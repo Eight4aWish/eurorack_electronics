@@ -77,12 +77,12 @@ svg { display: block; }
 // GRID (n8synth standard — shared by all layouts)
 // ============================================================
 const P = 24;
-const COLS = { pwrL: 30, a: 76, b: 100, c: 124, d: 148, e: 172, f: 222, g: 246, h: 270, i: 294, j: 318, pwrR: 364 };
+const COLS = { ctrlL: 28, pwrL: 52, a: 98, b: 122, c: 146, d: 170, e: 194, f: 244, g: 268, h: 292, i: 316, j: 340, pwrR: 386, ctrlR: 410 };
 // Legacy aliases for old layouts that still use +12v/gndL/gndR/-12v column names
 COLS['+12v'] = COLS.pwrL; COLS['gndL'] = COLS.pwrL; COLS['gndR'] = COLS.pwrR; COLS['-12v'] = COLS.pwrR;
 const rowY = r => 56 + (r - 1) * P;
 const colX = c => COLS[c];
-const SVG_W = 420, SVG_H = rowY(40) + 36;
+const SVG_W = 440, SVG_H = rowY(40) + 36;
 const RAIL_COLS = ['pwrL', 'pwrR'];
 const HOLE_COLS = ['a','b','c','d','e','f','g','h','i','j'];
 const RIGHT_COLS = ['f','g','h','i','j'];
@@ -324,6 +324,15 @@ function drawBoard() {
     svg.appendChild(el('text', {x:colX(c), y:y1-4, fill:'#999', 'font-size':6, 'text-anchor':'middle'}, topLabel));
   });
 
+  // Control-board columns (n8synth) — outboard of the rails; panel/pot/jack connections
+  ['ctrlL','ctrlR'].forEach(c => {
+    svg.appendChild(el('rect', {x:colX(c)-4, y:y1, width:8, height:y2-y1, rx:2, fill:'#2a1d0d', stroke:'#5a3f1a', 'stroke-width':0.3}));
+    for (let r = 1; r <= 40; r++) {
+      svg.appendChild(el('circle', {cx:colX(c), cy:rowY(r), r:3, fill:'none', stroke:'#d09030', 'stroke-width':0.9}));
+    }
+    svg.appendChild(el('text', {x:colX(c), y:y1-4, fill:'#d09030', 'font-size':6, 'text-anchor':'middle'}, 'CTRL'));
+  });
+
   // Half-row bars and holes
   for (let r = 1; r <= 40; r++) {
     const y = rowY(r);
@@ -386,14 +395,19 @@ function drawICs() {
     const g = makeCG(ic.id, 'IC', ic.value || ic.type || '', ic.stage);
     const icRows = ic.pins.map(p => p.r);
     const startY = rowY(Math.min(...icRows)), endY = rowY(Math.max(...icRows));
-    const lx = colX('e'), rx = colX('f');
+    // Body extent from actual pin columns — supports DIP (cols e+f) AND single-column SIP (col d or col g).
+    const pinXs = ic.pins.map(p => colX(p.c));
+    const lx = Math.min(...pinXs), rx = Math.max(...pinXs);
     g.appendChild(el('rect', {x:lx-8, y:startY-P/2+2, width:rx-lx+16, height:endY-startY+P-4, rx:2, fill:'#444', stroke:'#888', 'stroke-width':1, class:'comp-body'}));
     const notchY = ic.rotation === 180 ? endY+P/2-6 : startY-P/2+2;
     g.appendChild(el('path', {d:`M${(lx+rx)/2-5},${notchY} A5,5 0 0,1 ${(lx+rx)/2+5},${notchY}`, fill:'none', stroke:'#aaa', 'stroke-width':0.8}));
     g.appendChild(el('text', {x:(lx+rx)/2, y:(startY+endY)/2-3, fill:'#fff', 'font-size':8, 'text-anchor':'middle', 'dominant-baseline':'middle', 'font-weight':'bold'}, ic.id));
     g.appendChild(el('text', {x:(lx+rx)/2, y:(startY+endY)/2+6, fill:'#ccc', 'font-size':7, 'text-anchor':'middle', 'dominant-baseline':'middle'}, ic.value || ic.type || ''));
+    // Pin label side: honor ic.labelSide override; otherwise infer from pin column (col e or d → left; col f or g → right).
     ic.pins.forEach(pin => {
-      const x = colX(pin.c), y = rowY(pin.r), isLeft = pin.c==='e';
+      const x = colX(pin.c), y = rowY(pin.r);
+      const overrideSide = ic.labelSide;
+      const isLeft = overrideSide ? (overrideSide === 'left') : (pin.c === 'e' || pin.c === 'd');
       g.appendChild(el('circle', {cx:x, cy:y, r:2.5, fill:'#aaa'}));
       g.appendChild(el('text', {x:isLeft?x-12:x+12, y:y+1, fill:'#999', 'font-size':6, 'text-anchor':'middle', 'dominant-baseline':'middle'}, String(pin.n)));
       if (document.getElementById('showNets').checked && pin.net) g.appendChild(el('text', {x:isLeft?x-22:x+22, y:y+1, fill:'#556655', 'font-size':5.5, 'text-anchor':isLeft?'end':'start', 'dominant-baseline':'middle', opacity:0.7}, pin.net));
@@ -458,12 +472,27 @@ function drawPowerWires() {
 function drawJPSWires() {
   if (!layout || !layout.jpsWires) return;
   layout.jpsWires.forEach(j => {
-    const x=colX(j.col), y=rowY(j.row), isRight=RIGHT_COLS.includes(j.col);
+    const x=colX(j.col), y=rowY(j.row), isRight=RIGHT_COLS.includes(j.col)||j.col==='ctrlR';
     const g = makeCG(j.id, 'JPS', j.label, j.stage);
     const sz=4;
-    g.appendChild(el('path', {d:`M${x},${y-sz} L${x+sz},${y} L${x},${y+sz} L${x-sz},${y} Z`, fill:TYPE_COLORS.JPS, stroke:'#cc6600', 'stroke-width':0.5, class:'comp-body', opacity:0.85}));
-    g.appendChild(el('line', {x1:isRight?x+10:x-10, y1:y, x2:x+(isRight?sz:-sz), y2:y, stroke:TYPE_COLORS.JPS, 'stroke-width':1, opacity:0.6}));
-    g.appendChild(el('text', {x:isRight?x+13:x-13, y:y+1, fill:'#ff8c00', 'font-size':6, 'text-anchor':isRight?'start':'end', 'dominant-baseline':'middle', opacity:0.8}, `${j.id} ${j.label}`));
+    const txt = j.lbl || `${j.id} ${j.label}`;
+    let labelColor = '#ff8c00';
+    if (j.mark === 'gnd') {
+      // green earth symbol — "tie this control hole to the d ground-plane"
+      labelColor = '#3fbf63';
+      g.appendChild(el('line', {x1:x, y1:y-3, x2:x, y2:y+1, stroke:'#3fbf63', 'stroke-width':1.3}));
+      g.appendChild(el('line', {x1:x-4, y1:y+1.5, x2:x+4, y2:y+1.5, stroke:'#3fbf63', 'stroke-width':1.3}));
+      g.appendChild(el('line', {x1:x-2.5, y1:y+3.3, x2:x+2.5, y2:y+3.3, stroke:'#3fbf63', 'stroke-width':1.3}));
+      g.appendChild(el('line', {x1:x-1, y1:y+5, x2:x+1, y2:y+5, stroke:'#3fbf63', 'stroke-width':1.3}));
+    } else if (j.mark === 'link') {
+      // grey loop — leg tied locally to the wiper (e.g. DEPTH CCW-shorted-to-wiper)
+      labelColor = '#9ab';
+      g.appendChild(el('circle', {cx:x, cy:y, r:sz, fill:'none', stroke:'#8899aa', 'stroke-width':1}));
+    } else {
+      g.appendChild(el('path', {d:`M${x},${y-sz} L${x+sz},${y} L${x},${y+sz} L${x-sz},${y} Z`, fill:TYPE_COLORS.JPS, stroke:'#cc6600', 'stroke-width':0.5, class:'comp-body', opacity:0.85}));
+      g.appendChild(el('line', {x1:isRight?x+10:x-10, y1:y, x2:x+(isRight?sz:-sz), y2:y, stroke:TYPE_COLORS.JPS, 'stroke-width':1, opacity:0.6}));
+    }
+    g.appendChild(el('text', {x:isRight?x+8:x-8, y:y+1, fill:labelColor, 'font-size':6, 'text-anchor':isRight?'start':'end', 'dominant-baseline':'middle', opacity:0.9}, txt));
     svg.appendChild(g);
   });
 }
@@ -528,6 +557,7 @@ if (firstBuiltin) loadBuiltinLayout(firstBuiltin);
 <script src="layouts/snare_drum.js"></script>
 <script src="layouts/fm_drum_board1.js"></script>
 <script src="layouts/fm_drum_board2.js"></script>
+<script src="layouts/lpg.js"></script>
 
 <!-- Re-init after built-in layouts are registered -->
 <script>

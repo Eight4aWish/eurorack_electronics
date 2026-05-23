@@ -1,0 +1,1617 @@
+registerLayout("Dual LPG", {
+  "title": "DUAL PINGABLE LPG",
+  "source": "docs/lpg_netlist.md rev 0.5 + docs/lpg_breadboard_placement.md rev 0.19",
+  "board": "n8synth (single board, rows 1-36)",
+  "revision": "0.19",
+  "notes": "Rev 0.19: added a 3V3 turn-on-threshold zener in each status-LED ground leg (VD7 ch A, VD8 ch B) - panel/control-board side, in series between the LED anode and the d-plane (cathode/banded toward GND). Keeps the indicator dark through the MANUAL baseline and quiet passages, then it comes on punchily for strikes/peaks (kick-in ~Vf_LED+3.3 = ~5.2V). Panel-side part, not a breadboard twoPin, so the maps are unchanged. PRIOR Rev 0.18: status-LED parts updated to match the as-built voice. Status LEDs LED_STATUS_A/B = RED (was green); R_STATUS_A/B = 4K7 (was 2K2). Red's lower Vf would run brighter at 2K2, so the resistor went up to ~1.7 mA. (The vactrol-drive LEDs were already red \u2014 green underperformed on the Vf budget.) PRIOR Rev 0.16: CHANNEL B re-allocated to its REAL n8synth control positions, mirroring A. Left CTRL: MIX@17, DEPTH B a/b/c@20-22, OUT B@23, LED B a/b@32-33, STRIKE B@35. Right CTRL: IN B@23, ATTEN B a/b/c@32-34, MANUAL B a/b/c@35-37, CV B@38. Ground markers at MANUAL B a / ATTEN B a / LED B a; link marker at DEPTH B a. Board-link jumpers JW_INB / JW_P7cB / JW_P5cB / JW_MIX. Both channels now on real control positions. PRIOR Rev 0.15: CHANNEL A re-allocated to the REAL n8synth control-board positions supplied by the builder. Right CTRL: IN A@1, DEPTH A a/b/c@4-6, ATTEN A a/b/c@7-9, CV A@17, STRIKE A@20. Left CTRL: OUT A@1, MANUAL A a/b/c@4-6, LED A a/b@7-8. Pot legs map a=left,b=wiper,c=right; MANUAL/ATTEN c=hot end, a=GND; DEPTH c=DRV_OUT, b=wiper, a=link-to-b (CCW short). Ground-tie reminders (green earth glyph, mark=gnd) at MANUAL A a / ATTEN A a / LED A a; DEPTH A a is a link marker (mark=link). Short acronym labels (lbl field) added to kill truncation. Channel B still on placeholder control positions (re-map next). PRIOR Rev 0.14: brought the four previously panel-side resistors onto the board via control holes (now that ctrlL/ctrlR represent the panel positions): R_OUT_A (CHA_OUT->XS4, 3.ctrlL), R_OUT_B (CHB_OUT->XS8, 29.ctrlL), R_STATUS_A (DRV_OUT_A->LED_STATUS_A, 17.ctrlR), R_STATUS_B (DRV_OUT_B->LED_STATUS_B, 16.ctrlL). Their jack/LED stubs (XS4/XS8, LEDsta/LEDstb) moved onto the same control holes. 57 twoPins now (was 53). PRIOR Rev 0.13: panel-facing resistor ends moved off the breadboard onto n8synth CONTROL-BOARD holes (new columns ctrlL / ctrlR, outboard of the power rails). 12 ends relocated (6 per channel): R16/R17/R38/R29/R32/R6 (Ch A) and R22/R25/R39/R30/R33/R12 (Ch B) now land their pot/jack end on a control hole at the same row, freeing those breadboard rows. The matching panel-wire stubs (jpsWires: XS2/XS3/XS6/XS7, P1.w/P2.t/P2.w/P3.w, P5.w/P6.t/P6.w/P7.w) were relocated onto the SAME control holes, so each reads as one clean connection; the old breadboard holes (e.g. 9a/9j) are now empty/free. Control-board hole positions/routing are still the builder's to finalise. Each control hole carries the panel net it routes to (see cross_check_nets BARE_ROW_NETS ctrl entries). PRIOR Rev 0.12: reversed both audio LDR chains end-for-end to eliminate the centre-gap-crossing 10K series resistors (R4/R5, R10/R11). The chain now enters on the RIGHT (next to the input-buffer output) and exits V_p on the LEFT (next to the filter-buffer input), so neither 10K crosses the breadboard centre gap. Achieved by swapping the audio (LDR) nets on the two SIP outer pins per channel: VC_x_L.1 now = V_p, VC_x_R.4 now = VC_x_LDR1_IN. The R_alpha + 1nF cluster (R3/C13, R9/C14) moved with V_p to the left side; 220pF (C11/C12) stays at V_x (unchanged); LED chain, bridges and driver untouched. Electrically identical (both 10Ks equal, both LDRs share one LED). New GND rail ends: R3.r2 r1.pwrL, C13.r2 r3.pwrL, R9.r2 r21.pwrL, C14.r2 r23.pwrL (all odd-row GND parity). Rev 0.11 (prior): power-rail collision fix.",
+  "stages": [
+    {
+      "id": 1,
+      "name": "Phase 1 \u2014 First sound (Ch A, MANUAL only)",
+      "desc": "Bring up Channel A as a manually-controlled LPG. Solder: DA1 (audio buf) + DA3 (driver) sockets, 2x 4-pin SIP sockets at cols d and g (rows 5-8) for VC_A_L and VC_A_R vactrol pair, C3/C4/C5/C6 (decoupling), Ch A audio path (R1, R4, R3, R5, C11, C13), driver minimum (R36, R37, R29, R32), LED drive (R6 + VD5 6v8 zener in socket). Two short centre-gap bridges (rows 6 and 8). Off-board: P2 MANUAL pot, P3 DEPTH pot, CHA_IN + CHA_OUT jacks. Leave DA2/DA4/VC_B sockets empty.",
+      "test": "TEST 1.1 (DC checks, power off audio gear): set MANUAL fully CCW. Power on. Confirm \u00b112V on DA1/DA3 pins 8/4. TEST 1.2 (audio path passive): inject 1 kHz / 1 Vpp at CHA_IN. With MANUAL fully open, scope CHA_OUT \u2014 sine should pass at ~unity gain (slight attenuation OK). TEST 1.3 (manual sweep): rotate MANUAL CCW\u2192CW. Output should drop in level AND lose highs as MANUAL closes (LPG combined VCA + LPF behaviour). TEST 1.4 (zener swap): with MANUAL fully open, measure DC across VC_A pin 1 \u2192 GND. Should be near -V_zener (\u2248 -6.8 V for 6v8). If clamping cuts in too early (low LED current at full MANUAL), swap VD5 to 9v1. If too much current, try 3v9 (with one LED bridged out).",
+      "color": "#e74c3c"
+    },
+    {
+      "id": 2,
+      "name": "Phase 2 \u2014 Ch A pingable (CV + STRIKE + status LED)",
+      "desc": "Add CV input, STRIKE input, and status LED to Channel A. Solder: R16, R13, R38 (CV in), R17, C15, R15, VD1, R34 (strike shaper + sum), R_STATUS_A (4K7). Off-board: P1 CV ATTEN A pot, XS2 STRIKE jack, XS3 CV jack, LED_STATUS_A (red) on panel.",
+      "test": "TEST 2.1 (CV sweep): patch a slow LFO (~0.5 Hz, \u00b15 V) into CV_A. Filter should sweep smoothly. P1 attenuates. TEST 2.2 (strike ping): patch a gate/trigger source (5 V square, 1\u201310 Hz) into STRIKE_A. Each rising edge should ping \u2014 sudden filter-open then decay per vactrol fall time. TEST 2.3 (status LED): drive MANUAL fully open; LED_STATUS_A should be bright. Modulate via CV and confirm LED tracks driver level visibly. TEST 2.4 (interaction): hold a constant tone at CHA_IN, set MANUAL mid, send pings \u2014 pings should sit on top of the manual offset, not replace it (summing summer at DA3.2).",
+      "color": "#e67e22"
+    },
+    {
+      "id": 3,
+      "name": "Phase 3 \u2014 First sound (Ch B, MANUAL only)",
+      "desc": "Bring up Channel B as a manually-controlled LPG \u2014 mirror of Phase 1. Solder: DA2 (audio buf) socket + 2x 4-pin SIP sockets at cols d/g rows 23-26 for the VC_B_L/VC_B_R vactrol pair, C7/C8 decoupling, Ch B audio path (R7, R10, R9, R11, C12, C14), driver minimum (R20 feedback, R14 ground ref, R30 VCC\u2192P6 top, R33 P6 wiper\u2192sum), LED drive (R12 + VD6 6v8 zener). Two short centre-gap bridges (rows 24 and 26). Off-board: P6 MANUAL B, P7 DEPTH B, CHB_IN + CHB_OUT jacks.",
+      "test": "TEST 3.1 (DC): confirm \u00b112V on DA2 pins 8/4. TEST 3.2 (audio passive): inject 1 kHz / 1 Vpp at CHB_IN; MANUAL B open \u2192 sine passes near unity at CHB_OUT. TEST 3.3 (manual sweep): rotate MANUAL B CCW\u2192CW \u2014 level AND highs drop as it closes. TEST 3.4 (zener swap): as Phase 1.4 but on VC_B / VD6.",
+      "color": "#3498db"
+    },
+    {
+      "id": 4,
+      "name": "Phase 4 \u2014 Ch B pingable (CV + STRIKE + status LED)",
+      "desc": "Make Channel B pingable \u2014 mirror of Phase 2. Solder: R22, R19, R39 (CV in), R25, C16, R31, VD2, R35 (strike shaper + sum), R_STATUS_B (4K7). Off-board: P5 CV ATTEN B pot, XS6 STRIKE jack, XS7 CV jack, LED_STATUS_B (red) on panel.",
+      "test": "TEST 4.1 (CV sweep): slow LFO into CV_B \u2014 filter sweeps, P5 attenuates. TEST 4.2 (strike ping): gate into STRIKE_B \u2014 each rising edge pings. TEST 4.3 (status LED): LED_STATUS_B tracks driver level. TEST 4.4 (crosstalk): audio into CHA_IN only \u2014 CHB_OUT silent.",
+      "color": "#16a085"
+    },
+    {
+      "id": 5,
+      "name": "Phase 5 \u2014 Mix output",
+      "desc": "Add the combined mix bus. Solder: DA4 + C9/C10 decoupling, mix bus passives (R23 CHA_OUT\u2192mix, R26 CHB_OUT\u2192mix, R24 feedback, R28 +in to GND), C17 DC-blocking. The DA4 second half is parked unused (reserved for future L7 resonance amp). Off-board: XS9 MIX OUT jack.",
+      "test": "TEST 5.1 (mix sums): patch tone A into CHA_IN, tone B (different freq) into CHB_IN. MIX OUT should carry both. TEST 5.2 (polarity): mix output is inverted relative to per-channel outs (single inverting summer). Confirm by scoping ch A out vs mix out \u2014 180\u00b0 phase shift. TEST 5.3 (loaded channel-out): with MIX OUT loaded, CHA_OUT and CHB_OUT levels should NOT drop (DA1/DA2 output is buffered, mix-bus inputs are 100K). TEST 5.4 (level): with both inputs at 1 Vpp and channels fully open, MIX OUT \u2248 2 Vpp (unity gain summed).",
+      "color": "#f39c12"
+    }
+  ],
+  "ics": [
+    {
+      "id": "DA1",
+      "value": "TL072",
+      "label": "Channel A Audio (IN_BUF_A + FILT_BUF_A)",
+      "stage": 1,
+      "rotation": 180,
+      "pins": [
+        {
+          "n": 5,
+          "r": 1,
+          "c": "e",
+          "net": "V_OUT_A_PRE_BUF"
+        },
+        {
+          "n": 4,
+          "r": 1,
+          "c": "f",
+          "net": "VEE"
+        },
+        {
+          "n": 6,
+          "r": 2,
+          "c": "e",
+          "net": "FILT_BUF_A_INV"
+        },
+        {
+          "n": 3,
+          "r": 2,
+          "c": "f",
+          "net": "CHA_IN"
+        },
+        {
+          "n": 7,
+          "r": 3,
+          "c": "e",
+          "net": "CHA_OUT"
+        },
+        {
+          "n": 2,
+          "r": 3,
+          "c": "f",
+          "net": "IN_BUF_A_INV"
+        },
+        {
+          "n": 8,
+          "r": 4,
+          "c": "e",
+          "net": "VCC"
+        },
+        {
+          "n": 1,
+          "r": 4,
+          "c": "f",
+          "net": "BUF_OUT_A"
+        }
+      ]
+    },
+    {
+      "id": "VC_A_L",
+      "value": "4-pin SIP",
+      "label": "Channel A Vactrol L (LDRa/A/K/LDRb)",
+      "stage": 1,
+      "rotation": 0,
+      "labelSide": "left",
+      "pins": [
+        {
+          "n": 1,
+          "r": 5,
+          "c": "d",
+          "net": "V_p_A"
+        },
+        {
+          "n": 2,
+          "r": 6,
+          "c": "d",
+          "net": "LED_CHAIN_MID_A"
+        },
+        {
+          "n": 3,
+          "r": 7,
+          "c": "d",
+          "net": "LED_DRIVE_A"
+        },
+        {
+          "n": 4,
+          "r": 8,
+          "c": "d",
+          "net": "V_x_A"
+        }
+      ]
+    },
+    {
+      "id": "VC_A_R",
+      "value": "4-pin SIP (flipped)",
+      "label": "Channel A Vactrol R (LDRa/A/K/LDRb) \u2014 installed flipped",
+      "stage": 1,
+      "rotation": 0,
+      "labelSide": "right",
+      "pins": [
+        {
+          "n": 4,
+          "r": 5,
+          "c": "g",
+          "net": "VC_A_LDR1_IN"
+        },
+        {
+          "n": 3,
+          "r": 6,
+          "c": "g",
+          "net": "LED_CHAIN_MID_A"
+        },
+        {
+          "n": 2,
+          "r": 7,
+          "c": "g",
+          "net": "GND"
+        },
+        {
+          "n": 1,
+          "r": 8,
+          "c": "g",
+          "net": "V_x_A"
+        }
+      ]
+    },
+    {
+      "id": "DA3",
+      "value": "TL072",
+      "label": "Drivers (DRV_A + DRV_B)",
+      "stage": 1,
+      "rotation": 180,
+      "pins": [
+        {
+          "n": 5,
+          "r": 14,
+          "c": "e",
+          "net": "DRV_B_NINV"
+        },
+        {
+          "n": 4,
+          "r": 14,
+          "c": "f",
+          "net": "VEE"
+        },
+        {
+          "n": 6,
+          "r": 15,
+          "c": "e",
+          "net": "DRV_SUM_B"
+        },
+        {
+          "n": 3,
+          "r": 15,
+          "c": "f",
+          "net": "DRV_A_NINV"
+        },
+        {
+          "n": 7,
+          "r": 16,
+          "c": "e",
+          "net": "DRV_OUT_B"
+        },
+        {
+          "n": 2,
+          "r": 16,
+          "c": "f",
+          "net": "DRV_SUM_A"
+        },
+        {
+          "n": 8,
+          "r": 17,
+          "c": "e",
+          "net": "VCC"
+        },
+        {
+          "n": 1,
+          "r": 17,
+          "c": "f",
+          "net": "DRV_OUT_A"
+        }
+      ]
+    },
+    {
+      "id": "VC_B_L",
+      "value": "4-pin SIP",
+      "label": "Channel B Vactrol L (LDRa/A/K/LDRb)",
+      "stage": 3,
+      "rotation": 0,
+      "labelSide": "left",
+      "pins": [
+        {
+          "n": 1,
+          "r": 23,
+          "c": "d",
+          "net": "V_p_B"
+        },
+        {
+          "n": 2,
+          "r": 24,
+          "c": "d",
+          "net": "LED_CHAIN_MID_B"
+        },
+        {
+          "n": 3,
+          "r": 25,
+          "c": "d",
+          "net": "LED_DRIVE_B"
+        },
+        {
+          "n": 4,
+          "r": 26,
+          "c": "d",
+          "net": "V_x_B"
+        }
+      ]
+    },
+    {
+      "id": "VC_B_R",
+      "value": "4-pin SIP (flipped)",
+      "label": "Channel B Vactrol R \u2014 installed flipped",
+      "stage": 3,
+      "rotation": 0,
+      "labelSide": "right",
+      "pins": [
+        {
+          "n": 4,
+          "r": 23,
+          "c": "g",
+          "net": "VC_B_LDR1_IN"
+        },
+        {
+          "n": 3,
+          "r": 24,
+          "c": "g",
+          "net": "LED_CHAIN_MID_B"
+        },
+        {
+          "n": 2,
+          "r": 25,
+          "c": "g",
+          "net": "GND"
+        },
+        {
+          "n": 1,
+          "r": 26,
+          "c": "g",
+          "net": "V_x_B"
+        }
+      ]
+    },
+    {
+      "id": "DA2",
+      "value": "TL072",
+      "label": "Channel B Audio (IN_BUF_B + FILT_BUF_B)",
+      "stage": 3,
+      "rotation": 180,
+      "pins": [
+        {
+          "n": 5,
+          "r": 27,
+          "c": "e",
+          "net": "V_OUT_B_PRE_BUF"
+        },
+        {
+          "n": 4,
+          "r": 27,
+          "c": "f",
+          "net": "VEE"
+        },
+        {
+          "n": 6,
+          "r": 28,
+          "c": "e",
+          "net": "FILT_BUF_B_INV"
+        },
+        {
+          "n": 3,
+          "r": 28,
+          "c": "f",
+          "net": "CHB_IN"
+        },
+        {
+          "n": 7,
+          "r": 29,
+          "c": "e",
+          "net": "CHB_OUT"
+        },
+        {
+          "n": 2,
+          "r": 29,
+          "c": "f",
+          "net": "IN_BUF_B_INV"
+        },
+        {
+          "n": 8,
+          "r": 30,
+          "c": "e",
+          "net": "VCC"
+        },
+        {
+          "n": 1,
+          "r": 30,
+          "c": "f",
+          "net": "BUF_OUT_B"
+        }
+      ]
+    },
+    {
+      "id": "DA4",
+      "value": "TL072",
+      "label": "Mix Output (MIX_BUF + SPARE)",
+      "stage": 5,
+      "rotation": 180,
+      "pins": [
+        {
+          "n": 5,
+          "r": 33,
+          "c": "e",
+          "net": "SPARE_NINV"
+        },
+        {
+          "n": 4,
+          "r": 33,
+          "c": "f",
+          "net": "VEE"
+        },
+        {
+          "n": 6,
+          "r": 34,
+          "c": "e",
+          "net": "SPARE_INV"
+        },
+        {
+          "n": 3,
+          "r": 34,
+          "c": "f",
+          "net": "MIX_NINV"
+        },
+        {
+          "n": 7,
+          "r": 35,
+          "c": "e",
+          "net": "SPARE_OUT"
+        },
+        {
+          "n": 2,
+          "r": 35,
+          "c": "f",
+          "net": "MIX_BUS"
+        },
+        {
+          "n": 8,
+          "r": 36,
+          "c": "e",
+          "net": "VCC"
+        },
+        {
+          "n": 1,
+          "r": 36,
+          "c": "f",
+          "net": "MIX_OUT"
+        }
+      ]
+    }
+  ],
+  "twoPins": [
+    {
+      "id": "C3",
+      "type": "C",
+      "value": "100nF",
+      "r1": 4,
+      "c1": "b",
+      "r2": 5,
+      "c2": "pwrL",
+      "stage": 1
+    },
+    {
+      "id": "C4",
+      "type": "C",
+      "value": "100nF",
+      "r1": 1,
+      "c1": "h",
+      "r2": 1,
+      "c2": "pwrR",
+      "stage": 1
+    },
+    {
+      "id": "C5",
+      "type": "C",
+      "value": "100nF",
+      "r1": 17,
+      "c1": "b",
+      "r2": 17,
+      "c2": "pwrL",
+      "stage": 1
+    },
+    {
+      "id": "C6",
+      "type": "C",
+      "value": "100nF",
+      "r1": 14,
+      "c1": "h",
+      "r2": 13,
+      "c2": "pwrR",
+      "stage": 1
+    },
+    {
+      "id": "C7",
+      "type": "C",
+      "value": "100nF",
+      "r1": 30,
+      "c1": "b",
+      "r2": 29,
+      "c2": "pwrL",
+      "stage": 3
+    },
+    {
+      "id": "C8",
+      "type": "C",
+      "value": "100nF",
+      "r1": 27,
+      "c1": "h",
+      "r2": 27,
+      "c2": "pwrR",
+      "stage": 3
+    },
+    {
+      "id": "C9",
+      "type": "C",
+      "value": "100nF",
+      "r1": 36,
+      "c1": "b",
+      "r2": 35,
+      "c2": "pwrL",
+      "stage": 5
+    },
+    {
+      "id": "C10",
+      "type": "C",
+      "value": "100nF",
+      "r1": 33,
+      "c1": "h",
+      "r2": 33,
+      "c2": "pwrR",
+      "stage": 5
+    },
+    {
+      "id": "R1",
+      "type": "R",
+      "value": "100K",
+      "r1": 2,
+      "c1": "h",
+      "r2": 3,
+      "c2": "pwrR",
+      "stage": 1
+    },
+    {
+      "id": "R4",
+      "type": "R",
+      "value": "10K",
+      "r1": 4,
+      "c1": "h",
+      "r2": 5,
+      "c2": "h",
+      "stage": 1
+    },
+    {
+      "id": "C11",
+      "type": "C",
+      "value": "220pF",
+      "r1": 8,
+      "c1": "b",
+      "r2": 7,
+      "c2": "pwrL",
+      "stage": 1
+    },
+    {
+      "id": "R3",
+      "type": "R",
+      "value": "4M7",
+      "r1": 5,
+      "c1": "b",
+      "r2": 1,
+      "c2": "pwrL",
+      "stage": 1
+    },
+    {
+      "id": "C13",
+      "type": "C",
+      "value": "1nF",
+      "r1": 5,
+      "c1": "c",
+      "r2": 3,
+      "c2": "pwrL",
+      "stage": 1
+    },
+    {
+      "id": "R5",
+      "type": "R",
+      "value": "10K",
+      "r1": 5,
+      "c1": "a",
+      "r2": 1,
+      "c2": "a",
+      "stage": 1
+    },
+    {
+      "id": "R17",
+      "type": "R",
+      "value": "1K",
+      "r1": 20,
+      "c1": "ctrlR",
+      "r2": 10,
+      "c2": "a",
+      "stage": 2
+    },
+    {
+      "id": "C15",
+      "type": "C",
+      "value": "1uF",
+      "r1": 10,
+      "c1": "b",
+      "r2": 11,
+      "c2": "a",
+      "stage": 2
+    },
+    {
+      "id": "R15",
+      "type": "R",
+      "value": "10K",
+      "r1": 11,
+      "c1": "b",
+      "r2": 11,
+      "c2": "pwrL",
+      "stage": 2
+    },
+    {
+      "id": "VD1",
+      "type": "D",
+      "value": "1N4148",
+      "r1": 11,
+      "c1": "c",
+      "r2": 12,
+      "c2": "c",
+      "stage": 2
+    },
+    {
+      "id": "R34",
+      "type": "R",
+      "value": "10K",
+      "r1": 12,
+      "c1": "d",
+      "r2": 16,
+      "c2": "g",
+      "stage": 2
+    },
+    {
+      "id": "R16",
+      "type": "R",
+      "value": "1K",
+      "r1": 17,
+      "c1": "ctrlR",
+      "r2": 10,
+      "c2": "j",
+      "stage": 2
+    },
+    {
+      "id": "R13",
+      "type": "R",
+      "value": "100K",
+      "r1": 10,
+      "c1": "h",
+      "r2": 11,
+      "c2": "pwrR",
+      "stage": 2
+    },
+    {
+      "id": "R38",
+      "type": "R",
+      "value": "4K7",
+      "r1": 8,
+      "c1": "ctrlR",
+      "r2": 16,
+      "c2": "i",
+      "stage": 2
+    },
+    {
+      "id": "R29",
+      "type": "R",
+      "value": "4K7",
+      "r1": 6,
+      "c1": "ctrlL",
+      "r2": 12,
+      "c2": "pwrL",
+      "stage": 1
+    },
+    {
+      "id": "R32",
+      "type": "R",
+      "value": "4K7",
+      "r1": 5,
+      "c1": "ctrlL",
+      "r2": 16,
+      "c2": "j",
+      "stage": 1
+    },
+    {
+      "id": "R36",
+      "type": "R",
+      "value": "10K",
+      "r1": 17,
+      "c1": "g",
+      "r2": 16,
+      "c2": "h",
+      "stage": 1
+    },
+    {
+      "id": "R37",
+      "type": "R",
+      "value": "10K",
+      "r1": 15,
+      "c1": "h",
+      "r2": 15,
+      "c2": "pwrR",
+      "stage": 1
+    },
+    {
+      "id": "R6",
+      "type": "R",
+      "value": "470R",
+      "r1": 5,
+      "c1": "ctrlR",
+      "r2": 7,
+      "c2": "b",
+      "stage": 1
+    },
+    {
+      "id": "R7",
+      "type": "R",
+      "value": "100K",
+      "r1": 28,
+      "c1": "h",
+      "r2": 29,
+      "c2": "pwrR",
+      "stage": 3
+    },
+    {
+      "id": "R10",
+      "type": "R",
+      "value": "10K",
+      "r1": 30,
+      "c1": "h",
+      "r2": 23,
+      "c2": "h",
+      "stage": 3
+    },
+    {
+      "id": "C12",
+      "type": "C",
+      "value": "220pF",
+      "r1": 26,
+      "c1": "b",
+      "r2": 25,
+      "c2": "pwrL",
+      "stage": 3
+    },
+    {
+      "id": "R9",
+      "type": "R",
+      "value": "4M7",
+      "r1": 23,
+      "c1": "b",
+      "r2": 21,
+      "c2": "pwrL",
+      "stage": 3
+    },
+    {
+      "id": "C14",
+      "type": "C",
+      "value": "1nF",
+      "r1": 23,
+      "c1": "c",
+      "r2": 23,
+      "c2": "pwrL",
+      "stage": 3
+    },
+    {
+      "id": "R11",
+      "type": "R",
+      "value": "10K",
+      "r1": 23,
+      "c1": "a",
+      "r2": 27,
+      "c2": "a",
+      "stage": 3
+    },
+    {
+      "id": "R25",
+      "type": "R",
+      "value": "1K",
+      "r1": 35,
+      "c1": "ctrlL",
+      "r2": 20,
+      "c2": "a",
+      "stage": 4
+    },
+    {
+      "id": "C16",
+      "type": "C",
+      "value": "1uF",
+      "r1": 20,
+      "c1": "b",
+      "r2": 19,
+      "c2": "a",
+      "stage": 4
+    },
+    {
+      "id": "R31",
+      "type": "R",
+      "value": "10K",
+      "r1": 19,
+      "c1": "b",
+      "r2": 19,
+      "c2": "pwrL",
+      "stage": 4
+    },
+    {
+      "id": "VD2",
+      "type": "D",
+      "value": "1N4148",
+      "r1": 19,
+      "c1": "c",
+      "r2": 18,
+      "c2": "c",
+      "stage": 4
+    },
+    {
+      "id": "R35",
+      "type": "R",
+      "value": "10K",
+      "r1": 18,
+      "c1": "d",
+      "r2": 15,
+      "c2": "c",
+      "stage": 4
+    },
+    {
+      "id": "R22",
+      "type": "R",
+      "value": "1K",
+      "r1": 38,
+      "c1": "ctrlR",
+      "r2": 20,
+      "c2": "j",
+      "stage": 4
+    },
+    {
+      "id": "R19",
+      "type": "R",
+      "value": "100K",
+      "r1": 20,
+      "c1": "h",
+      "r2": 21,
+      "c2": "pwrR",
+      "stage": 4
+    },
+    {
+      "id": "R39",
+      "type": "R",
+      "value": "4K7",
+      "r1": 33,
+      "c1": "ctrlR",
+      "r2": 15,
+      "c2": "a",
+      "stage": 4
+    },
+    {
+      "id": "R30",
+      "type": "R",
+      "value": "4K7",
+      "r1": 37,
+      "c1": "ctrlR",
+      "r2": 18,
+      "c2": "pwrL",
+      "stage": 3
+    },
+    {
+      "id": "R33",
+      "type": "R",
+      "value": "4K7",
+      "r1": 36,
+      "c1": "ctrlR",
+      "r2": 15,
+      "c2": "b",
+      "stage": 3
+    },
+    {
+      "id": "R20",
+      "type": "R",
+      "value": "10K",
+      "r1": 16,
+      "c1": "c",
+      "r2": 15,
+      "c2": "d",
+      "stage": 3
+    },
+    {
+      "id": "R14",
+      "type": "R",
+      "value": "10K",
+      "r1": 14,
+      "c1": "b",
+      "r2": 13,
+      "c2": "pwrL",
+      "stage": 3
+    },
+    {
+      "id": "R12",
+      "type": "R",
+      "value": "470R",
+      "r1": 21,
+      "c1": "ctrlL",
+      "r2": 25,
+      "c2": "b",
+      "stage": 3
+    },
+    {
+      "id": "VD5",
+      "type": "D",
+      "value": "Zener 6v8 (socketed; A/B 3v9 / 6v8 / 9v1)",
+      "r1": 7,
+      "c1": "c",
+      "r2": 9,
+      "c2": "pwrL",
+      "stage": 1,
+      "note": "Vactrol LED-chain clamp, channel A. CATHODE (banded end) on row 7 pwrL (GND on odd rows). ANODE on row 7L col c (LED_DRIVE_A \u2014 same net as VC_A_L.3 at col d and R6.r2 at col b). Operation: when LED_DRIVE_A < -V_zener the zener reverse-conducts to GND; with V_zener=6v8 and 2x vactrol Vf chain ~3.2V, I_peak through chain = (6.8-3.2)/470R = 7.7 mA."
+    },
+    {
+      "id": "VD6",
+      "type": "D",
+      "value": "Zener 6v8 (socketed; A/B 3v9 / 6v8 / 9v1)",
+      "r1": 25,
+      "c1": "c",
+      "r2": 27,
+      "c2": "pwrL",
+      "stage": 3,
+      "note": "Vactrol LED-chain clamp, channel B (mirror of VD5). CATHODE on row 25 pwrL = GND. ANODE on row 25L col c (LED_DRIVE_B)."
+    },
+    {
+      "id": "R23",
+      "type": "R",
+      "value": "100K",
+      "r1": 31,
+      "c1": "b",
+      "r2": 35,
+      "c2": "h",
+      "stage": 5
+    },
+    {
+      "id": "R26",
+      "type": "R",
+      "value": "100K",
+      "r1": 31,
+      "c1": "i",
+      "r2": 35,
+      "c2": "i",
+      "stage": 5
+    },
+    {
+      "id": "R24",
+      "type": "R",
+      "value": "100K",
+      "r1": 35,
+      "c1": "g",
+      "r2": 36,
+      "c2": "g",
+      "stage": 5
+    },
+    {
+      "id": "R28",
+      "type": "R",
+      "value": "100K",
+      "r1": 34,
+      "c1": "h",
+      "r2": 35,
+      "c2": "pwrR",
+      "stage": 5
+    },
+    {
+      "id": "C17",
+      "type": "C",
+      "value": "100nF",
+      "r1": 36,
+      "c1": "h",
+      "r2": 32,
+      "c2": "b",
+      "stage": 5
+    },
+    {
+      "id": "R_OUT_A",
+      "type": "R",
+      "value": "1K",
+      "r1": 3,
+      "c1": "a",
+      "r2": 1,
+      "c2": "ctrlL",
+      "stage": 1,
+      "note": "Per-channel output series resistor (was panel-side rev 0.10). CHA_OUT (board, 3L) -> XS4 jack tip on control hole. Mix bus taps CHA_OUT before this R."
+    },
+    {
+      "id": "R_OUT_B",
+      "type": "R",
+      "value": "1K",
+      "r1": 29,
+      "c1": "a",
+      "r2": 23,
+      "c2": "ctrlL",
+      "stage": 3,
+      "note": "Per-channel output series resistor (was panel-side). CHB_OUT (29L) -> XS8 jack tip on control hole."
+    },
+    {
+      "id": "R_STATUS_A",
+      "type": "R",
+      "value": "4K7",
+      "r1": 17,
+      "c1": "h",
+      "r2": 8,
+      "c2": "ctrlL",
+      "stage": 2,
+      "note": "Status LED current limit (was panel-side rev 0.7). DRV_OUT_A (17R) -> LED_STATUS_A cathode on control hole."
+    },
+    {
+      "id": "R_STATUS_B",
+      "type": "R",
+      "value": "4K7",
+      "r1": 16,
+      "c1": "d",
+      "r2": 33,
+      "c2": "ctrlL",
+      "stage": 4,
+      "note": "Status LED current limit (was panel-side). DRV_OUT_B (16L) -> LED_STATUS_B cathode on control hole."
+    }
+  ],
+  "jumpers": [
+    {
+      "id": "JW_DA1_UGA",
+      "r1": 3,
+      "c1": "g",
+      "r2": 4,
+      "c2": "g",
+      "label": "IN_BUF_A pin2\u2192pin1",
+      "stage": 1
+    },
+    {
+      "id": "JW_DA1_UGB",
+      "r1": 2,
+      "c1": "b",
+      "r2": 3,
+      "c2": "b",
+      "label": "FILT_BUF_A pin6\u2192pin7",
+      "stage": 1
+    },
+    {
+      "id": "JW_DA2_UGA",
+      "r1": 29,
+      "c1": "g",
+      "r2": 30,
+      "c2": "g",
+      "label": "IN_BUF_B pin2\u2192pin1",
+      "stage": 3
+    },
+    {
+      "id": "JW_DA2_UGB",
+      "r1": 28,
+      "c1": "b",
+      "r2": 29,
+      "c2": "b",
+      "label": "FILT_BUF_B pin6\u2192pin7",
+      "stage": 3
+    },
+    {
+      "id": "JW_DA4_SP_NINV_GND",
+      "r1": 33,
+      "c1": "b",
+      "r2": 33,
+      "c2": "pwrL",
+      "label": "SPARE +in\u2192GND",
+      "stage": 5
+    },
+    {
+      "id": "JW_DA4_SP_FB",
+      "r1": 34,
+      "c1": "b",
+      "r2": 35,
+      "c2": "b",
+      "label": "SPARE -in\u2192OUT (park)",
+      "stage": 5
+    },
+    {
+      "id": "JW_CHA_OUT_BUS",
+      "r1": 3,
+      "c1": "c",
+      "r2": 31,
+      "c2": "c",
+      "label": "CHA_OUT \u2192 mix bus",
+      "stage": 5
+    },
+    {
+      "id": "JW_CHB_OUT_BUS",
+      "r1": 29,
+      "c1": "c",
+      "r2": 31,
+      "c2": "g",
+      "label": "CHB_OUT \u2192 mix bus",
+      "stage": 5
+    },
+    {
+      "id": "JW_VCA_MID",
+      "r1": 6,
+      "c1": "e",
+      "r2": 6,
+      "c2": "f",
+      "label": "Ch A MID bridge (LED chain mid)",
+      "stage": 1
+    },
+    {
+      "id": "JW_VCA_VX",
+      "r1": 8,
+      "c1": "e",
+      "r2": 8,
+      "c2": "f",
+      "label": "Ch A V_x bridge (LDR junction)",
+      "stage": 1
+    },
+    {
+      "id": "JW_VCB_MID",
+      "r1": 24,
+      "c1": "e",
+      "r2": 24,
+      "c2": "f",
+      "label": "Ch B MID bridge",
+      "stage": 3
+    },
+    {
+      "id": "JW_VCB_VX",
+      "r1": 26,
+      "c1": "e",
+      "r2": 26,
+      "c2": "f",
+      "label": "Ch B V_x bridge",
+      "stage": 3
+    },
+    {
+      "id": "JW_INA",
+      "r1": 1,
+      "c1": "ctrlR",
+      "r2": 2,
+      "c2": "j",
+      "label": "IN A -> CHA_IN (buffer in)",
+      "stage": 1
+    },
+    {
+      "id": "JW_P3cA",
+      "r1": 6,
+      "c1": "ctrlR",
+      "r2": 17,
+      "c2": "i",
+      "label": "DEPTH A CW -> DRV_OUT_A",
+      "stage": 1
+    },
+    {
+      "id": "JW_P1cA",
+      "r1": 9,
+      "c1": "ctrlR",
+      "r2": 10,
+      "c2": "i",
+      "label": "ATTEN A top -> CV_PROT_A",
+      "stage": 2
+    },
+    {
+      "id": "JW_INB",
+      "r1": 23,
+      "c1": "ctrlR",
+      "r2": 28,
+      "c2": "j",
+      "label": "IN B -> CHB_IN (buffer in)",
+      "stage": 3
+    },
+    {
+      "id": "JW_P7cB",
+      "r1": 22,
+      "c1": "ctrlL",
+      "r2": 16,
+      "c2": "b",
+      "label": "DEPTH B CW -> DRV_OUT_B",
+      "stage": 3
+    },
+    {
+      "id": "JW_P5cB",
+      "r1": 34,
+      "c1": "ctrlR",
+      "r2": 20,
+      "c2": "i",
+      "label": "ATTEN B top -> CV_PROT_B",
+      "stage": 4
+    },
+    {
+      "id": "JW_MIX",
+      "r1": 17,
+      "c1": "ctrlL",
+      "r2": 32,
+      "c2": "a",
+      "label": "MIX jack -> MIX_OUT_JACK (post C17)",
+      "stage": 5
+    }
+  ],
+  "powerWires": [
+    {
+      "r1": 4,
+      "c1": "a",
+      "r2": 4,
+      "c2": "pwrL",
+      "label": "DA1 VCC (+12V)",
+      "stage": 1
+    },
+    {
+      "r1": 1,
+      "c1": "i",
+      "r2": 2,
+      "c2": "pwrR",
+      "label": "DA1 VEE (-12V, span to even row)",
+      "stage": 1
+    },
+    {
+      "r1": 17,
+      "c1": "a",
+      "r2": 16,
+      "c2": "pwrL",
+      "label": "DA3 VCC (+12V, span)",
+      "stage": 1
+    },
+    {
+      "r1": 14,
+      "c1": "i",
+      "r2": 14,
+      "c2": "pwrR",
+      "label": "DA3 VEE (-12V)",
+      "stage": 1
+    },
+    {
+      "r1": 30,
+      "c1": "a",
+      "r2": 30,
+      "c2": "pwrL",
+      "label": "DA2 VCC (+12V)",
+      "stage": 3
+    },
+    {
+      "r1": 27,
+      "c1": "i",
+      "r2": 28,
+      "c2": "pwrR",
+      "label": "DA2 VEE (-12V, span)",
+      "stage": 3
+    },
+    {
+      "r1": 36,
+      "c1": "a",
+      "r2": 36,
+      "c2": "pwrL",
+      "label": "DA4 VCC (+12V)",
+      "stage": 4
+    },
+    {
+      "r1": 33,
+      "c1": "i",
+      "r2": 34,
+      "c2": "pwrR",
+      "label": "DA4 VEE (-12V, span)",
+      "stage": 4
+    },
+    {
+      "r1": 7,
+      "c1": "i",
+      "r2": 7,
+      "c2": "pwrR",
+      "label": "VC_A_R pin 2 \u2192 GND (was DIP-8 pin 8)",
+      "stage": 1
+    },
+    {
+      "r1": 25,
+      "c1": "i",
+      "r2": 25,
+      "c2": "pwrR",
+      "label": "VC_B_R pin 2 \u2192 GND (was DIP-8 pin 8)",
+      "stage": 3
+    }
+  ],
+  "jpsWires": [
+    {
+      "id": "XS1",
+      "label": "CH A IN",
+      "row": 1,
+      "col": "ctrlR",
+      "stage": 1,
+      "lbl": "INA"
+    },
+    {
+      "id": "XS4",
+      "label": "CH A OUT",
+      "row": 1,
+      "col": "ctrlL",
+      "stage": 1,
+      "lbl": "OUTA"
+    },
+    {
+      "id": "XS2",
+      "label": "CH A STRIKE",
+      "row": 20,
+      "col": "ctrlR",
+      "stage": 2,
+      "lbl": "STA"
+    },
+    {
+      "id": "XS3",
+      "label": "CH A CV",
+      "row": 17,
+      "col": "ctrlR",
+      "stage": 2,
+      "lbl": "CVA"
+    },
+    {
+      "id": "P1.t",
+      "label": "CV ATTEN A top",
+      "row": 9,
+      "col": "ctrlR",
+      "stage": 2,
+      "lbl": "P1c"
+    },
+    {
+      "id": "P1.w",
+      "label": "CV ATTEN A wiper",
+      "row": 8,
+      "col": "ctrlR",
+      "stage": 2,
+      "lbl": "P1b"
+    },
+    {
+      "id": "P2.t",
+      "label": "MANUAL A top",
+      "row": 6,
+      "col": "ctrlL",
+      "stage": 1,
+      "lbl": "P2c"
+    },
+    {
+      "id": "P2.w",
+      "label": "MANUAL A wiper",
+      "row": 5,
+      "col": "ctrlL",
+      "stage": 1,
+      "lbl": "P2b"
+    },
+    {
+      "id": "P3.cw",
+      "label": "DEPTH A CW (from DRV_OUT_A)",
+      "row": 6,
+      "col": "ctrlR",
+      "stage": 1,
+      "lbl": "P3c"
+    },
+    {
+      "id": "P3.w",
+      "label": "DEPTH A wiper",
+      "row": 5,
+      "col": "ctrlR",
+      "stage": 1,
+      "lbl": "P3b"
+    },
+    {
+      "id": "LEDsta",
+      "label": "Status LED A K",
+      "row": 8,
+      "col": "ctrlL",
+      "stage": 2,
+      "lbl": "LAb"
+    },
+    {
+      "id": "XS5",
+      "label": "CH B IN",
+      "row": 23,
+      "col": "ctrlR",
+      "stage": 3,
+      "lbl": "INB"
+    },
+    {
+      "id": "XS8",
+      "label": "CH B OUT",
+      "row": 23,
+      "col": "ctrlL",
+      "stage": 3,
+      "lbl": "OUTB"
+    },
+    {
+      "id": "XS6",
+      "label": "CH B STRIKE",
+      "row": 35,
+      "col": "ctrlL",
+      "stage": 4,
+      "lbl": "STB"
+    },
+    {
+      "id": "XS7",
+      "label": "CH B CV",
+      "row": 38,
+      "col": "ctrlR",
+      "stage": 4,
+      "lbl": "CVB"
+    },
+    {
+      "id": "P5.t",
+      "label": "CV ATTEN B top",
+      "row": 34,
+      "col": "ctrlR",
+      "stage": 4,
+      "lbl": "P5c"
+    },
+    {
+      "id": "P5.w",
+      "label": "CV ATTEN B wiper",
+      "row": 33,
+      "col": "ctrlR",
+      "stage": 4,
+      "lbl": "P5b"
+    },
+    {
+      "id": "P6.t",
+      "label": "MANUAL B top",
+      "row": 37,
+      "col": "ctrlR",
+      "stage": 3,
+      "lbl": "P6c"
+    },
+    {
+      "id": "P6.w",
+      "label": "MANUAL B wiper",
+      "row": 36,
+      "col": "ctrlR",
+      "stage": 3,
+      "lbl": "P6b"
+    },
+    {
+      "id": "P7.cw",
+      "label": "DEPTH B CW (from DRV_OUT_B)",
+      "row": 22,
+      "col": "ctrlL",
+      "stage": 3,
+      "lbl": "P7c"
+    },
+    {
+      "id": "P7.w",
+      "label": "DEPTH B wiper",
+      "row": 21,
+      "col": "ctrlL",
+      "stage": 3,
+      "lbl": "P7b"
+    },
+    {
+      "id": "LEDstb",
+      "label": "Status LED B K",
+      "row": 33,
+      "col": "ctrlL",
+      "stage": 4,
+      "lbl": "LBb"
+    },
+    {
+      "id": "XS9",
+      "label": "MIX OUT",
+      "row": 17,
+      "col": "ctrlL",
+      "stage": 5,
+      "lbl": "MIX"
+    },
+    {
+      "id": "P2a",
+      "label": "MANUAL A a -> GND",
+      "row": 4,
+      "col": "ctrlL",
+      "lbl": "P2a",
+      "mark": "gnd",
+      "stage": 1
+    },
+    {
+      "id": "P1a",
+      "label": "ATTEN A a -> GND",
+      "row": 7,
+      "col": "ctrlR",
+      "lbl": "P1a",
+      "mark": "gnd",
+      "stage": 2
+    },
+    {
+      "id": "LAa",
+      "label": "LED A anode -> VD7 (3V3 zener) -> GND (status turn-on threshold)",
+      "row": 7,
+      "col": "ctrlL",
+      "lbl": "LAa",
+      "mark": "gnd",
+      "stage": 2
+    },
+    {
+      "id": "P3a",
+      "label": "DEPTH A a -> tie to wiper b (CCW short)",
+      "row": 4,
+      "col": "ctrlR",
+      "lbl": "P3a",
+      "mark": "link",
+      "stage": 1
+    },
+    {
+      "id": "P6a",
+      "label": "MANUAL B a -> GND",
+      "row": 35,
+      "col": "ctrlR",
+      "lbl": "P6a",
+      "mark": "gnd",
+      "stage": 3
+    },
+    {
+      "id": "P5a",
+      "label": "ATTEN B a -> GND",
+      "row": 32,
+      "col": "ctrlR",
+      "lbl": "P5a",
+      "mark": "gnd",
+      "stage": 4
+    },
+    {
+      "id": "LBa",
+      "label": "LED B anode -> VD8 (3V3 zener) -> GND (status turn-on threshold)",
+      "row": 32,
+      "col": "ctrlL",
+      "lbl": "LBa",
+      "mark": "gnd",
+      "stage": 4
+    },
+    {
+      "id": "P7a",
+      "label": "DEPTH B a -> tie to wiper b (CCW short)",
+      "row": 20,
+      "col": "ctrlL",
+      "lbl": "P7a",
+      "mark": "link",
+      "stage": 3
+    }
+  ],
+  "netLabels": [
+    {
+      "r": 2,
+      "side": "R",
+      "name": "CHA_IN",
+      "stage": 1
+    },
+    {
+      "r": 4,
+      "side": "R",
+      "name": "BUF_OUT_A",
+      "stage": 1
+    },
+    {
+      "r": 3,
+      "side": "L",
+      "name": "CHA_OUT",
+      "stage": 1
+    },
+    {
+      "r": 5,
+      "side": "L",
+      "name": "LED_DRIVE_A",
+      "stage": 1
+    },
+    {
+      "r": 5,
+      "side": "R",
+      "name": "VC_A_LDR1_IN",
+      "stage": 1
+    },
+    {
+      "r": 8,
+      "side": "L",
+      "name": "V_x_A",
+      "stage": 1
+    },
+    {
+      "r": 5,
+      "side": "L",
+      "name": "V_p_A",
+      "stage": 1
+    },
+    {
+      "r": 17,
+      "side": "R",
+      "name": "DRV_OUT_A",
+      "stage": 1
+    },
+    {
+      "r": 16,
+      "side": "R",
+      "name": "DRV_SUM_A",
+      "stage": 1
+    },
+    {
+      "r": 23,
+      "side": "L",
+      "name": "LED_DRIVE_B",
+      "stage": 3
+    },
+    {
+      "r": 23,
+      "side": "R",
+      "name": "VC_B_LDR1_IN",
+      "stage": 3
+    },
+    {
+      "r": 26,
+      "side": "L",
+      "name": "V_x_B",
+      "stage": 3
+    },
+    {
+      "r": 23,
+      "side": "L",
+      "name": "V_p_B",
+      "stage": 3
+    },
+    {
+      "r": 30,
+      "side": "R",
+      "name": "BUF_OUT_B",
+      "stage": 3
+    },
+    {
+      "r": 29,
+      "side": "L",
+      "name": "CHB_OUT",
+      "stage": 3
+    },
+    {
+      "r": 16,
+      "side": "L",
+      "name": "DRV_OUT_B",
+      "stage": 3
+    },
+    {
+      "r": 15,
+      "side": "L",
+      "name": "DRV_SUM_B",
+      "stage": 3
+    },
+    {
+      "r": 35,
+      "side": "R",
+      "name": "MIX_BUS",
+      "stage": 5
+    },
+    {
+      "r": 36,
+      "side": "R",
+      "name": "MIX_OUT",
+      "stage": 5
+    }
+  ]
+});

@@ -1,0 +1,59 @@
+Status,Source,Section,Qty,Value,Type,Designators,Role,Stage,Suggested Source
+f,,Future layer,1,5K resistor (mode switch parallel R) + 3PDT mini toggle,-,(L5 - mode switch),Adds LP / Both / VCA mode switching per channel; reserve PCB pads,L5 planned,Mouser/Tayda
+f,,Future layer,1,4.7nF C0G + 100K trimpot + extra op-amp half (use spare),-,(L7 - resonance feedback),Adds resonance / self-oscillation to filter,L7 planned,Mouser/Tayda
+f,,Future layer,1,100K linear pot + extra resistors,-,(L4 - DAMP cross-coupling),Couples both channel drivers via shared decay pot,L4 planned,Mouser/Tayda
+,,,,,,,,,
+y,Switch,Resistor,2,4M7,1/4W 1% metal film,"R3, R9",R_alpha - Buchla 292 closed-state divider,Day-one,Mouser/Tayda
+y,Switch,Resistor,2,4K7,1/4W 1% metal film,"R_STATUS_A, R_STATUS_B",Status LED current limit for RED LEDs (parallel branch off DRV_OUT - ~1.7mA at full drive; was 2K2 for green). ON-BOARD (rev 0.14+) - spans the driver output to the LED-cathode control hole (LED A b @ ctrlL 8 / LED B b @ ctrlL 33); LED anode ties to the d ground-plane. Was panel-side pigtail pre-0.14.,Day-one,Mouser/Tayda
+y,,Resistor,2,1K,1/4W 1% metal film,"R_OUT_A, R_OUT_B",Per-channel output series resistor - matches Bergmann R15 and Thomas White R15 (canonical Buchla 292 output stage). ON-BOARD (rev 0.14+) - spans CHA_OUT/CHB_OUT (DA1.7/DA2.7) to the OUT-jack control hole (OUT A @ ctrlL 1 / OUT B @ ctrlL 23). Short-circuit protection + output impedance; mix bus taps before R_OUT. Was panel-side pigtail pre-0.14.,Day-one,Mouser/Tayda
+y,Switch,Resistor,4,220R,1/4W 1% metal film,alt for R6/R12 + spares,Alternative vactrol LED drive current limit - use instead of 470R for higher-Vf DIY vactrols (green/blue/white LEDs) to keep current in useful range,Day-one,Mouser/Tayda
+y,Switch,Capacitor,2,220pF,Ceramic C0G/NP0,"C11, C12",C_2 - Buchla 292 first filter pole (fixed),Day-one,Mouser
+y,Switch,Capacitor,4,470pF/2.2nF spares,Film or C0G,-,Optional cap swaps for C13/C14 (brighter/darker),Day-one,Mouser
+y,Switch,Capacitor,2,1nF,Film or C0G,"C13, C14",C_1 - Buchla 292 second filter pole (SOCKETED),Day-one,Mouser
+n,,Socket,2,Vactrol footprint (5-pin SIP or DIP-8 wide),Machined-pin if available,VC1/VC2 sockets,Accepts molded VTL5C3/2 / 2x single / DIY shroud,Day-one,Mouser
+n,,Socket,2,2-pin DIP socket (or 2x SIP single-pin),Machined-pin,for C13/C14,Filter cap C_1 swap socket,Day-one,Mouser/Tayda
+n,Switch,Socket,4,8-pin DIP socket,Standard,for DA1-DA4,Op-amp sockets (recommended),Day-one,Mouser/Tayda
+,,,,,,,,,
+n,Amazon,Vactrol,4,VTL5C3/2 OR equivalents,Dual-LDR molded vactrol,"VC1, VC2 + 2 spares",Canonical Buchla part - 1 per channel + 2 spares (also accepts 2x single VTL5C3/9 or 2x LCR0202/0203),Day-one,Pusherman / Modular Addict / Banzai (genuine); Tayda/LCSC (LCR0202/0203)
+n,Amazon,LDR pack,1,GL5506/16/28/37/39/49 variety pack,"5mm CdS photoresistors, 120pc 6-value pack",RL1-RL120 (variety),Alternative DIY vactrol path - supports swap experimentation + multiple character settings,Day-one,Amazon (e.g. AUKENIEN); AliExpress; LCSC
+,,,,,,,,,
+y,,Resistor,4,100K,1/4W 1% metal film,"R1, R7, R13, R19",Input + CV pulldowns A/B,Day-one,Mouser/Tayda
+y,,Resistor,2,100K,1/4W 1% metal film,"R23, R26",Mix bus summing inputs (passive sum) OR R23/R26 if buffered,Day-one,Mouser/Tayda
+y,,Resistor,2,100K,1/4W 1% metal film,"R24, R27",Mix bus feedback (buffered mix only),Day-one,Mouser/Tayda
+y,,Resistor,1,100K,1/4W 1% metal film,R28,Mix bus +in to GND (buffered mix only),Day-one,Mouser/Tayda
+y,,Resistor,4,10K,1/4W 1% metal film,"R4, R10, R5, R11",Series before/after vactrol LDRs (audio path),Day-one,Mouser/Tayda
+y,,Resistor,4,10K,1/4W 1% metal film,"R14, R20, R36, R37",Driver op-amp feedback + non-inv reference,Day-one,Mouser/Tayda
+y,,Resistor,2,10K,1/4W 1% metal film,"R15, R31",Strike pulse-shaper pulldown (post-differentiator 10ms time constant) - channel A/B,Day-one,Mouser/Tayda
+y,,Resistor,2,4K7,1/4W 1% metal film,"R32, R33",Manual offset summing into driver,Day-one,Mouser/Tayda
+y,,Resistor,2,4K7,1/4W 1% metal film,"R29, R30",Manual offset top resistor (limits VCC drive),Day-one,Mouser/Tayda
+y,,Resistor,2,4K7,1/4W 1% metal film,"R38, R39",CV summing into driver,Day-one,Mouser/Tayda
+y,,Resistor,2,10K,1/4W 1% metal film,"R34, R35",Strike summing into driver,Day-one,Mouser/Tayda
+y,,Resistor,2,1K,1/4W 1% metal film,"R16, R22",CV input series protection,Day-one,Mouser/Tayda
+y,,Resistor,2,1K,1/4W 1% metal film,"R17, R25",Strike input series protection,Day-one,Mouser/Tayda
+y,,Resistor,2,470R,1/4W 1% metal film,"R6, R12",Vactrol LED drive current limit (8-18mA depending on vactrol LED Vf),Day-one,Mouser/Tayda
+y,,Resistor,2,10R,1/4W 1% metal film,"R40, R41",Power rail series filter,Day-one,Mouser/Tayda
+y,,Capacitor,2,10uF,Electrolytic 25V,"C1, C2",Power supply bulk filter (one per rail),Day-one,Mouser/Tayda
+y,,Capacitor,8,100nF,Ceramic X7R,"C3, C4, C5, C6, C7, C8, C9, C10",IC supply decoupling (1 per op-amp rail),Day-one,Mouser/Tayda
+y,,Capacitor,2,1uF,Film,"C15, C16",Strike pulse-shaper differentiator (~10ms),Day-one,Mouser/Tayda
+y,,Capacitor,1,100nF,Film,C17,Mix bus output DC blocking,Day-one,Mouser/Tayda
+y,,IC,4,TL072,DIP-8 dual op-amp,"DA1, DA2, DA3, DA4",8 op-amp halves total - see IC USAGE in netlist,Day-one,Mouser
+y,,Diode,2,1N4148,Standard signal,"VD1, VD2",Strike pulse rectifier,Day-one,Mouser/Tayda
+y,,Diode,2,1N5819,Schottky power,"VD3, VD4",Power supply reverse polarity protection,Day-one,Mouser/Tayda
+n,,Zener,2,6v8,Zener 500mW (e.g. BZX55C6V8),"VD5, VD6 (DEFAULT POPULATE)",Vactrol LED-chain max-current clamp - sized for 2x VTL5C3 in series (Vf chain ~3.2V) giving ~7.7mA peak through R6=470R. Anode at LED_DRIVE node cathode at GND.,Day-one,Mouser/Farnell/Tayda
+n,,Zener,2,9v1,Zener 500mW (e.g. BZX55C9V1),VD5/VD6 alternative (bench A/B),Higher-current alternative - ~12.6mA peak through R6=470R. Use if 6v8 doesn't fully open vactrol on peak ping.,Day-one,Mouser/Farnell/Tayda
+n,,Zener,2,3v9,Zener 500mW (e.g. BZX55C3V9),VD5/VD6 alternative (NLC-stock value),NLC stock value - only passes useful current if one LED in the chain is bridged out (single-LED-vactrol mode). Buy for completeness/A-B testing.,Day-one,Mouser/Farnell/Tayda
+n,,Socket,2,SIP-2 machined-pin (or 2-pin DIP),Machined-pin,"for VD5, VD6",Zener swap socket - enables bench A/B of 3v9/6v8/9v1 without desoldering,Day-one,Mouser/Tayda
+y,,Zener,2,3v3,Zener 500mW (e.g. BZX55C3V3),"VD7, VD8",Status-LED turn-on threshold (panel/control-board side) - in series in each status-LED ground leg between the LED anode and the d-plane (cathode/banded toward GND). Raises kick-in to ~Vf_LED+3.3 = ~5.2V so the LED stays dark through the MANUAL floor and flashes on strikes/peaks. Bench-confirmed perfect.,Day-one,Mouser/Farnell/Tayda
+n,,Resistor,4,47R,1/4W 1% metal film,"R_LED_A1, R_LED_A2, R_LED_B1, R_LED_B2 (FUTURE POPULATE)",Per-LED series resistor - anti-self-oscillation tweak for LCR-0202 experimental path. NOT populated for day-one VTL5C3 build (NLC/Bergmann don't include it). Wire-bridge the position day-one.,Future/L-LCR,Mouser/Tayda
+n,,Vactrol,2,VTL5C3 spares,DIP-4 single-LDR,-,Spare VTL5C3s - current order has 4 = exactly 2 per channel with zero spares. Buy 2 more as breadboard insurance.,Day-one,Tayda/Mouser/Pusherman
+y,,LED,2,5mm or 3mm red,Standard,"LED_STATUS_A, LED_STATUS_B",Status LEDs (red - matches build; any colour works with R_STATUS retuned) - driven from parallel branch off DRV_OUT (one per channel),Day-one,Mouser/Tayda
+y,,LED,8,5mm green ~525nm high-brightness,Standard,LED1-LED8,DIY vactrol LED - best match for LDR sensitivity,Day-one,Mouser/Tayda
+y,,LED,4,5mm amber ~590nm,Standard,-,DIY vactrol - alternative swap colour,Day-one,Mouser/Tayda
+y,,LED,4,5mm red high-brightness,Standard,-,DIY vactrol - faster turn-off character,Day-one,Mouser/Tayda
+y,,LED,4,5mm blue or white,Standard,-,DIY vactrol - experimental (Two-Tone style),Day-one,Mouser/Tayda
+y,,Potentiometer,2,100K linear (B),9mm PCB rotary,"P1, P5","CV ATTEN A/B - divider, wiper to driver",Day-one,Tayda/Mouser
+y,,Potentiometer,2,100K linear (B),9mm PCB rotary,"P2, P6","MANUAL A/B - divider VCC<->GND, wiper to driver",Day-one,Tayda/Mouser
+y,,Potentiometer,2,500K log (A),9mm PCB rotary,"P3, P7",DEPTH A/B - rheostat in series with LED drive (CCW shorted to wiper),Day-one,Tayda/Mouser
+y,,Jack,8,Switched mono 3.5mm,PJ-301M (Kobiconn) or equivalent,XS1-XS8,"CH A/B IN, STRIKE, CV, OUT (4 per channel)",Day-one,Tayda
+y,,Jack,1,Switched mono 3.5mm,PJ-301M (Kobiconn) or equivalent,XS9,MIX OUT,Day-one,Tayda
+y,,Header,1,2x5 IDC,Eurorack power 16-pin compatible,XP1,Eurorack power header,Day-one,Mouser/Tayda
