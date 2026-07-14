@@ -1,0 +1,326 @@
+{
+  "id": "n8synth-6hp",
+  "hp": 6,
+  "source": "6HP_Template.n8layout",
+  "breadboard": {
+    "rows": 40,
+    "layoutRows": [
+      1,
+      36
+    ],
+    "powerSectionRows": [
+      37,
+      40
+    ],
+    "holeCols": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e",
+      "f",
+      "g",
+      "h",
+      "i",
+      "j"
+    ],
+    "centreGap": [
+      "e",
+      "f"
+    ],
+    "rails": {
+      "pwrL": {
+        "evenRows": "VCC",
+        "oddRows": "GND"
+      },
+      "pwrR": {
+        "evenRows": "VEE",
+        "oddRows": "GND"
+      }
+    },
+    "count": 1
+  },
+  "deck": {
+    "symbol": "n8-cd-6hp-2x6",
+    "grid": {
+      "cols": 2,
+      "rows": 6
+    },
+    "strips": 1,
+    "groundBus": {
+      "pad": "D",
+      "scope": "whole deck",
+      "note": "One D pad per cell, bussed deck-wide. Bridge a cell's spare A/B/C solder point to D for local grounds; the bus must reach breadboard GND via at least one outer-strip hole."
+    },
+    "padsPerCell": {
+      "A": 2,
+      "B": 2,
+      "C": 2,
+      "D": 1
+    },
+    "cells": {
+      "JPS1": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 1,
+          "B": 2,
+          "C": 3
+        }
+      },
+      "JPS2": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 4,
+          "B": 5,
+          "C": 6
+        }
+      },
+      "JPS3": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 7,
+          "B": 8,
+          "C": 9
+        }
+      },
+      "JPS4": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 10,
+          "B": 11,
+          "C": 12
+        }
+      },
+      "JPS5": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 13,
+          "B": 14,
+          "C": 15
+        }
+      },
+      "JPS6": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 16,
+          "B": 17,
+          "C": 18
+        }
+      },
+      "JPS7": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 23,
+          "B": 24,
+          "C": 25
+        }
+      },
+      "JPS8": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 26,
+          "B": 27,
+          "C": 28
+        }
+      },
+      "JPS9": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 29,
+          "B": 30,
+          "C": 31
+        }
+      },
+      "JPS10": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 32,
+          "B": 33,
+          "C": 34
+        }
+      },
+      "JPS11": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 35,
+          "B": 36,
+          "C": 37
+        }
+      },
+      "JPS12": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 38,
+          "B": 39,
+          "C": 40
+        }
+      }
+    }
+  },
+  "ctrlMap": {
+    "ctrlL": {
+      "1": {
+        "cell": "JPS1",
+        "pad": "A"
+      },
+      "2": {
+        "cell": "JPS1",
+        "pad": "B"
+      },
+      "3": {
+        "cell": "JPS1",
+        "pad": "C"
+      },
+      "4": {
+        "cell": "JPS2",
+        "pad": "A"
+      },
+      "5": {
+        "cell": "JPS2",
+        "pad": "B"
+      },
+      "6": {
+        "cell": "JPS2",
+        "pad": "C"
+      },
+      "7": {
+        "cell": "JPS3",
+        "pad": "A"
+      },
+      "8": {
+        "cell": "JPS3",
+        "pad": "B"
+      },
+      "9": {
+        "cell": "JPS3",
+        "pad": "C"
+      },
+      "10": {
+        "cell": "JPS4",
+        "pad": "A"
+      },
+      "11": {
+        "cell": "JPS4",
+        "pad": "B"
+      },
+      "12": {
+        "cell": "JPS4",
+        "pad": "C"
+      },
+      "13": {
+        "cell": "JPS5",
+        "pad": "A"
+      },
+      "14": {
+        "cell": "JPS5",
+        "pad": "B"
+      },
+      "15": {
+        "cell": "JPS5",
+        "pad": "C"
+      },
+      "16": {
+        "cell": "JPS6",
+        "pad": "A"
+      },
+      "17": {
+        "cell": "JPS6",
+        "pad": "B"
+      },
+      "18": {
+        "cell": "JPS6",
+        "pad": "C"
+      },
+      "19": null,
+      "20": null,
+      "21": null,
+      "22": null,
+      "23": {
+        "cell": "JPS7",
+        "pad": "A"
+      },
+      "24": {
+        "cell": "JPS7",
+        "pad": "B"
+      },
+      "25": {
+        "cell": "JPS7",
+        "pad": "C"
+      },
+      "26": {
+        "cell": "JPS8",
+        "pad": "A"
+      },
+      "27": {
+        "cell": "JPS8",
+        "pad": "B"
+      },
+      "28": {
+        "cell": "JPS8",
+        "pad": "C"
+      },
+      "29": {
+        "cell": "JPS9",
+        "pad": "A"
+      },
+      "30": {
+        "cell": "JPS9",
+        "pad": "B"
+      },
+      "31": {
+        "cell": "JPS9",
+        "pad": "C"
+      },
+      "32": {
+        "cell": "JPS10",
+        "pad": "A"
+      },
+      "33": {
+        "cell": "JPS10",
+        "pad": "B"
+      },
+      "34": {
+        "cell": "JPS10",
+        "pad": "C"
+      },
+      "35": {
+        "cell": "JPS11",
+        "pad": "A"
+      },
+      "36": {
+        "cell": "JPS11",
+        "pad": "B"
+      },
+      "37": {
+        "cell": "JPS11",
+        "pad": "C"
+      },
+      "38": {
+        "cell": "JPS12",
+        "pad": "A"
+      },
+      "39": {
+        "cell": "JPS12",
+        "pad": "B"
+      },
+      "40": {
+        "cell": "JPS12",
+        "pad": "C"
+      }
+    }
+  },
+  "gapRows": {
+    "ctrlL": [
+      19,
+      20,
+      21,
+      22
+    ]
+  },
+  "gapRowNote": "Gap rows have no JPS pad; the deck hole is otherwise unconnected, so they are free feed-through tie points (useful for long jumps routed across the deck).",
+  "stacking": {
+    "supported": true,
+    "note": "Extra breadboards stack via connectors on any deck size. Deck mounts right way up; stacked boards are typically mounted FLIPPED (left/right strips swap) so components face outward for probing. Per-layer net pass-through to be confirmed before multi-board layouts.",
+    "passThroughConfirmed": false
+  }
+}

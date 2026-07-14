@@ -187,8 +187,8 @@ def power_rail_net(rail, row):
 
 
 def main():
-    layout_path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(
-        '/Users/dbaghurst/eurorack_electronics/tools/visualizer/layouts/lpg.json')
+    layout_path = Path(sys.argv[1]) if len(sys.argv) > 1 else (
+        Path(__file__).parent / 'layouts' / 'lpg.json')
     with open(layout_path) as f:
         layout = json.load(f)
 

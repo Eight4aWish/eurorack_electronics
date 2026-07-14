@@ -1,0 +1,494 @@
+{
+  "id": "n8synth-10hps",
+  "hp": 10,
+  "source": "10HPS Template.n8layout",
+  "breadboard": {
+    "rows": 40,
+    "layoutRows": [
+      1,
+      36
+    ],
+    "powerSectionRows": [
+      37,
+      40
+    ],
+    "holeCols": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e",
+      "f",
+      "g",
+      "h",
+      "i",
+      "j"
+    ],
+    "centreGap": [
+      "e",
+      "f"
+    ],
+    "rails": {
+      "pwrL": {
+        "evenRows": "VCC",
+        "oddRows": "GND"
+      },
+      "pwrR": {
+        "evenRows": "VEE",
+        "oddRows": "GND"
+      }
+    },
+    "count": 2
+  },
+  "deck": {
+    "symbol": "n8-cd-10hp-3x6",
+    "grid": {
+      "cols": 3,
+      "rows": 6
+    },
+    "strips": 2,
+    "groundBus": {
+      "pad": "D",
+      "scope": "whole deck",
+      "note": "One D pad per cell, bussed deck-wide. Bridge a cell's spare A/B/C solder point to D for local grounds; the bus must reach breadboard GND via at least one outer-strip hole."
+    },
+    "padsPerCell": {
+      "A": 2,
+      "B": 2,
+      "C": 2,
+      "D": 1
+    },
+    "cells": {
+      "JPS1": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 1,
+          "B": 2,
+          "C": 3
+        }
+      },
+      "JPS2": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 4,
+          "B": 5,
+          "C": 6
+        }
+      },
+      "JPS3": {
+        "strip": "ctrlR",
+        "ctrlRows": {
+          "A": 1,
+          "B": 2,
+          "C": 3
+        }
+      },
+      "JPS4": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 7,
+          "B": 8,
+          "C": 9
+        }
+      },
+      "JPS5": {
+        "strip": "ctrlR",
+        "ctrlRows": {
+          "A": 4,
+          "B": 5,
+          "C": 6
+        }
+      },
+      "JPS6": {
+        "strip": "ctrlR",
+        "ctrlRows": {
+          "A": 7,
+          "B": 8,
+          "C": 9
+        }
+      },
+      "JPS7": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 17,
+          "B": 18,
+          "C": 19
+        }
+      },
+      "JPS8": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 20,
+          "B": 21,
+          "C": 22
+        }
+      },
+      "JPS9": {
+        "strip": "ctrlR",
+        "ctrlRows": {
+          "A": 17,
+          "B": 18,
+          "C": 19
+        }
+      },
+      "JPS10": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 23,
+          "B": 24,
+          "C": 25
+        }
+      },
+      "JPS11": {
+        "strip": "ctrlR",
+        "ctrlRows": {
+          "A": 20,
+          "B": 21,
+          "C": 22
+        }
+      },
+      "JPS12": {
+        "strip": "ctrlR",
+        "ctrlRows": {
+          "A": 23,
+          "B": 24,
+          "C": 25
+        }
+      },
+      "JPS13": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 32,
+          "B": 33,
+          "C": 34
+        }
+      },
+      "JPS14": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 35,
+          "B": 36,
+          "C": 37
+        }
+      },
+      "JPS15": {
+        "strip": "ctrlR",
+        "ctrlRows": {
+          "A": 32,
+          "B": 33,
+          "C": 34
+        }
+      },
+      "JPS16": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 38,
+          "B": 39,
+          "C": 40
+        }
+      },
+      "JPS17": {
+        "strip": "ctrlR",
+        "ctrlRows": {
+          "A": 35,
+          "B": 36,
+          "C": 37
+        }
+      },
+      "JPS18": {
+        "strip": "ctrlR",
+        "ctrlRows": {
+          "A": 38,
+          "B": 39,
+          "C": 40
+        }
+      }
+    }
+  },
+  "ctrlMap": {
+    "ctrlL": {
+      "1": {
+        "cell": "JPS1",
+        "pad": "A"
+      },
+      "2": {
+        "cell": "JPS1",
+        "pad": "B"
+      },
+      "3": {
+        "cell": "JPS1",
+        "pad": "C"
+      },
+      "4": {
+        "cell": "JPS2",
+        "pad": "A"
+      },
+      "5": {
+        "cell": "JPS2",
+        "pad": "B"
+      },
+      "6": {
+        "cell": "JPS2",
+        "pad": "C"
+      },
+      "7": {
+        "cell": "JPS4",
+        "pad": "A"
+      },
+      "8": {
+        "cell": "JPS4",
+        "pad": "B"
+      },
+      "9": {
+        "cell": "JPS4",
+        "pad": "C"
+      },
+      "10": null,
+      "11": null,
+      "12": null,
+      "13": null,
+      "14": null,
+      "15": null,
+      "16": null,
+      "17": {
+        "cell": "JPS7",
+        "pad": "A"
+      },
+      "18": {
+        "cell": "JPS7",
+        "pad": "B"
+      },
+      "19": {
+        "cell": "JPS7",
+        "pad": "C"
+      },
+      "20": {
+        "cell": "JPS8",
+        "pad": "A"
+      },
+      "21": {
+        "cell": "JPS8",
+        "pad": "B"
+      },
+      "22": {
+        "cell": "JPS8",
+        "pad": "C"
+      },
+      "23": {
+        "cell": "JPS10",
+        "pad": "A"
+      },
+      "24": {
+        "cell": "JPS10",
+        "pad": "B"
+      },
+      "25": {
+        "cell": "JPS10",
+        "pad": "C"
+      },
+      "26": null,
+      "27": null,
+      "28": null,
+      "29": null,
+      "30": null,
+      "31": null,
+      "32": {
+        "cell": "JPS13",
+        "pad": "A"
+      },
+      "33": {
+        "cell": "JPS13",
+        "pad": "B"
+      },
+      "34": {
+        "cell": "JPS13",
+        "pad": "C"
+      },
+      "35": {
+        "cell": "JPS14",
+        "pad": "A"
+      },
+      "36": {
+        "cell": "JPS14",
+        "pad": "B"
+      },
+      "37": {
+        "cell": "JPS14",
+        "pad": "C"
+      },
+      "38": {
+        "cell": "JPS16",
+        "pad": "A"
+      },
+      "39": {
+        "cell": "JPS16",
+        "pad": "B"
+      },
+      "40": {
+        "cell": "JPS16",
+        "pad": "C"
+      }
+    },
+    "ctrlR": {
+      "1": {
+        "cell": "JPS3",
+        "pad": "A"
+      },
+      "2": {
+        "cell": "JPS3",
+        "pad": "B"
+      },
+      "3": {
+        "cell": "JPS3",
+        "pad": "C"
+      },
+      "4": {
+        "cell": "JPS5",
+        "pad": "A"
+      },
+      "5": {
+        "cell": "JPS5",
+        "pad": "B"
+      },
+      "6": {
+        "cell": "JPS5",
+        "pad": "C"
+      },
+      "7": {
+        "cell": "JPS6",
+        "pad": "A"
+      },
+      "8": {
+        "cell": "JPS6",
+        "pad": "B"
+      },
+      "9": {
+        "cell": "JPS6",
+        "pad": "C"
+      },
+      "10": null,
+      "11": null,
+      "12": null,
+      "13": null,
+      "14": null,
+      "15": null,
+      "16": null,
+      "17": {
+        "cell": "JPS9",
+        "pad": "A"
+      },
+      "18": {
+        "cell": "JPS9",
+        "pad": "B"
+      },
+      "19": {
+        "cell": "JPS9",
+        "pad": "C"
+      },
+      "20": {
+        "cell": "JPS11",
+        "pad": "A"
+      },
+      "21": {
+        "cell": "JPS11",
+        "pad": "B"
+      },
+      "22": {
+        "cell": "JPS11",
+        "pad": "C"
+      },
+      "23": {
+        "cell": "JPS12",
+        "pad": "A"
+      },
+      "24": {
+        "cell": "JPS12",
+        "pad": "B"
+      },
+      "25": {
+        "cell": "JPS12",
+        "pad": "C"
+      },
+      "26": null,
+      "27": null,
+      "28": null,
+      "29": null,
+      "30": null,
+      "31": null,
+      "32": {
+        "cell": "JPS15",
+        "pad": "A"
+      },
+      "33": {
+        "cell": "JPS15",
+        "pad": "B"
+      },
+      "34": {
+        "cell": "JPS15",
+        "pad": "C"
+      },
+      "35": {
+        "cell": "JPS17",
+        "pad": "A"
+      },
+      "36": {
+        "cell": "JPS17",
+        "pad": "B"
+      },
+      "37": {
+        "cell": "JPS17",
+        "pad": "C"
+      },
+      "38": {
+        "cell": "JPS18",
+        "pad": "A"
+      },
+      "39": {
+        "cell": "JPS18",
+        "pad": "B"
+      },
+      "40": {
+        "cell": "JPS18",
+        "pad": "C"
+      }
+    }
+  },
+  "gapRows": {
+    "ctrlL": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "ctrlR": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ]
+  },
+  "gapRowNote": "Gap rows have no JPS pad; the deck hole is otherwise unconnected, so they are free feed-through tie points (useful for long jumps routed across the deck).",
+  "stacking": {
+    "supported": true,
+    "note": "Extra breadboards stack via connectors on any deck size. Deck mounts right way up; stacked boards are typically mounted FLIPPED (left/right strips swap) so components face outward for probing. Per-layer net pass-through to be confirmed before multi-board layouts.",
+    "passThroughConfirmed": false
+  }
+}

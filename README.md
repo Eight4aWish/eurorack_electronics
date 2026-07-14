@@ -6,9 +6,9 @@ Analog Eurorack breadboard layouts, drum-voice schematics, a dual-channel low-pa
 
 ### `tools/n8layout/`
 
-[n8synth](https://www.n8synth.com/) platform layout files. Hand-edited `.n8layout` JSON describing component placement on the n8synth breadboard. Loadable in the visualiser.
+[n8synth](https://www.n8synth.com/) platform layout files: the official blank module templates (SVG with embedded n8 metadata) plus one worked example.
 
-- `6HP_Template.n8layout` — blank starter layout sized for a 6HP module
+- `4HP Template.n8layout`, `6HP_Template.n8layout`, `10HP Template.n8layout`, `10HPS Template.n8layout` — official blank templates (10HPS = 10HP with a second stacked breadboard). These are the **source of truth for board geometry** — `tools/visualizer/gen_board_profiles.py` parses them into board-profile JSON.
 - `808_Kick_Example.n8layout` — example 808-style kick layout
 
 ### `tools/visualizer/`
@@ -17,9 +17,23 @@ A browser-based layout viewer that renders breadboard placements from JSON, plus
 
 - `index.html` — main visualiser; opens any layout from `layouts/`
 - `kick_drum_breadboard.html` — focused viewer for the kick drum layout
+- `check.sh` — **one-command check**: geometry validation → net-identity cross-check → doc map regeneration
 - `netlist_to_layout.py` — netlist → layout JSON converter
 - `cross_check_nets.py` / `validate_layout.py` / `sync_layout.py` / `gen_rowmap.py` — placement validation + maintenance helpers
+- `gen_board_profiles.py` / `boards/` — board-profile JSON generated from the official n8synth templates: JPS control-deck cells, breadboard-strip↔deck connector maps, gap rows, D ground bus
 - `layouts/` — per-module JS + JSON layouts (kick, snare, FM drum two-board, dual LPG)
+
+### How I use this (workflow)
+
+The loop that produced the dual LPG, end to end:
+
+1. **Reference review** — survey published schematics for the topology, compare sources, pick component values. Output: `docs/<module>_reference_review.md` + `docs/<module>_netlist.md` with named nets and per-source confidence tags.
+2. **Skeleton layout** — `netlist_to_layout.py` converts the netlist doc into a layout JSON with components, stages, and net assignments but no positions.
+3. **Placement** — fill in row/column positions per build phase (LLM-assisted in Claude Code sessions, guided by the board profile's control-deck maps in `boards/`). Panel-facing legs land on control-deck JPS pads; grounds tie to the deck-wide D bus.
+4. **Verify** — `./check.sh`: zero hole collisions, every component on the nets the netlist requires, then the placement doc's row maps regenerate from the JSON so they can never drift.
+5. **Build** — open the visualiser, step through the build phases at the bench; each phase carries its own test checklist (visible in the side panel).
+
+Repeat 3–4 until clean; the layout JSON is always the single source of truth for placement.
 
 To run locally:
 

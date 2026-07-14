@@ -1,0 +1,242 @@
+{
+  "id": "n8synth-4hp",
+  "hp": 4,
+  "source": "4HP Template.n8layout",
+  "breadboard": {
+    "rows": 40,
+    "layoutRows": [
+      1,
+      36
+    ],
+    "powerSectionRows": [
+      37,
+      40
+    ],
+    "holeCols": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e",
+      "f",
+      "g",
+      "h",
+      "i",
+      "j"
+    ],
+    "centreGap": [
+      "e",
+      "f"
+    ],
+    "rails": {
+      "pwrL": {
+        "evenRows": "VCC",
+        "oddRows": "GND"
+      },
+      "pwrR": {
+        "evenRows": "VEE",
+        "oddRows": "GND"
+      }
+    },
+    "count": 1
+  },
+  "deck": {
+    "symbol": "n8-cd-4hp-1x6",
+    "grid": {
+      "cols": 1,
+      "rows": 6
+    },
+    "strips": 1,
+    "groundBus": {
+      "pad": "D",
+      "scope": "whole deck",
+      "note": "One D pad per cell, bussed deck-wide. Bridge a cell's spare A/B/C solder point to D for local grounds; the bus must reach breadboard GND via at least one outer-strip hole."
+    },
+    "padsPerCell": {
+      "A": 2,
+      "B": 2,
+      "C": 2,
+      "D": 1
+    },
+    "cells": {
+      "JPS1": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 1,
+          "B": 2,
+          "C": 3
+        }
+      },
+      "JPS2": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 8,
+          "B": 9,
+          "C": 10
+        }
+      },
+      "JPS3": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 15,
+          "B": 16,
+          "C": 17
+        }
+      },
+      "JPS4": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 22,
+          "B": 23,
+          "C": 24
+        }
+      },
+      "JPS5": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 30,
+          "B": 31,
+          "C": 32
+        }
+      },
+      "JPS6": {
+        "strip": "ctrlL",
+        "ctrlRows": {
+          "A": 38,
+          "B": 39,
+          "C": 40
+        }
+      }
+    }
+  },
+  "ctrlMap": {
+    "ctrlL": {
+      "1": {
+        "cell": "JPS1",
+        "pad": "A"
+      },
+      "2": {
+        "cell": "JPS1",
+        "pad": "B"
+      },
+      "3": {
+        "cell": "JPS1",
+        "pad": "C"
+      },
+      "4": null,
+      "5": null,
+      "6": null,
+      "7": null,
+      "8": {
+        "cell": "JPS2",
+        "pad": "A"
+      },
+      "9": {
+        "cell": "JPS2",
+        "pad": "B"
+      },
+      "10": {
+        "cell": "JPS2",
+        "pad": "C"
+      },
+      "11": null,
+      "12": null,
+      "13": null,
+      "14": null,
+      "15": {
+        "cell": "JPS3",
+        "pad": "A"
+      },
+      "16": {
+        "cell": "JPS3",
+        "pad": "B"
+      },
+      "17": {
+        "cell": "JPS3",
+        "pad": "C"
+      },
+      "18": null,
+      "19": null,
+      "20": null,
+      "21": null,
+      "22": {
+        "cell": "JPS4",
+        "pad": "A"
+      },
+      "23": {
+        "cell": "JPS4",
+        "pad": "B"
+      },
+      "24": {
+        "cell": "JPS4",
+        "pad": "C"
+      },
+      "25": null,
+      "26": null,
+      "27": null,
+      "28": null,
+      "29": null,
+      "30": {
+        "cell": "JPS5",
+        "pad": "A"
+      },
+      "31": {
+        "cell": "JPS5",
+        "pad": "B"
+      },
+      "32": {
+        "cell": "JPS5",
+        "pad": "C"
+      },
+      "33": null,
+      "34": null,
+      "35": null,
+      "36": null,
+      "37": null,
+      "38": {
+        "cell": "JPS6",
+        "pad": "A"
+      },
+      "39": {
+        "cell": "JPS6",
+        "pad": "B"
+      },
+      "40": {
+        "cell": "JPS6",
+        "pad": "C"
+      }
+    }
+  },
+  "gapRows": {
+    "ctrlL": [
+      4,
+      5,
+      6,
+      7,
+      11,
+      12,
+      13,
+      14,
+      18,
+      19,
+      20,
+      21,
+      25,
+      26,
+      27,
+      28,
+      29,
+      33,
+      34,
+      35,
+      36,
+      37
+    ]
+  },
+  "gapRowNote": "Gap rows have no JPS pad; the deck hole is otherwise unconnected, so they are free feed-through tie points (useful for long jumps routed across the deck).",
+  "stacking": {
+    "supported": true,
+    "note": "Extra breadboards stack via connectors on any deck size. Deck mounts right way up; stacked boards are typically mounted FLIPPED (left/right strips swap) so components face outward for probing. Per-layer net pass-through to be confirmed before multi-board layouts.",
+    "passThroughConfirmed": false
+  }
+}
