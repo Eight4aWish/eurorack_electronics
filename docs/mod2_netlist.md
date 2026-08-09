@@ -478,29 +478,78 @@ three are unconnected in this build, it has no effect on placement. ✓
 
 ## PANEL AND CONTROL DECK ALLOCATION
 
-n8synth 6HP deck `n8-cd-6hp-2x6`: 12 cells, all on the left strip (`ctrlL`). Each cell has pads
-A/B/C plus D on the deck-wide ground bus.
+n8synth 6HP deck `n8-cd-6hp-2x6`: 12 cells in a **2 columns × 6 rows** grid (16.5 mm column
+pitch, 17.27 mm row pitch), all wired to the single left-hand strip (`ctrlL`). Each cell has
+pads A/B/C plus D on the deck-wide ground bus.
 
-| Cell use | Component | Pads |
-|---|---|---|
-| Pot | P1 | A/B/C |
-| Pot | P2 | A/B/C |
-| Pot | P3 | A/B/C |
-| Jack | J2 CV | tip A, switch B, sleeve D |
-| Jack | J3 IN2 | tip A, switch B, sleeve D |
-| Jack | J4 IN1 | tip A, switch B, sleeve D |
-| Jack | J6 OUT | tip A, switch B, sleeve D |
-| Switch | SW1 BUTTON | A, return D |
-| Indicator | D9 plain LED | anode A, cathode D |
-| Indicator | LED1 WS2812B | VIN A, DIN B, GND D |
-| Switch | SW2 FILTER | CAP_SW A, GND D |
-| Switch | SW3 DC | RC_B A, AMP_IN B |
+**Cell numbering is ROW-MAJOR — odd numbers down the LEFT column, even down the RIGHT.** ✓
+Confirmed from the n8synth annotated control-deck diagram (`6HP-2x6-Control-Deck-Annotated.png`
+in the [6HP quick-start guide](https://www.n8synth.co.uk/guides/6hp-eurorack-prototype-kit-quick-start/)),
+and corroborated by the footprint x-coordinates in `6HP_Template.n8layout` alternating
+0.71 / 17.22 mm. *Not* column-major — the 4-pin gap between JPS6 and JPS7 is a connector
+feature, not a column boundary.
+
+### Agreed panel layout
+
+```
+              6HP  —  2 × 6
+         ┌─────────────────────────┐
+    1    │  ( POT1 )       (*)     │   RGB pixel
+    2    │  ( POT2 )       (o)     │   plain LED
+    3    │  ( POT3 )      [BTN]    │   manual trigger
+    4    │   ( CV )       (OUT)    │
+    5    │   (IN1)         [DC]    │   AC / DC
+    6    │   (IN2)       [FILTER]  │   15k9 / 5k0
+         └─────────────────────────┘
+          in + control        out + config
+```
+
+Left column is everything you patch in and turn; right column is output, indicators and config.
+POT3 sits directly above its CV jack (both summed into A2). DC sits directly below OUT, the jack
+it governs.
+
+*Trade-off accepted:* the output cable hangs over the two config toggles below it. They are
+set-once-per-firmware rather than performance controls, so this was judged acceptable — and it
+arguably shields them from being knocked.
+
+### Position → cell → breadboard rows
+
+| Panel | Item | Cell | Rows (A/B/C) | Pads |
+|---|---|---|---|---|
+| L1 | P1 POT1 | **JPS1** | 1 / 2 / 3 | 3 legs → A/B/C |
+| R1 | LED1 WS2812B | **JPS2** | 4 / 5 / 6 | VIN A, DIN B, GND D |
+| L2 | P2 POT2 | **JPS3** | 7 / 8 / 9 | 3 legs → A/B/C |
+| R2 | D9 plain LED | **JPS4** | 10 / 11 / 12 | anode A, cathode D |
+| L3 | P3 POT3 | **JPS5** | 13 / 14 / 15 | 3 legs → A/B/C |
+| R3 | SW1 BUTTON | **JPS6** | 16 / 17 / 18 | A, return D |
+| — | *gap* | — | *19 / 20 / 21 / 22* | *free feed-through tie points* |
+| L4 | J2 CV | **JPS7** | 23 / 24 / 25 | tip A, switch B, sleeve D |
+| R4 | J6 OUT | **JPS8** | 26 / 27 / 28 | tip A, switch B, sleeve D |
+| L5 | J4 IN1 | **JPS9** | 29 / 30 / 31 | tip A, switch B, sleeve D |
+| R5 | SW3 DC | **JPS10** | 32 / 33 / 34 | RC_B A, AMP_IN B |
+| L6 | J3 IN2 | **JPS11** | 35 / 36 / 37 | tip A, switch B, sleeve D |
+| R6 | SW2 FILTER | **JPS12** | 38 / 39 / 40 | CAP_SW A, GND D |
 
 **12 of 12 cells — the panel is exactly full.** Any further feature displaces something.
 
-Row mapping: JPS1→rows 1/2/3, JPS2→4/5/6, JPS3→7/8/9, JPS4→10/11/12, JPS5→13/14/15,
-JPS6→16/17/18, **rows 19–22 are gap rows** (free feed-through tie points), JPS7→23/24/25,
-JPS8→26/27/28, JPS9→29/30/31, JPS10→32/33/34, JPS11→35/36/37, JPS12→38/39/40.
+✓ **All 40 breadboard rows are usable tie points**, confirmed against the physical board. The
+profile's `powerSectionRows` [37, 40] and `layoutRows` [1, 36] describe the board's power
+*area*, **not** a restriction on those rows — JPS11.C (row 37) and JPS12 (rows 38–40) connect
+normally. Do not re-derive a caution here; it has been checked.
+
+### Consequences for placement
+
+- **Row-major numbering interleaves the two panel columns down the breadboard.** The pots are
+  therefore *not* contiguous: rows 1–3, 7–9, 13–15, with the indicator and button cells at rows
+  4–6, 10–12, 16–18 between them.
+- **The whole ADC front end lands in rows 1–18** (POT1/POT2/POT3 → A0/A1/A2), so U1, U2 and the
+  XIAO belong in the top half, close to their pots. Keep the P3V3 star-feed short.
+- **All four jacks land in rows 23–40**, the bottom half — the audio output stage and gate
+  conditioning belong down there, near J6/J4/J3.
+- **Gap rows 19–22 fall exactly between the control group and the jack group** — free
+  feed-through space precisely where signals cross from the front end to the I/O section.
+- **SW3 spans two signal nets** (RC_B on A, AMP_IN on B) rather than using the D ground bus —
+  the only panel cell that does. Both legs must run back to the output stage.
 
 ---
 
