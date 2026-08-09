@@ -414,27 +414,65 @@ Both halves are unity-gain followers (output tied to inverting input).
 ### U3 (XIAO RP2350): Microcontroller
 | Pin | Function | Net |
 |-----|----------|-----|
-| 1 | D0 GPIO26 ADC0 | A0 |
-| 2 | D1 GPIO27 ADC1 | A1 |
-| 3 | D2 GPIO28 ADC2 | A2 |
-| 4 | D3 GPIO5 | LED_DRIVE |
-| 5 | D4 GPIO6 | GPIO6 |
-| 6 | D5 GPIO7 | GPIO7 |
-| 7 | D6 GPIO0 | GPIO0 |
-| 8 | D7 GPIO1 | PWM_OUT |
-| 9 | D8 GPIO2 | NC |
-| 10 | D9 GPIO4 | NC |
-| 11 | D10 GPIO3 | NC |
-| 12 | 3V3 | P3V3 |
-| 13 | GND | GND |
-| 14 | 5V | P5V |
+| 1 | D0 GPIO26 ADC0 right-top | A0 |
+| 2 | D1 GPIO27 ADC1 right | A1 |
+| 3 | D2 GPIO28 ADC2 right | A2 |
+| 4 | D3 GPIO5 right | LED_DRIVE |
+| 5 | D4 GPIO6 right | GPIO6 |
+| 6 | D5 GPIO7 right | GPIO7 |
+| 7 | D6 GPIO0 right-bottom | GPIO0 |
+| 8 | D7 GPIO1 left-bottom | PWM_OUT |
+| 9 | D8 GPIO2 left | NC |
+| 10 | D9 GPIO4 left | NC |
+| 11 | D10 GPIO3 left | NC |
+| 12 | 3V3 left | P3V3 |
+| 13 | GND left | GND |
+| 14 | VBUS 5V left-top | P5V |
 
-⚠ **The GPIO numbers are certain** — they are labelled directly on the Rev A schematic and
-match the firmware constants (`PWM_AUDIO_PIN = 1`, `TRIG_IN_PIN = 7`, `VOLUME_HALF_IN_PIN = 0`,
-`PUSH_BUTTON_PIN = 6`, `MOD2_LED_PIN = 5`). **The physical pin positions (column 1) and the
-D-number ↔ GPIO mapping are taken from the XIAO RP2040 convention and must be confirmed against
-the Seeed XIAO RP2350 pinout before placement.** ? This is the single highest-risk item in this
-document — an error here misplaces every MCU connection.
+**Physical layout confirmed from the board silkscreen** ✓ — viewed from above, component side,
+USB at top. Numbering is DIP-style: right side 1–7 top to bottom, left side 8–14 bottom to top.
+
+```
+                 ┌─────────────────┐
+                 │      USB-C      │
+   VBUS   14 ────┤                 ├──── 1   D0  / GPIO26 / A0
+   GND    13 ────┤                 ├──── 2   D1  / GPIO27 / A1
+   3V3    12 ────┤  XIAO  RP2350   ├──── 3   D2  / GPIO28 / A2
+   D10    11 ────┤                 ├──── 4   D3  / GPIO5
+   D9     10 ────┤                 ├──── 5   D4  / GPIO6
+   D8      9 ────┤                 ├──── 6   D5  / GPIO7
+   D7      8 ────┤                 ├──── 7   D6  / GPIO0
+                 └─────────────────┘
+```
+
+**Breadboard rows.** The module straddles the centre gap and spans seven rows, N to N+6:
+
+| Row | Left pin | Left net | Right pin | Right net |
+|-----|----------|----------|-----------|-----------|
+| N   | VBUS | P5V | D0 | A0 — POT1 |
+| N+1 | GND | GND | D1 | A1 — POT2 |
+| N+2 | 3V3 | P3V3 | D2 | A2 — CV + POT3 |
+| N+3 | D10 | *unused* | D3 | LED_DRIVE — GPIO5 |
+| N+4 | D9 | *unused* | D4 | GPIO6 — push switch |
+| N+5 | D8 | *unused* | D5 | GPIO7 — IN1 trigger |
+| N+6 | D7 | PWM_OUT — GPIO1 | D6 | GPIO0 — IN2 level |
+
+**Layout consequences worth exploiting:**
+- The **whole power trio (VBUS/GND/3V3) sits at the top-left**, adjacent to each other — feed
+  all three from one place, and keep C19/C20 tight against rows N+1/N+2.
+- **All three unused pins are contiguous on the left** (rows N+3 to N+5), so that stretch of
+  left-hand rows is free for routing.
+- ⚠ **PWM_OUT and the IN2 gate input share row N+6**, on opposite sides. That puts the PWM
+  carrier directly across from a digital input — keep the R17/R19 filter chain and the gate
+  wiring physically apart rather than running them alongside each other.
+
+**Confidence.** The GPIO numbers are certain — labelled on the Rev A schematic and matching the
+firmware constants (`PWM_AUDIO_PIN = 1`, `TRIG_IN_PIN = 7`, `VOLUME_HALF_IN_PIN = 0`,
+`PUSH_BUTTON_PIN = 6`, `MOD2_LED_PIN = 5`). The physical positions are read from the board. The
+D↔GPIO mapping is corroborated by the schematic's unused-pin marks: HAGIWO used the contiguous
+**D0–D7** block, leaving D8/D9/D10 — GPIO2, GPIO3 and GPIO4 — as exactly the three pins drawn
+with an X. The only residual ambiguity is *which* of GPIO2/3/4 lands on D8/D9/D10, and since all
+three are unconnected in this build, it has no effect on placement. ✓
 
 ---
 
@@ -486,7 +524,9 @@ bus through the host port.
 
 ## OPEN ITEMS FOR THE BENCH
 
-1. **XIAO RP2350 physical pinout** — confirm the D↔GPIO mapping in the U3 table. Highest risk.
+1. ~~XIAO RP2350 physical pinout~~ → **Resolved from the board silkscreen.** ✓ Right side 1–7
+   top to bottom, left side 8–14 bottom to top; see the U3 table. Residual ambiguity confined
+   to GPIO2/3/4, which are unconnected.
 2. 7805 thermal figure with the WS2812B lit (~0.9 W worst case).
 3. Confirm the WS2812B revision shipped, and whether D10 is needed at all.
 4. A2 noise with the 7805 fitted — the canary for the 3.3V decoupling question.
