@@ -70,9 +70,12 @@ if to hand; either works.
 ### Potentiometers
 | Qty | Value | Taper | Designator | Label | Wiring |
 |-----|-------|-------|------------|-------|--------|
-| 1 | 100K | B (lin) | P1 | POT1 | Divider: pin1 +3V3, wiper to R1, pin3 GND |
-| 1 | 100K | B (lin) | P2 | POT2 | Divider: pin1 +3V3, wiper to R2, pin3 GND |
-| 1 | 100K | B (lin) | P3 | POT3 | Divider: pin1 +3V3, wiper to R5, pin3 GND |
+| 1 | 100K | B (lin) | P1 | POT1 | Divider: pin3 +3V3, pin2 wiper to R1, pin1 GND |
+| 1 | 100K | B (lin) | P2 | POT2 | Divider: pin3 +3V3, pin2 wiper to R2, pin1 GND |
+| 1 | 100K | B (lin) | P3 | POT3 | Divider: pin3 +3V3, pin2 wiper to R5, pin1 GND |
+
+⚠ **Pin 3 is the +3.3V end and pin 1 is ground** — read directly off the schematic for all three
+pots (RV1/RV2/RV3). Reversing them inverts every knob's direction of travel.
 
 ### Connectors
 | Qty | Type | Designator | Label |
@@ -215,10 +218,10 @@ Two plain potentiometer dividers into the ADC, each with a series resistor and f
 
 | Component | Value | Pin 1 | Pin 2 | Pin 3 |
 |-----------|-------|-------|-------|-------|
-| P1 (100K B) | POT1 | P3V3_DECK (pin 1) | POT1_W (wiper) | GND (pin 3) |
+| P1 (100K B) | POT1 | GND (pin 1) | POT1_W (pin 2 wiper) | P3V3_DECK (pin 3) |
 | R1 | 10K | POT1_W | A0 | — |
 | C2 | 100nF | A0 | GND | — |
-| P2 (100K B) | POT2 | P3V3_DECK (pin 1) | POT2_W (wiper) | GND (pin 3) |
+| P2 (100K B) | POT2 | GND (pin 1) | POT2_W (pin 2 wiper) | P3V3_DECK (pin 3) |
 | R2 | 10K | POT2_W | A1 | — |
 | C3 | 100nF | A1 | GND | — |
 
@@ -236,7 +239,7 @@ positive offset injected from the -12V rail. This is why POT3 reads backwards in
 
 | Component | Value | Pin 1 | Pin 2 | Pin 3 |
 |-----------|-------|-------|-------|-------|
-| P3 (100K B) | POT3 | P3V3_DECK (pin 1) | POT3_W (wiper) | GND (pin 3) |
+| P3 (100K B) | POT3 | GND (pin 1) | POT3_W (pin 2 wiper) | P3V3_DECK (pin 3) |
 | R5 | 10K | POT3_W | U1A_IN | — |
 | R9 | 10K | POT3_BUF | SUM_INV | — |
 | R3 | 10K | CV_IN | CV_MID | — |
@@ -523,11 +526,11 @@ arguably shields them from being knocked.
 | L3 | P3 POT3 | **JPS5** | 13 / 14 / 15 | 3 legs → A/B/C |
 | R3 | SW1 BUTTON | **JPS6** | 16 / 17 / 18 | A, return D |
 | — | *gap* | — | *19 / 20 / 21 / 22* | *free feed-through tie points* |
-| L4 | J2 CV | **JPS7** | 23 / 24 / 25 | tip A, switch B, sleeve D |
-| R4 | J6 OUT | **JPS8** | 26 / 27 / 28 | tip A, switch B, sleeve D |
-| L5 | J4 IN1 | **JPS9** | 29 / 30 / 31 | tip A, switch B, sleeve D |
+| L4 | J2 CV | **JPS7** | 23 / 24 / 25 | tip A, sleeve D (B free) |
+| R4 | J6 OUT | **JPS8** | 26 / 27 / 28 | tip A, sleeve D (B free) |
+| L5 | J4 IN1 | **JPS9** | 29 / 30 / 31 | tip A, sleeve D (B free) |
 | R5 | SW3 DC | **JPS10** | 32 / 33 / 34 | RC_B A, AMP_IN B |
-| L6 | J3 IN2 | **JPS11** | 35 / 36 / 37 | tip A, switch B, sleeve D |
+| L6 | J3 IN2 | **JPS11** | 35 / 36 / 37 | tip A, sleeve D (B free) |
 | R6 | SW2 FILTER | **JPS12** | 38 / 39 / 40 | CAP_SW A, GND D |
 
 **12 of 12 cells — the panel is exactly full.** Any further feature displaces something.
