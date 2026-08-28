@@ -5,7 +5,9 @@ board-profile JSON files that the visualizer and validators can read, so board
 geometry is data instead of hardcoded constants.
 
 What a profile captures:
-  - breadboard geometry (rows, hole columns, power-rail parity rule, power section)
+  - breadboard anatomy: main area / edge connector / power rail (three different
+    extents). Ground truth is docs/n8synth_platform.md — that document wins over
+    anything inferred from the templates.
   - the control deck: JPS cell inventory and, critically, the CONNECTOR MAP —
     which breadboard outer-strip hole (ctrl row) lands on which JPS pad.
   - gap rows: connector pins with no JPS pad. The deck hole is otherwise
@@ -132,17 +134,56 @@ def make_profile(board_id, template_path):
     profile['id'] = board_id
     profile['hp'] = HP_OF[board_id]
     profile['source'] = os.path.basename(template_path)
+    # Board anatomy per docs/n8synth_platform.md (builder-verified 2026-08-28).
+    # The main area, the edge connector and the power rail are three DIFFERENT
+    # things with different extents — do not collapse them into one 'rows' count.
+    row_ids = sorted({int(m) for m in re.findall(r'data-zone="row-(\d+)"', text)})
+    has_power_section = 'data-zone="power"' in text
+    max_row = max(row_ids) if row_ids else 0
+
+    if n_breadboards == 2:
+        # 10HPS ships a powered board (main area 1-36) plus a plain stacked
+        # board (main area 1-40); its template holds 36 + 40 = 76 row zones.
+        boards = [{'variant': 'powered', 'mainAreaRows': [1, 36]},
+                  {'variant': 'plain', 'mainAreaRows': [1, 40]}]
+    else:
+        boards = [{'variant': 'powered' if has_power_section else 'plain',
+                   'mainAreaRows': [1, max_row]}]
+
     profile['breadboard'] = {
-        'rows': 40,
-        'layoutRows': [1, 36],
-        'powerSectionRows': [37, 40],
-        'holeCols': ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'],
-        'centreGap': ['e', 'f'],
-        'rails': {
-            'pwrL': {'evenRows': 'VCC', 'oddRows': 'GND'},
-            'pwrR': {'evenRows': 'VEE', 'oddRows': 'GND'},
-        },
         'count': n_breadboards,
+        'boards': boards,
+        'mainArea': {
+            'holeCols': ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'],
+            'centreGap': ['e', 'f'],
+            'note': 'Five holes each side of the gap are joined. The LEFT and RIGHT '
+                    'halves of a row are NOT joined to each other. Powered boards '
+                    'have 36 main-area rows; plain boards have 40.',
+        },
+        'edgeConnector': {
+            'positions': 40,
+            'holesPerPosition': 2,
+            'note': 'Two adjacent columns; the two holes at a position are joined to '
+                    'each other and to nothing else. JPS cell pads A/B/C terminate '
+                    'HERE, not on main-area rows — a panel signal reaches the circuit '
+                    'by a wire from its doublet into the main area. Positions 37-40 '
+                    'are therefore usable even on a powered board, which has no '
+                    'main-area row there. Positions not claimed by a JPS cell are '
+                    'free tie points and can be repurposed for routing.',
+        },
+        'powerRail': {
+            'positions': 40,
+            'pwrL': {'oddPositions': 'GND', 'evenPositions': 'VCC'},
+            'pwrR': {'oddPositions': 'GND', 'evenPositions': 'VEE'},
+            'reserved': ({'37': '10uF+ electrolytic', '38': '10uF+ electrolytic'}
+                         if has_power_section else {}),
+            'note': 'Numbering top to bottom, position 1 is GND and 2 is the supply '
+                    '(+12V on the left column, -12V on the right). On powered boards '
+                    'the 100nF caps consume no positions; the 10uF+ electrolytics sit '
+                    'on positions 37-38. Positions 1, 2, 39, 40 exist to jump power '
+                    'between stacked boards and are FREE on a single-board module — '
+                    '39 (GND) is handy for grounding near the bottom.',
+        },
     }
     profile['deck'] = {
         'symbol': deck_symbol,

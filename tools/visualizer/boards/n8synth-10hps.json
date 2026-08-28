@@ -3,42 +3,63 @@
   "hp": 10,
   "source": "10HPS Template.n8layout",
   "breadboard": {
-    "rows": 40,
-    "layoutRows": [
-      1,
-      36
+    "count": 2,
+    "boards": [
+      {
+        "variant": "powered",
+        "mainAreaRows": [
+          1,
+          36
+        ]
+      },
+      {
+        "variant": "plain",
+        "mainAreaRows": [
+          1,
+          40
+        ]
+      }
     ],
-    "powerSectionRows": [
-      37,
-      40
-    ],
-    "holeCols": [
-      "a",
-      "b",
-      "c",
-      "d",
-      "e",
-      "f",
-      "g",
-      "h",
-      "i",
-      "j"
-    ],
-    "centreGap": [
-      "e",
-      "f"
-    ],
-    "rails": {
+    "mainArea": {
+      "holeCols": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "h",
+        "i",
+        "j"
+      ],
+      "centreGap": [
+        "e",
+        "f"
+      ],
+      "note": "Five holes each side of the gap are joined. The LEFT and RIGHT halves of a row are NOT joined to each other. Powered boards have 36 main-area rows; plain boards have 40."
+    },
+    "edgeConnector": {
+      "positions": 40,
+      "holesPerPosition": 2,
+      "note": "Two adjacent columns; the two holes at a position are joined to each other and to nothing else. JPS cell pads A/B/C terminate HERE, not on main-area rows \u2014 a panel signal reaches the circuit by a wire from its doublet into the main area. Positions 37-40 are therefore usable even on a powered board, which has no main-area row there. Positions not claimed by a JPS cell are free tie points and can be repurposed for routing."
+    },
+    "powerRail": {
+      "positions": 40,
       "pwrL": {
-        "evenRows": "VCC",
-        "oddRows": "GND"
+        "oddPositions": "GND",
+        "evenPositions": "VCC"
       },
       "pwrR": {
-        "evenRows": "VEE",
-        "oddRows": "GND"
-      }
-    },
-    "count": 2
+        "oddPositions": "GND",
+        "evenPositions": "VEE"
+      },
+      "reserved": {
+        "37": "10uF+ electrolytic",
+        "38": "10uF+ electrolytic"
+      },
+      "note": "Numbering top to bottom, position 1 is GND and 2 is the supply (+12V on the left column, -12V on the right). On powered boards the 100nF caps consume no positions; the 10uF+ electrolytics sit on positions 37-38. Positions 1, 2, 39, 40 exist to jump power between stacked boards and are FREE on a single-board module \u2014 39 (GND) is handy for grounding near the bottom."
+    }
   },
   "deck": {
     "symbol": "n8-cd-10hp-3x6",

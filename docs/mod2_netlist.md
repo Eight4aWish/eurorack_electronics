@@ -516,9 +516,9 @@ it governs.
 set-once-per-firmware rather than performance controls, so this was judged acceptable — and it
 arguably shields them from being knocked.
 
-### Position → cell → breadboard rows
+### Position → cell → edge-connector positions
 
-| Panel | Item | Cell | Rows (A/B/C) | Pads |
+| Panel | Item | Cell | Edge positions (A/B/C) | Pads |
 |---|---|---|---|---|
 | L1 | P1 POT1 | **JPS1** | 1 / 2 / 3 | 3 legs → A/B/C |
 | R1 | LED1 WS2812B | **JPS2** | 4 / 5 / 6 | VIN A, DIN B, GND D |
@@ -526,7 +526,7 @@ arguably shields them from being knocked.
 | R2 | D9 plain LED | **JPS4** | 10 / 11 / 12 | anode A, cathode D |
 | L3 | P3 POT3 | **JPS5** | 13 / 14 / 15 | 3 legs → A/B/C |
 | R3 | SW1 BUTTON | **JPS6** | 16 / 17 / 18 | A, return D |
-| — | *gap* | — | *19 / 20 / 21 / 22* | *free feed-through tie points* |
+| — | *gap* | — | *19 / 20 / 21 / 22* | *unclaimed doublets — free tie points, repurposable* |
 | L4 | J2 CV | **JPS7** | 23 / 24 / 25 | tip A, sleeve D (B free) |
 | R4 | J6 OUT | **JPS8** | 26 / 27 / 28 | tip A, sleeve D (B free) |
 | L5 | J4 IN1 | **JPS9** | 29 / 30 / 31 | tip A, sleeve D (B free) |
@@ -536,20 +536,35 @@ arguably shields them from being knocked.
 
 **12 of 12 cells — the panel is exactly full.** Any further feature displaces something.
 
-✓ **All 40 breadboard rows are usable tie points**, confirmed against the physical board. The
-profile's `powerSectionRows` [37, 40] and `layoutRows` [1, 36] describe the board's power
-*area*, **not** a restriction on those rows — JPS11.C (row 37) and JPS12 (rows 38–40) connect
-normally. Do not re-derive a caution here; it has been checked.
+⚠️ **These are edge-connector positions, not main-area rows.** JPS pads A/B/C terminate on the
+outermost columns — two joined holes per position, connected to nothing else. A panel signal
+reaches the circuit by a **wire from its doublet into the main area**, which is where the
+placement work actually happens. See [`n8synth_platform.md`](n8synth_platform.md) — that
+document is the ground truth for platform behaviour and wins over anything inferred from the
+`.n8layout` templates or the generated board profiles.
+
+Two things follow that are easy to get wrong:
+
+- **This is a powered board, so the main area is rows 1–36 only.** The edge connector and power
+  rail run 1–40 regardless. There is no main-area row at 37–40 — but positions 37–40 on the
+  edge connector are ordinary doublets and fully usable.
+- **JPS11.C (position 37) and JPS12 (38/39/40) are therefore fine.** They simply route upward
+  into the main area like any other connector position.
 
 ### Consequences for placement
 
-- **Row-major numbering interleaves the two panel columns down the breadboard.** The pots are
-  therefore *not* contiguous: rows 1–3, 7–9, 13–15, with the indicator and button cells at rows
-  4–6, 10–12, 16–18 between them.
-- **The whole ADC front end lands in rows 1–18** (POT1/POT2/POT3 → A0/A1/A2), so U1, U2 and the
+- **Row-major numbering interleaves the two panel columns down the edge connector.** The pots
+  are therefore *not* contiguous: positions 1–3, 7–9, 13–15, with the indicator and button cells
+  at 4–6, 10–12, 16–18 between them.
+- **The whole ADC front end lands in positions 1–18** (POT1/POT2/POT3 → A0/A1/A2), so U1, U2 and the
   XIAO belong in the top half, close to their pots. Keep the P3V3 star-feed short.
-- **All four jacks land in rows 23–40**, the bottom half — the audio output stage and gate
+- **All four jacks land in positions 23–40**, the bottom half — the audio output stage and gate
   conditioning belong down there, near J6/J4/J3.
+- ⚠️ **SW2 FILTER sits at positions 38/39/40, past the end of the main area.** Its wires must
+  route up into rows ≤36. Convenient compensation: **power-rail position 39 is GND and free** on
+  a single-board module, so bottom-of-board grounds have a tie point right there.
+- **The gap doublets at 19–22 are genuinely free** — unclaimed by any JPS cell, so they are
+  usable as routing tie points for long jumps, not merely dead space.
 - **Gap rows 19–22 fall exactly between the control group and the jack group** — free
   feed-through space precisely where signals cross from the front end to the I/O section.
 - **SW3 spans two signal nets** (RC_B on A, AMP_IN on B) rather than using the D ground bus —

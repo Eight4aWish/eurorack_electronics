@@ -20,7 +20,7 @@ A browser-based layout viewer that renders breadboard placements from JSON, plus
 - `check.sh` — **one-command check**: geometry validation → net-identity cross-check → doc map regeneration
 - `netlist_to_layout.py` — netlist → layout JSON converter
 - `cross_check_nets.py` / `validate_layout.py` / `sync_layout.py` / `gen_rowmap.py` — placement validation + maintenance helpers
-- `gen_board_profiles.py` / `boards/` — board-profile JSON generated from the official n8synth templates: JPS control-deck cells, breadboard-strip↔deck connector maps, gap rows, D ground bus
+- `gen_board_profiles.py` / `boards/` — board-profile JSON generated from the official n8synth templates: JPS control-deck cells, edge-connector maps, gap positions, D ground bus. **Ground truth for platform behaviour is [`docs/n8synth_platform.md`](docs/n8synth_platform.md)** — that document wins over anything inferred from the templates or these profiles.
 - `layouts/` — per-module JS + JSON layouts (kick, snare, FM drum two-board, dual LPG)
 
 ### How I use this (workflow)
@@ -52,6 +52,12 @@ Build-phase schematic generator for the **Dual Pingable LPG**. Produces per-phas
 ### `docs/`
 
 Circuit notes, netlists, and reference material.
+
+**Platform reference**
+
+- `n8synth_platform.md` — verified electrical behaviour of the n8synth breadboards and control
+  decks: main area vs edge connector vs power rail, board variants, grounding practice. The
+  single source of truth; everything else is downstream of it.
 
 **Drum voices** — derived from the *MKI x ES EDU DIY Modular* book and breadboard placement working notes:
 
