@@ -1,0 +1,33 @@
+Status,Source,Section,Qty,Value,Type,Designators,Role,Stage,Suggested Source
+,MOD2 Rev A,Resistor,7,10K,1/4W 1% metal film,"R1, R2, R3, R5, R9, R10, R15","ADC series (A0/A1), CV series, buffer outputs to summer, U2A feedback",Phase 4,Mouser/Tayda
+,MOD2 Rev A,Resistor,6,1K,1/4W 1% metal film,"R14, R16, R17, R18, R19, R23","Offset series, A2 series, RC poles 1+2, switch debounce, output series",Phase 3-4,Mouser/Tayda
+,MOD2 Rev A,Resistor,2,3K3,1/4W 1% metal film,"R12, R13",Gate series to GPIO0 / GPIO7,Phase 4,Mouser/Tayda
+,MOD2 Rev A,Resistor,1,3K3,1/4W 1% metal film,R24,Plain LED current limit (~0.5 mA),Phase 5,Mouser/Tayda
+,MOD2 Rev A,Resistor,2,4K7,1/4W 1% metal film,"R7, R8",Gate input pulldowns (3K3+4K7 = 8K per RP2350 errata),Phase 4,Mouser/Tayda
+,MOD2 Rev A,Resistor,1,100K,1/4W 1% metal film,R4,CV divider upper,Phase 4,Mouser/Tayda
+,MOD2 Rev A,Resistor,1,100K,1/4W 1% metal film,R20,U2B input bias to GND,Phase 3,Mouser/Tayda
+,MOD2 Rev A,Resistor,1,33K,1/4W 1% metal film,R11,Offset injection from -12V,Phase 4,Mouser/Tayda
+,MOD2 Rev A,Resistor,1,33K,1/4W 1% metal film,R21,U2B gain lower leg,Phase 3,Mouser/Tayda
+,MOD2 Rev A,Resistor,1,220K,1/4W 1% metal film,R6,CV divider lower,Phase 4,Mouser/Tayda
+,MOD2 Rev A,Resistor,1,68K,1/4W 1% metal film,R22,U2B feedback - sets gain 1+68K/33K = 3.06,Phase 3,Mouser/Tayda
+,MOD2 Rev A,Capacitor,9,100nF,Ceramic X7R 50V,"C2, C3, C4, C7, C8, C9, C10, C11, C19","ADC filters (A0/A1), rail bypass, switch debounce, 3V3 decoupling",Phase 1-4,Mouser/Tayda
+,Addition,Capacitor,3,100nF,Ceramic X7R 50V,"C22, C23, C24","7805 output, 3V3 at deck end, WS2812B supply bypass",Phase 1-6,Mouser/Tayda
+,MOD2 Rev A,Capacitor,4,10uF,Electrolytic 25V,"C1, C5, C6, C20","Rail bulk: +5V, +12V, -12V, +3V3 (observe polarity, C6 on neg rail)",Phase 1-2,Mouser/Tayda
+,MOD2 Rev A,Capacitor,3,22nF,Film,"C12, C14, C17",A2 filter; RC pole 1 + pole 2 switched caps,Phase 3-4,Mouser/Tayda
+,MOD2 Rev A,Capacitor,2,10nF,Film,"C13, C16","RC reconstruction filter, fixed caps both poles",Phase 3,Mouser/Tayda
+,MOD2 Rev A,Capacitor,1,1uF,Film,C18,Output AC coupling (bypassed by SW3 for DC mode),Phase 3,Mouser/Tayda
+,Addition,Capacitor,1,330nF,Ceramic,C21,7805 input decoupling (datasheet value),Phase 1,Mouser/Tayda
+,MOD2 Rev A,Semiconductor,2,1N4148,Signal diode DO-35,"D1, D2",Power rail reverse-polarity protection,Phase 1,Mouser/Tayda
+,MOD2 Rev A,Semiconductor,6,1N5819,Schottky DO-41 (BAT85 preferred),"D3, D4, D5, D6, D7, D8","Input clamps on GPIO0, GPIO7 and A2 (Rev A uses B5819W)",Phase 4,Mouser/Tayda
+,MOD2 Rev A,Semiconductor,1,3mm LED,"LED, any colour",D9,Plain indicator - required by 9 firmwares incl. the snare,Phase 5,Mouser/Tayda
+,Addition,Semiconductor,1,1N4148,Signal diode DO-35,D10,Drops +5V to ~4.3V for WS2812B (lowers data threshold to ~3.0V),Phase 6,Mouser/Tayda
+,MOD2 Rev A,Semiconductor,2,TL072,DIP-8 dual JFET op-amp,"U1, U2",U1: POT3 + CV buffers. U2: CV summer + output amp,Phase 3-4,Mouser/Tayda
+,MOD2 Rev A,Module,1,Seeed XIAO RP2350,"MCU module, 14-pin",U3,"Microcontroller - NOT XIAO RP2040, .uf2 family ID will not match",Phase 2,Pi Hut/Pimoroni/Mouser
+,Addition,Module,1,7805,TO-220 linear regulator,U4,"Local +5V from +12V; ~0.46W, ~30C rise, no heatsink",Phase 1,Mouser/Tayda
+,Addition,Module,1,Adafruit 5975,"NeoPixel breakout, 5050 GRB, JST SH",LED1,RGB indicator. Buy 2. NOT a 5mm through-hole NeoPixel (those are RGB order),Phase 6,Pimoroni GBP1.40 / Pi Hut
+,MOD2 Rev A,Potentiometer,3,100K,"B (linear), 9mm PCB mount","P1, P2, P3","POT1/POT2/POT3 (HAGIWO RV1-3). Pin 3 = +3V3, pin 1 = GND",Phase 4,Mouser/Tayda
+,MOD2 Rev A,Connector,4,3.5mm mono jack,Switched (PJ-301M or Thonkiconn),"J2, J3, J4, J6","CV IN, IN2/LEVEL, IN1/TRIG, AUDIO OUT. Switch contact unused",Phase 3-4,Thonk
+,MOD2 Rev A,Connector,1,2x8 pin header,"16-pin IDC, or n8synth power section",J1,Eurorack power. Bus +5V pin deliberately NOT connected,Phase 1,Mouser/Tayda
+,MOD2 Rev A,Switch,1,6x6mm tactile,Momentary push,SW1,"BUTTON - manual trigger / mode, GPIO6",Phase 4,Mouser/Tayda
+,Addition,Switch,2,SPST toggle,Sub-min panel toggle,"SW2, SW3",FILTER (15k9/5k0) and DC (AC/DC coupling) - promoted from PCB jumpers,Phase 3,Mouser/Tayda
+,,Platform,1,n8synth 6HP kit,Solderable breadboard + 2x6 control deck,-,"Board and control deck. 12 JPS cells, all used",Phase 1,n8synth.co.uk

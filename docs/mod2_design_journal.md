@@ -12,7 +12,7 @@ Companion to [`mod2_reference_review.md`](mod2_reference_review.md), which holds
 
 | | Opening ask | Final spec |
 |---|---|---|
-| **Goal** | Build a snare for a spare 6HP slot | A **dual-firmware-compatible** board running ~30 published voices |
+| **Goal** | Build a snare for a spare 6HP slot | A **dual-firmware-compatible** board running 25 published voices |
 | **Firmware** | "a snare drum is one of the patches available for the MOD2" | HAGIWO's CC0 `snare.ino`, plus every other MOD2 *and* Melon voice, unmodified |
 | **Power** | "MELON uses a regulated 5V… I tend to use bucks, I also have 7805s" | 7805 from +12V, datasheet decoupling, with the *reason* understood (3.3V is the ADC reference) |
 | **LED** | "It would be interesting to see if I could use that enhancement" | Both indicator types populated — the mechanism that makes dual-firmware work |
@@ -163,7 +163,8 @@ Deliberately *not* resolved on paper, because they need the bench:
    canary (A0/A1 are already filtered at 159 Hz).
 2. 7805 thermal figure with the WS2812B lit (~0.9 W worst case).
 3. Confirm the pixel actually shipped is a **V5** revision.
-4. `tides` pin map — its header claims `OUT D7` / `BTN D4`, which would collide with IN1.
+4. ~~`tides` pin map~~ — disproved: `tides` uses Arduino D-aliases, so `D7`=GPIO1 and
+   `D4`=GPIO6. An exact match to the standard map; the concern conflated D- with GPIO-numbers.
    Probably a stale comment like `kick`'s `D11`, but unverified.
 5. Per-firmware switch-settings table — currently reasoned, not measured.
 

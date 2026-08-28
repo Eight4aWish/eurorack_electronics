@@ -51,7 +51,8 @@ the original schematic; the gap is preserved rather than renumbered.
 | 1 | 330nF | Ceramic | C21 | 7805 input |
 
 **C15 (10nF) is DNP** — drawn crossed-out on Rev A and absent from the BOM. Omitted here. ✓
-**C21–C23 are additions** ⚠ — 7805 datasheet decoupling, plus the deck-end 3V3 cap.
+**C21–C24 are additions** ⚠ — 7805 datasheet decoupling, the deck-end 3V3 cap, and the
+WS2812B supply bypass.
 
 ### Semiconductors
 | Qty | Type | Designators | Role |
@@ -582,5 +583,9 @@ bus through the host port.
 2. 7805 thermal figure with the WS2812B lit (~0.9 W worst case).
 3. Confirm the WS2812B revision shipped, and whether D10 is needed at all.
 4. A2 noise with the 7805 fitted — the canary for the 3.3V decoupling question.
-5. `tides` pin map — its header claims `OUT D7` / `BTN D4`, which would collide with IN1.
+5. ~~`tides` pin map~~ → **Disproved; no issue.** ✓ `tides` uses Arduino D-aliases rather than
+   raw GPIO numbers: `PWMOUT D7`→GPIO1, `TRIG_PIN D5`→GPIO7, `MOD_PIN D6`→GPIO0,
+   `BUTTON_PIN D4`→GPIO6, `LED_PIN D3`→GPIO5. Against the confirmed silkscreen pinout that is
+   an exact match to the standard MOD2 map. The earlier concern conflated D-number with
+   GPIO-number.
 6. Per-firmware SW2/SW3 settings table — currently reasoned, not measured.

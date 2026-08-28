@@ -8,7 +8,8 @@ board that runs both the HAGIWO/modulove MOD2 firmwares *and* the WGD Modular Me
 **Scope:** hardware only. **No firmware modifications.** The deliverable is a board plus a guide
 to loading the existing published firmwares. First target voice is the **MOD2 LFSR Snare**.
 
-**Status:** Stage 1 — reference review complete, decisions locked. Netlist next.
+**Status:** Reference review complete, decisions locked. Netlist complete and verified
+(`mod2_netlist.md`). Panel layout locked. Breadboard placement not yet started.
 
 **Naming note:** `snare_drum_*` in this repo is the *MKI x ES* analog snare. This is an unrelated
 digital module and uses the `mod2_*` prefix throughout.
@@ -23,7 +24,7 @@ digital module and uses the `mod2_*` prefix throughout.
   content (CV conditioning, gate conditioning, PWM reconstruction, output amp) is ~50 parts —
   comparable to the dual LPG — but the payload is digital.
 - It is the first build to drive the new board profiles in `tools/visualizer/boards/`.
-- **One board, ~30 published voices.** That is the story worth telling.
+- **One board, 25 published voices** across both firmware families. That is the story worth telling.
 
 The hardware is audio-limited by design (8/10-bit PWM, no DAC) — fine for drums, which is the point.
 
@@ -51,12 +52,8 @@ The Melon sources are the MOD2 sources with the LED block replaced by an
 (comment typo fixes) and was never converted at all. `kick`'s MOD2 header comment says
 `OUT D11`, corrected to `D1` in the Melon copy — a doc typo; both compile to GPIO1.
 
-⚠️ **Verified across the drum/audio voices** (snare, kick, clap, hihat, fm_drum, vco) — those
-are pin-identical. **`tides` is an exception worth checking**: its header claims `OUT D7` and
-`BTN D4`, which would collide with IN1 (GPIO7) on the MOD2 map. Given the `kick` header carried
-a similar error, this is *probably* another stale comment — but `tides` is also absent from the
-`build_release.yml` matrix despite appearing on the web flasher, so treat it as unconfirmed
-until tested. The headline claim holds for the voices that matter to this build.
+✓ **Verified exhaustively across all 36 `.ino` files in both repos** — every firmware in both
+families drives its indicator on GPIO5, with no exceptions. See "Pin compatibility" below.
 
 **Therefore GPIO5 is the entire hardware delta between the two families.** Populating *both*
 indicator types yields a board that runs either, unmodified. See Departure 2.
@@ -65,7 +62,7 @@ indicator types yields a board that runs either, unmodified. See Departure 2.
 
 | | MOD2 (modulove) | Melon (wgd-modular) |
 |---|---|---|
-| Voices | **19** incl. **snare**, spiral, tides, flux, laser, mod303, breakbeats | 14 incl. RALPS, drums, fxloperformer, reese_bass |
+| Voices | **19** incl. **snare**, spiral, tides, flux, laser, mod303, breakbeats | **17** incl. ralps, drums, fxloperformer, palimpsest, string_mouth, reese_bass |
 | Prebuilt `.uf2` | **Yes** — CI builds 16; browser flasher at [dl.modulove.io/mod2](https://dl.modulove.io/mod2/) | **Yes** — GitHub release v1.3.0 ships 12 `.uf2` files |
 | Indicator | Plain LED | WS2812B |
 
@@ -90,6 +87,50 @@ Three loading paths exist, in ascending order of effort:
 
 RALPS (CC BY-NC-SA 4.0) is a third option — 16 engines including a SNARE, with a boot menu to
 select LED type. Not part of this build; noted as an optional extra for the bench.
+
+### Voice coverage across the two families
+
+Verified by listing both repos and diffing every `.ino` (survey date 2026-08-27):
+
+| MOD2 only (8) | Both (11) | Melon only (6) |
+|---|---|---|
+| **snare**, breakbeats, flux, laser, retro_game_kick, spiral, square_vco, tides | braids, clap, claves, fm_drum, hihat, kick, metal↔metal_hit, mod303, radio, sample↔sample_player, vco | drums, fxloperformer, palimpsest, ralps, reese_bass, string_mouth |
+
+**25 unique voices** across both families. This is the quantitative case for the dual indicator:
+
+- **9 voices need the plain LED** — the 8 MOD2-only ones (including the snare, this build's
+  headline voice) plus `melon/fm_drum`, which was never converted and still drives GPIO5 as a
+  plain LED.
+- **16 voices drive the WS2812B.**
+
+Neither set is shrinking. As of the 2026-08-27 survey both repos were live but had diverged in
+role: **MOD2 is now the collection point for HAGIWO's own releases** — six new voices landed in
+a single batch on 2026-07-20, the snare among them — while **Melon is where original
+development happens**, with six exclusives and a continuous PR/release cadence.
+
+### The firmware authors reached the same conclusion
+
+Melon's three newest firmwares — `palimpsest`, `string_mouth` and `ralps` — support **both**
+indicator types, selected at boot:
+
+- `palimpsest` / `string_mouth`: `LED_MODE_LEGACY` vs `LED_MODE_MELON`, chosen by **POT2
+  position at power-up** — `selected = (analogRead(A1) < 2048) ? LEGACY : MELON`
+- `ralps`: stores the choice in EEPROM address 0
+
+`palimpsest` even documents its pin as `MOD2_LED = 5; // D9 via R24 3.3k`, citing MOD2's own
+designators for the plain LED. The dual-indicator hardware is therefore not a compromise
+between two ecosystems — it is the configuration the Melon lead is actively building for.
+
+### Pin compatibility — verified exhaustively
+
+All 36 `.ino` files across both repos were checked: **every firmware in both families drives
+its indicator on GPIO5**, with no exceptions. `tides` was the only apparent outlier and is not
+one — it uses Arduino D-aliases (`LED_PIN D3` = GPIO5).
+
+⚠️ **One coexistence caveat.** `clap`, `claves` and `hihat` drive GPIO5 with *hardware PWM*
+(`pwm_gpio_to_slice_num(5)`) rather than `digitalWrite`. The pixel still reads as dark — PWM
+pulse widths are ~1000× a NeoPixel bit period — but on those three it may occasionally latch a
+dim random colour rather than being reliably black. Harmless; lifting one LED leg cures it.
 
 ---
 
@@ -411,7 +452,7 @@ same form as `lpg_netlist.md`, ready for `netlist_to_layout.py`.
 ## Later deliverable — firmware loading guide
 
 Hardware-only build, but the journey ends at "load the firmware". Because the pin maps match,
-**one board covers ~30 published voices across both families** — that is the guide's headline.
+**one board covers 25 published voices across both families** — that is the guide's headline.
 
 - **Browser flasher** — [dl.modulove.io/mod2](https://dl.modulove.io/mod2/), WebSerial, nothing
   to install. Easiest path; covers 13 MOD2 voices.
