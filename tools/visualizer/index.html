@@ -419,6 +419,27 @@ function drawBoard() {
 
 function netLabelKey(r, side) { return r + '|' + side; }
 
+// Rows covered by an IC or socket body, with the body's outer edges. Row net labels
+// use this to start OUTSIDE the part rather than running underneath it — the same
+// clearance the IC's own pin labels already get.
+const IC_LABEL_GAP = 14;   // matches the pin-label inset (pinX -/+ 22 vs body edge -/+ 8)
+function icBodySpans() {
+  const spans = new Map();
+  if (!layout || !layout.ics) return spans;
+  layout.ics.forEach(ic => {
+    if (!ic.pins || !ic.pins.length) return;
+    const rows = ic.pins.map(p => p.r);
+    const xs = ic.pins.map(p => colX(p.c));
+    const left = Math.min(...xs) - 8, right = Math.max(...xs) + 8;
+    for (let r = Math.min(...rows); r <= Math.max(...rows); r++) {
+      const cur = spans.get(r);
+      spans.set(r, cur ? {left: Math.min(cur.left, left), right: Math.max(cur.right, right)}
+                       : {left, right});
+    }
+  });
+  return spans;
+}
+
 // Which nets are already shown as a row label, so drawICs can avoid repeating them.
 function shownNetLabels() {
   const map = new Map();
@@ -447,12 +468,18 @@ function drawNetLabels() {
     if (!g.names.includes(nl.name)) g.names.push(nl.name);
     g.stage = Math.min(g.stage, nl.stage);
   });
+  const bodies = icBodySpans();
   groups.forEach(g => {
     const y = rowY(g.r) + NET_LABEL_DY;
     const opacity = (!showAll && g.stage < currentStage) ? 0.4 : 1;
     const onLeft = g.side === 'L';
+    // Hug the gap by default; if a part covers this row, start outside it instead.
+    const body = bodies.get(g.r);
+    let x = onLeft ? colX('e') + 4 : colX('f') - 4;
+    if (body) x = onLeft ? Math.min(x, body.left - IC_LABEL_GAP)
+                         : Math.max(x, body.right + IC_LABEL_GAP);
     svg.appendChild(el('text', {
-      x: onLeft ? colX('e') + 4 : colX('f') - 4,
+      x,
       y,
       fill: TH.netInk,
       'font-size': NET_LABEL_SIZE,
