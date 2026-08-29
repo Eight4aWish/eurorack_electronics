@@ -535,7 +535,12 @@ function drawICs() {
     const pinXs = ic.pins.map(p => colX(p.c));
     const lx = Math.min(...pinXs), rx = Math.max(...pinXs);
     g.appendChild(el('rect', {x:lx-8, y:startY-P/2+2, width:rx-lx+16, height:endY-startY+P-4, rx:2, fill:TH.icBody, stroke:TH.markStroke, 'stroke-width':1, class:'comp-body'}));
-    const notchY = ic.rotation === 180 ? endY+P/2-6 : startY-P/2+2;
+    // The notch marks the PIN 1 end. Derive it from the pins themselves rather than
+    // a separate rotation field, so the marking can never disagree with the pinout —
+    // a flipped part has pin 1 at the other end and must get its notch there.
+    const p1 = ic.pins.find(p => p.n === 1);
+    const pin1AtBottom = p1 ? (p1.r === Math.max(...icRows)) : (ic.rotation === 180);
+    const notchY = pin1AtBottom ? endY+P/2-6 : startY-P/2+2;
     g.appendChild(el('path', {d:`M${(lx+rx)/2-5},${notchY} A5,5 0 0,1 ${(lx+rx)/2+5},${notchY}`, fill:'none', stroke:TH.markStroke, 'stroke-width':0.8}));
     g.appendChild(el('text', {x:(lx+rx)/2, y:(startY+endY)/2-3, fill:TH.labelStrong, 'font-size':8, 'text-anchor':'middle', 'dominant-baseline':'middle', 'font-weight':'bold'}, ic.id));
     g.appendChild(el('text', {x:(lx+rx)/2, y:(startY+endY)/2+6, fill:TH.labelInk, 'font-size':7, 'text-anchor':'middle', 'dominant-baseline':'middle'}, ic.value || ic.type || ''));
