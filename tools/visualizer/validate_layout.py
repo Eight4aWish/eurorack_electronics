@@ -99,6 +99,22 @@ def validate(path):
           f"{len(layout.get('jumpers', []))} jumpers, "
           f"{len(layout.get('powerWires', []))} powerWires, "
           f"{len(layout.get('jpsWires', []))} jpsWires")
+    # --- Net labels vs the IC pin on the same node ----------------------
+    # A row half is ONE node, so a net label must agree with any IC pin net
+    # sitting on it. Catches a label transcribed onto the wrong row — which
+    # cross_check_nets cannot see, since it validates component endpoints
+    # against EXPECTED_NETS and never looks at netLabels.
+    pin_net = {}
+    for ic in layout.get('ics', []):
+        for pin in ic.get('pins', []):
+            if pin.get('net'):
+                pin_net.setdefault((pin['r'], side(pin['c'])), set()).add(pin['net'])
+    for nl in layout.get('netLabels', []):
+        key = (nl['r'], nl['side'])
+        if key in pin_net and nl['name'] not in pin_net[key]:
+            errs.append(f"net label row {nl['r']} {nl['side']}: says '{nl['name']}' but the "
+                        f"IC pin on that node is '{', '.join(sorted(pin_net[key]))}'")
+
     if errs:
         print(f"\n✗ {len(errs)} error(s):")
         for e in errs:
