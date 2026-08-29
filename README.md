@@ -53,6 +53,11 @@ Build-phase schematic generator for the **Dual Pingable LPG**. Produces per-phas
 
 Circuit notes, netlists, and reference material.
 
+**Plans**
+
+- `public_tool_plan.md` — plan for a third-party-usable version of the placement/visualisation
+  tooling, with the dual LPG and the MOD2/Melon hybrid as the two flagship examples.
+
 **Platform reference**
 
 - `n8synth_platform.md` — verified electrical behaviour of the n8synth breadboards and control
