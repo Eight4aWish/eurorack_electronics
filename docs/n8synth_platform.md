@@ -49,6 +49,29 @@ Working inward from either edge:
 10HPS template ships two boards — one powered (36 rows) and one plain (40 rows) — which is why
 it contains 76 row zones.
 
+## Which edge connector to use
+
+**4HP and 6HP designs use one edge connector — by convention the LEFT.** Either edge works, but
+**not both**. 10HP designs use both.
+
+---
+
+## Stacking, and how signals actually get between boards
+
+Stacking is for designs that outgrow a single board — in practice 10HP modules.
+
+**Signals can pass between stacked boards** via dedicated stacking connectors. However, those
+connectors are **awkward to work with in practice**.
+
+**The technique actually used:** fit **1-to-6-way pin headers on the inside of the connector
+rails** and jump the signals along the chain — control deck → first board → second board. The
+edge connector is a doublet, so the inner hole of each position is available for exactly this
+while the outer hole carries the deck connection.
+
+Power between stacked boards is jumped separately, using power-rail positions 1, 2, 39 and 40.
+
+---
+
 ### Positions 1, 2, 39, 40 on the power columns
 
 These are reserved *only* for **jumping power between stacked boards** — needed when a design
@@ -129,7 +152,5 @@ Independently corroborated where possible:
 
 **Unverified, still open:**
 
-- Whether stacked boards pass *signals* through, or only power (power pass-through is confirmed:
-  "2 pin, single row headers, mounted here pass power to stacked boards").
-- Which physical edge the single connector uses on 4HP/6HP. `gen_board_profiles.py` assumes the
-  left and marks it builder-confirmed; not re-checked here.
+- Whether a stacked board is conventionally mounted flipped (left/right swapped) so components
+  face outward for probing. `gen_board_profiles.py` asserts this; not re-checked here.

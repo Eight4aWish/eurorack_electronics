@@ -29,7 +29,8 @@ Connector facts (confirmed by the builder, 2026-07):
     10HPS template simply ships with a second board pre-placed). The deck
     mounts right way up; stacked boards are usually mounted FLIPPED (left
     strips become right strips) so components stay visible for probing.
-    Per-layer net pass-through still to be confirmed.
+    Signals DO pass between stacked boards; in practice via pin headers on
+    the inside of the connector rails rather than the stacking connectors.
 
 Usage:
     python3 gen_board_profiles.py            # writes boards/*.json
@@ -126,8 +127,8 @@ def make_profile(board_id, template_path):
         ctrl_maps = OrderedDict([('ctrlL', build_ctrl_map(pins, 0)),
                                  ('ctrlR', build_ctrl_map(pins, 40))])
     else:
-        # Single 40-pin strip (4HP / 6HP) — one ctrl column on the LEFT edge
-        # of the breadboard, beside the +12V/GND rail (builder-confirmed).
+        # Single 40-pin strip (4HP / 6HP) — ONE edge connector only, never both.
+        # Convention is the LEFT edge; either would work (builder-confirmed).
         ctrl_maps = OrderedDict([('ctrlL', build_ctrl_map(pins, 0))])
 
     profile = OrderedDict()
@@ -214,9 +215,13 @@ def make_profile(board_id, template_path):
         'note': 'Extra breadboards stack via connectors on any deck size. Deck '
                 'mounts right way up; stacked boards are typically mounted FLIPPED '
                 '(left/right strips swap) so components face outward for probing. '
-                'Per-layer net pass-through to be confirmed before multi-board '
+                'SIGNALS do pass between stacked boards, but the stacking '
+                'connectors are awkward in practice — the working method is '
+                '1-to-6-way pin headers on the INSIDE of the connector rails, '
+                'jumping deck -> board 1 -> board 2. Power is jumped via power-rail '
+                'positions 1, 2, 39, 40. See docs/n8synth_platform.md before '
                 'layouts.',
-        'passThroughConfirmed': False,
+        'passThroughConfirmed': True,
     }
     return profile
 

@@ -502,7 +502,7 @@
   "gapRowNote": "Gap rows have no JPS pad; the deck hole is otherwise unconnected, so they are free feed-through tie points (useful for long jumps routed across the deck).",
   "stacking": {
     "supported": true,
-    "note": "Extra breadboards stack via connectors on any deck size. Deck mounts right way up; stacked boards are typically mounted FLIPPED (left/right strips swap) so components face outward for probing. Per-layer net pass-through to be confirmed before multi-board layouts.",
-    "passThroughConfirmed": false
+    "note": "Extra breadboards stack via connectors on any deck size. Deck mounts right way up; stacked boards are typically mounted FLIPPED (left/right strips swap) so components face outward for probing. SIGNALS do pass between stacked boards, but the stacking connectors are awkward in practice \u2014 the working method is 1-to-6-way pin headers on the INSIDE of the connector rails, jumping deck -> board 1 -> board 2. Power is jumped via power-rail positions 1, 2, 39, 40. See docs/n8synth_platform.md before layouts.",
+    "passThroughConfirmed": true
   }
 }
