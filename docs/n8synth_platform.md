@@ -49,6 +49,46 @@ Working inward from either edge:
 10HPS template ships two boards — one powered (36 rows) and one plain (40 rows) — which is why
 it contains 76 row zones.
 
+## What the board already provides — do not duplicate it
+
+On a **powered** board the ±12V rails arrive already conditioned: **100nF + 10µF-or-larger on
+each rail**. Any module design transcribed from a standalone Eurorack PCB will carry its *own*
+rail-entry conditioning, which is then duplicated.
+
+**Drop on transfer:**
+
+- **Rail-entry bulk electrolytics** (typically 47µF or 10µF on VCC and VEE). The board's own
+  10µF+ at power-rail positions 37–38 does this job.
+- **Rail-entry 100nF bypass**, where the design has one per rail *at the power connector*.
+
+**Never drop:**
+
+- **Per-IC decoupling** — the 100nF sitting at each op-amp's pin 8 / pin 4. The board's single
+  bypass at the power entry is not a substitute, and on a breadboard, where wiring inductance is
+  far worse than on a PCB, local decoupling matters **more**, not less.
+- **Reverse-polarity protection diodes.** The board provides capacitors only — no protection.
+- **Series rail filtering** (e.g. the 10R resistors in the MKI x ES designs), which is a
+  different function and doubles as a slow-blow fuse.
+- **Regulator conditioning** for anything generated on-board (e.g. a 7805's own input/output
+  caps), and decoupling on rails the board does not supply.
+
+⚠️ If a bench test later shows ripple on a long run, adding one bulk cap back near the ICs is a
+two-second job on a breadboard. Removing is the low-risk direction.
+
+### Applied to the current dataset
+
+| Build | Duplicated — droppable | Keep |
+|---|---|---|
+| **MOD2** | C5, C6 (10µF rail bulk) | C7–C10 are per-IC, one per TL072 per rail |
+| Dual LPG | C1, C2 (47µF rail bulk) | C3–C10 — already annotated "near IC pin 8/4" |
+| Kick drum | C2, C3 (47µF bulk) + C1, C4 (100nF entry bypass) | C13, C14, C15, C5 per-IC; R36/R37 series filter |
+| Snare drum | C8, C9 (47µF bulk) + C6, C7 (100nF entry bypass) | C2–C5, C21, C22 per-IC; R36/R37 series filter |
+
+Only MOD2 has been changed. The others are existing committed designs — apply this when
+transferring them, not retrospectively.
+
+---
+
 ## Which edge connector to use
 
 **4HP and 6HP designs use one edge connector — by convention the LEFT.** Either edge works, but

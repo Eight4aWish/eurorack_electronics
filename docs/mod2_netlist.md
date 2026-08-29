@@ -39,11 +39,11 @@ the original schematic; the gap is preserved rather than renumbered.
 
 **Verified against BOM:** every group above matches a JLCPCB line item exactly. ✓
 
-### Capacitors (19 fitted + 1 DNP + 3 added)
+### Capacitors (17 fitted + 1 DNP + 4 added)
 | Qty | Value | Type | Designators | Role |
 |-----|-------|------|-------------|------|
-| 9 | 100nF | Ceramic | C2, C3, C4, C7, C8, C9, C10, C11, C19 | ADC filters, rail bypass, debounce, 3V3 decoupling |
-| 4 | 10uF | Electrolytic | C1, C5, C6, C20 | Rail bulk on +5V, +12V, -12V, +3V3 |
+| 9 | 100nF | Ceramic | C2, C3, C4, C7, C8, C9, C10, C11, C19 | ADC filters, per-IC decoupling (C7-C10), +5V bypass, debounce, 3V3 |
+| 2 | 10uF | Electrolytic | C1, C20 | Bulk on the +5V and +3V3 rails (observe polarity) |
 | 3 | 22nF | Film | C12, C14, C17 | A2 filter, RC pole 1 switched, RC pole 2 switched |
 | 2 | 10nF | Film | C13, C16 | RC pole 1 fixed, RC pole 2 fixed |
 | 1 | 1uF | Film | C18 | Output AC coupling |
@@ -154,15 +154,20 @@ The bus +5V pin on J1 is **deliberately left unconnected** — see Block 2.
 |-----------|-------|-------|-------|-------|
 | D1 | 1N4148 | BUS_P12V (anode) | P12V (cathode) | — |
 | D2 | 1N4148 | N12V (anode) | BUS_N12V (cathode) | — |
-| C5 | 10uF | P12V | GND | — |
 | C7 | 100nF | P12V | GND | — |
 | C9 | 100nF | P12V | GND | — |
-| C6 | 10uF | GND | N12V | — |
 | C8 | 100nF | N12V | GND | — |
 | C10 | 100nF | N12V | GND | — |
 
 **Notes:**
-- Observe polarity on C5/C6 — C6 sits on a negative rail.
+- ⚠️ **C5 and C6 (the stock 10µF rail bulk) are deliberately omitted.** The n8synth powered
+  board already conditions both ±12V rails with 100nF + 10µF-or-larger, so they would be
+  duplicated. See [`n8synth_platform.md`](n8synth_platform.md).
+- **C7–C10 stay.** They are per-IC decoupling — one 100nF per TL072 per rail, at the chip's
+  power pins. The board's entry-point bypass is not a substitute, and breadboard wiring makes
+  local decoupling more important, not less.
+- **D1/D2 stay.** The board provides conditioning capacitors only, no reverse-polarity
+  protection.
 - J1 is a 16-pin header on the original. The n8synth power section provides +12V, -12V, GND
   and +5V; only the first three are used.
 

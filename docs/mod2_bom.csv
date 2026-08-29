@@ -12,7 +12,7 @@ Status,Source,Section,Qty,Value,Type,Designators,Role,Stage,Suggested Source
 ,MOD2 Rev A,Resistor,1,68K,1/4W 1% metal film,R22,U2B feedback - sets gain 1+68K/33K = 3.06,Phase 3,Mouser/Tayda
 ,MOD2 Rev A,Capacitor,9,100nF,Ceramic X7R 50V,"C2, C3, C4, C7, C8, C9, C10, C11, C19","ADC filters (A0/A1), rail bypass, switch debounce, 3V3 decoupling",Phase 1-4,Mouser/Tayda
 ,Addition,Capacitor,3,100nF,Ceramic X7R 50V,"C22, C23, C24","7805 output, 3V3 at deck end, WS2812B supply bypass",Phase 1-6,Mouser/Tayda
-,MOD2 Rev A,Capacitor,4,10uF,Electrolytic 25V,"C1, C5, C6, C20","Rail bulk: +5V, +12V, -12V, +3V3 (observe polarity, C6 on neg rail)",Phase 1-2,Mouser/Tayda
+,MOD2 Rev A,Capacitor,2,10uF,Electrolytic 25V,"C1, C20",Bulk on the +5V and +3V3 rails (observe polarity),Phase 1-2,Mouser/Tayda
 ,MOD2 Rev A,Capacitor,3,22nF,Film,"C12, C14, C17",A2 filter; RC pole 1 + pole 2 switched caps,Phase 3-4,Mouser/Tayda
 ,MOD2 Rev A,Capacitor,2,10nF,Film,"C13, C16","RC reconstruction filter, fixed caps both poles",Phase 3,Mouser/Tayda
 ,MOD2 Rev A,Capacitor,1,1uF,Film,C18,Output AC coupling (bypassed by SW3 for DC mode),Phase 3,Mouser/Tayda
