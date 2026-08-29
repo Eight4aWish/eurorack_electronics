@@ -19,6 +19,7 @@ A browser-based layout viewer that renders breadboard placements from JSON, plus
 - `kick_drum_breadboard.html` — focused viewer for the kick drum layout
 - `check.sh` — **one-command check**: geometry validation → net-identity cross-check → doc map regeneration
 - `netlist_to_layout.py` — netlist → layout JSON converter
+- `edit_layout.py` — **hand-edit a layout from the bench**: move an endpoint (`b10 > g12`), set a component (`C15 = g12 g13`), mirror left/right, shift rows or ICs. Refuses any edit that would collide, then you re-run `check.sh`
 - `cross_check_nets.py` / `validate_layout.py` / `sync_layout.py` / `gen_rowmap.py` — placement validation + maintenance helpers
 - `gen_board_profiles.py` / `boards/` — board-profile JSON generated from the official n8synth templates: JPS control-deck cells, edge-connector maps, gap positions, D ground bus. **Ground truth for platform behaviour is [`docs/n8synth_platform.md`](docs/n8synth_platform.md)** — that document wins over anything inferred from the templates or these profiles.
 - `layouts/` — per-module JS + JSON layouts (kick, snare, FM drum two-board, dual LPG)

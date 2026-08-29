@@ -93,8 +93,11 @@ edge-connector doublets or board variants.
 **B6 — No install story, no getting-started doc.** ⚠️
 Works from a clone plus `python3 -m http.server`, but that is undocumented for a newcomer.
 
-**B7 — Placement has no tool support.** ℹ️ *Not a blocker — a framing issue.*
-Be explicit that placement is manual and the tool verifies it.
+**B7 — Placement has no tool support.** ℹ️ *Partly addressed.*
+`edit_layout.py` now covers the *correction* half: a text command language for moving endpoints,
+setting components, mirroring left/right and shifting rows, refusing any edit that collides.
+Initial placement is still manual. Be explicit that the offer is the verification loop plus
+hand-editing, not auto-placement.
 
 ---
 
