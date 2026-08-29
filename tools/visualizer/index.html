@@ -540,8 +540,13 @@ function drawICs() {
     // a flipped part has pin 1 at the other end and must get its notch there.
     const p1 = ic.pins.find(p => p.n === 1);
     const pin1AtBottom = p1 ? (p1.r === Math.max(...icRows)) : (ic.rotation === 180);
-    const notchY = pin1AtBottom ? endY+P/2-6 : startY-P/2+2;
-    g.appendChild(el('path', {d:`M${(lx+rx)/2-5},${notchY} A5,5 0 0,1 ${(lx+rx)/2+5},${notchY}`, fill:'none', stroke:TH.markStroke, 'stroke-width':0.8}));
+    // Sit the notch ON the body edge at the pin-1 end, and curve it INTO the body so it
+    // reads as an indent rather than a dome. sweep-flag 1 arcs through the top, 0 through
+    // the bottom — so a top-edge notch needs 0 and a bottom-edge notch needs 1.
+    const bodyTop = startY - P/2 + 2, bodyBottom = endY + P/2 - 2;
+    const notchY = pin1AtBottom ? bodyBottom : bodyTop;
+    const notchSweep = pin1AtBottom ? 1 : 0;
+    g.appendChild(el('path', {d:`M${(lx+rx)/2-5},${notchY} A5,5 0 0,${notchSweep} ${(lx+rx)/2+5},${notchY}`, fill:'none', stroke:TH.markStroke, 'stroke-width':0.8}));
     g.appendChild(el('text', {x:(lx+rx)/2, y:(startY+endY)/2-3, fill:TH.labelStrong, 'font-size':8, 'text-anchor':'middle', 'dominant-baseline':'middle', 'font-weight':'bold'}, ic.id));
     g.appendChild(el('text', {x:(lx+rx)/2, y:(startY+endY)/2+6, fill:TH.labelInk, 'font-size':7, 'text-anchor':'middle', 'dominant-baseline':'middle'}, ic.value || ic.type || ''));
     // Pin label side: honor ic.labelSide override; otherwise infer from pin column (col e or d → left; col f or g → right).
