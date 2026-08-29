@@ -164,6 +164,17 @@ def make_profile(board_id, template_path):
         'edgeConnector': {
             'positions': 40,
             'holesPerPosition': 2,
+            'columns': {
+                'ctrlLo': 'left edge connector, OUTER column (nearer the board edge)',
+                'ctrlLi': 'left edge connector, INNER column (nearer the power rail)',
+                'ctrlRo': 'right edge connector, OUTER column',
+                'ctrlRi': 'right edge connector, INNER column',
+            },
+            'pairNote': 'The two holes at a position are one node. Address a specific '
+                        'hole as ctrlLo5 / ctrlLi5; bare ctrlL5 means the position with '
+                        'the hole unspecified. Two occupants at one position are normal '
+                        '- typically a panel wire in one hole and a component leg in the '
+                        'other - and are NOT a collision.',
             'note': 'Two adjacent columns; the two holes at a position are joined to '
                     'each other and to nothing else. JPS cell pads A/B/C terminate '
                     'HERE, not on main-area rows — a panel signal reaches the circuit '

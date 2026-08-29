@@ -41,9 +41,16 @@ from collections import defaultdict
 
 MIRROR = {'a':'j','b':'i','c':'h','d':'g','e':'f',
           'f':'e','g':'d','h':'c','i':'b','j':'a',
-          'pwrL':'pwrR','pwrR':'pwrL','ctrlL':'ctrlR','ctrlR':'ctrlL'}
+          'pwrL':'pwrR','pwrR':'pwrL',
+          'ctrlL':'ctrlR','ctrlR':'ctrlL',
+          'ctrlLo':'ctrlRo','ctrlRo':'ctrlLo',
+          'ctrlLi':'ctrlRi','ctrlRi':'ctrlLi'}
 
-POS = re.compile(r'^(pwrL|pwrR|ctrlL|ctrlR|[a-j])(\d+)$')
+# Edge-connector positions are DOUBLETS: two holes, joined to each other and
+# nothing else. 'o' = outer (nearer the board edge), 'i' = inner (nearer the
+# power rail). Bare ctrlL/ctrlR mean "this position, hole unspecified".
+# See docs/n8synth_platform.md.
+POS = re.compile(r'^(pwrL|pwrR|ctrlLo|ctrlLi|ctrlRo|ctrlRi|ctrlL|ctrlR|[a-j])(\d+)$')
 
 
 def parse_pos(tok):

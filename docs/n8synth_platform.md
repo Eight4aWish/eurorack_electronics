@@ -89,6 +89,40 @@ transferring them, not retrospectively.
 
 ---
 
+## Naming the two holes of a doublet
+
+Each edge-connector position has **two holes, joined to each other and to nothing else**. Both
+are usable, and using both is normal — typically a wire from the panel in one and a component
+leg in the other, which is how a panel signal reaches the circuit.
+
+**Convention:**
+
+| Name | Meaning |
+|---|---|
+| `ctrlLo5` | left edge connector, position 5, **outer** hole (nearer the board edge) |
+| `ctrlLi5` | left edge connector, position 5, **inner** hole (nearer the power rail) |
+| `ctrlRo5` / `ctrlRi5` | the same for the right edge connector |
+| `ctrlL5` / `ctrlR5` | the position, **hole unspecified** — use when it does not matter |
+
+Outer and inner are defined geometrically, so they mean the same thing on either edge
+regardless of orientation.
+
+**Two occupants at one position is correct, not a collision.** A collision is two things in the
+*same hole*. Any checker must key on the hole, not the position — otherwise every panel
+connection that feeds a component looks like an error.
+
+In the dual LPG as documented, **16 of its 32 occupied control-lane positions carry two
+things** — a `jpsWire` from the panel plus a component leg — and the rest carry one, leaving a
+spare hole that is available for routing.
+
+⚠️ **Open:** which column is used for what. Both are electrically identical, so this is a
+workshop convention rather than a constraint — but the tooling should record it consistently.
+The builder fits pin headers to the **inside** of the connector rails when jumping signals
+between stacked boards, which suggests inner is the header column and outer stays free for
+component legs. **To be confirmed before layouts start recording specific holes.**
+
+---
+
 ## Which edge connector to use
 
 **4HP and 6HP designs use one edge connector — by convention the LEFT.** Either edge works, but
