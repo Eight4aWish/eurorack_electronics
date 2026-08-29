@@ -36,10 +36,9 @@ Deliberately chosen to be licence-clean *and* to cover the platform between them
 Between them they cover both deck widths, both strip configurations, analog and digital, and
 two different licensing models. That is a genuinely representative pair.
 
-⚠️ **The MKI x ES kick, snare and FM drum layouts must NOT ship.** Moritz Klein and Erica Synths
-sell these as kits, and the 109-page manual carries **no licence statement at all** — so default
-all-rights-reserved applies (verified 2026-08-28; the *Circuit Design Guide* is also a €15
-product). They stay local. `index.html` currently hardcodes all three.
+⚠️ **The third-party kit designs in this repo must NOT ship with the public tool.** They are
+someone else's commercial product and are not ours to redistribute. `index.html` currently
+hardcodes them, so this needs an explicit removal step rather than an omission.
 
 ---
 
