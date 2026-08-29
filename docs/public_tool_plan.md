@@ -90,6 +90,15 @@ It uses `ctrlL`/`ctrlR` and `pwrL`/`pwrR`, which is roughly right, but does not 
 edge-connector doublets or board variants.
 **Fix:** align the schema with `n8synth_platform.md` before others build on it.
 
+**B6a — Colour and contrast.** ⚠️ *Partly addressed.*
+The original palette failed four of five accessibility checks — two hues read as grey, a
+CVD-adjacent pair at ΔE 5.1, and a normal-vision pair at 11.9 (below the 15 floor, i.e. hard to
+tell apart even with full colour vision). Replaced with a validated dark categorical set, and
+the board surface changed from dark green to neutral: on green, the contrast check could not
+pass at all. **Rule going forward: no hue is hand-tweaked without re-running
+`validate_palette.js`.** Still to do — a legend so identity is never colour-alone, and a
+light-mode palette stepped for a light surface rather than an automatic flip.
+
 **B6 — No install story, no getting-started doc.** ⚠️
 Works from a clone plus `python3 -m http.server`, but that is undocumented for a newcomer.
 
