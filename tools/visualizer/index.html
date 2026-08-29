@@ -89,7 +89,11 @@ COLS.ctrlL = COLS.ctrlLo; COLS.ctrlR = COLS.ctrlRo;   // bare = hole unspecified
 COLS['+12v'] = COLS.pwrL; COLS['gndL'] = COLS.pwrL; COLS['gndR'] = COLS.pwrR; COLS['-12v'] = COLS.pwrR;
 const rowY = r => 56 + (r - 1) * P;
 const colX = c => COLS[c];
-const NET_LABEL_SIZE = 6.5, NET_LABEL_DY = 8;   // one standard for all net labels
+// One standard for all net labels. DY is measured, not eyeballed: the half-row bar
+// runs y-5..y+5 and the cap height at 6.5px is ~4.7px, so a baseline at y+12 puts the
+// glyph top 2.3px clear of its own row's bar and 7px short of the next one — still
+// visibly closer to the row it belongs to.
+const NET_LABEL_SIZE = 6.5, NET_LABEL_DY = 12;
 const SVG_W = 476, SVG_H = rowY(40) + 36;
 const MAIN_ROWS = 36, CONN_ROWS = 40;   // main area vs edge-connector/rail extent
 const RAIL_COLS = ['pwrL', 'pwrR'];
@@ -413,18 +417,40 @@ function drawBoard() {
   HOLE_COLS.forEach(c => svg.appendChild(el('text', {x:colX(c), y:rowY(1)-18, fill:TH.ink, 'font-size':9, 'text-anchor':'middle'}, c)));
 }
 
-function drawNetLabels() {
-  if (!layout || !layout.netLabels) return;
+function netLabelKey(r, side) { return r + '|' + side; }
+
+// Which nets are already shown as a row label, so drawICs can avoid repeating them.
+function shownNetLabels() {
+  const map = new Map();
+  if (!layout || !layout.netLabels) return map;
   const showAll = document.getElementById('showAll').checked;
   layout.netLabels.forEach(nl => {
     if (!showAll && nl.stage > currentStage) return;
-    // One standard for every net label: one colour, one size, always BELOW the row,
-    // and justified TOWARDS the centre gap — left-side labels right-justified, right-side
-    // labels left-justified — so both sides form a clean column either side of the gap
-    // and never run into each other across it.
-    const y = rowY(nl.r) + NET_LABEL_DY;
-    const opacity = (!showAll && nl.stage < currentStage) ? 0.4 : 1;
-    const onLeft = nl.side === 'L';
+    const k = netLabelKey(nl.r, nl.side);
+    if (!map.has(k)) map.set(k, new Set());
+    map.get(k).add(nl.name);
+  });
+  return map;
+}
+
+function drawNetLabels() {
+  if (!layout || !layout.netLabels) return;
+  const showAll = document.getElementById('showAll').checked;
+  // Group by row+side. A row half is ONE node, so several names on it are aliases
+  // for the same node — join them rather than stacking them at identical coords.
+  const groups = new Map();
+  layout.netLabels.forEach(nl => {
+    if (!showAll && nl.stage > currentStage) return;
+    const k = netLabelKey(nl.r, nl.side);
+    if (!groups.has(k)) groups.set(k, {r:nl.r, side:nl.side, names:[], stage:nl.stage});
+    const g = groups.get(k);
+    if (!g.names.includes(nl.name)) g.names.push(nl.name);
+    g.stage = Math.min(g.stage, nl.stage);
+  });
+  groups.forEach(g => {
+    const y = rowY(g.r) + NET_LABEL_DY;
+    const opacity = (!showAll && g.stage < currentStage) ? 0.4 : 1;
+    const onLeft = g.side === 'L';
     svg.appendChild(el('text', {
       x: onLeft ? colX('e') + 4 : colX('f') - 4,
       y,
@@ -433,7 +459,7 @@ function drawNetLabels() {
       'text-anchor': onLeft ? 'end' : 'start',
       'dominant-baseline': 'auto',
       opacity
-    }, nl.name));
+    }, g.names.join(' / ')));
   });
 }
 
@@ -470,7 +496,9 @@ function drawTwoPins() {
   });
 }
 
+const EMPTY_SET = new Set();
 function drawICs() {
+  const shownNets = shownNetLabels();
   if (!layout || !layout.ics) return;
   layout.ics.forEach(ic => {
     const g = makeCG(ic.id, 'IC', ic.value || ic.type || '', ic.stage);
@@ -491,7 +519,9 @@ function drawICs() {
       const isLeft = overrideSide ? (overrideSide === 'left') : (pin.c === 'e' || pin.c === 'd');
       g.appendChild(el('circle', {cx:x, cy:y, r:2.5, fill:TH.labelDim}));
       g.appendChild(el('text', {x:isLeft?x-12:x+12, y:y+1, fill:TH.ink, 'font-size':7, 'text-anchor':'middle', 'dominant-baseline':'middle'}, String(pin.n)));
-      if (document.getElementById('showNets').checked && pin.net) g.appendChild(el('text', {x:isLeft?x-22:x+22, y:y+NET_LABEL_DY, fill:TH.netInk, 'font-size':NET_LABEL_SIZE, 'text-anchor':isLeft?'end':'start', 'dominant-baseline':'auto'}, pin.net));
+      if (document.getElementById('showNets').checked && pin.net &&
+          !(shownNets.get(netLabelKey(pin.r, isLeft ? 'L' : 'R'))||EMPTY_SET).has(pin.net))
+        g.appendChild(el('text', {x:isLeft?x-22:x+22, y:y+NET_LABEL_DY, fill:TH.netInk, 'font-size':NET_LABEL_SIZE, 'text-anchor':isLeft?'end':'start', 'dominant-baseline':'auto'}, pin.net));
     });
     svg.appendChild(g);
   });
