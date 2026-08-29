@@ -96,8 +96,12 @@ CVD-adjacent pair at ΔE 5.1, and a normal-vision pair at 11.9 (below the 15 flo
 tell apart even with full colour vision). Replaced with a validated dark categorical set, and
 the board surface changed from dark green to neutral: on green, the contrast check could not
 pass at all. **Rule going forward: no hue is hand-tweaked without re-running
-`validate_palette.js`.** Still to do — a legend so identity is never colour-alone, and a
-light-mode palette stepped for a light surface rather than an automatic flip.
+`validate_palette.js`.** Light mode added as a **selected** palette — stepped for a light surface and validated
+separately, not an automatic flip of the dark one. It passes all checks with a contrast WARN on
+four hues, which carries a **relief obligation**: component labels are forced visible whenever
+light mode is on, and the Values toggle is disabled to stop the relief being switched off.
+Default follows `prefers-color-scheme`. Still to do — a **legend**, so identity is never
+colour-alone.
 
 **B6 — No install story, no getting-started doc.** ⚠️
 Works from a clone plus `python3 -m http.server`, but that is undocumented for a newcomer.
