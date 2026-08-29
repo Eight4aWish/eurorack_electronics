@@ -90,18 +90,20 @@ It uses `ctrlL`/`ctrlR` and `pwrL`/`pwrR`, which is roughly right, but does not 
 edge-connector doublets or board variants.
 **Fix:** align the schema with `n8synth_platform.md` before others build on it.
 
-**B6a — Colour and contrast.** ⚠️ *Partly addressed.*
-The original palette failed four of five accessibility checks — two hues read as grey, a
-CVD-adjacent pair at ΔE 5.1, and a normal-vision pair at 11.9 (below the 15 floor, i.e. hard to
-tell apart even with full colour vision). Replaced with a validated dark categorical set, and
-the board surface changed from dark green to neutral: on green, the contrast check could not
-pass at all. **Rule going forward: no hue is hand-tweaked without re-running
-`validate_palette.js`.** Light mode added as a **selected** palette — stepped for a light surface and validated
-separately, not an automatic flip of the dark one. It passes all checks with a contrast WARN on
-four hues, which carries a **relief obligation**: component labels are forced visible whenever
-light mode is on, and the Values toggle is disabled to stop the relief being switched off.
-Default follows `prefers-color-scheme`. Still to do — a **legend**, so identity is never
-colour-alone.
+**B6a — Colour and contrast.** ⚠️ *Addressed, with a design change.*
+The original palette failed four of five accessibility checks. Fixing it properly forced a real
+finding: **eight categorical hues cannot be made mutually distinguishable.** Measured, not
+judged — an 8-hue set fails even in dark mode (worst pair ΔE 1.6 deutan), and in light mode a
+yellow dark enough to reach 3:1 contrast turns brown and collides with both red and aqua. Seven
+fails too.
+
+So colour now encodes **three categories** — passive (R/C/D), active (IC/NPN/PNP), connection
+(JW/JPS) — and the component's **shape and label** carry its exact identity, which is what a
+builder reads anyway. Both palettes pass all five checks under the **strictest** model
+(`--pairs all`), dark on `#242426` and light on `#f4f4f0`. Light is a selected palette, stepped
+for its own surface, not a flip. Default follows `prefers-color-scheme`.
+
+Still to do — a **legend** naming the three categories.
 
 **B6 — No install story, no getting-started doc.** ⚠️
 Works from a clone plus `python3 -m http.server`, but that is undocumented for a newcomer.

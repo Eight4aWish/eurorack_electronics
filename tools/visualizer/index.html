@@ -7,7 +7,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root { color-scheme: dark; --page:#1a1a19; --ink:#e8e8e2; --ink-2:#c3c2b7;
         --side:#232326; --panel:#2b2b2f; --edge:#44444a; --accent:#4a9; --field:#1e1e21; }
-    :root[data-theme="light"] { color-scheme: light; --page:#f2f2ef; --ink:#0b0b0b; --ink-2:#52514e;
+    :root[data-theme="light"] { color-scheme: light; --page:#e8e8e4; --ink:#0b0b0b; --ink-2:#52514e;
         --side:#e6e6e1; --panel:#dcdcd6; --edge:#b9b9b1; --accent:#1a7f5a; --field:#fbfbf8; }
     body { font-family: 'Consolas', 'Monaco', monospace; background: var(--page); color: var(--ink); display: flex; height: 100vh; }
 #sidebar { width: 280px; min-width: 280px; background: var(--side); border-right: 1px solid var(--edge); overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
@@ -109,13 +109,25 @@ function railLabel(col, row) {
   if (col === 'pwrR' || col === '-12v' || col === 'gndR') return (row % 2 === 0) ? '-12V' : 'GND';
   return '';
 }
-// Two SELECTED palettes — light is not a flip of dark; each was stepped for its own
-// surface and validated with dataviz scripts/validate_palette.js:
-//   dark  --surface #242426 : all five checks PASS
-//   light --surface #f2f2ef : PASS, with a contrast WARN on orange/aqua/yellow/magenta.
-//     That WARN carries a RELIEF OBLIGATION — component labels must stay visible in
-//     light mode, which is why "Values" is forced on when light is selected.
-// Do not hand-tweak a hue without re-running the validator for BOTH modes.
+// COLOUR ENCODES THREE CATEGORIES, NOT EIGHT COMPONENT TYPES.
+//
+// Eight hues cannot be made mutually distinguishable: measured with dataviz
+// scripts/validate_palette.js, an 8-hue set fails even in dark mode (worst pair
+// dE 1.6 deutan), and in light mode a yellow dark enough to reach 3:1 contrast
+// becomes brown and collides with both red and aqua. Seven fails too. So colour
+// folds to three categories and the component's SHAPE and LABEL carry its exact
+// identity — which is what a builder reads anyway.
+//
+//   passive     R, C, D          blue
+//   active      IC, NPN, PNP     orange
+//   connection  JW, JPS          aqua
+//
+// Both palettes PASS all five checks under the STRICTEST model (--pairs all):
+//   dark  --surface #242426
+//   light --surface #f4f4f0
+// Rails keep the electrical convention (red +12V / blue -12V / green GND); they
+// sit on their own strip, so position separates them from component marks.
+// Re-run the validator for BOTH modes before changing any hue.
 const PALETTES = {
   dark: {
     page:'#1a1a19', board:'#242426', boardEdge:'#44444a', halfRow:'#2e2e31',
@@ -123,22 +135,24 @@ const PALETTES = {
     ctrlLink:'#8a7340', ctrlLabel:'#d9a441', railFill:'#111', railEdge:'#333',
     ink:'#c3c2b7', inkDim:'#8a8a80', note:'#a89a86',
     pos:'#e66767', neg:'#3987e5', gnd:'#199e70',
-    types:{ R:'#d95926', C:'#3987e5', D:'#e66767', IC:'#9085e9',
-            NPN:'#199e70', PNP:'#c98500', JW:'#d55181', JPS:'#008300' }
+    passive:'#3987e5', active:'#d95926', connection:'#199e70'
   },
   light: {
-    page:'#f2f2ef', board:'#e4e4de', boardEdge:'#b9b9b1', halfRow:'#d8d8d1',
-    hole:'#8d8d85', ctrlFill:'#efe7d6', ctrlEdge:'#c0ab7e', ctrlHole:'#a97b00',
-    ctrlLink:'#bfa76a', ctrlLabel:'#8a6600', railFill:'#e8e8e3', railEdge:'#c4c4bd',
-    ink:'#52514e', inkDim:'#8a8a84', note:'#6b6459',
-    pos:'#e34948', neg:'#2a78d6', gnd:'#1baf7a',
-    types:{ R:'#eb6834', C:'#2a78d6', D:'#e34948', IC:'#4a3aa7',
-            NPN:'#1baf7a', PNP:'#eda100', JW:'#e87ba4', JPS:'#008300' }
+    page:'#e8e8e4', board:'#f4f4f0', boardEdge:'#b9b9b1', halfRow:'#e2e2dc',
+    hole:'#8d8d85', ctrlFill:'#f3ecdc', ctrlEdge:'#c0ab7e', ctrlHole:'#8a6600',
+    ctrlLink:'#b09a5e', ctrlLabel:'#7a5a00', railFill:'#dedeD8', railEdge:'#b9b9b1',
+    ink:'#3a3937', inkDim:'#6f6e6a', note:'#5a544a',
+    pos:'#c62828', neg:'#2a78d6', gnd:'#0f7d57',
+    passive:'#2a78d6', active:'#c2500f', connection:'#0f7d57'
   }
 };
+const TYPE_CATEGORY = { R:'passive', C:'passive', D:'passive',
+                        IC:'active', NPN:'active', PNP:'active',
+                        JW:'connection', JPS:'connection' };
 let THEME = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
 let TH = PALETTES[THEME];
-const TYPE_COLORS = new Proxy({}, { get: (_, k) => TH.types[k] || TH.ctrlLabel });
+const TYPE_COLORS = new Proxy({}, { get: (_, k) => TH[TYPE_CATEGORY[k]] ||
+  ({'+12v':TH.pos,'-12v':TH.neg,gndL:TH.gnd,gndR:TH.gnd,pwrL:TH.pos,pwrR:TH.neg}[k]) || TH.ink });
 
 // ============================================================
 // STATE
@@ -596,16 +610,14 @@ document.addEventListener('keydown', e => {
 // ============================================================
 // INIT
 // ============================================================
-// Theme toggle. Light mode's palette carries a contrast WARN on four hues, so the
-// relief obligation applies: component labels are forced visible while light is on.
+// Theme toggle. Both palettes now pass contrast in both modes, so labels are no
+// longer forced — but colour carries only 3 categories, so the shape and label are
+// still what identify a specific component.
 const lightBox = document.getElementById('lightMode');
-const valuesBox = document.getElementById('showValues');
 function applyTheme() {
   THEME = lightBox.checked ? 'light' : 'dark';
   TH = PALETTES[THEME];
   document.documentElement.setAttribute('data-theme', THEME);
-  if (THEME === 'light') { valuesBox.checked = true; valuesBox.disabled = true; }
-  else { valuesBox.disabled = false; }
   render();
 }
 lightBox.checked = (THEME === 'light');
