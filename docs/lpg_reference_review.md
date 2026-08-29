@@ -122,7 +122,7 @@ Based on Optomix as target, with the DIY swappable-vactrol idea folded in:
 
 ## Stage 1 deliverable
 
-When the questions above are resolved, the next doc will be `docs/lpg_netlist.md` — the same format as `kick_drum_netlist_from_text.md`: BOM table, block diagram, designators per block (input buffer, vactrol driver, audio path, Strike pulse-shaper, DAMP coupler, output mixer, power decoupling).
+When the questions above are resolved, the next doc will be `docs/lpg_netlist.md` — the standard netlist format: BOM table, block diagram, designators per block (input buffer, vactrol driver, audio path, Strike pulse-shaper, DAMP coupler, output mixer, power decoupling).
 
 ---
 

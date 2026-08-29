@@ -75,11 +75,10 @@ them, so edits to a layout could pass every check and never reach the screen. Fo
 the LPG's wrapper sat at rev 0.19 while the JSON was at 0.21, so two fixes appeared not to work.
 `check.sh` now regenerates the wrapper as step 3 of 4.
 
-⚠️ **Still outstanding:** three wrappers are *newer* than their JSON — `kick_drum` (js 1.1 vs
-json 1.0) and `fm_drum_board1`/`board2` (js 1.0 vs json 0.1). For those the **JSON** is the stale
-one, so regenerating would destroy work. They need reconciling by hand before the dual-file
-arrangement can be trusted. This is an argument for dropping the wrappers entirely (B2) rather
-than keeping two sources of truth in sync.
+⚠️ The wrappers had also drifted the *other* way on some layouts — the `.js` newer than its
+`.json`, so regenerating would have destroyed work. Those layouts have since been removed from
+the repo, but the hazard is inherent to keeping two sources of truth: it is an argument for
+dropping the wrappers entirely (B2) rather than syncing them.
 
 **B2 — Modules are registered by editing `index.html`.** ⛔
 Layouts load via hardcoded `<script src="layouts/*.js">` tags, and each `.js` is a wrapper
@@ -87,8 +86,9 @@ duplicating its `.json`. Adding a module means editing the app.
 **Fix:** a `layouts/index.json` manifest plus `fetch`, keeping the `.js` wrappers only as a
 `file://` fallback.
 
-**B3 — MKI x ES layouts are baked into the app.** ⛔
-Must be removed from the public build (see above).
+**B3 — Third-party kit layouts.** ✅ *Done.*
+Removed from the repo along with their transcribed netlists and the `index.html` script tags
+that loaded them. Kept locally in the gitignored `docs/refs/`.
 
 **B4 — Board profiles are generated but unused.** ⚠️
 `lpg.json` records its board as the free-text string `"n8synth (single board, rows 1-36)"`.

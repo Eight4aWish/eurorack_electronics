@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-netlist_to_layout.py — Parse an MKI x ES EDU netlist markdown document
+netlist_to_layout.py — Parse a netlist markdown document
 and generate a skeleton layout JSON for the n8synth breadboard visualizer.
 
 Usage:
@@ -537,7 +537,7 @@ def main():
     if len(sys.argv) < 2:
         print('Usage: python3 netlist_to_layout.py <netlist.md> [-o output.json]')
         print()
-        print('Parses an MKI x ES EDU netlist markdown and generates a skeleton')
+        print('Parses a netlist markdown and generates a skeleton')
         print('layout JSON for the n8synth breadboard visualizer.')
         sys.exit(1)
 

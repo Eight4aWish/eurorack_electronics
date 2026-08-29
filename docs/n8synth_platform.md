@@ -67,7 +67,7 @@ rail-entry conditioning, which is then duplicated.
   bypass at the power entry is not a substitute, and on a breadboard, where wiring inductance is
   far worse than on a PCB, local decoupling matters **more**, not less.
 - **Reverse-polarity protection diodes.** The board provides capacitors only — no protection.
-- **Series rail filtering** (e.g. the 10R resistors in the MKI x ES designs), which is a
+- **Series rail filtering** (a small series resistor on each rail), which is a
   different function and doubles as a slow-blow fuse.
 - **Regulator conditioning** for anything generated on-board (e.g. a 7805's own input/output
   caps), and decoupling on rails the board does not supply.
@@ -81,11 +81,10 @@ two-second job on a breadboard. Removing is the low-risk direction.
 |---|---|---|
 | **MOD2** | C5, C6 (10µF rail bulk) | C7–C10 are per-IC, one per TL072 per rail |
 | Dual LPG | C1, C2 (47µF rail bulk) | C3–C10 — already annotated "near IC pin 8/4" |
-| Kick drum | C2, C3 (47µF bulk) + C1, C4 (100nF entry bypass) | C13, C14, C15, C5 per-IC; R36/R37 series filter |
-| Snare drum | C8, C9 (47µF bulk) + C6, C7 (100nF entry bypass) | C2–C5, C21, C22 per-IC; R36/R37 series filter |
 
-Only MOD2 has been changed. The others are existing committed designs — apply this when
-transferring them, not retrospectively.
+Only MOD2 has been changed. Apply the same reading to any other design when transferring it:
+drop the rail-entry bulk and any entry-point bypass, keep everything per-IC, keep protection
+diodes, and keep any series rail filtering.
 
 ---
 

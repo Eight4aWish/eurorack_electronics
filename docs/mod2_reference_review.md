@@ -11,8 +11,8 @@ to loading the existing published firmwares. First target voice is the **MOD2 LF
 **Status:** Reference review complete, decisions locked. Netlist complete and verified
 (`mod2_netlist.md`). Panel layout locked. Breadboard placement not yet started.
 
-**Naming note:** `snare_drum_*` in this repo is the *MKI x ES* analog snare. This is an unrelated
-digital module and uses the `mod2_*` prefix throughout.
+**Naming note:** this module uses the `mod2_*` prefix throughout, to keep it distinct from the
+unrelated analog snare notes kept locally.
 
 ---
 
@@ -146,7 +146,7 @@ dim random colour rather than being reliably black. Harmless; lifting one LED le
 | RALPS (optional) | [mxzrmxzrmxzr/RALPS](https://github.com/mxzrmxzrmxzr/RALPS) | CC BY-NC-SA 4.0 | Optional extra, not in this build |
 | WGD Modular Melon *hardware* | [wgdmodular.de](https://wgdmodular.de/module/melon/) | Commercial product | **Ideas only — not copied** |
 
-**Two deliberate boundaries, consistent with the repo's stance on MKI x ES material:**
+**Two deliberate boundaries, consistent with how this repo treats other people's commercial work:**
 
 1. HAGIWO's **gerbers/manufacturing data are Patreon-paid**. We do not redistribute them.
    Nothing here needs them — this is a breadboard build from the published CC0 schematic.
