@@ -70,6 +70,18 @@ for anyone but us.
 `EXPECTED_NETS` is *derived* and the markdown netlist becomes a generated view. This was already
 the intended direction; third-party use makes it mandatory rather than nice-to-have.
 
+**B2a — The `.js` wrappers silently go stale.** ⚠️ *Mitigated.*
+The browser loads `layouts/*.js`, generated from the canonical `.json` — but nothing regenerated
+them, so edits to a layout could pass every check and never reach the screen. Found the hard way:
+the LPG's wrapper sat at rev 0.19 while the JSON was at 0.21, so two fixes appeared not to work.
+`check.sh` now regenerates the wrapper as step 3 of 4.
+
+⚠️ **Still outstanding:** three wrappers are *newer* than their JSON — `kick_drum` (js 1.1 vs
+json 1.0) and `fm_drum_board1`/`board2` (js 1.0 vs json 0.1). For those the **JSON** is the stale
+one, so regenerating would destroy work. They need reconciling by hand before the dual-file
+arrangement can be trusted. This is an argument for dropping the wrappers entirely (B2) rather
+than keeping two sources of truth in sync.
+
 **B2 — Modules are registered by editing `index.html`.** ⛔
 Layouts load via hardcoded `<script src="layouts/*.js">` tags, and each `.js` is a wrapper
 duplicating its `.json`. Adding a module means editing the app.
