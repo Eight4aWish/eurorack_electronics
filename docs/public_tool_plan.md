@@ -90,20 +90,22 @@ It uses `ctrlL`/`ctrlR` and `pwrL`/`pwrR`, which is roughly right, but does not 
 edge-connector doublets or board variants.
 **Fix:** align the schema with `n8synth_platform.md` before others build on it.
 
-**B6a — Colour and contrast.** ⚠️ *Addressed, with a design change.*
-The original palette failed four of five accessibility checks. Fixing it properly forced a real
-finding: **eight categorical hues cannot be made mutually distinguishable.** Measured, not
-judged — an 8-hue set fails even in dark mode (worst pair ΔE 1.6 deutan), and in light mode a
-yellow dark enough to reach 3:1 contrast turns brown and collides with both red and aqua. Seven
-fails too.
+**B6a — Colour and contrast.** ✅ *Done.*
+The original palette failed four of five accessibility checks and several sidebar labels were
+literally unreadable — `test-point` measured **1.08:1** in light mode, `stage name` **1.01:1**.
 
-So colour now encodes **three categories** — passive (R/C/D), active (IC/NPN/PNP), connection
-(JW/JPS) — and the component's **shape and label** carry its exact identity, which is what a
-builder reads anyway. Both palettes pass all five checks under the **strictest** model
-(`--pairs all`), dark on `#242426` and light on `#f4f4f0`. Light is a selected palette, stepped
-for its own surface, not a flip. Default follows `prefers-color-scheme`.
+Fixed properly: **every** colour now resolves through a theme role (zero hardcoded hex left in
+the drawing code or the CSS), which is what stopped this being fixable piecemeal. Two selected
+palettes, each stepped and validated for its own surface — dark `#242426`, light `#f4f4f0`.
+All 8 component hues clear **3:1** contrast in both modes, and **every text role clears WCAG AA
+4.5:1** in both modes.
 
-Still to do — a **legend** naming the three categories.
+Per-type colour is retained by preference. The honest limit, documented in the code: eight hues
+cannot be made mutually distinguishable, and in light mode NPN/PNP sit at ΔE 14.2 against a 15
+floor. Relief is in place — designator and value labels on every part, distinct shapes, and a
+legend that names all eight plus the rails and says which pair to read the label for. The legend
+is generated from the live palette, so it can no longer drift out of date (it had been showing
+the *old* eight colours after the palette changed).
 
 **B6 — No install story, no getting-started doc.** ⚠️
 Works from a clone plus `python3 -m http.server`, but that is undocumented for a newcomer.
