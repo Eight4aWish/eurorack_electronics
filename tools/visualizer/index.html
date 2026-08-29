@@ -126,7 +126,7 @@ const PALETTES = {
     ctrlLink:'#8a7340', ctrlLabel:'#d9a441', railFill:'#111', railEdge:'#333',
     ink:'#c3c2b7', inkDim:'#8a8a80', note:'#a89a86',
     labelStrong:'#f2f2ec', labelInk:'#d8d8d0', labelDim:'#9a9a92',
-    netInk:'#4fd07a', jumpInk:'#e0c452',
+    netInk:'#4fd07a',
     jpsInk:'#f0932b', jpsAlt:'#a8b4c0', markStroke:'#9aa6b4', markAlt:'#e08a30',
     icBody:'#4a4a50', rBody:'#8a6840', cBody:'#2a5a8a',
     pos:'#e66767', neg:'#3987e5', gnd:'#199e70',
@@ -139,7 +139,7 @@ const PALETTES = {
     ctrlLink:'#b09a5e', ctrlLabel:'#7a5a00', railFill:'#deded8', railEdge:'#b9b9b1',
     ink:'#3a3937', inkDim:'#6f6e6a', note:'#5a544a',
     labelStrong:'#0b0b0b', labelInk:'#2e2d2b', labelDim:'#5f5e5a',
-    netInk:'#136b39', jumpInk:'#6f5900',
+    netInk:'#136b39',
     jpsInk:'#8a4a00', jpsAlt:'#48535e', markStroke:'#59636e', markAlt:'#9c4a00',
     icBody:'#c9c9c3', rBody:'#c8a982', cBody:'#a8c4de',
     pos:'#c62828', neg:'#2a78d6', gnd:'#0f7d57',
@@ -527,7 +527,8 @@ function drawJumpers() {
     g.appendChild(el('line', {x1:p1.x, y1:p1.y, x2:p2.x, y2:p2.y, stroke:TYPE_COLORS.JW, 'stroke-width':1.5, 'stroke-dasharray':'6,3', class:'comp-body', opacity:0.8}));
     g.appendChild(el('circle', {cx:p1.x, cy:p1.y, r:2.5, fill:TYPE_COLORS.JW}));
     g.appendChild(el('circle', {cx:p2.x, cy:p2.y, r:2.5, fill:TYPE_COLORS.JW}));
-    g.appendChild(el('text', {x:mx+6, y:my-4, fill:TH.jumpInk, 'font-size':6.5, 'dominant-baseline':'auto', opacity:0.8}, `${j.id} ${j.label}`));
+    // No text on jumpers — the dashed line reads as a jumper on sight, and the id
+    // and label are still on its hover tooltip via makeCG().
     svg.appendChild(g);
   });
 }
