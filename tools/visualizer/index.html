@@ -89,6 +89,7 @@ COLS.ctrlL = COLS.ctrlLo; COLS.ctrlR = COLS.ctrlRo;   // bare = hole unspecified
 COLS['+12v'] = COLS.pwrL; COLS['gndL'] = COLS.pwrL; COLS['gndR'] = COLS.pwrR; COLS['-12v'] = COLS.pwrR;
 const rowY = r => 56 + (r - 1) * P;
 const colX = c => COLS[c];
+const NET_LABEL_SIZE = 6.5, NET_LABEL_DY = 8;   // one standard for all net labels
 const SVG_W = 476, SVG_H = rowY(40) + 36;
 const MAIN_ROWS = 36, CONN_ROWS = 40;   // main area vs edge-connector/rail extent
 const RAIL_COLS = ['pwrL', 'pwrR'];
@@ -125,7 +126,7 @@ const PALETTES = {
     ctrlLink:'#8a7340', ctrlLabel:'#d9a441', railFill:'#111', railEdge:'#333',
     ink:'#c3c2b7', inkDim:'#8a8a80', note:'#a89a86',
     labelStrong:'#f2f2ec', labelInk:'#d8d8d0', labelDim:'#9a9a92',
-    netInk:'#4fd07a', netSide:'#7f9a86', jumpInk:'#e0c452',
+    netInk:'#4fd07a', jumpInk:'#e0c452',
     jpsInk:'#f0932b', jpsAlt:'#a8b4c0', markStroke:'#9aa6b4', markAlt:'#e08a30',
     icBody:'#4a4a50', rBody:'#8a6840', cBody:'#2a5a8a',
     pos:'#e66767', neg:'#3987e5', gnd:'#199e70',
@@ -138,7 +139,7 @@ const PALETTES = {
     ctrlLink:'#b09a5e', ctrlLabel:'#7a5a00', railFill:'#deded8', railEdge:'#b9b9b1',
     ink:'#3a3937', inkDim:'#6f6e6a', note:'#5a544a',
     labelStrong:'#0b0b0b', labelInk:'#2e2d2b', labelDim:'#5f5e5a',
-    netInk:'#136b39', netSide:'#4a5f50', jumpInk:'#6f5900',
+    netInk:'#136b39', jumpInk:'#6f5900',
     jpsInk:'#8a4a00', jpsAlt:'#48535e', markStroke:'#59636e', markAlt:'#9c4a00',
     icBody:'#c9c9c3', rBody:'#c8a982', cBody:'#a8c4de',
     pos:'#c62828', neg:'#2a78d6', gnd:'#0f7d57',
@@ -417,9 +418,22 @@ function drawNetLabels() {
   const showAll = document.getElementById('showAll').checked;
   layout.netLabels.forEach(nl => {
     if (!showAll && nl.stage > currentStage) return;
-    const y = rowY(nl.r), opacity = (!showAll && nl.stage < currentStage) ? 0.35 : 0.7;
-    if (nl.side === 'L') svg.appendChild(el('text', {x:colX('e')+6, y:y+1, fill:TH.netSide, 'font-size':6.5, 'dominant-baseline':'middle', opacity}, nl.name));
-    else svg.appendChild(el('text', {x:colX('f')-6, y:y+1, fill:TH.netSide, 'font-size':6.5, 'text-anchor':'end', 'dominant-baseline':'middle', opacity}, nl.name));
+    // One standard for every net label: one colour, one size, always BELOW the row,
+    // and justified TOWARDS the centre gap — left-side labels right-justified, right-side
+    // labels left-justified — so both sides form a clean column either side of the gap
+    // and never run into each other across it.
+    const y = rowY(nl.r) + NET_LABEL_DY;
+    const opacity = (!showAll && nl.stage < currentStage) ? 0.4 : 1;
+    const onLeft = nl.side === 'L';
+    svg.appendChild(el('text', {
+      x: onLeft ? colX('e') + 4 : colX('f') - 4,
+      y,
+      fill: TH.netInk,
+      'font-size': NET_LABEL_SIZE,
+      'text-anchor': onLeft ? 'end' : 'start',
+      'dominant-baseline': 'auto',
+      opacity
+    }, nl.name));
   });
 }
 
@@ -477,7 +491,7 @@ function drawICs() {
       const isLeft = overrideSide ? (overrideSide === 'left') : (pin.c === 'e' || pin.c === 'd');
       g.appendChild(el('circle', {cx:x, cy:y, r:2.5, fill:TH.labelDim}));
       g.appendChild(el('text', {x:isLeft?x-12:x+12, y:y+1, fill:TH.ink, 'font-size':7, 'text-anchor':'middle', 'dominant-baseline':'middle'}, String(pin.n)));
-      if (document.getElementById('showNets').checked && pin.net) g.appendChild(el('text', {x:isLeft?x-22:x+22, y:y+1, fill:TH.netSide, 'font-size':5.5, 'text-anchor':isLeft?'end':'start', 'dominant-baseline':'middle', opacity:0.7}, pin.net));
+      if (document.getElementById('showNets').checked && pin.net) g.appendChild(el('text', {x:isLeft?x-22:x+22, y:y+NET_LABEL_DY, fill:TH.netInk, 'font-size':NET_LABEL_SIZE, 'text-anchor':isLeft?'end':'start', 'dominant-baseline':'auto'}, pin.net));
     });
     svg.appendChild(g);
   });
