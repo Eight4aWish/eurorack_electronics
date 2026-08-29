@@ -48,7 +48,7 @@
         "ctrlRo": "right edge connector, OUTER column",
         "ctrlRi": "right edge connector, INNER column"
       },
-      "pairNote": "The two holes at a position are one node. Address a specific hole as ctrlLo5 / ctrlLi5; bare ctrlL5 means the position with the hole unspecified. Two occupants at one position are normal - typically a panel wire in one hole and a component leg in the other - and are NOT a collision.",
+      "pairNote": "The two holes at a position are one node. Address a specific hole as ctrlLo5 / ctrlLi5; bare ctrlL5 means the position with the hole unspecified. Two occupants at one position are normal - typically a panel wire in one hole and a component leg in the other - and are NOT a collision. OUTER carries the control-deck connection to the first board; INNER carries small headers jumping to a second stacked board, so on a single-board module the inner column is free for component legs and routing. A position with no JPS cell has NO deck connection - it is an isolated pair of joined holes, usable as a tie point for routing across or under the board. Do not assume a control-lane position carries a panel net.",
       "note": "Two adjacent columns; the two holes at a position are joined to each other and to nothing else. JPS cell pads A/B/C terminate HERE, not on main-area rows \u2014 a panel signal reaches the circuit by a wire from its doublet into the main area. Positions 37-40 are therefore usable even on a powered board, which has no main-area row there. Positions not claimed by a JPS cell are free tie points and can be repurposed for routing."
     },
     "powerRail": {

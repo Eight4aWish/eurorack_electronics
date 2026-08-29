@@ -174,7 +174,13 @@ def make_profile(board_id, template_path):
                         'hole as ctrlLo5 / ctrlLi5; bare ctrlL5 means the position with '
                         'the hole unspecified. Two occupants at one position are normal '
                         '- typically a panel wire in one hole and a component leg in the '
-                        'other - and are NOT a collision.',
+                        'other - and are NOT a collision. OUTER carries the control-deck '
+                        'connection to the first board; INNER carries small headers jumping '
+                        'to a second stacked board, so on a single-board module the inner '
+                        'column is free for component legs and routing. A position with no '
+                        'JPS cell has NO deck connection - it is an isolated pair of joined '
+                        'holes, usable as a tie point for routing across or under the board. '
+                        'Do not assume a control-lane position carries a panel net.',
             'note': 'Two adjacent columns; the two holes at a position are joined to '
                     'each other and to nothing else. JPS cell pads A/B/C terminate '
                     'HERE, not on main-area rows — a panel signal reaches the circuit '

@@ -115,11 +115,29 @@ In the dual LPG as documented, **16 of its 32 occupied control-lane positions ca
 things** — a `jpsWire` from the panel plus a component leg — and the rest carry one, leaving a
 spare hole that is available for routing.
 
-⚠️ **Open:** which column is used for what. Both are electrically identical, so this is a
-workshop convention rather than a constraint — but the tooling should record it consistently.
-The builder fits pin headers to the **inside** of the connector rails when jumping signals
-between stacked boards, which suggests inner is the header column and outer stays free for
-component legs. **To be confirmed before layouts start recording specific holes.**
+### Which column does what ✓
+
+| Column | Use |
+|---|---|
+| **Outer** | **Control deck → first circuit board.** The main deck connection. |
+| **Inner** | Smaller headers jumping to a **second circuit board stacked over the first**. |
+
+**A spare doublet has no deck connection at all.** Only positions where a JPS cell terminates
+are wired to the control deck. Every other position is an **electrically isolated pair of joined
+holes** — nothing else. Using one to jump a signal across or under the board gives you a **tie
+point, not a deck connection**.
+
+That is what makes them safe to repurpose, and it is also a rule for any checker: **do not
+assume a control-lane position carries a panel net.** Claimed positions do; spare ones carry
+only whatever the things plugged into them make. How many are spare depends on the deck's HP —
+a 6HP deck claims 36 of 40 positions, a 4HP deck only 18, leaving 22 free.
+
+**Consequence for a single-board module: the inner column is free.** That is the spare capacity
+behind the repurposing technique — jump a component leg into an inner hole and route a wire up
+or down the board on the back, where both columns are tinned.
+
+So on a single-board build, a control-lane position typically holds the deck connection in its
+**outer** hole and, where used, a component leg in its **inner** hole.
 
 ---
 

@@ -15,11 +15,24 @@ from collections import defaultdict
 
 
 def side(c):
+    """Normalise a column to its electrical LANE.
+
+    Edge-connector doublets (ctrlLo/ctrlLi, ctrlRo/ctrlRi) are two holes on ONE
+    node, so both resolve to the same lane. Collision checks must still key on
+    the raw column, since the two holes are physically distinct.
+    See docs/n8synth_platform.md.
+    """
+    if c is None:
+        return None
     if c in 'abcde':
         return 'L'
     if c in 'fghij':
         return 'R'
-    return c
+    if c in ('ctrlLo', 'ctrlLi'):
+        return 'ctrlL'
+    if c in ('ctrlRo', 'ctrlRi'):
+        return 'ctrlR'
+    return c   # pwrL / pwrR / ctrlL / ctrlR
 
 
 def validate(path):
