@@ -552,8 +552,8 @@
       "id": "R17",
       "type": "R",
       "value": "1K",
-      "r1": 20,
-      "c1": "ctrlRi",
+      "r1": 13,
+      "c1": "h",
       "r2": 12,
       "c2": "ctrlRi",
       "stage": 2
@@ -742,8 +742,8 @@
       "id": "R25",
       "type": "R",
       "value": "1K",
-      "r1": 35,
-      "c1": "ctrlLi",
+      "r1": 26,
+      "c1": "ctrlRi",
       "r2": 20,
       "c2": "h",
       "stage": 4
@@ -1260,12 +1260,12 @@
     },
     {
       "id": "JW_R17_IN",
-      "label": "C15_a -> spare 12R (above board)",
-      "r1": 13,
-      "c1": "h",
-      "r2": 12,
-      "c2": "ctrlRo",
-      "side": "front",
+      "label": "12R -> CH A STRIKE (under board)",
+      "r1": 12,
+      "c1": "ctrlRo",
+      "r2": 20,
+      "c2": "ctrlRi",
+      "side": "back",
       "stage": 2
     },
     {
@@ -1285,6 +1285,16 @@
       "c1": "ctrlRo",
       "r2": 38,
       "c2": "ctrlRi",
+      "side": "back",
+      "stage": 4
+    },
+    {
+      "id": "JW_R25_STRB",
+      "label": "26R -> CH B STRIKE (under board)",
+      "r1": 26,
+      "c1": "ctrlRo",
+      "r2": 35,
+      "c2": "ctrlLi",
       "side": "back",
       "stage": 4
     }

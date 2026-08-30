@@ -208,7 +208,7 @@ These two tables are produced by `tools/visualizer/gen_rowmap.py` straight from 
 | 10 | `GND` | VD5.2@c (Zener 6v8) | `CV_PROT_A` | R13.1@h (100K), _JW_P1cA_, _JW_R16_IN_ |
 | 11 | `—` | — | `C15_b` | C15.2@f (1uF), R15.1@g (10K), VD1.1@h (1N4148) |
 | 12 | `—` | — | `STRIKE_PULSE_A` | R34.1@g (10K), VD1.2@h (1N4148) |
-| 13 | `—` | — | `C15_a` | C15.1@f (1uF), _JW_R17_IN_ |
+| 13 | `—` | — | `C15_a` | C15.1@f (1uF), R17.1@h (1K) |
 | 14 | `DRV_B_NINV` | R14.1@b (10K), **DA3.5**@e | `VEE` | **DA3.4**@f, C6.1@h (100nF) |
 | 15 | `DRV_SUM_B` | R39.2@a (4K7), _JW_R33_IN_, R35.2@c (10K), R20.2@d (10K), **DA3.6**@e | `DRV_A_NINV` | **DA3.3**@f, R37.1@h (10K) |
 | 16 | `DRV_OUT_B` | _JW_P7cB_, R20.1@c (10K), R_STATUS_B.1@d (4K7), **DA3.7**@e | `DRV_SUM_A` | **DA3.2**@f, R34.2@g (10K), R36.2@h (10K), R38.2@i (4K7), R32.2@j (4K7) |
@@ -249,17 +249,18 @@ These two tables are produced by `tools/visualizer/gen_rowmap.py` straight from 
 | 14 | R_STATUS_B.2@ctrlLi (4K7), _JW_STATB_ | R16.2@ctrlRi (1K), _JW_R16_IN_ |
 | 15 | _JW_R33_IN_, _JW_R33_X_ | R32.1@ctrlRo (4K7), _JW_R32_MAN_A_ |
 | 17 | MIX, _JW_MIX_ | CVA, R16.1@ctrlRi (1K) |
-| 20 | P7a ↔b | R17.1@ctrlRi (1K), STA |
+| 20 | P7a ↔b | STA, _JW_R17_IN_ |
 | 21 | P7b, R12.1@ctrlLi (470R) | — |
 | 22 | P7c, _JW_P7cB_ | — |
 | 23 | OUTB, R_OUT_B.2@ctrlLi (1K) | INB, _JW_INB_ |
+| 26 | — | R25.1@ctrlRi (1K), _JW_R25_STRB_ |
 | 28 | — | R23.1@ctrlRo (100K), _JW_CHA_OUT_X_ |
 | 29 | — | R22.1@ctrlRi (1K), _JW_R22_X_ |
 | 30 | R30.2@ctrlLi (4K7), _JW_R30_12V_ | R33.2@ctrlRi (4K7), _JW_R33_X_ |
 | 32 | LBa ⏚ | P5a ⏚ |
 | 33 | LBb, _JW_STATB_ | P5b, _JW_R39_CVB_ |
 | 34 | — | P5c, _JW_P5cB_ |
-| 35 | R25.1@ctrlLi (1K), STB | P6a ⏚ |
+| 35 | STB, _JW_R25_STRB_ | P6a ⏚ |
 | 36 | — | P6b, R33.1@ctrlRi (4K7) |
 | 37 | — | P6c, _JW_R30_12V_ |
 | 38 | — | CVB, _JW_R22_X_ |
