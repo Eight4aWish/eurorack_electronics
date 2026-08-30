@@ -16,8 +16,10 @@ Analog Eurorack breadboard layouts, a dual-channel low-pass gate, a mixed-signal
 A browser-based layout viewer that renders breadboard placements from JSON, plus Python helpers for netlist → layout conversion and placement validation.
 
 - `index.html` — main visualiser; opens any layout from `layouts/`
-- `check.sh` — **one-command check**: geometry validation → net-identity cross-check → doc map regeneration
+- `check.sh` — **one-command check**: geometry → net identity → browser wrapper regeneration → doc maps → doc-position cross-check. Refuses to regenerate docs from a failing layout.
 - `netlist_to_layout.py` — netlist → layout JSON converter
+- `smoke_test.py` — executes the visualiser's scripts against a stub DOM and asserts a layout registers; catches load-time errors that silently empty the layout picker
+- `check_doc_positions.py` — every control position a doc names by hand must exist in the layout
 - `edit_layout.py` — **hand-edit a layout from the bench**: move an endpoint (`b10 > g12`), set a component (`C15 = g12 g13`), mirror left/right, shift rows or ICs. Refuses any edit that would collide, then you re-run `check.sh`
 - `cross_check_nets.py` / `validate_layout.py` / `sync_layout.py` / `gen_rowmap.py` — placement validation + maintenance helpers
 - `gen_board_profiles.py` / `boards/` — board-profile JSON generated from the official n8synth templates: JPS control-deck cells, edge-connector maps, gap positions, D ground bus. **Ground truth for platform behaviour is [`docs/n8synth_platform.md`](docs/n8synth_platform.md)** — that document wins over anything inferred from the templates or these profiles.
