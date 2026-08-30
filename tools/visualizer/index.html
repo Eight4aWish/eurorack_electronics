@@ -626,7 +626,14 @@ function drawJumpers() {
   layout.jumpers.forEach(j => {
     const p1=pinPos(j.r1,j.c1), p2=pinPos(j.r2,j.c2), mx=(p1.x+p2.x)/2, my=(p1.y+p2.y)/2;
     const g = makeCG(j.id, 'JW', j.label, j.stage);
-    g.appendChild(el('line', {x1:p1.x, y1:p1.y, x2:p2.x, y2:p2.y, stroke:TYPE_COLORS.JW, 'stroke-width':1.5, 'stroke-dasharray':'6,3', class:'comp-body', opacity:0.8}));
+    // A wire on the BACK of the board is drawn finer and fainter, with a tight dash,
+    // so it reads as running underneath. Both outer lanes are tinned front and back,
+    // which is what makes back-routing possible. Default is front.
+    const onBack = j.side === 'back';
+    g.appendChild(el('line', {x1:p1.x, y1:p1.y, x2:p2.x, y2:p2.y, stroke:TYPE_COLORS.JW,
+      'stroke-width': onBack ? 1 : 1.5,
+      'stroke-dasharray': onBack ? '2,2.5' : '6,3',
+      class:'comp-body', opacity: onBack ? 0.55 : 0.9}));
     g.appendChild(el('circle', {cx:p1.x, cy:p1.y, r:2.5, fill:TYPE_COLORS.JW}));
     g.appendChild(el('circle', {cx:p2.x, cy:p2.y, r:2.5, fill:TYPE_COLORS.JW}));
     // No text on jumpers — the dashed line reads as a jumper on sight, and the id
@@ -740,7 +747,9 @@ function drawLegend() {
   `<div class="legend-item"><div class="legend-swatch" style="background:${TH.pos}"></div>+12V</div>` +
   `<div class="legend-item"><div class="legend-swatch" style="background:${TH.neg}"></div>-12V</div>` +
   `<div class="legend-item"><div class="legend-swatch" style="background:${TH.gnd}"></div>GND</div>` +
-  '<div class="legend-note">NPN and PNP are close in light mode — read the label to tell them apart</div>';
+  `<div class="legend-item"><div class="legend-swatch" style="background:${TH.types.JW}"></div>wire (front)</div>` +
+  `<div class="legend-item"><div class="legend-swatch" style="background:${TH.types.JW};opacity:0.55"></div>wire (back)</div>` +
+  '<div class="legend-note">Back wires run under the board — the outer lanes are tinned both sides. NPN/PNP are close in light mode; read the label.</div>';
 }
 function applyTheme() {
   THEME = lightBox.checked ? 'light' : 'dark';

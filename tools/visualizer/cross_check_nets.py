@@ -133,6 +133,10 @@ BARE_ROW_NETS = {
     (13, 'R'): 'C15_a',          # R17.r2, C15.r1
     (11, 'R'): 'C15_b',          # C15.r2, R15.r1, VD1.r1
     (12, 'R'): 'STRIKE_PULSE_A', # VD1.r2 (cathode), R34.r1
+    # Rev 0.23 — spare edge positions used as routing tie points. The wire lands
+    # in one hole of the doublet and the component leg in the other; same pad.
+    (11, 'ctrlR'): 'LED_DRIVE_A',  # JW_R6_LED_A (front) from b8; R6.r2
+    (15, 'ctrlR'): 'MAN_WIPER_A',  # R32.r1; JW_R32_MAN_A (back) to ctrlLi5
     (10, 'R'): 'CV_PROT_A',      # R16.r2, R13.r1
     # Channel B
     (20, 'L'): 'C16_a',          # R25.r2, C16.r1
