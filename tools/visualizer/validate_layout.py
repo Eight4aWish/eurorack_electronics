@@ -4,6 +4,7 @@ n8synth layout validator. Checks a visualizer JSON for:
   1. Hole collisions — multiple pins assigned to one (row, col)
   1b. Net labels vs the IC pin on the same node
   1c. Same net named on both row halves with nothing bridging the gap
+  1d. A wire scheduled later than both ends it joins
   2. Net-distinctness — every twoPin component must bridge two distinct (row, side) nets
   3. Power-rail parity — pwrL/pwrR endpoints match the alternating-parity rule
      (pwrL: odd=GND/even=+12V; pwrR: odd=GND/even=-12V)
@@ -143,6 +144,43 @@ def validate(path):
         if halves.get('L') and halves.get('L') == halves.get('R') and not spans_gap(r):
             errs.append(f"row {r}: net '{halves['L']}' is named on BOTH halves but nothing "
                         f"bridges the centre gap — those are two isolated nodes")
+
+    # --- A wire scheduled later than both ends it joins -----------------------
+    # If both nodes a wire connects already exist at stage N but the wire is stage
+    # N+1, phase N shows two live ends with nothing between them: the phase reads
+    # as complete and its test cannot pass.
+    def lane(c):
+        c = str(c)
+        if c.startswith('ctrlL'):
+            return 'ctrlL'
+        if c.startswith('ctrlR'):
+            return 'ctrlR'
+        return side(c)
+
+    first_stage = {}
+
+    def note(r, c, st):
+        k = (r, lane(c))
+        first_stage[k] = min(first_stage.get(k, 99), st)
+
+    for comp in layout.get('twoPins', []):
+        for e in (1, 2):
+            note(comp[f'r{e}'], comp[f'c{e}'], comp.get('stage', 1))
+    for ic in layout.get('ics', []):
+        for pin in ic.get('pins', []):
+            note(pin['r'], pin['c'], ic.get('stage', 1))
+    for w in layout.get('jpsWires', []):
+        note(w['row'], w['col'], w.get('stage', 1))
+
+    for grp in ('jumpers', 'powerWires'):
+        for w in layout.get(grp, []):
+            a = first_stage.get((w.get('r1'), lane(w.get('c1'))), 99)
+            b = first_stage.get((w.get('r2'), lane(w.get('c2'))), 99)
+            both = max(a, b)
+            if both < 99 and w.get('stage', 1) > both:
+                errs.append(f"{grp} {w.get('id', w.get('label', '?'))}: stage "
+                            f"{w.get('stage')} but both ends exist by stage {both} — "
+                            f"that phase shows two live ends with no link")
 
     if errs:
         print(f"\n✗ {len(errs)} error(s):")

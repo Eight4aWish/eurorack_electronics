@@ -1175,7 +1175,7 @@ registerLayout("Dual LPG", {
       "r2": 5,
       "c2": "ctrlLi",
       "side": "back",
-      "stage": 2
+      "stage": 1
     }
   ],
   "powerWires": [
