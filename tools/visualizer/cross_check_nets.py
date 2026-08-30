@@ -137,6 +137,7 @@ BARE_ROW_NETS = {
     # in one hole of the doublet and the component leg in the other; same pad.
     (11, 'ctrlR'): 'LED_DRIVE_A',  # JW_R6_LED_A (front) from b8; R6.r2
     (15, 'ctrlR'): 'MAN_WIPER_A',  # R32.r1; JW_R32_MAN_A (back) to ctrlLi5
+    (13, 'ctrlR'): 'LED_STATUS_A', # R_STATUS_A.r2; JW_STATA (back) to ctrlLi8
     (10, 'R'): 'CV_PROT_A',      # R16.r2, R13.r1
     # Channel B
     (20, 'L'): 'C16_a',          # R25.r2, C16.r1

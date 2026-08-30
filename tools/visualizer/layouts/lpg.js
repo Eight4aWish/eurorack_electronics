@@ -968,8 +968,8 @@ registerLayout("Dual LPG", {
       "value": "4K7",
       "r1": 17,
       "c1": "h",
-      "r2": 8,
-      "c2": "ctrlLi",
+      "r2": 13,
+      "c2": "ctrlRo",
       "stage": 2,
       "note": "Status LED current limit (was panel-side rev 0.7). DRV_OUT_A (17R) -> LED_STATUS_A cathode on control hole."
     },
@@ -1176,6 +1176,16 @@ registerLayout("Dual LPG", {
       "c2": "ctrlLi",
       "side": "back",
       "stage": 1
+    },
+    {
+      "id": "JW_STATA",
+      "label": "spare 13R -> Status LED A K (under board)",
+      "r1": 13,
+      "c1": "ctrlRi",
+      "r2": 8,
+      "c2": "ctrlLi",
+      "side": "back",
+      "stage": 2
     }
   ],
   "powerWires": [
