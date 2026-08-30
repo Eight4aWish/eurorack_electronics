@@ -2,7 +2,7 @@ registerLayout("Dual LPG", {
   "title": "DUAL PINGABLE LPG",
   "source": "docs/lpg_netlist.md rev 0.5 + docs/lpg_breadboard_placement.md rev 0.19",
   "board": "n8synth (single board, rows 1-36)",
-  "revision": "0.22",
+  "revision": "0.23-photo-recon",
   "notes": "Rev 0.19: added a 3V3 turn-on-threshold zener in each status-LED ground leg (VD7 ch A, VD8 ch B) - panel/control-board side, in series between the LED anode and the d-plane (cathode/banded toward GND). Keeps the indicator dark through the MANUAL baseline and quiet passages, then it comes on punchily for strikes/peaks (kick-in ~Vf_LED+3.3 = ~5.2V). Panel-side part, not a breadboard twoPin, so the maps are unchanged. PRIOR Rev 0.18: status-LED parts updated to match the as-built voice. Status LEDs LED_STATUS_A/B = RED (was green); R_STATUS_A/B = 4K7 (was 2K2). Red's lower Vf would run brighter at 2K2, so the resistor went up to ~1.7 mA. (The vactrol-drive LEDs were already red \u2014 green underperformed on the Vf budget.) PRIOR Rev 0.16: CHANNEL B re-allocated to its REAL n8synth control positions, mirroring A. Left CTRL: MIX@17, DEPTH B a/b/c@20-22, OUT B@23, LED B a/b@32-33, STRIKE B@35. Right CTRL: IN B@23, ATTEN B a/b/c@32-34, MANUAL B a/b/c@35-37, CV B@38. Ground markers at MANUAL B a / ATTEN B a / LED B a; link marker at DEPTH B a. Board-link jumpers JW_INB / JW_P7cB / JW_P5cB / JW_MIX. Both channels now on real control positions. PRIOR Rev 0.15: CHANNEL A re-allocated to the REAL n8synth control-board positions supplied by the builder. Right CTRL: IN A@1, DEPTH A a/b/c@4-6, ATTEN A a/b/c@7-9, CV A@17, STRIKE A@20. Left CTRL: OUT A@1, MANUAL A a/b/c@4-6, LED A a/b@7-8. Pot legs map a=left,b=wiper,c=right; MANUAL/ATTEN c=hot end, a=GND; DEPTH c=DRV_OUT, b=wiper, a=link-to-b (CCW short). Ground-tie reminders (green earth glyph, mark=gnd) at MANUAL A a / ATTEN A a / LED A a; DEPTH A a is a link marker (mark=link). Short acronym labels (lbl field) added to kill truncation. Channel B still on placeholder control positions (re-map next). PRIOR Rev 0.14: brought the four previously panel-side resistors onto the board via control holes (now that ctrlL/ctrlR represent the panel positions): R_OUT_A (CHA_OUT->XS4, 3.ctrlL), R_OUT_B (CHB_OUT->XS8, 29.ctrlL), R_STATUS_A (DRV_OUT_A->LED_STATUS_A, 17.ctrlR), R_STATUS_B (DRV_OUT_B->LED_STATUS_B, 16.ctrlL). Their jack/LED stubs (XS4/XS8, LEDsta/LEDstb) moved onto the same control holes. 57 twoPins now (was 53). PRIOR Rev 0.13: panel-facing resistor ends moved off the breadboard onto n8synth CONTROL-BOARD holes (new columns ctrlL / ctrlR, outboard of the power rails). 12 ends relocated (6 per channel): R16/R17/R38/R29/R32/R6 (Ch A) and R22/R25/R39/R30/R33/R12 (Ch B) now land their pot/jack end on a control hole at the same row, freeing those breadboard rows. The matching panel-wire stubs (jpsWires: XS2/XS3/XS6/XS7, P1.w/P2.t/P2.w/P3.w, P5.w/P6.t/P6.w/P7.w) were relocated onto the SAME control holes, so each reads as one clean connection; the old breadboard holes (e.g. 9a/9j) are now empty/free. Control-board hole positions/routing are still the builder's to finalise. Each control hole carries the panel net it routes to (see cross_check_nets BARE_ROW_NETS ctrl entries). PRIOR Rev 0.12: reversed both audio LDR chains end-for-end to eliminate the centre-gap-crossing 10K series resistors (R4/R5, R10/R11). The chain now enters on the RIGHT (next to the input-buffer output) and exits V_p on the LEFT (next to the filter-buffer input), so neither 10K crosses the breadboard centre gap. Achieved by swapping the audio (LDR) nets on the two SIP outer pins per channel: VC_x_L.1 now = V_p, VC_x_R.4 now = VC_x_LDR1_IN. The R_alpha + 1nF cluster (R3/C13, R9/C14) moved with V_p to the left side; 220pF (C11/C12) stays at V_x (unchanged); LED chain, bridges and driver untouched. Electrically identical (both 10Ks equal, both LDRs share one LED). New GND rail ends: R3.r2 r1.pwrL, C13.r2 r3.pwrL, R9.r2 r21.pwrL, C14.r2 r23.pwrL (all odd-row GND parity). Rev 0.11 (prior): power-rail collision fix.",
   "stages": [
     {
@@ -109,25 +109,25 @@ registerLayout("Dual LPG", {
       "pins": [
         {
           "n": 1,
-          "r": 5,
+          "r": 6,
           "c": "d",
           "net": "V_p_A"
         },
         {
           "n": 2,
-          "r": 6,
+          "r": 7,
           "c": "d",
           "net": "LED_CHAIN_MID_A"
         },
         {
           "n": 3,
-          "r": 7,
+          "r": 8,
           "c": "d",
           "net": "LED_DRIVE_A"
         },
         {
           "n": 4,
-          "r": 8,
+          "r": 9,
           "c": "d",
           "net": "V_x_A"
         }
@@ -143,25 +143,25 @@ registerLayout("Dual LPG", {
       "pins": [
         {
           "n": 4,
-          "r": 5,
+          "r": 6,
           "c": "g",
           "net": "VC_A_LDR1_IN"
         },
         {
           "n": 3,
-          "r": 6,
+          "r": 7,
           "c": "g",
           "net": "LED_CHAIN_MID_A"
         },
         {
           "n": 2,
-          "r": 7,
+          "r": 8,
           "c": "g",
           "net": "GND"
         },
         {
           "n": 1,
-          "r": 8,
+          "r": 9,
           "c": "g",
           "net": "V_x_A"
         }
@@ -415,7 +415,7 @@ registerLayout("Dual LPG", {
       "r1": 4,
       "c1": "b",
       "r2": 5,
-      "c2": "pwrL",
+      "c2": "b",
       "stage": 1
     },
     {
@@ -504,7 +504,7 @@ registerLayout("Dual LPG", {
       "value": "10K",
       "r1": 4,
       "c1": "h",
-      "r2": 5,
+      "r2": 6,
       "c2": "h",
       "stage": 1
     },
@@ -512,7 +512,7 @@ registerLayout("Dual LPG", {
       "id": "C11",
       "type": "C",
       "value": "220pF",
-      "r1": 8,
+      "r1": 9,
       "c1": "b",
       "r2": 7,
       "c2": "pwrL",
@@ -523,26 +523,26 @@ registerLayout("Dual LPG", {
       "type": "R",
       "value": "4M7",
       "r1": 5,
-      "c1": "b",
-      "r2": 1,
-      "c2": "pwrL",
+      "c1": "e",
+      "r2": 6,
+      "c2": "e",
       "stage": 1
     },
     {
       "id": "C13",
       "type": "C",
       "value": "1nF",
-      "r1": 5,
+      "r1": 6,
       "c1": "c",
-      "r2": 3,
-      "c2": "pwrL",
+      "r2": 5,
+      "c2": "c",
       "stage": 1
     },
     {
       "id": "R5",
       "type": "R",
       "value": "10K",
-      "r1": 5,
+      "r1": 6,
       "c1": "a",
       "r2": 1,
       "c2": "a",
@@ -553,19 +553,19 @@ registerLayout("Dual LPG", {
       "type": "R",
       "value": "1K",
       "r1": 20,
-      "c1": "ctrlR",
-      "r2": 10,
-      "c2": "a",
+      "c1": "ctrlRi",
+      "r2": 13,
+      "c2": "h",
       "stage": 2
     },
     {
       "id": "C15",
       "type": "C",
       "value": "1uF",
-      "r1": 10,
-      "c1": "b",
+      "r1": 13,
+      "c1": "f",
       "r2": 11,
-      "c2": "a",
+      "c2": "f",
       "stage": 2
     },
     {
@@ -573,9 +573,9 @@ registerLayout("Dual LPG", {
       "type": "R",
       "value": "10K",
       "r1": 11,
-      "c1": "b",
-      "r2": 11,
-      "c2": "pwrL",
+      "c1": "g",
+      "r2": 9,
+      "c2": "pwrR",
       "stage": 2
     },
     {
@@ -583,9 +583,9 @@ registerLayout("Dual LPG", {
       "type": "D",
       "value": "1N4148",
       "r1": 11,
-      "c1": "c",
+      "c1": "h",
       "r2": 12,
-      "c2": "c",
+      "c2": "h",
       "stage": 2
     },
     {
@@ -593,7 +593,7 @@ registerLayout("Dual LPG", {
       "type": "R",
       "value": "10K",
       "r1": 12,
-      "c1": "d",
+      "c1": "g",
       "r2": 16,
       "c2": "g",
       "stage": 2
@@ -603,7 +603,7 @@ registerLayout("Dual LPG", {
       "type": "R",
       "value": "1K",
       "r1": 17,
-      "c1": "ctrlR",
+      "c1": "ctrlRi",
       "r2": 10,
       "c2": "j",
       "stage": 2
@@ -623,7 +623,7 @@ registerLayout("Dual LPG", {
       "type": "R",
       "value": "4K7",
       "r1": 8,
-      "c1": "ctrlR",
+      "c1": "ctrlRi",
       "r2": 16,
       "c2": "i",
       "stage": 2
@@ -633,7 +633,7 @@ registerLayout("Dual LPG", {
       "type": "R",
       "value": "4K7",
       "r1": 6,
-      "c1": "ctrlL",
+      "c1": "ctrlLi",
       "r2": 12,
       "c2": "pwrL",
       "stage": 1
@@ -643,7 +643,7 @@ registerLayout("Dual LPG", {
       "type": "R",
       "value": "4K7",
       "r1": 5,
-      "c1": "ctrlL",
+      "c1": "ctrlLi",
       "r2": 16,
       "c2": "j",
       "stage": 1
@@ -673,8 +673,8 @@ registerLayout("Dual LPG", {
       "type": "R",
       "value": "470R",
       "r1": 5,
-      "c1": "ctrlR",
-      "r2": 7,
+      "c1": "ctrlRi",
+      "r2": 8,
       "c2": "b",
       "stage": 1
     },
@@ -743,7 +743,7 @@ registerLayout("Dual LPG", {
       "type": "R",
       "value": "1K",
       "r1": 35,
-      "c1": "ctrlL",
+      "c1": "ctrlLi",
       "r2": 20,
       "c2": "a",
       "stage": 4
@@ -793,7 +793,7 @@ registerLayout("Dual LPG", {
       "type": "R",
       "value": "1K",
       "r1": 38,
-      "c1": "ctrlR",
+      "c1": "ctrlRi",
       "r2": 20,
       "c2": "j",
       "stage": 4
@@ -813,7 +813,7 @@ registerLayout("Dual LPG", {
       "type": "R",
       "value": "4K7",
       "r1": 33,
-      "c1": "ctrlR",
+      "c1": "ctrlRi",
       "r2": 15,
       "c2": "a",
       "stage": 4
@@ -823,7 +823,7 @@ registerLayout("Dual LPG", {
       "type": "R",
       "value": "4K7",
       "r1": 37,
-      "c1": "ctrlR",
+      "c1": "ctrlRi",
       "r2": 18,
       "c2": "pwrL",
       "stage": 3
@@ -833,7 +833,7 @@ registerLayout("Dual LPG", {
       "type": "R",
       "value": "4K7",
       "r1": 36,
-      "c1": "ctrlR",
+      "c1": "ctrlRi",
       "r2": 15,
       "c2": "b",
       "stage": 3
@@ -863,7 +863,7 @@ registerLayout("Dual LPG", {
       "type": "R",
       "value": "470R",
       "r1": 21,
-      "c1": "ctrlL",
+      "c1": "ctrlLi",
       "r2": 25,
       "c2": "b",
       "stage": 3
@@ -872,10 +872,10 @@ registerLayout("Dual LPG", {
       "id": "VD5",
       "type": "D",
       "value": "Zener 6v8",
-      "r1": 7,
+      "r1": 8,
       "c1": "c",
-      "r2": 9,
-      "c2": "pwrL",
+      "r2": 10,
+      "c2": "c",
       "stage": 1,
       "note": "Vactrol LED-chain clamp, channel A. CATHODE (banded end) on row 7 pwrL (GND on odd rows). ANODE on row 7L col c (LED_DRIVE_A \u2014 same net as VC_A_L.3 at col d and R6.r2 at col b). Operation: when LED_DRIVE_A < -V_zener the zener reverse-conducts to GND; with V_zener=6v8 and 2x vactrol Vf chain ~3.2V, I_peak through chain = (6.8-3.2)/470R = 7.7 mA."
     },
@@ -947,7 +947,7 @@ registerLayout("Dual LPG", {
       "r1": 3,
       "c1": "a",
       "r2": 1,
-      "c2": "ctrlL",
+      "c2": "ctrlLi",
       "stage": 1,
       "note": "Per-channel output series resistor (was panel-side rev 0.10). CHA_OUT (board, 3L) -> XS4 jack tip on control hole. Mix bus taps CHA_OUT before this R."
     },
@@ -958,7 +958,7 @@ registerLayout("Dual LPG", {
       "r1": 29,
       "c1": "a",
       "r2": 23,
-      "c2": "ctrlL",
+      "c2": "ctrlLi",
       "stage": 3,
       "note": "Per-channel output series resistor (was panel-side). CHB_OUT (29L) -> XS8 jack tip on control hole."
     },
@@ -969,7 +969,7 @@ registerLayout("Dual LPG", {
       "r1": 17,
       "c1": "h",
       "r2": 8,
-      "c2": "ctrlL",
+      "c2": "ctrlLi",
       "stage": 2,
       "note": "Status LED current limit (was panel-side rev 0.7). DRV_OUT_A (17R) -> LED_STATUS_A cathode on control hole."
     },
@@ -980,7 +980,7 @@ registerLayout("Dual LPG", {
       "r1": 16,
       "c1": "d",
       "r2": 33,
-      "c2": "ctrlL",
+      "c2": "ctrlLi",
       "stage": 4,
       "note": "Status LED current limit (was panel-side). DRV_OUT_B (16L) -> LED_STATUS_B cathode on control hole."
     }
@@ -1060,18 +1060,18 @@ registerLayout("Dual LPG", {
     },
     {
       "id": "JW_VCA_MID",
-      "r1": 6,
+      "r1": 7,
       "c1": "e",
-      "r2": 6,
+      "r2": 7,
       "c2": "f",
       "label": "Ch A MID bridge (LED chain mid)",
       "stage": 1
     },
     {
       "id": "JW_VCA_VX",
-      "r1": 8,
+      "r1": 9,
       "c1": "e",
-      "r2": 8,
+      "r2": 9,
       "c2": "f",
       "label": "Ch A V_x bridge (LDR junction)",
       "stage": 1
@@ -1097,7 +1097,7 @@ registerLayout("Dual LPG", {
     {
       "id": "JW_INA",
       "r1": 1,
-      "c1": "ctrlR",
+      "c1": "ctrlRi",
       "r2": 2,
       "c2": "j",
       "label": "IN A -> CHA_IN (buffer in)",
@@ -1106,7 +1106,7 @@ registerLayout("Dual LPG", {
     {
       "id": "JW_P3cA",
       "r1": 6,
-      "c1": "ctrlR",
+      "c1": "ctrlRi",
       "r2": 17,
       "c2": "i",
       "label": "DEPTH A CW -> DRV_OUT_A",
@@ -1115,7 +1115,7 @@ registerLayout("Dual LPG", {
     {
       "id": "JW_P1cA",
       "r1": 9,
-      "c1": "ctrlR",
+      "c1": "ctrlRi",
       "r2": 10,
       "c2": "i",
       "label": "ATTEN A top -> CV_PROT_A",
@@ -1124,7 +1124,7 @@ registerLayout("Dual LPG", {
     {
       "id": "JW_INB",
       "r1": 23,
-      "c1": "ctrlR",
+      "c1": "ctrlRi",
       "r2": 28,
       "c2": "j",
       "label": "IN B -> CHB_IN (buffer in)",
@@ -1133,7 +1133,7 @@ registerLayout("Dual LPG", {
     {
       "id": "JW_P7cB",
       "r1": 22,
-      "c1": "ctrlL",
+      "c1": "ctrlLi",
       "r2": 16,
       "c2": "b",
       "label": "DEPTH B CW -> DRV_OUT_B",
@@ -1142,7 +1142,7 @@ registerLayout("Dual LPG", {
     {
       "id": "JW_P5cB",
       "r1": 34,
-      "c1": "ctrlR",
+      "c1": "ctrlRi",
       "r2": 20,
       "c2": "i",
       "label": "ATTEN B top -> CV_PROT_B",
@@ -1151,7 +1151,7 @@ registerLayout("Dual LPG", {
     {
       "id": "JW_MIX",
       "r1": 17,
-      "c1": "ctrlL",
+      "c1": "ctrlLi",
       "r2": 32,
       "c2": "a",
       "label": "MIX jack -> MIX_OUT_JACK (post C17)",
@@ -1238,6 +1238,22 @@ registerLayout("Dual LPG", {
       "c2": "pwrR",
       "label": "VC_B_R pin 2 \u2192 GND (was DIP-8 pin 8)",
       "stage": 3
+    },
+    {
+      "r1": 5,
+      "c1": "a",
+      "r2": 5,
+      "c2": "pwrL",
+      "label": "local GND \u2014 row 5 left (ch A vactrol area)",
+      "stage": 1
+    },
+    {
+      "r1": 10,
+      "c1": "b",
+      "r2": 9,
+      "c2": "pwrL",
+      "label": "local GND \u2014 row 10 left (zener / local returns)",
+      "stage": 1
     }
   ],
   "jpsWires": [
@@ -1245,7 +1261,7 @@ registerLayout("Dual LPG", {
       "id": "XS1",
       "label": "CH A IN",
       "row": 1,
-      "col": "ctrlR",
+      "col": "ctrlRi",
       "stage": 1,
       "lbl": "INA"
     },
@@ -1253,7 +1269,7 @@ registerLayout("Dual LPG", {
       "id": "XS4",
       "label": "CH A OUT",
       "row": 1,
-      "col": "ctrlL",
+      "col": "ctrlLi",
       "stage": 1,
       "lbl": "OUTA"
     },
@@ -1261,7 +1277,7 @@ registerLayout("Dual LPG", {
       "id": "XS2",
       "label": "CH A STRIKE",
       "row": 20,
-      "col": "ctrlR",
+      "col": "ctrlRi",
       "stage": 2,
       "lbl": "STA"
     },
@@ -1269,7 +1285,7 @@ registerLayout("Dual LPG", {
       "id": "XS3",
       "label": "CH A CV",
       "row": 17,
-      "col": "ctrlR",
+      "col": "ctrlRi",
       "stage": 2,
       "lbl": "CVA"
     },
@@ -1277,7 +1293,7 @@ registerLayout("Dual LPG", {
       "id": "P1.t",
       "label": "CV ATTEN A top",
       "row": 9,
-      "col": "ctrlR",
+      "col": "ctrlRi",
       "stage": 2,
       "lbl": "P1c"
     },
@@ -1285,7 +1301,7 @@ registerLayout("Dual LPG", {
       "id": "P1.w",
       "label": "CV ATTEN A wiper",
       "row": 8,
-      "col": "ctrlR",
+      "col": "ctrlRi",
       "stage": 2,
       "lbl": "P1b"
     },
@@ -1293,7 +1309,7 @@ registerLayout("Dual LPG", {
       "id": "P2.t",
       "label": "MANUAL A top",
       "row": 6,
-      "col": "ctrlL",
+      "col": "ctrlLi",
       "stage": 1,
       "lbl": "P2c"
     },
@@ -1301,7 +1317,7 @@ registerLayout("Dual LPG", {
       "id": "P2.w",
       "label": "MANUAL A wiper",
       "row": 5,
-      "col": "ctrlL",
+      "col": "ctrlLi",
       "stage": 1,
       "lbl": "P2b"
     },
@@ -1309,7 +1325,7 @@ registerLayout("Dual LPG", {
       "id": "P3.cw",
       "label": "DEPTH A CW (from DRV_OUT_A)",
       "row": 6,
-      "col": "ctrlR",
+      "col": "ctrlRi",
       "stage": 1,
       "lbl": "P3c"
     },
@@ -1317,7 +1333,7 @@ registerLayout("Dual LPG", {
       "id": "P3.w",
       "label": "DEPTH A wiper",
       "row": 5,
-      "col": "ctrlR",
+      "col": "ctrlRi",
       "stage": 1,
       "lbl": "P3b"
     },
@@ -1325,7 +1341,7 @@ registerLayout("Dual LPG", {
       "id": "LEDsta",
       "label": "Status LED A K",
       "row": 8,
-      "col": "ctrlL",
+      "col": "ctrlLi",
       "stage": 2,
       "lbl": "LAb"
     },
@@ -1333,7 +1349,7 @@ registerLayout("Dual LPG", {
       "id": "XS5",
       "label": "CH B IN",
       "row": 23,
-      "col": "ctrlR",
+      "col": "ctrlRi",
       "stage": 3,
       "lbl": "INB"
     },
@@ -1341,7 +1357,7 @@ registerLayout("Dual LPG", {
       "id": "XS8",
       "label": "CH B OUT",
       "row": 23,
-      "col": "ctrlL",
+      "col": "ctrlLi",
       "stage": 3,
       "lbl": "OUTB"
     },
@@ -1349,7 +1365,7 @@ registerLayout("Dual LPG", {
       "id": "XS6",
       "label": "CH B STRIKE",
       "row": 35,
-      "col": "ctrlL",
+      "col": "ctrlLi",
       "stage": 4,
       "lbl": "STB"
     },
@@ -1357,7 +1373,7 @@ registerLayout("Dual LPG", {
       "id": "XS7",
       "label": "CH B CV",
       "row": 38,
-      "col": "ctrlR",
+      "col": "ctrlRi",
       "stage": 4,
       "lbl": "CVB"
     },
@@ -1365,7 +1381,7 @@ registerLayout("Dual LPG", {
       "id": "P5.t",
       "label": "CV ATTEN B top",
       "row": 34,
-      "col": "ctrlR",
+      "col": "ctrlRi",
       "stage": 4,
       "lbl": "P5c"
     },
@@ -1373,7 +1389,7 @@ registerLayout("Dual LPG", {
       "id": "P5.w",
       "label": "CV ATTEN B wiper",
       "row": 33,
-      "col": "ctrlR",
+      "col": "ctrlRi",
       "stage": 4,
       "lbl": "P5b"
     },
@@ -1381,7 +1397,7 @@ registerLayout("Dual LPG", {
       "id": "P6.t",
       "label": "MANUAL B top",
       "row": 37,
-      "col": "ctrlR",
+      "col": "ctrlRi",
       "stage": 3,
       "lbl": "P6c"
     },
@@ -1389,7 +1405,7 @@ registerLayout("Dual LPG", {
       "id": "P6.w",
       "label": "MANUAL B wiper",
       "row": 36,
-      "col": "ctrlR",
+      "col": "ctrlRi",
       "stage": 3,
       "lbl": "P6b"
     },
@@ -1397,7 +1413,7 @@ registerLayout("Dual LPG", {
       "id": "P7.cw",
       "label": "DEPTH B CW (from DRV_OUT_B)",
       "row": 22,
-      "col": "ctrlL",
+      "col": "ctrlLi",
       "stage": 3,
       "lbl": "P7c"
     },
@@ -1405,7 +1421,7 @@ registerLayout("Dual LPG", {
       "id": "P7.w",
       "label": "DEPTH B wiper",
       "row": 21,
-      "col": "ctrlL",
+      "col": "ctrlLi",
       "stage": 3,
       "lbl": "P7b"
     },
@@ -1413,7 +1429,7 @@ registerLayout("Dual LPG", {
       "id": "LEDstb",
       "label": "Status LED B K",
       "row": 33,
-      "col": "ctrlL",
+      "col": "ctrlLi",
       "stage": 4,
       "lbl": "LBb"
     },
@@ -1421,7 +1437,7 @@ registerLayout("Dual LPG", {
       "id": "XS9",
       "label": "MIX OUT",
       "row": 17,
-      "col": "ctrlL",
+      "col": "ctrlLi",
       "stage": 5,
       "lbl": "MIX"
     },
@@ -1429,7 +1445,7 @@ registerLayout("Dual LPG", {
       "id": "P2a",
       "label": "MANUAL A a -> GND",
       "row": 4,
-      "col": "ctrlL",
+      "col": "ctrlLi",
       "lbl": "P2a",
       "mark": "gnd",
       "stage": 1
@@ -1438,7 +1454,7 @@ registerLayout("Dual LPG", {
       "id": "P1a",
       "label": "ATTEN A a -> GND",
       "row": 7,
-      "col": "ctrlR",
+      "col": "ctrlRi",
       "lbl": "P1a",
       "mark": "gnd",
       "stage": 2
@@ -1447,7 +1463,7 @@ registerLayout("Dual LPG", {
       "id": "LAa",
       "label": "LED A anode -> VD7 (3V3 zener) -> GND (status turn-on threshold)",
       "row": 7,
-      "col": "ctrlL",
+      "col": "ctrlLi",
       "lbl": "LAa",
       "mark": "gnd",
       "stage": 2
@@ -1456,7 +1472,7 @@ registerLayout("Dual LPG", {
       "id": "P3a",
       "label": "DEPTH A a -> tie to wiper b (CCW short)",
       "row": 4,
-      "col": "ctrlR",
+      "col": "ctrlRi",
       "lbl": "P3a",
       "mark": "link",
       "stage": 1
@@ -1465,7 +1481,7 @@ registerLayout("Dual LPG", {
       "id": "P6a",
       "label": "MANUAL B a -> GND",
       "row": 35,
-      "col": "ctrlR",
+      "col": "ctrlRi",
       "lbl": "P6a",
       "mark": "gnd",
       "stage": 3
@@ -1474,7 +1490,7 @@ registerLayout("Dual LPG", {
       "id": "P5a",
       "label": "ATTEN B a -> GND",
       "row": 32,
-      "col": "ctrlR",
+      "col": "ctrlRi",
       "lbl": "P5a",
       "mark": "gnd",
       "stage": 4
@@ -1483,7 +1499,7 @@ registerLayout("Dual LPG", {
       "id": "LBa",
       "label": "LED B anode -> VD8 (3V3 zener) -> GND (status turn-on threshold)",
       "row": 32,
-      "col": "ctrlL",
+      "col": "ctrlLi",
       "lbl": "LBa",
       "mark": "gnd",
       "stage": 4
@@ -1492,7 +1508,7 @@ registerLayout("Dual LPG", {
       "id": "P7a",
       "label": "DEPTH B a -> tie to wiper b (CCW short)",
       "row": 20,
-      "col": "ctrlL",
+      "col": "ctrlLi",
       "lbl": "P7a",
       "mark": "link",
       "stage": 3
@@ -1518,25 +1534,25 @@ registerLayout("Dual LPG", {
       "stage": 1
     },
     {
-      "r": 7,
+      "r": 8,
       "side": "L",
       "name": "LED_DRIVE_A",
       "stage": 1
     },
     {
-      "r": 5,
+      "r": 6,
       "side": "R",
       "name": "VC_A_LDR1_IN",
       "stage": 1
     },
     {
-      "r": 8,
+      "r": 9,
       "side": "L",
       "name": "V_x_A",
       "stage": 1
     },
     {
-      "r": 5,
+      "r": 6,
       "side": "L",
       "name": "V_p_A",
       "stage": 1

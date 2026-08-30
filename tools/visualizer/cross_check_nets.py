@@ -125,9 +125,14 @@ BARE_ROW_NETS = {
     # of these chains (jacks, pot wipers/tops) now live on control holes — see
     # the rev 0.15/0.16 control-hole block below.
     # Channel A
-    (10, 'L'): 'C15_a',          # R17.r2, C15.r1
-    (11, 'L'): 'C15_b',          # C15.r2, R15.r1, VD1.r1
-    (12, 'L'): 'STRIKE_PULSE_A', # VD1.r2 (cathode), R34.r1
+    # Rev 0.23 — the C15 block moved to the RIGHT half and the ch-A vactrol
+    # dropped a row, freeing 10-13 left. 5L and 10L are now local ground rows,
+    # fed from the rail so nearby parts need not stretch to reach it.
+    (5,  'L'): 'GND',            # local ground: C3.r2, R3.r1, C13.r2
+    (10, 'L'): 'GND',            # local ground: VD5 cathode
+    (13, 'R'): 'C15_a',          # R17.r2, C15.r1
+    (11, 'R'): 'C15_b',          # C15.r2, R15.r1, VD1.r1
+    (12, 'R'): 'STRIKE_PULSE_A', # VD1.r2 (cathode), R34.r1
     (10, 'R'): 'CV_PROT_A',      # R16.r2, R13.r1
     # Channel B
     (20, 'L'): 'C16_a',          # R25.r2, C16.r1
