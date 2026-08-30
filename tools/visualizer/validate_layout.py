@@ -5,6 +5,8 @@ n8synth layout validator. Checks a visualizer JSON for:
   1b. Net labels vs the IC pin on the same node
   1c. Same net named on both row halves with nothing bridging the gap
   1d. A wire scheduled later than both ends it joins
+  1e. A component reaching across the board for a rail
+  1f. Anything on an outer hole a control-deck header occupies
   2. Net-distinctness — every twoPin component must bridge two distinct (row, side) nets
   3. Power-rail parity — pwrL/pwrR endpoints match the alternating-parity rule
      (pwrL: odd=GND/even=+12V; pwrR: odd=GND/even=-12V)
@@ -13,6 +15,9 @@ Usage:
     python3 validate_layout.py path/to/layout.json
 """
 import json
+import os
+
+HERE = os.path.dirname(os.path.abspath(__file__))
 import sys
 from collections import defaultdict
 
@@ -181,6 +186,53 @@ def validate(path):
                 errs.append(f"{grp} {w.get('id', w.get('label', '?'))}: stage "
                             f"{w.get('stage')} but both ends exist by stage {both} — "
                             f"that phase shows two live ends with no link")
+
+    # --- A component reaching across the board for a rail ---------------------
+    # Both rails carry GND, so a right-half part grounding on pwrL passes every net
+    # check while being a needlessly long wire. VCC is the exception: it exists only
+    # on pwrL even rows, so a right-half part needing it has no choice.
+    def body_half(c):
+        c = str(c)
+        if c in 'abcde' or c.startswith('ctrlL'):
+            return 'L'
+        if c in 'fghij' or c.startswith('ctrlR'):
+            return 'R'
+        return None
+
+    for comp in layout.get('twoPins', []):
+        for e in (1, 2):
+            rail, other = str(comp[f'c{e}']), body_half(comp[f'c{3 - e}'])
+            if rail not in ('pwrL', 'pwrR') or other not in ('L', 'R'):
+                continue
+            row = comp[f'r{e}']
+            if rail == 'pwrL' and other == 'R' and row % 2 == 0:
+                continue          # VCC only exists on pwrL — unavoidable
+            if (rail == 'pwrL' and other == 'R') or (rail == 'pwrR' and other == 'L'):
+                errs.append(f"{comp['id']}: body on the {other} half at "
+                            f"{comp['c' + str(3 - e)]}{comp['r' + str(3 - e)]} but reaches "
+                            f"{rail}{row} on the far side — use the near rail")
+
+    # --- Anything on a hole a control-deck header occupies ---------------------
+    # Read from the board profile, so the header positions are stated once.
+    spans = None
+    bid = layout.get('boardId')
+    if bid:
+        try:
+            prof = json.load(open(os.path.join(HERE, 'boards', bid + '.json')))
+            spans = prof['breadboard']['edgeConnector'].get('headerSpans')
+            pads = {int(r) for r, v in
+                    list(prof['ctrlMap'].values())[0].items() if v}
+        except Exception:
+            spans = None
+    if spans:
+        blocked = {r for lo, hi in spans for r in range(lo, hi + 1) if r not in pads}
+        for grp in ('twoPins', 'jumpers', 'powerWires'):
+            for item in layout.get(grp, []):
+                for e in (1, 2):
+                    col, row = str(item.get(f'c{e}')), item.get(f'r{e}')
+                    if col.endswith('o') and row in blocked:
+                        errs.append(f"{grp} {item.get('id', '?')}: {col}{row} is an OUTER hole "
+                                    f"a header pin occupies — only the inner hole is free there")
 
     if errs:
         print(f"\n✗ {len(errs)} error(s):")

@@ -42,6 +42,20 @@
     "edgeConnector": {
       "positions": 40,
       "holesPerPosition": 2,
+      "headerSpans": [
+        [
+          1,
+          10
+        ],
+        [
+          16,
+          25
+        ],
+        [
+          31,
+          40
+        ]
+      ],
       "columns": {
         "ctrlLo": "left edge connector, OUTER column (nearer the board edge)",
         "ctrlLi": "left edge connector, INNER column (nearer the power rail)",

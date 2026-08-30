@@ -269,6 +269,15 @@ Asked where three components had moved, the builder pointed out it was derivable
 Two placed components fixed where the moved nets now lived, and `EXPECTED_NETS` said what was on
 them; everything else followed. Worth reaching for before asking a question the data answers.
 
+## One thing deliberately not done
+
+Third-party kit designs were removed from the repo and then purged from history with
+`git-filter-repo` and a force-push. The old commits remain fetchable from GitHub by SHA until
+its own garbage collection runs, which a support request would force. **Declined as not worth
+it** — the repo had zero forks, three clones in the fortnight before removal (some of them the
+builder's own), and the content is unreferenced by any branch. Recorded so it is not raised
+again.
+
 ## What this says for the public tool
 
 The verification loop is the product, and it is genuinely good — it caught every knock-on of a

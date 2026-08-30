@@ -164,6 +164,11 @@ def make_profile(board_id, template_path):
         'edgeConnector': {
             'positions': 40,
             'holesPerPosition': 2,
+            # Where the 10-pin headers to the control deck land. Each spans ten
+            # positions but only nine carry JPS pads, so one pin per header is
+            # unused — and that position's OUTER hole is still physically occupied.
+            # Freeing it means trimming the header, so treat it as unavailable.
+            'headerSpans': [[1, 10], [16, 25], [31, 40]],
             'columns': {
                 'ctrlLo': 'left edge connector, OUTER column (nearer the board edge)',
                 'ctrlLi': 'left edge connector, INNER column (nearer the power rail)',
