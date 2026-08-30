@@ -155,6 +155,11 @@ BARE_ROW_NETS = {
     (15, 'ctrlL'): 'DRV_SUM_B',     # JW_R33_IN (front) from b15; JW_R33_X (back) out
     (30, 'ctrlR'): 'DRV_SUM_B',     # arrives from 15L; R33.r2
     (30, 'ctrlL'): 'P6_TOP_B',      # R30.r2; JW_R30_12V (back) to ctrlRi37
+    # Rev 0.26 — right-hand gap positions. R16, R17 and R22 sit above board in the
+    # control-board area, each fed by a wire from the main grid.
+    (12, 'ctrlR'): 'C15_a',      # JW_R17_IN (front) from h13; R17.r2
+    (14, 'ctrlR'): 'CV_PROT_A',  # JW_R16_IN (front) from j10; R16.r2
+    (29, 'ctrlR'): 'CHB_CV',     # R22.r1 from j21; JW_R22_X (back) to ctrlRi38
     (10, 'R'): 'CV_PROT_A',      # R16.r2, R13.r1
     # Channel B
     (20, 'L'): 'C16_a',          # R25.r2, C16.r1
