@@ -130,6 +130,7 @@ BARE_ROW_NETS = {
     # fed from the rail so nearby parts need not stretch to reach it.
     (5,  'L'): 'GND',            # local ground: C3.r2, R3.r1, C13.r2
     (10, 'L'): 'GND',            # local ground: VD5 cathode
+    (26, 'L'): 'GND',            # local ground: VD6 cathode (ch B mirror)
     (13, 'R'): 'C15_a',          # R17.r2, C15.r1
     (11, 'R'): 'C15_b',          # C15.r2, R15.r1, VD1.r1
     (12, 'R'): 'STRIKE_PULSE_A', # VD1.r2 (cathode), R34.r1

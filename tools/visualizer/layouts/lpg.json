@@ -885,8 +885,8 @@
       "value": "Zener 6v8",
       "r1": 24,
       "c1": "c",
-      "r2": 27,
-      "c2": "pwrL",
+      "r2": 26,
+      "c2": "c",
       "stage": 3,
       "note": "Vactrol LED-chain clamp, channel B (mirror of VD5). CATHODE on row 25 pwrL = GND. ANODE on row 25L col c (LED_DRIVE_B)."
     },
@@ -1284,6 +1284,14 @@
       "c2": "pwrL",
       "label": "local GND \u2014 row 10 left (zener / local returns)",
       "stage": 1
+    },
+    {
+      "r1": 26,
+      "c1": "b",
+      "r2": 27,
+      "c2": "pwrL",
+      "label": "local GND \u2014 row 26 left (zener / local returns, ch B)",
+      "stage": 3
     }
   ],
   "jpsWires": [

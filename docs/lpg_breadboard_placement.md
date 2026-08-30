@@ -220,6 +220,7 @@ These two tables are produced by `tools/visualizer/gen_rowmap.py` straight from 
 | 23 | `LED_CHAIN_MID_B` | **VC_B_L.2**@d, _JW_VCB_MID_ | `LED_CHAIN_MID_B` | _JW_VCB_MID_, **VC_B_R.3**@g |
 | 24 | `LED_DRIVE_B` | R12.2@b (470R), VD6.1@c (Zener 6v8), **VC_B_L.3**@d | `GND` | **VC_B_R.2**@g |
 | 25 | `V_x_B` | C12.1@b (220pF), **VC_B_L.4**@d, _JW_VCB_VX_ | `V_x_B` | _JW_VCB_VX_, **VC_B_R.1**@g |
+| 26 | `GND` | VD6.2@c (Zener 6v8) | `—` | — |
 | 27 | `V_OUT_B_PRE_BUF` | R11.2@a (10K), **DA2.5**@e | `VEE` | **DA2.4**@f, C8.1@h (100nF) |
 | 28 | `FILT_BUF_B_INV` | _JW_DA2_UGB_, **DA2.6**@e | `CHB_IN` | **DA2.3**@f, R7.1@h (100K), _JW_INB_ |
 | 29 | `CHB_OUT` | R_OUT_B.1@a (1K), _JW_DA2_UGB_, _JW_CHB_OUT_BUS_, **DA2.7**@e | `IN_BUF_B_INV` | **DA2.2**@f, _JW_DA2_UGA_ |
