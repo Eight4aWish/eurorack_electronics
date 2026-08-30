@@ -8,7 +8,7 @@ registerLayout("Dual LPG", {
     {
       "id": 1,
       "name": "Phase 1 \u2014 First sound (Ch A, MANUAL only)",
-      "desc": "Bring up Channel A as a manually-controlled LPG. Solder: DA1 (audio buf) + DA3 (driver) sockets, 2x 4-pin SIP sockets at cols d and g (rows 5-8) for VC_A_L and VC_A_R vactrol pair, C3/C4/C5/C6 (decoupling), Ch A audio path (R1, R4, R3, R5, C11, C13), driver minimum (R36, R37, R29, R32), LED drive (R6 + VD5 6v8 zener in socket). Two short centre-gap bridges (rows 6 and 8). Off-board: P2 MANUAL pot, P3 DEPTH pot, CHA_IN + CHA_OUT jacks. Leave DA2/DA4/VC_B sockets empty.",
+      "desc": "Bring up Channel A as a manually-controlled LPG. Solder: DA1 (audio buf) + DA3 (driver) sockets, 2x 4-pin SIP sockets for VC_A_L and VC_A_R vactrol pair, C3/C4/C5/C6 (decoupling), Ch A audio path (R1, R4, R3, R5, C11, C13), driver minimum (R36, R37, R29, R32), LED drive (R6 + VD5 6v8 zener in socket). Two short centre-gap bridges (the visualiser draws both). Off-board: P2 MANUAL pot, P3 DEPTH pot, CHA_IN + CHA_OUT jacks. Leave DA2/DA4/VC_B sockets empty.",
       "test": "TEST 1.1 (DC checks, power off audio gear): set MANUAL fully CCW. Power on. Confirm \u00b112V on DA1/DA3 pins 8/4. TEST 1.2 (audio path passive): inject 1 kHz / 1 Vpp at CHA_IN. With MANUAL fully open, scope CHA_OUT \u2014 sine should pass at ~unity gain (slight attenuation OK). TEST 1.3 (manual sweep): rotate MANUAL CCW\u2192CW. Output should drop in level AND lose highs as MANUAL closes (LPG combined VCA + LPF behaviour). TEST 1.4 (zener swap): with MANUAL fully open, measure DC across VC_A pin 1 \u2192 GND. Should be near -V_zener (\u2248 -6.8 V for 6v8). If clamping cuts in too early (low LED current at full MANUAL), swap VD5 to 9v1. If too much current, try 3v9 (with one LED bridged out).",
       "color": "#e74c3c"
     },
@@ -22,7 +22,7 @@ registerLayout("Dual LPG", {
     {
       "id": 3,
       "name": "Phase 3 \u2014 First sound (Ch B, MANUAL only)",
-      "desc": "Bring up Channel B as a manually-controlled LPG \u2014 mirror of Phase 1. Solder: DA2 (audio buf) socket + 2x 4-pin SIP sockets at cols d/g rows 23-26 for the VC_B_L/VC_B_R vactrol pair, C7/C8 decoupling, Ch B audio path (R7, R10, R9, R11, C12, C14), driver minimum (R20 feedback, R14 ground ref, R30 VCC\u2192P6 top, R33 P6 wiper\u2192sum), LED drive (R12 + VD6 6v8 zener). Two short centre-gap bridges (rows 24 and 26). Off-board: P6 MANUAL B, P7 DEPTH B, CHB_IN + CHB_OUT jacks.",
+      "desc": "Bring up Channel B as a manually-controlled LPG \u2014 mirror of Phase 1. Solder: DA2 (audio buf) socket + 2x 4-pin SIP sockets for the VC_B_L/VC_B_R vactrol pair, C7/C8 decoupling, Ch B audio path (R7, R10, R9, R11, C12, C14), driver minimum (R20 feedback, R14 ground ref, R30 VCC\u2192P6 top, R33 P6 wiper\u2192sum), LED drive (R12 + VD6 6v8 zener). Two short centre-gap bridges (the visualiser draws both). Off-board: P6 MANUAL B, P7 DEPTH B, CHB_IN + CHB_OUT jacks.",
       "test": "TEST 3.1 (DC): confirm \u00b112V on DA2 pins 8/4. TEST 3.2 (audio passive): inject 1 kHz / 1 Vpp at CHB_IN; MANUAL B open \u2192 sine passes near unity at CHB_OUT. TEST 3.3 (manual sweep): rotate MANUAL B CCW\u2192CW \u2014 level AND highs drop as it closes. TEST 3.4 (zener swap): as Phase 1.4 but on VC_B / VD6.",
       "color": "#3498db"
     },
