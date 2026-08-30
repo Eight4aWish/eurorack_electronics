@@ -60,7 +60,7 @@ The LPG passes end to end today: **57 components on expected nets, zero collisio
 
 ## Blockers
 
-**B1 — The answer key is hand-transcribed per module.** ⛔ *Hard blocker.*
+**Every module's answer key is typed by hand.** ⛔ *Hard blocker.*
 `cross_check_nets.py` carries `EXPECTED_NETS` as a literal dict in the source, headed *"from
 docs/lpg_netlist.md rev 0.4"* — while the layout is at rev 0.19, so it may already be stale.
 A third party's module has no answer key at all, which makes the most valuable check unusable
@@ -69,7 +69,7 @@ for anyone but us.
 `EXPECTED_NETS` is *derived* and the markdown netlist becomes a generated view. This was already
 the intended direction; third-party use makes it mandatory rather than nice-to-have.
 
-**B2a — The `.js` wrappers silently go stale.** ⚠️ *Mitigated.*
+**The browser copy of a layout goes stale without warning.** ⚠️ *Mitigated.*
 The browser loads `layouts/*.js`, generated from the canonical `.json` — but nothing regenerated
 them, so edits to a layout could pass every check and never reach the screen. Found the hard way:
 the LPG's wrapper sat at rev 0.19 while the JSON was at 0.21, so two fixes appeared not to work.
@@ -78,30 +78,30 @@ the LPG's wrapper sat at rev 0.19 while the JSON was at 0.21, so two fixes appea
 ⚠️ The wrappers had also drifted the *other* way on some layouts — the `.js` newer than its
 `.json`, so regenerating would have destroyed work. Those layouts have since been removed from
 the repo, but the hazard is inherent to keeping two sources of truth: it is an argument for
-dropping the wrappers entirely (B2) rather than syncing them.
+dropping the browser wrappers entirely rather than syncing them.
 
-**B2 — Modules are registered by editing `index.html`.** ⛔
+**Adding a module means editing the app's own HTML.** ⛔
 Layouts load via hardcoded `<script src="layouts/*.js">` tags, and each `.js` is a wrapper
 duplicating its `.json`. Adding a module means editing the app.
 **Fix:** a `layouts/index.json` manifest plus `fetch`, keeping the `.js` wrappers only as a
 `file://` fallback.
 
-**B3 — Third-party kit layouts.** ✅ *Done.*
+**Third-party kit designs were in the repo.** ✅ *Done.*
 Removed from the repo along with their transcribed netlists and the `index.html` script tags
 that loaded them. Kept locally in the gitignored `docs/refs/`.
 
-**B4 — Board profiles are generated but unused.** ⚠️
+**Board profiles exist but almost nothing reads them.** ⚠️
 `lpg.json` records its board as the free-text string `"n8synth (single board, rows 1-36)"`.
 Nothing links a layout to a profile, so nothing enforces board geometry.
 **Fix:** layouts reference a board id; validators load the profile.
 
-**B5 — The layout schema predates the corrected platform model.** ⚠️
+**The layout format predates the corrected platform model.** ⚠️
 It uses `ctrlL`/`ctrlR` and `pwrL`/`pwrR`, which is roughly right, but does not distinguish
 **main area / edge connector / power rail** as the three different extents they are, nor model
 edge-connector doublets or board variants.
 **Fix:** align the schema with `n8synth_platform.md` before others build on it.
 
-**B6a — Colour and contrast.** ✅ *Done.*
+**Colour and contrast were unreadable.** ✅ *Done.*
 The original palette failed four of five accessibility checks and several sidebar labels were
 literally unreadable — `test-point` measured **1.08:1** in light mode, `stage name` **1.01:1**.
 
@@ -118,10 +118,10 @@ legend that names all eight plus the rails and says which pair to read the label
 is generated from the live palette, so it can no longer drift out of date (it had been showing
 the *old* eight colours after the palette changed).
 
-**B6 — No install story, no getting-started doc.** ⚠️
+**No install instructions and no getting-started guide.** ⚠️
 Works from a clone plus `python3 -m http.server`, but that is undocumented for a newcomer.
 
-**B7 — Placement has no tool support.** ℹ️ *Partly addressed.*
+**The tool checks placement but does not help you place.** ℹ️ *Partly addressed.*
 `edit_layout.py` now covers the *correction* half: a text command language for moving endpoints,
 setting components, mirroring left/right and shifting rows, refusing any edit that collides.
 Initial placement is still manual. Be explicit that the offer is the verification loop plus
@@ -132,13 +132,13 @@ hand-editing, not auto-placement.
 ## Sequence
 
 1. **Platform model correct** — ✅ done (`n8synth_platform.md`, profiles regenerated)
-2. **Structured circuit file** (B1) — schema, retrofit the LPG, prove 57/57 nets still pass with
+2. **Structured circuit file** — the answer-key problem — schema, retrofit the LPG, prove 57/57 nets still pass with
    the hardcoded table deleted. *This is the gate: until it is done there is no third-party tool.*
-3. **Layout ↔ board profile link** (B4, B5)
-4. **Manifest loading** (B2) and **drop the MKI layouts** (B3)
+3. **Link layouts to board profiles**, and align the layout format with the platform doc
+4. **Load modules from a manifest** instead of editing the app's HTML
 5. **Transfer the dual LPG** to the new tool, reconciled against the as-built board
 6. **MOD2 placement** and verify
-7. **Getting-started doc** (B6), honest scope statement (B7)
+7. **Getting-started doc**, and an honest statement of what the tool does and does not do
 8. Publish
 
 Steps 2–4 are the actual engineering. Steps 5–6 are content, and are what the video needs.

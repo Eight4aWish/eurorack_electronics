@@ -222,7 +222,7 @@ position they name.
 `BARE_ROW_NETS`, a hand-maintained table asserting which net each bare row carries. It grew
 from **21 entries to 39** during this session — eighteen assertions about design intent that no
 file states, added by hand, each of which the checker would have accepted had it been wrong.
-That is blocker B1 in the tool plan, and this session is the argument for it.
+That is the answer-key problem in the tool plan, and this session is the argument for it.
 
 ## Four defect classes the checks could not see
 
@@ -283,4 +283,4 @@ again.
 The verification loop is the product, and it is genuinely good — it caught every knock-on of a
 fifty-component rework and refused to regenerate docs from a bad state. But its coverage is
 anecdotal, and `BARE_ROW_NETS` means the most valuable check cannot be used by anyone else at
-all. The structured circuit file (B1) should come **before** MOD2 placement, not after.
+all. The structured circuit file should come **before** MOD2 placement, not after.
