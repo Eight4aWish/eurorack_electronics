@@ -58,6 +58,58 @@ The LPG passes end to end today: **57 components on expected nets, zero collisio
 
 ---
 
+## What the tool actually needs as input
+
+Settled by working through the LPG rework. **Three inputs, and everything else derived** — not
+a new circuit format, which was over-engineering on my part.
+
+**1. The netlist** — components and the two nets each one connects. The existing netlist docs
+already state exactly this (`| R4 | 10K | BUF_OUT_A | VC_A.LDR1.in |`), so `EXPECTED_NETS` is
+pure hand-transcription of something already written down. The parser needs a spec so it reads
+all of it, and two validity rules:
+
+- **every component must have both terminals on a named net** — a one-ended component makes the
+  netlist invalid, not ambiguous
+- **nothing may be silently dropped** — the current parser lost all five MOD2 jacks, LED1 and
+  every connection while reporting success
+
+**2. The front panel layout** — which control position each jack, pot, switch and LED occupies.
+This is a real input, not decoration: it *anchors placement spatially*. Measured on the finished
+dual LPG, every IC sits at or just below the panel positions it serves —
+
+    DA1 rows 1-4    panel row 1        DA2 rows 27-30   panel row 23
+    DA3 rows 14-17  panel row 13       DA4 rows 33-36   panel row 28
+    VC_B rows 22-25 panel row 21
+
+perfectly monotonic, and nobody wrote that rule down. It emerged from placing by hand. It is
+also what makes a placement search bounded rather than open: an IC whose parts reach the top of
+the panel belongs near the top of the board.
+
+**3. The board rules** — already written: `n8synth_platform.md` plus the generated board
+profiles. Main area vs edge connector vs power rail, doublets and their outer/inner convention,
+header positions, rail parity, which rows exist on which board variant.
+
+### What is derived, not authored
+
+- **Which net each row-half carries.** A row-half is one node. Seed from the rails (by parity)
+  and the IC pins (which declare their nets), then propagate: if one end of a component sits on
+  a known node, its other end must be its other net. The hand-maintained table of 46 assertions
+  is a *consequence* of netlist plus placement, not an input to it.
+- **The per-component answer key** — read from the netlist rather than transcribed.
+
+### How placement actually happens
+
+There is no clever algorithm and there does not need to be one. Placement is **LLM-assisted
+trial and error, monitored by the checks**: spread the ICs out with room either side, anchor
+each near the panel positions it serves, then let the validators find what is wrong against the
+netlist and the board rules. That loop is what this session demonstrated at scale — a
+fifty-component rework where every knock-on was caught by a check rather than by inspection.
+
+The tool's offer is therefore honest and narrow: **it will not place your circuit, but it will
+not let you keep a placement that is wrong.**
+
+---
+
 ## Blockers
 
 **Every module's answer key is typed by hand.** ⛔ *Hard blocker.*
