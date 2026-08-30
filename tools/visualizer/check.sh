@@ -6,7 +6,9 @@
 #   3. sync_layout.py        regenerate the .js wrapper the browser actually loads
 #                            (the JSON is canonical; the wrapper is generated)
 #   4. gen_rowmap.py         regenerate the placement doc's row maps from the JSON
-#                            (only when 1-3 pass, so the doc never records a bad rev)
+#   5. check_doc_positions   every control position the doc names by hand must
+#                            exist in the layout (the off-board tables are prose,
+#                            but they still name positions)
 #
 # Usage:
 #   tools/visualizer/check.sh                              # checks the LPG
@@ -17,23 +19,29 @@ LAYOUT="${1:-layouts/lpg.json}"
 DOC="${2:-../../docs/lpg_breadboard_placement.md}"
 FAIL=0
 
-echo "════ 1/4 geometry (validate_layout) ════"
+echo "════ 1/5 geometry (validate_layout) ════"
 python3 validate_layout.py "$LAYOUT" || FAIL=1
 
 echo
-echo "════ 2/4 net identity (cross_check_nets) ════"
+echo "════ 2/5 net identity (cross_check_nets) ════"
 python3 cross_check_nets.py "$LAYOUT" || FAIL=1
 
 if [ "$FAIL" -eq 0 ]; then
     echo
-    echo "════ 3/4 browser wrapper (sync_layout) ════"
+    echo "════ 3/5 browser wrapper (sync_layout) ════"
     python3 sync_layout.py "$LAYOUT" || FAIL=1
 fi
 
 if [ "$FAIL" -eq 0 ]; then
     echo
-    echo "════ 4/4 doc maps (gen_rowmap) ════"
+    echo "════ 4/5 doc maps (gen_rowmap) ════"
     python3 gen_rowmap.py "$LAYOUT" "$DOC" || FAIL=1
+fi
+
+if [ "$FAIL" -eq 0 ]; then
+    echo
+    echo "════ 5/5 doc positions (check_doc_positions) ════"
+    python3 check_doc_positions.py "$LAYOUT" "$DOC" || FAIL=1
 fi
 
 echo
