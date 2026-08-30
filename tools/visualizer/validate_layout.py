@@ -2,6 +2,8 @@
 """
 n8synth layout validator. Checks a visualizer JSON for:
   1. Hole collisions — multiple pins assigned to one (row, col)
+  1b. Net labels vs the IC pin on the same node
+  1c. Same net named on both row halves with nothing bridging the gap
   2. Net-distinctness — every twoPin component must bridge two distinct (row, side) nets
   3. Power-rail parity — pwrL/pwrR endpoints match the alternating-parity rule
      (pwrL: odd=GND/even=+12V; pwrR: odd=GND/even=-12V)
@@ -114,6 +116,33 @@ def validate(path):
         if key in pin_net and nl['name'] not in pin_net[key]:
             errs.append(f"net label row {nl['r']} {nl['side']}: says '{nl['name']}' but the "
                         f"IC pin on that node is '{', '.join(sorted(pin_net[key]))}'")
+
+    # --- Same net named on both halves of a row, with nothing bridging ---------
+    # The left and right halves of a row are separate nodes. If both are labelled
+    # with the SAME net, something must cross the centre gap or they are two
+    # isolated nodes pretending to be one — an open circuit that reads as wired.
+    def spans_gap(r):
+        for grp in ('twoPins', 'jumpers'):
+            for t in layout.get(grp, []):
+                if t.get('r1') == r or t.get('r2') == r:
+                    if {side(t.get('c1')), side(t.get('c2'))} == {'L', 'R'}:
+                        return True
+        for ic in layout.get('ics', []):
+            if {side(p['c']) for p in ic.get('pins', []) if p['r'] == r} == {'L', 'R'}:
+                return True
+        return False
+
+    by_row = {}
+    for nl in layout.get('netLabels', []):
+        by_row.setdefault(nl['r'], {})[nl['side']] = nl['name']
+    for ic in layout.get('ics', []):
+        for pin in ic.get('pins', []):
+            if pin.get('net'):
+                by_row.setdefault(pin['r'], {}).setdefault(side(pin['c']), pin['net'])
+    for r, halves in sorted(by_row.items()):
+        if halves.get('L') and halves.get('L') == halves.get('R') and not spans_gap(r):
+            errs.append(f"row {r}: net '{halves['L']}' is named on BOTH halves but nothing "
+                        f"bridges the centre gap — those are two isolated nodes")
 
     if errs:
         print(f"\n✗ {len(errs)} error(s):")
