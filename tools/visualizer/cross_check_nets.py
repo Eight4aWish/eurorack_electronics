@@ -138,12 +138,18 @@ BARE_ROW_NETS = {
     (11, 'ctrlR'): 'LED_DRIVE_A',  # JW_R6_LED_A (front) from b8; R6.r2
     (15, 'ctrlR'): 'MAN_WIPER_A',  # R32.r1; JW_R32_MAN_A (back) to ctrlLi5
     (13, 'ctrlR'): 'LED_STATUS_A', # R_STATUS_A.r2; JW_STATA (back) to ctrlLi8
+    # Rev 0.24 — channel B mirrors A: vactrol up one row, the C16 block moved to
+    # the RIGHT half, CV_PROT_B pushed from 20R to 21R to make room for it.
+    (21, 'R'): 'CV_PROT_B',      # R19.r1, R22.r2
+    (20, 'R'): 'C16_a',          # R25.r2, C16.r1
+    (18, 'R'): 'C16_b',          # C16.r2, R31.r1, VD2.r1 (anode)
+    # VD2 jumps the centre gap on row 18, so STRIKE_PULSE_B stays on the LEFT
+    # half where R35 already reaches it — 19R is not needed.
     (10, 'R'): 'CV_PROT_A',      # R16.r2, R13.r1
     # Channel B
     (20, 'L'): 'C16_a',          # R25.r2, C16.r1
     (19, 'L'): 'C16_b',          # C16.r2, R31.r1, VD2.r1
     (18, 'L'): 'STRIKE_PULSE_B', # VD2.r2, R35.r1
-    (20, 'R'): 'CV_PROT_B',      # R22.r2, R19.r1
 
     # Mix bus tap nodes
     (31, 'L'): 'CHA_OUT',        # via JW_CHA_OUT_BUS from row 3L; R23.r1
