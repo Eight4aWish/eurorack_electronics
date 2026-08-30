@@ -2,7 +2,7 @@ registerLayout("Dual LPG", {
   "title": "DUAL PINGABLE LPG",
   "source": "docs/lpg_netlist.md rev 0.5 + docs/lpg_breadboard_placement.md rev 0.19",
   "board": "n8synth (single board, rows 1-36)",
-  "revision": "0.24-photo-recon",
+  "revision": "0.25-photo-recon",
   "notes": "Rev 0.19: added a 3V3 turn-on-threshold zener in each status-LED ground leg (VD7 ch A, VD8 ch B) - panel/control-board side, in series between the LED anode and the d-plane (cathode/banded toward GND). Keeps the indicator dark through the MANUAL baseline and quiet passages, then it comes on punchily for strikes/peaks (kick-in ~Vf_LED+3.3 = ~5.2V). Panel-side part, not a breadboard twoPin, so the maps are unchanged. PRIOR Rev 0.18: status-LED parts updated to match the as-built voice. Status LEDs LED_STATUS_A/B = RED (was green); R_STATUS_A/B = 4K7 (was 2K2). Red's lower Vf would run brighter at 2K2, so the resistor went up to ~1.7 mA. (The vactrol-drive LEDs were already red \u2014 green underperformed on the Vf budget.) PRIOR Rev 0.16: CHANNEL B re-allocated to its REAL n8synth control positions, mirroring A. Left CTRL: MIX@17, DEPTH B a/b/c@20-22, OUT B@23, LED B a/b@32-33, STRIKE B@35. Right CTRL: IN B@23, ATTEN B a/b/c@32-34, MANUAL B a/b/c@35-37, CV B@38. Ground markers at MANUAL B a / ATTEN B a / LED B a; link marker at DEPTH B a. Board-link jumpers JW_INB / JW_P7cB / JW_P5cB / JW_MIX. Both channels now on real control positions. PRIOR Rev 0.15: CHANNEL A re-allocated to the REAL n8synth control-board positions supplied by the builder. Right CTRL: IN A@1, DEPTH A a/b/c@4-6, ATTEN A a/b/c@7-9, CV A@17, STRIKE A@20. Left CTRL: OUT A@1, MANUAL A a/b/c@4-6, LED A a/b@7-8. Pot legs map a=left,b=wiper,c=right; MANUAL/ATTEN c=hot end, a=GND; DEPTH c=DRV_OUT, b=wiper, a=link-to-b (CCW short). Ground-tie reminders (green earth glyph, mark=gnd) at MANUAL A a / ATTEN A a / LED A a; DEPTH A a is a link marker (mark=link). Short acronym labels (lbl field) added to kill truncation. Channel B still on placeholder control positions (re-map next). PRIOR Rev 0.14: brought the four previously panel-side resistors onto the board via control holes (now that ctrlL/ctrlR represent the panel positions): R_OUT_A (CHA_OUT->XS4, 3.ctrlL), R_OUT_B (CHB_OUT->XS8, 29.ctrlL), R_STATUS_A (DRV_OUT_A->LED_STATUS_A, 17.ctrlR), R_STATUS_B (DRV_OUT_B->LED_STATUS_B, 16.ctrlL). Their jack/LED stubs (XS4/XS8, LEDsta/LEDstb) moved onto the same control holes. 57 twoPins now (was 53). PRIOR Rev 0.13: panel-facing resistor ends moved off the breadboard onto n8synth CONTROL-BOARD holes (new columns ctrlL / ctrlR, outboard of the power rails). 12 ends relocated (6 per channel): R16/R17/R38/R29/R32/R6 (Ch A) and R22/R25/R39/R30/R33/R12 (Ch B) now land their pot/jack end on a control hole at the same row, freeing those breadboard rows. The matching panel-wire stubs (jpsWires: XS2/XS3/XS6/XS7, P1.w/P2.t/P2.w/P3.w, P5.w/P6.t/P6.w/P7.w) were relocated onto the SAME control holes, so each reads as one clean connection; the old breadboard holes (e.g. 9a/9j) are now empty/free. Control-board hole positions/routing are still the builder's to finalise. Each control hole carries the panel net it routes to (see cross_check_nets BARE_ROW_NETS ctrl entries). PRIOR Rev 0.12: reversed both audio LDR chains end-for-end to eliminate the centre-gap-crossing 10K series resistors (R4/R5, R10/R11). The chain now enters on the RIGHT (next to the input-buffer output) and exits V_p on the LEFT (next to the filter-buffer input), so neither 10K crosses the breadboard centre gap. Achieved by swapping the audio (LDR) nets on the two SIP outer pins per channel: VC_x_L.1 now = V_p, VC_x_R.4 now = VC_x_LDR1_IN. The R_alpha + 1nF cluster (R3/C13, R9/C14) moved with V_p to the left side; 220pF (C11/C12) stays at V_x (unchanged); LED chain, bridges and driver untouched. Electrically identical (both 10Ks equal, both LDRs share one LED). New GND rail ends: R3.r2 r1.pwrL, C13.r2 r3.pwrL, R9.r2 r21.pwrL, C14.r2 r23.pwrL (all odd-row GND parity). Rev 0.11 (prior): power-rail collision fix.",
   "stages": [
     {
@@ -812,8 +812,8 @@ registerLayout("Dual LPG", {
       "id": "R39",
       "type": "R",
       "value": "4K7",
-      "r1": 33,
-      "c1": "ctrlRi",
+      "r1": 13,
+      "c1": "ctrlLi",
       "r2": 15,
       "c2": "a",
       "stage": 4
@@ -822,10 +822,10 @@ registerLayout("Dual LPG", {
       "id": "R30",
       "type": "R",
       "value": "4K7",
-      "r1": 37,
-      "c1": "ctrlRi",
-      "r2": 18,
-      "c2": "pwrL",
+      "r1": 28,
+      "c1": "pwrL",
+      "r2": 30,
+      "c2": "ctrlLi",
       "stage": 3
     },
     {
@@ -834,8 +834,8 @@ registerLayout("Dual LPG", {
       "value": "4K7",
       "r1": 36,
       "c1": "ctrlRi",
-      "r2": 15,
-      "c2": "b",
+      "r2": 30,
+      "c2": "ctrlRi",
       "stage": 3
     },
     {
@@ -894,8 +894,8 @@ registerLayout("Dual LPG", {
       "id": "R23",
       "type": "R",
       "value": "100K",
-      "r1": 31,
-      "c1": "b",
+      "r1": 28,
+      "c1": "ctrlRo",
       "r2": 35,
       "c2": "h",
       "stage": 5
@@ -915,9 +915,9 @@ registerLayout("Dual LPG", {
       "type": "R",
       "value": "100K",
       "r1": 35,
-      "c1": "g",
+      "c1": "j",
       "r2": 36,
-      "c2": "g",
+      "c2": "j",
       "stage": 5
     },
     {
@@ -934,9 +934,9 @@ registerLayout("Dual LPG", {
       "id": "C17",
       "type": "C",
       "value": "100nF",
-      "r1": 36,
-      "c1": "h",
-      "r2": 32,
+      "r1": 32,
+      "c1": "d",
+      "r2": 31,
       "c2": "b",
       "stage": 5
     },
@@ -979,7 +979,7 @@ registerLayout("Dual LPG", {
       "value": "4K7",
       "r1": 16,
       "c1": "d",
-      "r2": 33,
+      "r2": 14,
       "c2": "ctrlLi",
       "stage": 4,
       "note": "Status LED current limit (was panel-side). DRV_OUT_B (16L) -> LED_STATUS_B cathode on control hole."
@@ -1044,10 +1044,11 @@ registerLayout("Dual LPG", {
       "id": "JW_CHA_OUT_BUS",
       "r1": 3,
       "c1": "c",
-      "r2": 31,
-      "c2": "c",
-      "label": "CHA_OUT \u2192 mix bus",
-      "stage": 5
+      "r2": 11,
+      "c2": "ctrlLi",
+      "label": "CHA_OUT -> spare 11L (front)",
+      "stage": 5,
+      "side": "front"
     },
     {
       "id": "JW_CHB_OUT_BUS",
@@ -1152,7 +1153,7 @@ registerLayout("Dual LPG", {
       "id": "JW_MIX",
       "r1": 17,
       "c1": "ctrlLi",
-      "r2": 32,
+      "r2": 31,
       "c2": "a",
       "label": "MIX jack -> MIX_OUT_JACK (post C17)",
       "stage": 5
@@ -1186,6 +1187,76 @@ registerLayout("Dual LPG", {
       "c2": "ctrlLi",
       "side": "back",
       "stage": 2
+    },
+    {
+      "id": "JW_CHA_OUT_X",
+      "label": "11L -> 28R, CHA_OUT across (under board)",
+      "r1": 11,
+      "c1": "ctrlLo",
+      "r2": 28,
+      "c2": "ctrlRi",
+      "side": "back",
+      "stage": 5
+    },
+    {
+      "id": "JW_R39_CVB",
+      "label": "13L -> CV ATTEN B wiper (under board)",
+      "r1": 13,
+      "c1": "ctrlLo",
+      "r2": 33,
+      "c2": "ctrlRi",
+      "side": "back",
+      "stage": 4
+    },
+    {
+      "id": "JW_STATB",
+      "label": "14L -> Status LED B K (under board)",
+      "r1": 14,
+      "c1": "ctrlLo",
+      "r2": 33,
+      "c2": "ctrlLi",
+      "side": "back",
+      "stage": 4
+    },
+    {
+      "id": "JW_R33_IN",
+      "label": "DRV_SUM_B -> spare 15L (above board)",
+      "r1": 15,
+      "c1": "b",
+      "r2": 15,
+      "c2": "ctrlLi",
+      "side": "front",
+      "stage": 3
+    },
+    {
+      "id": "JW_R33_X",
+      "label": "15L -> 30R, DRV_SUM_B across (under board)",
+      "r1": 15,
+      "c1": "ctrlLo",
+      "r2": 30,
+      "c2": "ctrlRo",
+      "side": "back",
+      "stage": 3
+    },
+    {
+      "id": "JW_R30_12V",
+      "label": "30L -> 37R, +12V feed across (under board)",
+      "r1": 30,
+      "c1": "ctrlLo",
+      "r2": 37,
+      "c2": "ctrlRi",
+      "side": "back",
+      "stage": 3
+    },
+    {
+      "id": "JW_MIX_OUT_X",
+      "label": "MIX_OUT 32L -> 36R (above board)",
+      "r1": 32,
+      "c1": "e",
+      "r2": 36,
+      "c2": "g",
+      "side": "front",
+      "stage": 5
     }
   ],
   "powerWires": [

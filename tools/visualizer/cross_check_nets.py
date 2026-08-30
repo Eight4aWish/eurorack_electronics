@@ -146,6 +146,15 @@ BARE_ROW_NETS = {
     (18, 'R'): 'C16_b',          # C16.r2, R31.r1, VD2.r1 (anode)
     # VD2 jumps the centre gap on row 18, so STRIKE_PULSE_B stays on the LEFT
     # half where R35 already reaches it — 19R is not needed.
+    # Rev 0.25 — left-hand gap positions used as routing tie points. Each carries
+    # whatever net its wire brings; the component sits in one hole, the wire the other.
+    (11, 'ctrlL'): 'CHA_OUT',       # JW_CHA_OUT_BUS (front) in; JW_CHA_OUT_X (back) out
+    (28, 'ctrlR'): 'CHA_OUT',       # arrives from 11L; R23.r1
+    (13, 'ctrlL'): 'CV_WIPER_B',    # R39.r1; JW_R39_CVB (back) to ctrlRi33
+    (14, 'ctrlL'): 'LED_STATUS_B',  # R_STATUS_B.r2; JW_STATB (back) to ctrlLi33
+    (15, 'ctrlL'): 'DRV_SUM_B',     # JW_R33_IN (front) from b15; JW_R33_X (back) out
+    (30, 'ctrlR'): 'DRV_SUM_B',     # arrives from 15L; R33.r2
+    (30, 'ctrlL'): 'P6_TOP_B',      # R30.r2; JW_R30_12V (back) to ctrlRi37
     (10, 'R'): 'CV_PROT_A',      # R16.r2, R13.r1
     # Channel B
     (20, 'L'): 'C16_a',          # R25.r2, C16.r1
@@ -153,9 +162,10 @@ BARE_ROW_NETS = {
     (18, 'L'): 'STRIKE_PULSE_B', # VD2.r2, R35.r1
 
     # Mix bus tap nodes
-    (31, 'L'): 'CHA_OUT',        # via JW_CHA_OUT_BUS from row 3L; R23.r1
+    (31, 'L'): 'MIX_OUT_JACK',   # JW_MIX lands a31; C17.r2
+                                 # (CHA_OUT now runs 11L -> 28R, see above)
     (31, 'R'): 'CHB_OUT',        # via JW_CHB_OUT_BUS from row 29L; R26.r1
-    (32, 'L'): 'MIX_OUT_JACK',   # C17.r2 (mix DC-block) -> JW_MIX -> MIX control hole
+    (32, 'L'): 'MIX_OUT',        # C17.r1; JW_MIX_OUT_X (front) carries it to 36R
 
     # Rev 0.8 — VC_X bridge intermediate cols (the centre-gap bridges land here
     # but the nets are also anchored by IC pins on the same row, so they're
