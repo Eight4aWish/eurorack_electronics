@@ -7,3 +7,8 @@ __pycache__/
 
 # third-party reference material (kept local; see README for source links)
 docs/refs/
+
+# The private reference repo, cloned in here so the tools and the third-party
+# material they refer to are one tree and one workspace folder. See its README.
+# Eight4aWish/eurorack_electronics_private
+private/
