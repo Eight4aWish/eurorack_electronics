@@ -72,6 +72,7 @@ Circuit notes, netlists, and reference material.
 - `lpg_published_schematics.md` — comparison of the source schematics that informed the design
 - `lpg_netlist.md` — full netlist
 - `lpg_breadboard_placement.md` — n8synth placement, panel layout, build-phase order
+- `lpg_mod_pot_rerange.md` — step-by-step bench procedure for the rev 0.27 DEPTH/MANUAL re-range (proposed, not yet built), written for picking the board up cold
 - `lpg_bom.csv` — bill of materials
 - `schematics/` — generated build-phase PNGs
 

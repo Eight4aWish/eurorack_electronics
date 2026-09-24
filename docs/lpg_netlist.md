@@ -171,10 +171,47 @@ LDR part-to-part variation is ~50% — buy generously and bench-select matched p
 | Qty | Value | Taper | Designator | Label | Wiring |
 |-----|-------|-------|------------|-------|--------|
 | 2 | 100K | B (lin) | P1, P5 | CV ATTEN A/B | jack tip → R(1K) → top, GND → bottom, wiper to driver |
-| 2 | 100K | B (lin) | P2, P6 | MANUAL A/B | VCC → 4K7 → top, GND → bottom, wiper to driver |
-| 2 | 500K | A (log) | P3, P7 | DEPTH A/B | rheostat (CCW shorted to wiper): driver out → CW → wiper → R(470R) → LED |
+| 2 | **10K** (was 100K — see re-range below) | B (lin) | P2, P6 | MANUAL A/B | VCC → 4K7 → top, GND → bottom, wiper to driver |
+| 2 | 500K | A (log) | P3, P7 | DEPTH A/B | rheostat (**CW** shorted to wiper — see re-range below): driver out → CCW → wiper → R(470R) → LED |
 
-Note: DEPTH is wired as a rheostat (variable R), not a divider. CCW shorted to wiper = full pot resistance in series; full CW = 0Ω in series. Per AI017 (P3 in their schematic).
+Note: DEPTH is wired as a rheostat (variable R), not a divider. The shorted end gives 0Ω in series; turning away from it brings the full pot resistance in. Per AI017 (P3 in their schematic).
+
+#### Pot re-range (rev 0.27 — proposed, not yet built)
+
+Both controls used only a sliver of their travel. Neither fix adds a part, and both are
+bench-confirmed by Phase 6 in [lpg_breadboard_placement.md](lpg_breadboard_placement.md).
+
+- **DEPTH — taper orientation.** Originally the CCW end was shorted to the wiper and the
+  driver fed CW, which puts the **c-to-b** track in circuit. On an A (log) taper that
+  track sits near full resistance for most of the rotation, so the whole audible
+  LED-current span — roughly 7.7mA down to 0.1mA, about 0.5K to 72K in series with R6 —
+  landed in the first few percent of travel from full CW. Shorting **CW** to the wiper
+  and feeding **CCW** puts the log track itself in circuit and spreads that span across
+  most of the rotation. Wiring only; the wiper leg and R6/R12 do not move.
+  **This reverses the knob direction** — full CCW becomes most-open — because a
+  rheostat's usable travel and its rotation direction are set by the same choice of
+  shorted end. So the rewire is the *free test* of the diagnosis; if it proves out and
+  the reversed direction is unwanted, a 500K **C-taper (reverse-log)** pot in the
+  original wiring buys the same width back with the original direction.
+  Because the pot legs arrive as JPS pads on edge-connector doublets, this is done
+  **entirely at the edge connector** — the link wire and the driver wire each move one
+  position on the free inner holes. The pot is not removed and the panel stays together.
+- **MANUAL — pot value.** R32/R33 (4K7) load the wiper into the summer's virtual ground.
+  Against a 100K pot that is roughly a 20:1 load at mid-rotation, collapsing the wiper to
+  well under a volt where open-circuit would be ~5.7V; with the driver's 10K/4K7 gain the
+  output stays under the ~3.2V the two-LED chain needs to conduct until about
+  three-quarters of the way up. Dropping P2/P6 to **10K** cuts the source impedance
+  tenfold and brings the opening point down to roughly a quarter of travel. Equivalently,
+  and without touching the panel, scale the whole driver network ×10 instead —
+  R29/R30, R32/R33, R38/R39 4K7 → 47K and R34/R35, R36/R20 10K → 100K. Every ratio is
+  preserved, so CV and Strike scaling are unchanged; it has to be done as a set, not
+  piecemeal.
+- **Optional, already stocked:** VD5/VD6 6v8 → **9v1** lifts the ceiling from ~7.7mA to
+  ~12.6mA, so the clamp stops compressing the top of both controls.
+
+These figures are calculated from this netlist (TL072 swing, Vf chain ≈ 3.2V, R6 = 470R),
+not measured. Phase 6 test 6.1 records the "before" so each change can be judged on its
+own. L7 resonance is deferred and unaffected.
 
 ### Connectors (9 jacks + power)
 
