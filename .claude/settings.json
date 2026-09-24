@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "additionalDirectories": [
+      "../eurorack_daisy_patch_init"
+    ]
+  }
+}
