@@ -563,16 +563,30 @@ brand-name addendum (EuroPi, apf.audio) is the common way to stay open while pro
 the name. CC BY-SA 4.0 is the current version (Ogham uses it; Mutable used 3.0). Add the
 licence file with the first KiCad files.
 
-## 14. Next steps
+## 14. From here to the order
 
-1. Get JLC's online quote for the bare 4-layer board and shipping (§12).
-2. Interface contract: wiring-field channel list and order, per-module pin maps
-   (Pico 2, Teensy 4.1), EEPROM layout.
-3. Schematic in KiCad, ERC clean; JLCPCB part numbers in symbol fields.
-4. Layout to the measured breadboard outline; DRC clean; analogue routing reviewed by eye.
-5. JLCPCB outputs (gerbers, drill, BOM, CPL); check rotations in JLC's preview.
-6. Bring-up firmware for the Pico 2 in `eurorack_modules`.
-7. Add the CC BY-SA 4.0 licence alongside the first hardware files.
+**Toolchain** (installed 2026-10-14): KiCad 9.0.7 with the JLC plugin (gerbers, BOM, CPL);
+Freerouting 2.5.0 on OpenJDK 21 for non-critical nets; kiutils and easyeda2kicad in the
+repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No paid tools.
+
+**Checkpoints** — each one is David's to look at before the next step:
+
+1. **Schematic**, as a PDF: KiCad's electrical rules check clean; every IC pin scripted
+   against its datasheet pinout; every power pin checked for its decoupling and every
+   polarised part for orientation. The pin map (which Pico / Teensy pin goes where) is
+   the first sheet.
+2. **1:1 printout** of the outline, edge strips, module footprints and power header. David
+   lays a real breadboard, a Pico 2, a Teensy 4.1 and the deck header on it.
+3. **Placement renders**, before routing.
+4. **Routed board**, clean against the design rules, with test points on every rail and
+   bus and 0 Ω links in each supply so a faulty rail can be isolated.
+5. **JLCPCB quote and preview**, rotations checked, "Confirm Parts Placement" ($0.45)
+   ticked, before paying. Then 5 PCBs, 2 assembled.
+
+Rev A is expected to need a few bodge wires. An outside layout review (KiCad forum,
+r/PrintedCircuitBoard) is held in reserve for if it does not bring up.
+
+Add the CC BY-SA 4.0 licence alongside the first hardware files.
 
 ## 15. Sources
 

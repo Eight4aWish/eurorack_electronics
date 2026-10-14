@@ -12,3 +12,6 @@ docs/refs/
 # material they refer to are one tree and one workspace folder. See its README.
 # Eight4aWish/eurorack_electronics_private
 private/
+
+# Python virtualenv for the PCB tooling (kiutils, easyeda2kicad)
+.venv/
