@@ -300,7 +300,7 @@ produce, and the 595 drives eight from one chip.
 | **Audio in** | Eurorack 10 Vpp → AC-couple → inverting amp, gain −0.3, biased to VCOM → codec. Clamp to the codec rails. | op-amp | — | proposed |
 | **Audio out** | Codec VOUT± → difference amp, gain 1.25 → ±5 V, **DC-coupled** → 1 kΩ → jack | op-amp | — | proposed |
 | **CV ADC** | ADS8688: 8 ch, 16-bit, 500 kSPS aggregate, per-channel ranges ±10.24 / ±5.12 / ±2.56 / 0–10.24 / 0–5.12 V, **1 MΩ** input, OVP ±20 V powered / **±11 V unpowered**, internal 4.096 V ref, AVDD 4.75–5.25 V, DVDD 1.65 V–AVDD, SCLK ≤ 17 MHz, 32-clock frames *(SBAS582C)*. No input op-amps needed. | ADS8688IDBTR **C527390** | 2,921 / $7.32 | proposed |
-| **CV DAC** | DAC8568 grade A: 8 ch, 16-bit, internal 2.5 V ref (off by default), output 0–2.5 V, resets to zero scale, SCLK ≤ 50 MHz. **AVDD = 3.3 V analogue rail**, so VINH = 0.7 × AVDD and 3.3 V logic drives it *(SBAS430F)*. Op-amp ×4 with −5 V offset → ±5 V. | DAC8568IAPWR **C486051** | 796 / $17.45 | proposed |
+| **CV DAC** | DAC8568 grade A: 8 ch, 16-bit, internal 2.5 V ref (off by default), output 0–2.5 V, resets to zero scale, SCLK ≤ 50 MHz. **AVDD = 3.3 V analogue rail**, so VINH = 0.7 × AVDD and 3.3 V logic drives it *(SBAS430F)*. Op-amp ×4 with −5 V offset → ±5 V. | DAC8568IAPWR **C486051** | 796 / $17.45 | decided |
 | **Jack switch** | DG412 (logic 1 = on) with pull-downs, so jacks power up as inputs. ±12 V fine (V+ to V− ≤ 44 V), VL = 5 V, logic 0.8 / 2.4 V, RDS(on) 25 Ω typ, signals beyond the rails clamp through internal diodes, ≤ 30 mA *(Vishay 61564 rev B)* | 2 × DG412DQ-T1-E3 **C2651920** (TSSOP) | 5,903 / $2.18 | proposed |
 | **CV op-amps** | 8 outputs at ±5 V: TL074H (no phase reversal, CM includes V+). The ±10 V option needs rail-to-rail output: OPA4197 footprint-compatible (SOIC-14) | TL074HIDR **C2878713**; option OPA4197IDR **C2058532** | 14,140 / $0.25; 8,474 / $2.73 | proposed |
 | **Reference** | LM4040 4.096 V shunt for the calibration check (0.1 % A-grade or 1 % D-grade) | LM4040AIM3-4.1 **C126807** / LM4040DIM3-4.1 **C202194** | 2,077 / $1.12; 6,187 / $0.47 | proposed |
@@ -312,7 +312,7 @@ produce, and the 595 drives eight from one chip.
 | **EEPROM** | Board revision, footprint ID, calibration, panel map | M24C64-RMN6TP **C79988** (Preferred) | 103,045 / $0.15 | proposed |
 | **Qwiic** | JST SH 4-pin, 3.3 V from the display LDO | SM04B-SRSS-TB **C160404** | 10,257 / $0.21 | decided |
 
-### 7.1 The DAC choice: 16-bit DAC8568 or 12-bit MCP4822
+### 7.1 The DAC choice: 16-bit DAC8568 or 12-bit MCP4822 [decided: DAC8568]
 
 **What established modules use** (read from each module's firmware driver or published
 schematic, 2026-10-14):
@@ -366,10 +366,10 @@ Computer's audio outs) and David's own builds use 12-bit.
   or a decoder chip.
 - **Cost:** $8.93 a board, so $18 on a 2-board shakedown or $45 on 5.
 
-**Recommendation:** DAC8568IA. It is what O&C and Performer use, one chip fits the pin
+**Decided (David, 2026-10-14): DAC8568IA.** It is what O&C and Performer use, one chip fits the pin
 budget and the area, and at this volume the premium is under $50. The case for 12-bit is
 David's own standard — "it's Eurorack, not expected to be spot on" — and it has served
-every build so far. [open]
+every build so far.
 
 ## 8. Power
 
@@ -445,7 +445,7 @@ datasheet's differential 8 Vpp (§7).
 
 - **The DAC is the cost decision**, as v0.1 said, but bigger than it thought: the
   DAC8568IA is 42 % of the parts cost. The 12-bit alternative, 4 × MCP4822 (C16040,
-  2,985 in stock, $2.13), is $8.93 less a board. Full comparison: §7.1. [open — see §13]
+  2,985 in stock, $2.13), is $8.93 less a board. Comparison and decision: §7.1.
 - **Extended part types:** ~15. Per-order fees (setup, stencil, Extended loading fee,
   4-layer PCB, shipping) are **not yet verified** (§12).
 - **6HP and 10HP from one design** means one assembly setup, not two.
@@ -478,44 +478,45 @@ datasheet's differential 8 Vpp (§7).
 - Four gate ins.
 - XIAO dropped: Pico 2 and Teensy 4.1 only.
 - Modules on headers; low-profile SMT under them.
+- No TRS MIDI in Rev A.
+- DAC: DAC8568IA (§7.1).
 
-### Open
+### Hardware licence: CC BY-SA 4.0 (decided)
 
-1. **DAC resolution:** 16-bit DAC8568 or 12-bit 4 × MCP4822 — comparison with the DACs in
-   established modules in progress.
-2. **Hardware licence.** What comparable open projects chose (each repo's README or
-   LICENSE, 2026-10-14):
+What comparable open projects chose, for the record (each repo's README or LICENSE,
+2026-10-14):
 
-   | Project | Hardware | Code | Note |
-   |---|---|---|---|
-   | Mutable Instruments | CC BY-SA 3.0 | MIT | Why the CCTV and Behringer clones in the rack are legal |
-   | EuroPi | **CERN-OHL-S v2** | Apache 2.0 | Docs CC0; asks that modified builds not use the brand name |
-   | apf.audio Tiliqua | **CERN-OHL-S v2** | mixed | Addendum: derivatives may not use apf.audio names |
-   | Keeos Ogham | CC BY-SA 4.0 | MIT | |
-   | Westlicht Performer | MIT (everything) | MIT | Fully permissive |
-   | Workshop Computer, O&C | no hardware licence file in the repo | MIT / GPL-3 per program | |
+| Project | Hardware | Code | Note |
+|---|---|---|---|
+| Mutable Instruments | CC BY-SA 3.0 | MIT | Why the CCTV and Behringer clones in the rack are legal |
+| EuroPi | **CERN-OHL-S v2** | Apache 2.0 | Docs CC0; asks that modified builds not use the brand name |
+| apf.audio Tiliqua | **CERN-OHL-S v2** | mixed | Addendum: derivatives may not use apf.audio names |
+| Keeos Ogham | CC BY-SA 4.0 | MIT | |
+| Westlicht Performer | MIT (everything) | MIT | Fully permissive |
+| Workshop Computer, O&C | no hardware licence file in the repo | MIT / GPL-3 per program | |
 
-   The three families:
-   - **Strongly reciprocal** (CERN-OHL-S, CC BY-SA): anyone may build and sell it, but
-     anything derived must be published under the same terms.
-   - **Weakly reciprocal** (CERN-OHL-W): changes to this board must be shared, but it can sit
-     inside a closed product.
-   - **Permissive** (CERN-OHL-P, MIT): anything goes, attribution only.
+The three families:
+- **Strongly reciprocal** (CERN-OHL-S, CC BY-SA): anyone may build and sell it, but
+  anything derived must be published under the same terms.
+- **Weakly reciprocal** (CERN-OHL-W): changes to this board must be shared, but it can sit
+  inside a closed product.
+- **Permissive** (CERN-OHL-P, MIT): anything goes, attribution only.
 
-   CERN-OHL is written for hardware; CC BY-SA is a content licence borrowed for it. The
-   brand-name addendum (EuroPi, apf.audio) is the common way to stay open while protecting
-   the name. **Recommendation:** CERN-OHL-S v2 with an Eight4aWish name addendum, matching
-   the Tiliqua work and EuroPi; firmware MIT. [open]
+CERN-OHL is written for hardware; CC BY-SA is a content licence borrowed for it. The
+brand-name addendum (EuroPi, apf.audio) is the common way to stay open while protecting
+the name. CC BY-SA 4.0 is the current version (Ogham uses it; Mutable used 3.0). Add the
+licence file with the first KiCad files.
 
 ## 14. Next steps
 
-1. Answer §13; verify §12.
+1. Verify §12 (JLCPCB rules and fees; the measured breadboard outline).
 2. Interface contract: wiring-field channel list and order, per-module pin maps
    (Pico 2, Teensy 4.1), EEPROM layout.
 3. Schematic in KiCad, ERC clean; JLCPCB part numbers in symbol fields.
 4. Layout to the measured breadboard outline; DRC clean; analogue routing reviewed by eye.
 5. JLCPCB outputs (gerbers, drill, BOM, CPL); check rotations in JLC's preview.
 6. Bring-up firmware for the Pico 2 in `eurorack_modules`.
+7. Add the CC BY-SA 4.0 licence alongside the first hardware files.
 
 ## 15. Sources
 
