@@ -104,7 +104,7 @@ writes and would port here. Bought modules are benchmarks.
 | CV bidirectional | 6 | ADC always reads the jack; DAC switched on for output |
 | CV in only | 2 | The ADC's spare channels |
 | CV out only | 2 | The DAC's spare channels |
-| Gate in | 4 | Direct GPIO, Schmitt input (v0.1 had 6) [decided] |
+| Gate in | 4 | Direct GPIO, comparator input with a set threshold (v0.1 had 6) [decided] |
 | Gate out | 8 | 0/5 V via shift register |
 | Pots | 8 | Ratiometric |
 | Buttons / switches / encoder | 9 lines | On the GPIO expander; one encoder needs 3 |
@@ -217,8 +217,9 @@ function table); PJRC Teensy 4.1 product page, pinout cards and dimension drawin
 - **Power:** 5 V reaches either module through a Schottky. Teensy: cut the VIN–VUSB pads
   before fitting.
 - **Every signal into the module is 3.3 V** (the Teensy sets the rule). The parts that
-  talk back to it — ADS8688 (DVDD), MCP3208, PCM3060 (VDD), TCA9555, EEPROM, 74HC14 —
-  all run their logic from the 3.3 V digital rail. The 5 V parts (74HCT595, AHCT1G125)
+  talk back to it — ADS8688 (DVDD), MCP3208, PCM3060 (VDD), TCA9555, EEPROM — run their logic
+  from the 3.3 V digital rail; the gate-in comparators' open-collector outputs are pulled
+  up to it. The 5 V parts (74HCT595, AHCT1G125)
   only take 3.3 V in and drive jacks or LEDs, never a module pin.
 - **Teensy 4.0** is not a target. If its pins prove to sit where the 4.1's first 14 per
   side do †, the bus-merge jumpers (§6.3) would let it run as a bonus.
@@ -300,7 +301,7 @@ v1.0.5 and libDaisy; Ogham = Keeos `ogham-merged-v1.0` sheets.
 | **Input protection** | Large series R into a virtual ground; the 3.3 V rail-to-rail op-amp cannot drive the ADC past its rails | Same idea: TL074 then a 3.3 V MCP6002 that "will always clip" | Ogham: 470k series plus the op-amp's clamps | The ADS8688's own OVP (±20 V powered, ±11 V off) behind 1 kΩ |
 | **CV out** | PWM 11-bit at 60 kHz → 2-pole MFB on TL074H (gain −3.6, +5.97 V offset); sigma-delta in the PWM IRQ gives ~19 bits, ~5.9 mV calibrated | PWM 100 kHz → 1k/100 nF → TL074 ×3.2 → 1k: 0–10 V, ~1.5 kHz bandwidth | Patch SM: STM32 12-bit DAC, 0–5 V. Ogham: Seed DAC → TL072 ×3 | DAC8568 16-bit → TL074H ×4 with offset: ±5 V at ~31 kHz per channel |
 | **Audio out** | MCP4822 → TL074H inverting with −5 V ref: ±6 V, 1k out | — | Patch SM: PCM3060, DC-coupled ±5 V. Ogham: TL072 ×4.7 overshot to 19.5 Vpp | PCM3060 differential → difference amp ×1.25: ±5 V DC-coupled |
-| **Gate in** | 100k → NPN base, RP2040 pull-up as the load, no clamp; above 0.4 V = high | 100k → NPN, reverse diode on the base, 10k pull-up; 0.8 V threshold | Patch SM: BJT input, inverted in libDaisy. Ogham: LM393 with hysteresis for clock | 22k / 100k divider, BAV99 clamp, 74HC14 Schmitt. No reliance on module pull-ups (they differ between Pico, Teensy, XIAO) |
+| **Gate in** | 100k → NPN base, RP2040 pull-up as the load, no clamp; above 0.4 V = high | 100k → NPN, reverse diode on the base, 10k pull-up; 0.8 V threshold | Patch SM: BJT input, inverted in libDaisy. Ogham: LM393 with hysteresis for clock Ogham's clock input, adopted: 10k series, BAT54S clamps, LM393 against 1.65 V with hysteresis, own 3.3 V pull-up. No reliance on module pull-ups |
 | **Gate out** | GPIO → NPN, 10k to +12 V: ~7.2 V open-circuit, ~6 kΩ source, short-proof | — | Patch SM: 0–5 V, 100 Ω. Ogham: 74AHCT1G125 → 1k → Schottky clamps | 74HCT595 → 1k, BAV99 clamps: 0/5 V |
 | **Pots** | 3 × 100k from 3V3 through the mux; a 3-way switch read on one channel via 100k/100k | 2 × 10k from the Pico's 3V3 | Patch SM: pots from +5 V out (not ratiometric). Ogham: 1k + 100 nF + 100k pull-down | MCP3208, pots from its own reference: ratiometric |
 | **Buttons** | — | 1k series, 10k pull-up, 100 nF: 1 ms RC debounce | — | Adopt EuroPi's 1k / 10k / 100 nF on each expander button line [proposed] |
@@ -328,7 +329,7 @@ produce, and the 595 drives eight from one chip.
 | **CV op-amps** | 8 outputs at ±5 V: TL074H (no phase reversal, CM includes V+). The ±10 V option needs rail-to-rail output: OPA4197 footprint-compatible (SOIC-14) | TL074HIDR **C2878713**; option OPA4197IDR **C2058532** | 14,140 / $0.25; 8,474 / $2.73 | proposed |
 | **Reference** | LM4040 4.096 V shunt for the calibration check (0.1 % A-grade or 1 % D-grade) | LM4040AIM3-4.1 **C126807** / LM4040DIM3-4.1 **C202194** | 2,077 / $1.12; 6,187 / $0.47 | proposed |
 | **Pots** | MCP3208 on the 3.3 V analogue rail, VREF = that rail, pots fed from VREF + AGND (ratiometric). 50 ksps at 2.7 V, SCLK ≤ 1 MHz at 2.7 V *(DS21298)* | MCP3208-CI/SL **C16939** | 600 / $3.24 | proposed |
-| **Gate in** | jack → 22 kΩ series → 100 kΩ to GND → BAV99 clamp to 3.3 V / GND → 74HC14 at 3.3 V → GPIO (inverted). A 3.3 V gate arrives as 2.7 V, above VT+ (1.55–3.13 V at 4.5 V, lower at 3.3 V); ±12 V clamps at 0.4 mA. Two spare gates. | 74HC14D **C5605** (Basic) | 148,555 / $0.10 | decided |
+| **Gate in** | Ogham's clock input (Keeos `ogham-merged-v1.0`): jack → 10 kΩ → BAT54S clamp to 3.3 V / GND, 100 kΩ to GND → LM393 (+5 V) + input; − input at 1.65 V from a 3.3 V divider; ~100 kΩ hysteresis; open-collector output, 10 kΩ pull-up to 3.3 V → GPIO, not inverted. Trips at ~1.8 V at the jack, set by resistors, not by logic-gate tolerance — a 3.3 V gate clears it by 1.5 V. ±12 V clamps at ~0.8 mA. Values to tune at schematic. | 2 × LM393DR2G **C7955** (Basic); 4 × BAT54S **C408389** | 213,954 / $0.07; 817,166 / $0.02 | decided |
 | **Gate out** | 74HCT595 at 5 V (VIH 2.0 V, so 3.3 V drives it) → 1 kΩ → jack, BAV99 (Basic, C2500) clamp to +5 V / GND per output. OE pulled high until firmware enables (§10). | 74HCT595D **C282339** | 14,359 / $0.27 | decided |
 | **Expander** | 16 lines: 6 switch enables (DG412), 1 gate-output enable, 9 for buttons, switches, encoder; INT to a GPIO | TCA9555PWR **C465732** | 35,995 / $0.56 | proposed |
 | **LEDs** | WS2812 chain; data level-shifted to 5 V; LED supply on its own wiring-field holes | SN74AHCT1G125DBVR **C7484** | 49,818 / $0.10 | proposed |
@@ -402,7 +403,7 @@ every build so far.
 | +5 V digital | Buck from +12 V | module, Qwiic, WS2812, 595, VL | TPS54202DDCR **C191884** (261k / $0.18) or AP63205WU-7 **C2071056** (fixed 5 V) |
 | +5 V analogue | Linear from +12 V, own ground return | PCM3060 VCC, ADS8688 AVDD | L78M05ABDT **C58069** (Basic); low-noise option TPS7A4901 **C16430** ($1.26) |
 | +3.3 V analogue | LDO from +5 V analogue | DAC8568, MCP3208 + pot reference | AMS1117-3.3 **C6186** (Basic) or LP2985-33 **C95414** |
-| +3.3 V digital | LDO from +5 V digital | PCM3060 VDD, ADS8688 DVDD, 74HC14, expander, EEPROM, Qwiic | AMS1117-3.3 **C6186** (Basic) |
+| +3.3 V digital | LDO from +5 V digital | PCM3060 VDD, ADS8688 DVDD, gate-in pull-ups and threshold, expander, EEPROM, Qwiic | AMS1117-3.3 **C6186** (Basic) |
 
 - **Why a buck:** David's hand-built Daisy modules showed a block-rate comb traced to a
   shared +5 V rail, with a dedicated buck as the fix. Digital and analogue 5 V stay
@@ -431,12 +432,12 @@ Studied: Electrosmith patch.init carrier (48.5 × 111 mm, 2-layer), Keeos Ogham
 |---|---|
 | **Stack-up:** L1 signals and SMT; **L2 unbroken GND**; L3 power pours (±12 V, 5 V analogue, 5 V digital, the 3.3 V rails); L4 signals | reDIP-SID (L1 signal / In1 power / In2 mixed / B signal) |
 | **Zone along the length:** power entry and buck at one end; module and logic in the middle; ADS8688, DAC8568, DG412, PCM3060 and their op-amps at the far end from the buck | Ogham |
-| **Low-profile logic under the module on its headers** (MCP3208, 595, 74HC14, TCA9555, EEPROM, ≤ 2.5 mm) — agreed. That brings demand from ~85–120 % of the free area down to ~60 % | Ogham (TL072 stage under the Seed); area estimate |
+| **Low-profile logic under the module on its headers** (MCP3208, 595, LM393s, TCA9555, EEPROM, ≤ 2.5 mm) — agreed. That brings demand from ~85–120 % of the free area down to ~60 % | Ogham (TL072 stage under the Seed); area estimate |
 | **0402 passives, TSSOP wherever a variant exists** | area estimate |
 | Rail entry: series Schottky → BLM18PG121 ferrite → 10 µF 50 V X7R + 100 nF, per rail | Ogham |
 | Pot and converter references on a linear rail, never the buck or the module's 5 V | Ogham; David's bench notes |
 | Gate out: HCT part → 1 kΩ → Schottky clamps to +5 V and GND | Ogham (74AHCT1G125) |
-| Gate in: series 10k–100k, BAT54-class clamps, then the Schmitt part | Ogham (clock and gate inputs) |
+| Gate in: 10k series, BAT54 clamps, then a comparator with a set threshold and hysteresis | Ogham (clock input) |
 | Pot inputs: 1 kΩ + 100 nF, 100 kΩ pull-down, pot top on the converter's reference rail | Ogham |
 | 74HCT595: OE pulled **high** (gates off) until firmware enables them from a TCA9555 line; MR to VCC. The storage register powers up undefined. | Datasheet behaviour; Ogham ties OE low |
 | Spare op-amp sections tied as followers with + to GND | Ogham |
@@ -461,7 +462,7 @@ datasheet's differential 8 Vpp (§7).
 |---|---|
 | Converters: PCM3060 4.08, ADS8688 7.32, DAC8568IA 17.45, MCP3208 3.24 | 32.09 |
 | Switches and op-amps: 2 × DG412 4.36, 3 × TL074H 0.76 | 5.12 |
-| Logic, I/O, memory: 74HC14 0.10, 74HCT595 0.27, AHCT1G125 0.10, TCA9555 0.56, M24C64 0.15 | 1.18 |
+| Logic, I/O, memory: 2 × LM393 0.13, 4 × BAT54S 0.08, 74HCT595 0.27, AHCT1G125 0.10, TCA9555 0.56, M24C64 0.15 | 1.29 |
 | Power and protection: buck + inductor ~0.30, L78M05 0.21, 2 × AMS1117 0.42, Schottkys, ferrites, BAV99 clamps ~0.60 | ~1.53 |
 | Reference, connectors: LM4040 0.47–1.12, JST SH 0.21 | 0.68–1.33 |
 | Passives (~150 Basic 0402/0603/0805) | ~1.50 |
@@ -470,7 +471,7 @@ datasheet's differential 8 Vpp (§7).
 - **The DAC is the cost decision**, as v0.1 said, but bigger than it thought: the
   DAC8568IA is 42 % of the parts cost. The 12-bit alternative, 4 × MCP4822 (C16040,
   2,985 in stock, $2.13), is $8.93 less a board. Comparison and decision: §7.1.
-- **Extended part types:** ~13 (PCM3060, ADS8688, DAC8568, DG412, MCP3208, TL074H,
+- **Extended part types:** ~14 (PCM3060, ADS8688, DAC8568, DG412, MCP3208, TL074H, BAT54S,
   74HCT595, TCA9555, AHCT1G125, LM4040, buck, its inductor, JST SH). Order fees: §12.
 - **6HP and 10HP from one design** means one assembly setup, not two.
 
@@ -504,11 +505,11 @@ From JLCPCB's *PCB Assembly Cost: What Does the Price Include?* (help centre, up
 | | 2 assembled | 5 assembled |
 |---|---|---|
 | Setup + stencil | $9.71 | $9.71 |
-| Extended parts (~13 × $3.07) | $39.91 | $39.91 |
+| Extended parts (~14 × $3.07) | $42.98 | $42.98 |
 | Placement (~700 joints a board) | $2.24 | $5.60 |
 | Components (§11, ~$42 a board) | ~$84 | ~$210 |
 | Bare 4-layer PCBs (5 off, 49.6 × 103 mm) | † | † |
-| **Subtotal before PCBs and shipping** | **~$136** | **~$265** |
+| **Subtotal before PCBs and shipping** | **~$139** | **~$268** |
 
 Still to check: the 4-layer bare-board price and shipping, both from JLC's online quote.
 
@@ -577,7 +578,7 @@ licence file with the first KiCad files.
 
 - Datasheets (TI unless noted): MCP4802/4812/4822 (Microchip DS20002249B); PCM3060 SBAS437; ADS8684/8688 SBAS582C; DAC7568/8168/8568
   SBAS430F; DAC8564, DAC8565; MCP3204/3208 (Microchip DS21298); DG411/412/413 (Vishay
-  61564, rev B 2025); TL07xx (TL07xH data); SN74HCT595; SN74HC14; LM4040.
+  61564, rev B 2025); TL07xx (TL07xH data); SN74HCT595; SN74HC14 (superseded); LM4040.
 - Stock and prices: JLCPCB parts API (`selectSmtComponentList`), 2026-10-14.
 - I/O audit: `MCU_MODULES.xlsx` and `MODULES.md`, eight4awish repo.
 - Deck geometry: `docs/n8synth_platform.md`, `tools/visualizer/boards/*.json`,
