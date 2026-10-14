@@ -40,9 +40,9 @@ Datasheet facts carry the datasheet; stock and prices are from the JLCPCB parts 
 - **Principle:** the board offers more channels than any one panel uses. It provides typed
   channels and never decides which deck cell they go to; David wires that per module on
   the board. [decided]
-- **Assembly:** 4-layer, SMT on one side, JLCPCB Economic PCBA if it accepts 4-layer
-  boards (†, §12). Prefer Basic and Preferred parts; each Extended part type carries a
-  loading fee.
+- **Assembly:** 4-layer, SMT on one side, JLCPCB **Economic PCBA**, which takes 2-, 4- and
+  6-layer boards, single-sided placement, 0402 and 0.4 mm pitch at the finest, 2–50
+  boards (§12). Prefer Basic parts: each Extended part type costs $3.07 an order.
 
 ## 3. I/O audit — what the modules actually use
 
@@ -133,9 +133,25 @@ replaces the breadboard in both widths:
   the right strip is unused and that edge is the rear of the module.
 
 **David confirms (2026-10-14):** the 6HP and 10HP kits use the same breadboard; in 6HP only
-the left set of 40 positions can be connected. **Still to measure** from a real board: the
-outline, hole positions and mounting holes — `docs/n8synth_platform.md` warns that the
-templates are a drawing, not the board.
+the left set of 40 positions can be connected.
+
+**Geometry** — from the n8synth web tool's own vector of the board (`10HP Template.n8layout`,
+symbol `n8bb-a1-v1-front`), origin at the top-left corner, mm. Electrical behaviour is
+not read from it (`docs/n8synth_platform.md`); dimensions are.
+
+| Feature | Position |
+|---|---|
+| Outline | 49.6 × 103.0 |
+| Edge strip, left | outer column x = 1.92, inner x = 4.46 |
+| Edge strip, right | inner x = 45.14, outer x = 47.68 |
+| Edge positions 1–40 | y = 2.07 + 2.54·(n − 1), so 2.07 … 101.13 |
+| Power rails (breadboard only) | x = 7.57 (+12 V side) and 42.02 (−12 V side) |
+| Mounting holes | three, Ø 3.0, on the centre line x = 24.8, at y = 4.445, 42.545, 83.185 |
+| Eurorack power header (breadboard) | 2 × 8, pins at x = 15.91 … 33.69, y = 98.82 / 101.36 — bottom centre |
+| Deck headers (template) | female 1 × 40 into the outer columns of both strips |
+
+The board keeps the outline, both strips, the mounting holes and the power-header position.
+The breadboard's own power rails and main area are not reproduced.
 
 ### 4.2 Edge strips and wiring field [decided: wiring on this board; geometry proposed]
 
@@ -143,9 +159,13 @@ templates are a drawing, not the board.
   positions: an outer hole for the deck header and an inner hole as a wiring point, the
   two joined (the n8synth doublet). Deck header spans are positions 1–10, 16–25 and 31–40;
   positions with no deck cell remain free tie points, as on the breadboard.
-- **Wiring field:** a labelled column of plated holes, one per channel (§3), plus short
-  buses of AGND, VREF (pot top), +5 V LED and DGND holes. David solders a wire from a
-  cell's inner hole to the channel it needs. Silkscreen names on both faces.
+- **Channel holes beside their circuits** [decided, David 2026-10-14]: each channel ends in a
+  plated hole next to the circuit it belongs to, labelled on both faces, plus a few AGND,
+  VREF (pot top), +5 V LED and DGND holes. Each module is wired exactly like a
+  breadboard: short wires from those holes to the inner ("second") hole of the deck
+  position each cell occupies.
+- **Pads tinned on both faces** (HASL finish), so wires can run on either face: across the
+  outward face, or underneath in the stand-off gap on the deck face.
 - **Deck ground bus (D pads):** one wire from any D pad to an AGND hole (pot and jack
   grounds are on D).
 - **Stacking:** keep power-rail-compatible pads at positions 1, 2, 39, 40 (GND, +12 V /
@@ -169,8 +189,11 @@ templates are a drawing, not the board.
   a real 6HP build.**
 - **USB:** all module USB connectors toward the **top short edge** (reachable in both
   orientations), then a panel-mount USB-C extension. [proposed]
-- **Power header:** shrouded 2×5 (or 2×8) on the outward face near the **right** long edge
-  — the rear in the 6HP orientation. [proposed]
+- **Power header:** shrouded **2 × 5**, ±12 V only, at bottom centre (where the breadboard
+  has its 2 × 8), on the outward face. [decided — David: the bus +5 V is not wanted]
+- **Mounting holes:** the three on the centre line stay. The module footprint will straddle
+  at least one, so keep a ~Ø 6 mm keep-out for SMT around each. A screw head under a
+  module on 8.5 mm headers clears.
 
 ## 5. Compute modules [decided: Pico 2 and Teensy 4.1]
 
@@ -385,8 +408,8 @@ every build so far.
   shared +5 V rail, with a dedicated buck as the fix. Digital and analogue 5 V stay
   separate here for the same reason.
 - **Budget (estimate):** +12 V ≈ 120 mA typical, ~350 mA worst case (ESP32 Wi-Fi peaks
-  plus a lit LED chain through the buck); −12 V ≈ 25 mA (op-amps). Offer a 0 Ω option
-  to take +5 V from a 16-pin bus header instead of the buck. [proposed]
+  plus a lit LED chain through the buck); −12 V ≈ 25 mA (op-amps). The bus +5 V is never
+  used [decided]: every 5 V rail is made on the board.
 
 ## 9. Grounding [proposed]
 
@@ -423,6 +446,7 @@ Studied: Electrosmith patch.init carrier (48.5 × 111 mm, 2-layer), Keeos Ogham
 | Derate MLCC values for DC bias | reDIP-SID (capacitor notes) |
 | 0.45 / 0.2 mm vias only for fine-pitch fan-out (ADS8688 TSSOP-38); three fiducials | reDIP-SID; JLC practice |
 | Rules: 0.2 mm track and clearance, 0.5 mm power, via 0.6 / 0.3 mm, 0.5 mm copper to edge, a Power net class — JLCPCB's cheapest tier | Ogham, patch.init |
+| Leaded packages only (no QFN/BGA): Economic PCBA's 0.4 mm pitch floor, and no X-ray charge | JLCPCB capabilities and price pages |
 | LCSC field on every machine-placed part; everything else marked do-not-place | Ogham |
 | Test pads on every rail and on I2S; fiducials | none of the four boards had them |
 | Check every decoupling cap's two nets and every polarised part in the PCB, then step through rotations in JLC's preview | review of the boards |
@@ -446,16 +470,47 @@ datasheet's differential 8 Vpp (§7).
 - **The DAC is the cost decision**, as v0.1 said, but bigger than it thought: the
   DAC8568IA is 42 % of the parts cost. The 12-bit alternative, 4 × MCP4822 (C16040,
   2,985 in stock, $2.13), is $8.93 less a board. Comparison and decision: §7.1.
-- **Extended part types:** ~15. Per-order fees (setup, stencil, Extended loading fee,
-  4-layer PCB, shipping) are **not yet verified** (§12).
+- **Extended part types:** ~13 (PCM3060, ADS8688, DAC8568, DG412, MCP3208, TL074H,
+  74HCT595, TCA9555, AHCT1G125, LM4040, buck, its inductor, JST SH). Order fees: §12.
 - **6HP and 10HP from one design** means one assembly setup, not two.
 
-## 12. Still to verify (one batched lookup each, no design impact expected)
+## 12. JLCPCB rules and order cost
 
-1. JLCPCB rules today: does Economic PCBA take 4-layer boards; the Extended loading fee
-   (v0.1 said $1.50 since Dec 2025, previously $3); whether Preferred parts are fee-free;
-   setup and stencil fees; can 5 be ordered and 2 assembled.
-2. n8synth breadboard outline and mounting holes, measured (§4.1).
+From JLCPCB's *PCB Assembly Cost: What Does the Price Include?* (help centre, updated
+2026-09-09) and *PCB Assembly Capabilities* page, read 2026-10-14:
+
+| | Economic PCBA (our choice) | Standard PCBA |
+|---|---|---|
+| Placement | single-sided | single or double |
+| Layers | **2, 4, 6** | 1–32 |
+| Assembled quantity | **2–50** | 2–80,000 |
+| Finest package / pin pitch | 0402 / 0.4 mm | 0201 / 0.35 mm |
+| Setup | $8.18 | $25.56 single-sided |
+| Stencil | $1.53 | $8.21 |
+| Placement | $0.0016 a joint | same |
+| Extended parts | **$3.07 per Extended part type** | $1.53 feeder loading per Basic or Extended part |
+| Hand-soldered through-hole (only if ordered) | $0.0164 a joint + $3.58 an order | same |
+| X-ray | charged for QFN/BGA parts | same |
+| Finish at 1.6 mm | green, HASL or ENIG | any |
+
+- **v0.1's "$1.50 Extended fee" was Standard PCBA's per-feeder figure.** In Economic it is
+  $3.07 a part type.
+- **Keep every part leaded** (TSSOP, SOIC, SOT): no QFN, so no X-ray charge. The current
+  parts list already does.
+- **Whether Preferred parts escape the $3.07** is not stated on these pages †.
+
+**First order, estimated:**
+
+| | 2 assembled | 5 assembled |
+|---|---|---|
+| Setup + stencil | $9.71 | $9.71 |
+| Extended parts (~13 × $3.07) | $39.91 | $39.91 |
+| Placement (~700 joints a board) | $2.24 | $5.60 |
+| Components (§11, ~$42 a board) | ~$84 | ~$210 |
+| Bare 4-layer PCBs (5 off, 49.6 × 103 mm) | † | † |
+| **Subtotal before PCBs and shipping** | **~$136** | **~$265** |
+
+Still to check: the 4-layer bare-board price and shipping, both from JLC's online quote.
 
 ## 13. Decisions
 
@@ -509,7 +564,7 @@ licence file with the first KiCad files.
 
 ## 14. Next steps
 
-1. Verify §12 (JLCPCB rules and fees; the measured breadboard outline).
+1. Get JLC's online quote for the bare 4-layer board and shipping (§12).
 2. Interface contract: wiring-field channel list and order, per-module pin maps
    (Pico 2, Teensy 4.1), EEPROM layout.
 3. Schematic in KiCad, ERC clean; JLCPCB part numbers in symbol fields.
