@@ -153,15 +153,22 @@ board.
 
 ### 4.3 Faces and height
 
-- **SMT on one face** (JLCPCB one-side assembly); module sockets, power header and the
-  wiring on the other. In 10HP the SMT face faces the deck, inside the header stand-off
-  (keep SMT ≤ 2.5 mm tall: no electrolytics, no DPAK above that).
-- **6HP height budget** (board at 90°): socket 8.5 + Pico 1.0 + its parts ~1.5 + PCB 1.6 +
-  SMT ~2.5 ≈ **15 mm** against a 30.3 mm panel. Where the board sits across the 6HP width
-  depends on where the deck's right-angle header lands — **to check on a real 6HP build.**
+- **Everything on the outward face** — the face away from the deck, as n8synth mounts
+  components outward for probing. That means the SMT (JLCPCB one-side assembly), the
+  module on headers, the power header and the wiring. The deck face carries only the
+  deck's header pins.
+- **Low-profile SMT under the module** [decided, David 2026-10-14]. The modules sit on
+  headers, so the area between and under their pin rows takes the logic (§10). Parts there
+  stay ≤ 2.5 mm tall; with 8.5 mm female headers that leaves ample clearance under a Pico,
+  Teensy or XIAO. Taller parts (DPAK regulator, buck inductor) go outside the module
+  footprint.
+- **6HP height budget** (board at 90°): deck-side pin stubs ~1 + PCB 1.6 + header 8.5 +
+  module and its parts ~2.5 ≈ **14 mm** against a 30.3 mm panel. Where the board sits
+  across the 6HP width depends on where the deck's right-angle header lands — **to check on
+  a real 6HP build.**
 - **USB:** all module USB connectors toward the **top short edge** (reachable in both
   orientations), then a panel-mount USB-C extension. [proposed]
-- **Power header:** shrouded 2×5 (or 2×8) on the module face near the **right** long edge
+- **Power header:** shrouded 2×5 (or 2×8) on the outward face near the **right** long edge
   — the rear in the 6HP orientation. [proposed]
 
 ## 5. Compute modules
@@ -353,7 +360,7 @@ Studied: Electrosmith patch.init carrier (48.5 × 111 mm, 2-layer), Keeos Ogham
 |---|---|
 | **Stack-up:** L1 signals and SMT; **L2 unbroken GND**; L3 power pours (±12 V, 5 V analogue, 5 V digital, the 3.3 V rails); L4 signals | reDIP-SID (L1 signal / In1 power / In2 mixed / B signal) |
 | **Zone along the length:** power entry and buck at one end; module and logic in the middle; ADS8688, DAC8568, DG412, PCM3060 and their op-amps at the far end from the buck | Ogham |
-| **Use the SMT-face area behind the module** (between its pin rows) for the logic — MCP3208, 595, 74HC14, TCA9555, EEPROM. Without it, demand is ~120 % of the area | Ogham (TL072 stage under the Seed); area estimate |
+| **Low-profile logic under the module on its headers** (MCP3208, 595, 74HC14, TCA9555, EEPROM, ≤ 2.5 mm) — agreed. That brings demand from ~85–120 % of the free area down to ~60 % | Ogham (TL072 stage under the Seed); area estimate |
 | **0402 passives, TSSOP wherever a variant exists** | area estimate |
 | Rail entry: series Schottky → BLM18PG121 ferrite → 10 µF 50 V X7R + 100 nF, per rail | Ogham |
 | Pot and converter references on a linear rail, never the buck or the module's 5 V | Ogham; David's bench notes |
