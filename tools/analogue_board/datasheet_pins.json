@@ -1,0 +1,1465 @@
+{
+ "PCM3060PWR": {
+  "package": "TSSOP-28 (PW)",
+  "source": "pcm3060.pdf p.7 (Pin Assignments drawing, P0043-03) and p.8 (Table 1 Terminal Functions), SLAS533B",
+  "pins": {
+   "1": "MC/SCL/FMT",
+   "2": "MD/SDA/DEMP",
+   "3": "DOUT",
+   "4": "LRCK1",
+   "5": "BCK1",
+   "6": "SCKI1",
+   "7": "VDD",
+   "8": "DGND",
+   "9": "SCKI2",
+   "10": "BCK2",
+   "11": "LRCK2",
+   "12": "DIN",
+   "13": "ZEROR",
+   "14": "ZEROL",
+   "15": "RST",
+   "16": "SGND",
+   "17": "VOUTR-",
+   "18": "VOUTR+",
+   "19": "VOUTL-",
+   "20": "VOUTL+",
+   "21": "VCOM",
+   "22": "AGND2",
+   "23": "AGND1",
+   "24": "VCC",
+   "25": "VINL",
+   "26": "VINR",
+   "27": "MS/ADR/IFMD",
+   "28": "MODE"
+  },
+  "notes": "Drawing and terminal table agree on every pin. Overbars: RST (pin 15, active-low reset/power-down) and the MS part of MS/ADR/IFMD (pin 27, SPI select active low). Drawing uses subscripts: V_DD, V_CC, V_COM, V_IN R/L, V_OUT L+/L-/R+/R- (minus printed as an en dash '–' in the datasheet; transcribed here as ASCII '-'). No exposed thermal pad on the PW package. VCC (24) = 5 V analog supply; VDD (7) = 3.3 V digital supply. AGND1 (23) = ADC analog ground, AGND2 (22) = DAC analog ground, SGND (16) = shield analog ground. MODE (28) is a quad-state input: tied to VDD = SPI; 220k pull-up to VDD = H/W mode single-ended out; 220k pull-down to DGND = H/W mode differential out; tied to DGND = I2C. VOUTx- must be left open in single-ended mode."
+ },
+ "ADS8688IDBTR": {
+  "package": "TSSOP-38 (DBT)",
+  "source": "ads8688.pdf p.4 (DBT TSSOP-38 drawing, ADS8688 column) and p.4-5 (Pin Functions table), SBAS582C",
+  "pins": {
+   "1": "SDI",
+   "2": "RST/PD",
+   "3": "DAISY",
+   "4": "REFSEL",
+   "5": "REFIO",
+   "6": "REFGND",
+   "7": "REFCAP",
+   "8": "AGND",
+   "9": "AVDD",
+   "10": "AUX_IN",
+   "11": "AUX_GND",
+   "12": "AIN_6P",
+   "13": "AIN_6GND",
+   "14": "AIN_7P",
+   "15": "AIN_7GND",
+   "16": "AIN_0P",
+   "17": "AIN_0GND",
+   "18": "AIN_1P",
+   "19": "AIN_1GND",
+   "20": "AIN2_GND",
+   "21": "AIN_2P",
+   "22": "AIN_3GND",
+   "23": "AIN_3P",
+   "24": "AIN_4GND",
+   "25": "AIN_4P",
+   "26": "AIN_5GND",
+   "27": "AIN_5P",
+   "28": "AGND",
+   "29": "AGND",
+   "30": "AVDD",
+   "31": "AGND",
+   "32": "AGND",
+   "33": "DGND",
+   "34": "DVDD",
+   "35": "DNC",
+   "36": "SDO",
+   "37": "SCLK",
+   "38": "CS"
+  },
+  "notes": "Names are from the ADS8688 drawing (p.4); the Pin Functions table NAME column agrees on every pin. Overbars: RST and PD are each overbarred in 'RST/PD' (pin 2, active-low reset / power-down), REFSEL (pin 4, active low: low = internal reference enabled), CS (pin 38, active-low chip select). Pin 20 is printed 'AIN2_GND' (no underscore between AIN and 2) in BOTH the drawing and the table, inconsistent with every other channel's 'AIN_nGND' pattern and with the table's own description text, which calls it 'AIN_2GND'; a library symbol may well use AIN_2GND. ERRATA in the table DESCRIPTION column (pins 20-27): pin 20 AIN2_GND is described as 'channel 2: positive input', pin 21 AIN_2P as 'negative input'; likewise 22 AIN_3GND 'positive' / 23 AIN_3P 'negative', 24 AIN_4GND 'positive' / 25 AIN_4P 'negative', 26 AIN_5GND 'positive' / 27 AIN_5P 'negative'; pin 26's text also says 'Decouple with AIN_5GND on pin 27' and pin 27's 'Decouple with AIN_5P on pin 26' (self-references). The names in the drawing and table NAME column are consistent (P = positive, GND = negative), so the names are taken as correct and the descriptions as the error. Pins 12-15 and 24-27 are NC on the ADS8684 only (not relevant to ADS8688). DNC (35): do not connect, must remain floating. No exposed thermal pad."
+ },
+ "DAC8568IAPWR": {
+  "package": "TSSOP-16 (PW)",
+  "source": "dac8568.pdf p.4 (PW TSSOP-16 drawing and Pin Functions table), SBAS430F",
+  "pins": {
+   "1": "LDAC",
+   "2": "SYNC",
+   "3": "AVDD",
+   "4": "VOUTA",
+   "5": "VOUTC",
+   "6": "VOUTE",
+   "7": "VOUTG",
+   "8": "VREFIN/VREFOUT",
+   "9": "CLR",
+   "10": "VOUTH",
+   "11": "VOUTF",
+   "12": "VOUTD",
+   "13": "VOUTB",
+   "14": "GND",
+   "15": "DIN",
+   "16": "SCLK"
+  },
+  "notes": "Drawing and table agree. Overbars on LDAC (1, load DACs), SYNC (2, frame sync, active low) and CLR (9, asynchronous clear). Drawing prints subscripts AV_DD, V_OUT A..H, V_REF IN/V_REF OUT, D_IN; table prints AVDD, VOUTA.., 'VREFIN/ VREFOUT', DIN. Note the odd/even output interleave: outputs A,C,E,G are on pins 4-7 (left side) and H,F,D,B on pins 10-13 (right side, bottom to top). Only the TSSOP-16 (16-pin column) is used; the TSSOP-14 variant (DAC7568/DAC8168 only) lacks LDAC and CLR and is numbered differently. No exposed pad. Grade A (DAC8568IAPWR): 2.5 V internal ref, power-on reset to zero; table footnote: grades A/B external VREFIN max <= AVDD."
+ },
+ "MCP3208-CI/SL": {
+  "package": "SOIC-16 (SL, 150 mil body)",
+  "source": "mcp3208.pdf p.1 (Package Types, 'PDIP, SOIC' MCP3208 drawing) and p.15 (Table 3-1 Pin Function Table), DS21298E",
+  "pins": {
+   "1": "CH0",
+   "2": "CH1",
+   "3": "CH2",
+   "4": "CH3",
+   "5": "CH4",
+   "6": "CH5",
+   "7": "CH6",
+   "8": "CH7",
+   "9": "DGND",
+   "10": "CS/SHDN",
+   "11": "DIN",
+   "12": "DOUT",
+   "13": "CLK",
+   "14": "AGND",
+   "15": "VREF",
+   "16": "VDD"
+  },
+  "notes": "Drawing and Table 3-1 agree. Overbar on CS only in 'CS/SHDN' (pin 10: low = select/start, high = end conversion and shutdown; must be pulled high between conversions). Drawing prints subscripts V_DD, V_REF, D_OUT, D_IN. PDIP and SOIC share this pinout. Product ID: SL = Plastic SOIC (150 mil body) 14/16-lead (p. product identification); -C = +/-2 LSB INL grade, I = industrial -40..+85 C."
+ },
+ "DG412DQ-T1-E3": {
+  "package": "TSSOP-16 (DQ suffix)",
+  "source": "Vishay DG411/DG412/DG413 document 61564 Rev. B (30-Jun-2025) p.1, drawing titled 'Dual-In-Line, TSSOP, and SOIC'; earlier transcription from document 70050 Rev G p.1 (DIP/SOIC drawing)",
+  "pins": {
+   "1": "IN1",
+   "2": "D1",
+   "3": "S1",
+   "4": "V-",
+   "5": "GND",
+   "6": "S4",
+   "7": "D4",
+   "8": "IN4",
+   "9": "IN3",
+   "10": "D3",
+   "11": "S3",
+   "12": "VL",
+   "13": "V+",
+   "14": "S2",
+   "15": "D2",
+   "16": "IN2"
+  },
+  "notes": "TSSOP NOT INDEPENDENTLY VERIFIABLE FROM THIS DATASHEET: the only 16-pin pinout drawing is titled 'DG411 Dual-In-Line and SOIC'. There is no TSSOP pin diagram and no DG412-specific drawing. The TSSOP appears only in the ordering table (DG412DQ-E3, DG412DQ-T1-E3 = '16-pin TSSOP', -40 to 85 C) and as a mechanical outline (TSSOP 16-lead, 0.65 mm pitch, DWG 5624) that shows dimensions but no pin names. So the TSSOP pinout can neither be confirmed nor shown to differ; the pins above are the DIP/SOIC numbering, which the datasheet implicitly applies to all 16-lead packages. DG412 vs DG411: the drawing is DG411's; the truth table says DG411 switch ON at logic 0, DG412 switch ON at logic 1 (logic '0' <= 0.8 V, '1' >= 2.4 V). Pinout is otherwise identical. Drawing names use subscripts: IN_1..IN_4, D_1..D_4, S_1..S_4, V_L. No exposed pad. In single-supply operation the datasheet says tie V+ to VL and V- to 0 V (p.8). Confirmed for TSSOP by Vishay 61564 Rev B, whose pin drawing covers DIP, TSSOP and SOIC."
+ },
+ "TL074HIDR": {
+  "package": "SOIC-14 (D)",
+  "source": "tl074h.pdf p.8 (Figure 4-8 'TL074x D, DYY, J, N, NS, PW and W Packages', Table 4-6 Pin Functions: TL074x), SLOS080W (Rev. W, July 2025); cross-checked against tl074h_lcsc.pdf (ZHCSHV5U, Rev. U, Figure 5-8 / Table 5-6), identical",
+  "pins": {
+   "1": "1OUT",
+   "2": "1IN-",
+   "3": "1IN+",
+   "4": "VCC+",
+   "5": "2IN+",
+   "6": "2IN-",
+   "7": "2OUT",
+   "8": "3OUT",
+   "9": "3IN-",
+   "10": "3IN+",
+   "11": "VCC-",
+   "12": "4IN+",
+   "13": "4IN-",
+   "14": "4OUT"
+  },
+  "notes": "Drawing and table agree; both datasheet revisions agree. Minus signs are printed as en dashes ('1IN–', 'VCC–'); transcribed as ASCII '-'. pdftotext renders them as '±' in the drawing; the rendered PDF shows en dashes. Same pinout for all 14-pin TL074x packages (SOIC, SOT-23-THIN, CDIP, PDIP, SOP, TSSOP, CFP). No exposed pad. Note the standard quad op-amp arrangement: VCC+ on pin 4 and VCC- on pin 11."
+ },
+ "LM393DR2G": {
+  "package": "SOIC-8 (D suffix, CASE 751)",
+  "source": "lm393.pdf p.1 'PIN CONNECTIONS' (Top View) drawing; p.7 ordering information. onsemi LM393/D Rev. 25, April 2014",
+  "pins": {
+   "1": "Output A",
+   "2": "Inputs A (-)",
+   "3": "Inputs A (+)",
+   "4": "GND",
+   "5": "Inputs B (+)",
+   "6": "Inputs B (-)",
+   "7": "Output B",
+   "8": "VCC"
+  },
+  "notes": "onsemi gives no per-pin input names and no pin table. The drawing labels pins 2 and 3 with one bracket 'Inputs A' and pins 5 and 6 with 'Inputs B'; polarity comes from the comparator triangles: pin 2 = '-' (inverting) and pin 3 = '+' (non-inverting) for A; pin 6 = '-' and pin 5 = '+' for B. The '(-)'/'(+)' suffixes above are taken from the triangle symbols, not printed pin names. VCC printed as V_CC (subscript). Same drawing covers PDIP-8, SOIC-8 and Micro8. LM393DR2G = SOIC-8 Pb-free, 2500/tape & reel, 0 to +70 C (p.7). Open-collector outputs (from the schematic, Q16). No exposed pad."
+ },
+ "74HCT595D": {
+  "package": "SO16 (SOT109-1, body width 3.9 mm)",
+  "source": "74hct595.pdf p.4 (6.1 Pinning, 'D package SOT109-1 (SO16)', aaa-035349) and p.5 (Table 2 Pin description). Nexperia 74HC_HCT595 Rev. 12, 20 March 2024",
+  "pins": {
+   "1": "Q1",
+   "2": "Q2",
+   "3": "Q3",
+   "4": "Q4",
+   "5": "Q5",
+   "6": "Q6",
+   "7": "Q7",
+   "8": "GND",
+   "9": "Q7S",
+   "10": "MR",
+   "11": "SHCP",
+   "12": "STCP",
+   "13": "OE",
+   "14": "DS",
+   "15": "Q0",
+   "16": "VCC"
+  },
+  "notes": "Drawing and Table 2 agree. Overbars on MR (10, master reset, active LOW) and OE (13, output enable, active LOW). VCC is printed V_CC (subscript). Nexperia naming differs from the TI-style names a library symbol may use (SER/SRCLK/RCLK/SRCLR/QA..QH/QH'): DS = serial data in, SHCP = shift register clock, STCP = storage register clock, Q7S = serial data out, Q0..Q7 = parallel outputs. Q0 is on pin 15 (opposite side from Q1..Q7). Minor table quirk: Table 2 lists Q0 twice (in the 'Q0..Q7 = 15,1,2,...,7' row and again as its own row 'Q0 15'). SO16 has no exposed pad (only the DHVQFN16/DHXQFN16 variants have a GND centre pad)."
+ },
+ "TCA9555PWR": {
+  "package": "TSSOP-24 (PW)",
+  "source": "tca9555.pdf p.4 (6 Pin Configuration and Functions: 'DB, PW Package 24-Pin TSSOP Top View' drawing and Pin Functions table, DB/PW column), SCPS200E (Rev. E, April 2019)",
+  "pins": {
+   "1": "INT",
+   "2": "A1",
+   "3": "A2",
+   "4": "P00",
+   "5": "P01",
+   "6": "P02",
+   "7": "P03",
+   "8": "P04",
+   "9": "P05",
+   "10": "P06",
+   "11": "P07",
+   "12": "GND",
+   "13": "P10",
+   "14": "P11",
+   "15": "P12",
+   "16": "P13",
+   "17": "P14",
+   "18": "P15",
+   "19": "P16",
+   "20": "P17",
+   "21": "A0",
+   "22": "SCL",
+   "23": "SDA",
+   "24": "VCC"
+  },
+  "notes": "Drawing and table agree. Overbar on INT (pin 1, interrupt output, open-drain, needs pull-up to VCC). VCC printed V_CC. A0 is on pin 21 (right side), while A1/A2 are on pins 2/3 (left side); the address inputs must be tied directly to VCC or ground. Port names are P00-P07 and P10-P17 (zero-padded, no underscore or dot). The table gives SDA's TYPE as 'Input' (it is bidirectional open-drain in practice). The PW package has no thermal pad; only the RTW/RGE QFNs have one ('if used, must be connected as a secondary ground or left electrically open')."
+ },
+ "M24C64-RMN6TP": {
+  "package": "SO8N (MN, 150 mil width)",
+  "source": "m24c64.pdf p.7 (Figure 2 '8-pin package connections, top view', AI01845f), p.6 (Table 1 Signal names), p.9 (Sections 2.3/2.4), p.47 (Table 27 ordering scheme). ST DocID16891 Rev 33, June 2016",
+  "pins": {
+   "1": "E0",
+   "2": "E1",
+   "3": "E2",
+   "4": "VSS",
+   "5": "SDA",
+   "6": "SCL",
+   "7": "WC",
+   "8": "VCC"
+  },
+  "notes": "Overbar on WC (pin 7, Write Control, active low: high = writes disabled; writes enabled when driven low OR LEFT FLOATING). E2/E1/E0 'must be tied to VCC or VSS'; if left floating they read as low (0) (Section 2.3). SDA is open drain and needs a pull-up to VCC. The 8-pin drawing is common to all 8-pin packages (SO8N, TSSOP8, UFDFPN8, PDIP8). Part number decode (Table 27): R = VCC 1.8-5.5 V, MN = SO8 150 mil, 6 = industrial -40..85 C, T = tape & reel, P = ECOPACK2. No exposed pad on SO8N. Text extraction of this figure is garbled (custom font); names read from the rendered page."
+ },
+ "LM4040xIM3-4.1": {
+  "package": "SOT-23-3 (DBZ)",
+  "source": "lm4040.pdf p.4 (Figure 5-1 'DBZ Package 3-Pin SOT-23 Top View', Table 5-1 Pin Functions) and Section 8.2.2.4 'SOT-23 Connections'. TI SLOS456Q (Jan 2005, revised April 2026)",
+  "pins": {
+   "1": "CATHODE",
+   "2": "ANODE",
+   "3": "*"
+  },
+  "notes": "Drawing labels pin 1 '+' and pin 2 '-' (en dash); the shunt-reference (zener) symbol has its bar/cathode on pin 1 and its anode on pin 2. Table 5-1 names them CATHODE (DBZ pin 1, 'Shunt Current/Voltage input') and ANODE (DBZ pin 2, 'Common pin, normally connected to ground'). Pin 3 is printed as '*' (no name): 'Must float or connect to anode'. Footnote: TI recommends connecting it to the anode where there is high EMI or significant high-frequency switching noise. Section 8.2.2.4: 'There is a parasitic Schottky diode connected between pins 2 and 3 of the SOT-23 packaged device. Thus, pin 3 of the SOT-23 package must be left floating or connected to pin 2.' So pin 3 is not a true NC: it must never be tied to anything except pin 2. PART-NUMBER MISMATCH: 'LM4040xIM3-4.1' is National/LM4040-N-style ordering nomenclature and does not appear in this datasheet. SLOS456Q's 4.096 V SOT-23 parts are LM4040A41IDBZR / B41 / C41 / D41 (DBZ). If the ordered part really is an 'IM3-4.1', its own datasheet (TI LM4040-N, SNOS633) was not on disk, so this pinout is verified only for the DBZ part. Also note the DCK (SC70-5) and LP (TO-92) packages are numbered differently (e.g. SC70: 1 = anode, 3 = cathode); do not mix footprints."
+ },
+ "AMS1117-3.3": {
+  "package": "SOT-223 (3 lead + tab)",
+  "source": "ams1117.pdf p.1 ('PIN CONNECTIONS: 3 PIN FIXED/ADJUSTABLE VERSION' list and 'SOT-223 Top View' drawing; 'TO-252 FRONT VIEW: TAB IS OUTPUT'), p.3 application hints, p.7 '3 LEAD SOT-223 PLASTIC PACKAGE' outline (AMS DRW# 042292). Advanced Monolithic Systems 'DS1117' (no revision/date printed). ams1117_lcsc.pdf is byte-identical to ams1117.pdf",
+  "pins": {
+   "1": "Ground/Adjust",
+   "2": "VOUT",
+   "3": "VIN",
+   "TAB": "VOUT"
+  },
+  "notes": "Pin names are from the pin-connection list ('1- Ground/Adjust, 2- V_OUT, 3- V_IN'); the SOT-223 top-view drawing only numbers pins 1-2-3 left to right with the tab at the top and gives no names. On a fixed -3.3 part, pin 1 is GND (the 8L SOIC drawing on the same page prints it 'GND/ADJ'). TAB: the datasheet's only explicit tab statement, 'TAB IS OUTPUT', is printed beside the TO-252 front view, NOT the SOT-223. The SOT-223 drawing and outline (p.7) leave the tab unlabelled, so the SOT-223 tab = VOUT is an inference (the same die/leadframe family, and pin 2 = VOUT is the centre lead that the tab normally joins), not something this datasheet states for SOT-223. The p.3 thermal text refers to 'the tab' (junction-to-tab 15 C/W) and Table 1 to 'Tab of device attached to topside copper', still without naming its potential. The AMS application note also says the heat-spreading copper 'does not need to be electrically connected to the tab'. Treat the tab as VOUT and do not connect it to GND. The ams1117_lcsc copy is the same file, so there was no second-vendor datasheet to cross-check (LCSC 'AMS1117-3.3' stock can come from clone makers)."
+ },
+ "L78M05ABDT": {
+  "package": "DPAK (TO-252), 2 leads + tab (middle lead cut)",
+  "source": "l78m05.pdf p.3 (Figure 2 'Pin connections (top view)', DPAK drawing SC07770), p.30-35 (DPAK package outlines A/E/I and footprint), p.40 (Table 27 order codes: L78M05ABDT-TR = DPAK, 5 V). ST DS0425 Rev 24, September 2020",
+  "pins": {
+   "1": "INPUT",
+   "2": "GND",
+   "3": "OUTPUT",
+   "TAB": "GND"
+  },
+  "notes": "The DPAK drawing labels the tab 'GND', the upper lead 'OUTPUT' and the lower lead 'INPUT', and shows the centre lead as a short stub (cut). THE DATASHEET PRINTS NO PIN NUMBERS for any package (TO-220/TO-220FP/IPAK drawings are also names only: OUTPUT, GROUND, INPUT from top to bottom with the tab on the left). The 1/2/3 numbering above is inferred. Rotate the 'top view' so the leads point down: INPUT becomes the left lead and OUTPUT the right, so left-to-right numbering gives 1 = INPUT, 2 = GND (cut stub), 3 = OUTPUT. Verify the footprint/symbol numbering against this ORDER (INPUT, GND, OUTPUT), not against datasheet numbers. Tab = GND (unlike the AMS1117, where the tab is the output). The outline (Figure 32) calls the tab 'THERMAL PAD'. Order code is 'L78M05ABDT-TR' (A grade: VO 4.9-5.1 V at TJ = 25 C per Table 4; -TR = tape & reel). Table 27 quirk: an 'L78M05ACDT-TR' row has a blank output-voltage cell. Pin '2' (GND) is the cut centre stub, which is not a solderable lead on DPAK; electrically GND is the TAB. A footprint may number the tab as pad 2 or as a separate pad."
+ },
+ "TPS54202DDCR": {
+  "package": "SOT-23-6 (DDC, SOT-23-THIN)",
+  "source": "tps54202.pdf p.3 (Figure 4-1 '6-Pin SOT-23 DDC Package (Top View)', Table 4-1 Pin Functions). TI SLVSD26C (April 2016, revised February 2026)",
+  "pins": {
+   "1": "GND",
+   "2": "SW",
+   "3": "VIN",
+   "4": "FB",
+   "5": "EN",
+   "6": "BOOT"
+  },
+  "notes": "Drawing and table agree. EN: 'Float the EN pin to enable' (internal pull-up). BOOT: 0.1 uF capacitor between BOOT and SW. FB: feedback divider from the output (adjustable part; there is no fixed-output variant). GND is the low-side FET source and controller ground; connect the sensitive VFB divider to GND at a single point. No exposed pad. The packaging table calls the package 'SOT-23-THIN (DDC)'."
+ },
+ "AP63205WU-7": {
+  "package": "TSOT-23-6 (TSOT26, WU)",
+  "source": "ap63205.pdf p.1 (Pin Assignments 'TOP VIEW TSOT26'), p.2 (Pin Descriptions; Figure 1 Typical Application Circuit), p.~11 (9 Setting the Output Voltage), p.~16 (Ordering information: AP63205WU-7 = TSOT26, 1100 kHz, 5 V, WU, 3000/7-inch T&R; marking T5). Diodes Inc. DS41326 Rev. 3-2, November 2024",
+  "pins": {
+   "1": "FB",
+   "2": "EN",
+   "3": "VIN",
+   "4": "GND",
+   "5": "SW",
+   "6": "BST"
+  },
+  "notes": "Drawing and Pin Descriptions agree. AP63205 is the FIXED 5.0 V version: Figure 1 connects FB (pin 1) directly to VOUT with no divider (the pin-table text about 'resistive divider' applies to the adjustable AP63200/AP63201). EN: 'Attach to VIN or leave open for automatic startup', precision 1.18 V threshold. BST: 100 nF from SW to BST. No exposed pad. CAUTION: same footprint class as the TPS54202 (SOT-23-6) but a completely different pinout (AP63205: 1 FB, 2 EN, 3 VIN, 4 GND, 5 SW, 6 BST; TPS54202: 1 GND, 2 SW, 3 VIN, 4 FB, 5 EN, 6 BOOT). Only VIN on pin 3 is common; the parts are not drop-in interchangeable."
+ },
+ "BAT54S": {
+  "package": "SOT-23 (MDD / Microdiode)",
+  "source": "bat54s.pdf p.1 (internal-connection symbols 'BAT54S MARKING: KL4' and SOT-23 3-D view with pins numbered 1, 2, 3), p.3 (SOT-23 outline). MDD BAT54/A/C/S, Rev:2024A2",
+  "pins": {
+   "1": "anode (diode 1)",
+   "2": "cathode (diode 2)",
+   "3": "cathode (diode 1) / anode (diode 2)"
+  },
+  "series_pair": "Two Schottky diodes in series: pin 1 (anode) -> D1 -> pin 3 (common) -> D2 -> pin 2 (cathode). Conduction path anode-to-cathode is 1 -> 3 -> 2.",
+  "notes": "MDD prints NO pin names or pin table, and the BAT54S internal-connection symbol (a low-resolution raster image) has NO pin numbers. Numbering is inferred by combining two drawings on p.1. (a) The symbol shows one lead on top and two on the bottom: the bottom-left lead goes to the ANODE of the left diode (triangle pointing up, bar at top); its cathode joins the top lead; the top lead also feeds the ANODE of the right diode (triangle pointing down); that diode's cathode (bar) goes to the bottom-right lead. (b) The 3-D package view numbers the two-lead side 1 (left) and 2 (right) and the single lead 3. Reading the symbol as a top view with the same orientation gives 1 = anode, 2 = cathode, 3 = common. This matches the Nexperia BAV99 pinning table (A1 / K2 / K1,A2) and its graphic symbol, which is drawn identically. MARKING: KL4. Treat as 'verified by drawing shape only', not by an explicit pin table."
+ },
+ "BAV99": {
+  "package": "SOT23 (TO-236AB) (Nexperia)",
+  "source": "bav99.pdf p.2 (Table 2 Pinning information: pin/symbol/description, simplified outline, graphic symbol 006aaa763). Nexperia BAV99 product data sheet, 1 July 2022",
+  "pins": {
+   "1": "A1",
+   "2": "K2",
+   "3": "K1, A2"
+  },
+  "series_pair": "Two switching diodes in series: pin 1 = anode (diode 1); pin 3 = cathode (diode 1) and anode (diode 2); pin 2 = cathode (diode 2). Conduction path 1 -> 3 -> 2.",
+  "notes": "Explicit pin table, outline and graphic symbol all agree. Simplified outline: pins 1 (left) and 2 (right) on one side, pin 3 alone on the other. Marking code A7% (% = site code). Same pin-to-function mapping as the MDD BAT54S."
+ },
+ "SS14": {
+  "package": "SMA (DO-214AC) (MDD)",
+  "source": "ss14.pdf p.1 (Mechanical Data 'Polarity : Color band denotes cathode end'; DO-214AC/SMA outline with band line and diode symbol). MDD SS12 THRU SS1200, Rev:2025A5",
+  "pins": {
+   "band_end": "cathode",
+   "plain_end": "anode"
+  },
+  "notes": "The datasheet assigns NO pin numbers (no 1/2); it only states 'Color band denotes cathode end'. In the outline top view the band (double line) is at the LEFT end of the body, and the diode symbol beneath it has its bar and triangle tip on the left, so the left/banded terminal is the cathode. Any 1/2 numbering in a library symbol/footprint is the library's convention, not the datasheet's. SS14 = 40 V, 1.0 A, VF max 0.55 V at 1.0 A. Two-terminal SMA package with J-bend leads, body 4.50/3.80 mm long, 2.80/2.30 mm wide, overall 5.30/4.70 mm."
+ },
+ "SN74AHCT1G125DBVR": {
+  "package": "SOT-23-5 (DBV)",
+  "source": "sn74ahct1g125.pdf p.3 (4 Pin Configuration and Functions: 'DBV PACKAGE (TOP VIEW)' drawing and Table 4-1 Pin Functions). TI SCLS378P (Aug 1997, revised March 2024)",
+  "pins": {
+   "1": "OE",
+   "2": "A",
+   "3": "GND",
+   "4": "Y",
+   "5": "VCC"
+  },
+  "notes": "Drawing and table agree. Overbar on OE (pin 1, active-low output enable: output Y is high-Z when OE is high). VCC printed V_CC. Same numbering for the DBV, DCK and DRL packages. Pin 2 = A input and pin 4 = Y output on opposite sides; there is no pin 6 (the gap opposite pin 2 is unpopulated). No exposed pad. AHCT = TTL-level inputs, so a 3.3 V logic input drives a 5 V-powered output."
+ },
+ "SM04B-SRSS-TB": {
+  "package": "JST SH 1.0 mm pitch, side entry (right-angle) SMT shrouded header, 4 circuits + 2 solder tabs",
+  "source": "sm04b.pdf p.1 ('PC board layout and Assembly layout: Side entry type' land pattern and assembled side view; Note 1 'viewed from the connector mounting side'), p.2 ('Shrouded header: Side entry type' front/side views with 'Circuit No.1' callout; model table row 4 = SM04B-SRSS-TB, A = 3.0, B = 6.0, 3,000/reel; material: 'Solder tab: Brass, copper-undercoated, tin-plated'). JST SH connector catalogue pages ('eSH'), no revision printed",
+  "pins": {
+   "1": "Circuit No.1",
+   "2": "Circuit 2",
+   "3": "Circuit 3",
+   "4": "Circuit 4",
+   "TAB_L": "solder tab (mechanical, no circuit number)",
+   "TAB_R": "solder tab (mechanical, no circuit number)"
+  },
+  "mechanical": {
+   "pitch_mm": 1.0,
+   "circuits": 4,
+   "A_mm_pin1_to_pinN": 3.0,
+   "B_mm_overall_width": 6.0,
+   "header_depth_mm": 4.25,
+   "contact_tail_beyond_body_mm": 0.7,
+   "header_height_mm": 2.9,
+   "assembled_height_mm": 2.95,
+   "assembled_depth_with_housing_mm": 6.25,
+   "land_pattern_signal_pad_mm": "0.6 (+/-0.05) wide x 1.55 long (spans 4.0 to 5.55 +/-0.1 from the front edge of the tab pads)",
+   "land_pattern_tab_pad_mm": "1.2 (+/-0.1) wide x 1.8 (+/-0.1) long",
+   "tab_pad_inner_edge_to_outer_signal_pad_centre_mm": 0.7,
+   "tab_pad_front_edge_beyond_header_outline_mm": 0.2,
+   "pin1_location": "Front view into the mating face (PCB at bottom, p.2): Circuit No.1 is the LEFT-most contact, circuits run 1..N left to right; the two solder tabs are at the outer ends of the body, near the mating (front) face."
+  },
+  "notes": "Mechanical part: the datasheet gives circuit numbers only via the 'Circuit No.1' callout and has no pin table. The side-entry LAND PATTERN (p.1) does NOT mark pin 1. It shows the signal pads in one row at the rear (contact tails, extending past the header outline) and the two larger solder-tab pads at the front corners. Note 1 says the layout is 'viewed from the connector mounting side'. Inference (not printed): viewed from above the PCB with the mating face toward the viewer, Circuit 1 is the left-most signal pad, matching the p.2 front view. Confirm against the footprint before ordering. The solder tabs have no circuit number and no electrical function in the datasheet (brass, tin-plated); KiCad footprints typically call them 'MP', which is a library convention, not a datasheet name. Current rating 1.0 A (AWG #28), 50 V. Mating housing SHR-04V-S(-B), contacts SSH-003T-P0.2-H."
+ },
+ "TEENSY41": {
+  "source": "PJRC Teensy 4.1 pinout card, front side: https://www.pjrc.com/teensy/card11a_rev4_web.pdf (rev4; vector PDF, rendered at 400 dpi and read per pin column; linked from https://www.pjrc.com/store/teensy41.html). Back side card11b_rev4_web.pdf (underside pads 42-54 only, 5 V-tolerance note). Mechanical: https://www.pjrc.com/teensy/dimensions_teensy41.png and product-page text. Files saved in scratchpad/teensy/. (card11a_rev4_web.png does not exist: HTTP 404; the store's preview image is teensy41_card11a_rev3.png.)",
+  "left_top_to_bottom": [
+   "GND",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "5",
+   "6",
+   "7",
+   "8",
+   "9",
+   "10",
+   "11",
+   "12",
+   "3.3V",
+   "24",
+   "25",
+   "26",
+   "27",
+   "28",
+   "29",
+   "30",
+   "31",
+   "32"
+  ],
+  "right_top_to_bottom": [
+   "Vin",
+   "GND",
+   "3.3V",
+   "23",
+   "22",
+   "21",
+   "20",
+   "19",
+   "18",
+   "17",
+   "16",
+   "15",
+   "14",
+   "13",
+   "GND",
+   "41",
+   "40",
+   "39",
+   "38",
+   "37",
+   "36",
+   "35",
+   "34",
+   "33"
+  ],
+  "orientation_note": "The card draws the board top side up with the USB connector at the LEFT. The card's lower pin row becomes the left column above, and its upper row the right column, after rotating 90 degrees clockwise so the USB is at the top (top view, no mirroring). Card wording: right column top = 'Vin (3.6 to 5.5 volts)', 3rd = '3.3V (250 mA max)'.",
+  "functions": {
+   "0": [
+    "RX1",
+    "CS1",
+    "CRX2",
+    "PWM"
+   ],
+   "1": [
+    "TX1",
+    "MISO1",
+    "CTX2",
+    "PWM"
+   ],
+   "2": [
+    "OUT2",
+    "PWM"
+   ],
+   "3": [
+    "LRCLK2",
+    "PWM"
+   ],
+   "4": [
+    "BCLK2",
+    "PWM"
+   ],
+   "5": [
+    "IN2",
+    "PWM"
+   ],
+   "6": [
+    "OUT1D",
+    "PWM"
+   ],
+   "7": [
+    "RX2",
+    "OUT1A",
+    "PWM"
+   ],
+   "8": [
+    "TX2",
+    "IN1",
+    "PWM"
+   ],
+   "9": [
+    "OUT1C",
+    "PWM"
+   ],
+   "10": [
+    "CS",
+    "MQSR",
+    "PWM"
+   ],
+   "11": [
+    "MOSI",
+    "CTX1",
+    "PWM"
+   ],
+   "12": [
+    "MISO",
+    "MQSL",
+    "PWM"
+   ],
+   "13": [
+    "(LED)",
+    "SCK",
+    "PWM"
+   ],
+   "14": [
+    "A0",
+    "TX3",
+    "S/PDIF OUT",
+    "PWM"
+   ],
+   "15": [
+    "A1",
+    "RX3",
+    "S/PDIF IN",
+    "PWM"
+   ],
+   "16": [
+    "A2",
+    "RX4",
+    "SCL1"
+   ],
+   "17": [
+    "A3",
+    "TX4",
+    "SDA1"
+   ],
+   "18": [
+    "A4",
+    "SDA",
+    "PWM"
+   ],
+   "19": [
+    "A5",
+    "SCL",
+    "PWM"
+   ],
+   "20": [
+    "A6",
+    "TX5",
+    "LRCLK1"
+   ],
+   "21": [
+    "A7",
+    "RX5",
+    "BCLK1"
+   ],
+   "22": [
+    "A8",
+    "CTX1",
+    "PWM"
+   ],
+   "23": [
+    "A9",
+    "CRX1",
+    "MCLK1",
+    "PWM"
+   ],
+   "24": [
+    "A10",
+    "TX6",
+    "SCL2",
+    "PWM"
+   ],
+   "25": [
+    "A11",
+    "RX6",
+    "SDA2",
+    "PWM"
+   ],
+   "26": [
+    "A12",
+    "MOSI1"
+   ],
+   "27": [
+    "A13",
+    "SCK1"
+   ],
+   "28": [
+    "RX7",
+    "PWM"
+   ],
+   "29": [
+    "TX7",
+    "PWM"
+   ],
+   "30": [
+    "CRX3"
+   ],
+   "31": [
+    "CTX3"
+   ],
+   "32": [
+    "OUT1B"
+   ],
+   "33": [
+    "MCLK2",
+    "PWM"
+   ],
+   "34": [
+    "RX8"
+   ],
+   "35": [
+    "TX8"
+   ],
+   "36": [
+    "CS",
+    "PWM"
+   ],
+   "37": [
+    "CS",
+    "PWM"
+   ],
+   "38": [
+    "A14",
+    "CS1 (grey)",
+    "IN1 (grey)"
+   ],
+   "39": [
+    "A15",
+    "MISO1 (grey)",
+    "OUT1A (grey)"
+   ],
+   "40": [
+    "A16"
+   ],
+   "41": [
+    "A17"
+   ]
+  },
+  "special_function_summary": {
+   "SPI": {
+    "MOSI": "11",
+    "MISO": "12",
+    "SCK": "13",
+    "CS": "10 (also labelled CS: 36, 37)"
+   },
+   "SPI1": {
+    "MOSI1": "26",
+    "MISO1": "1 (grey alternate: 39)",
+    "SCK1": "27",
+    "CS1": "0 (grey alternate: 38)"
+   },
+   "SAI1_I2S1": {
+    "MCLK1": "23",
+    "BCLK1": "21",
+    "LRCLK1": "20",
+    "OUT1A": "7 (grey alternate: 39)",
+    "OUT1B": "32",
+    "OUT1C": "9",
+    "OUT1D": "6",
+    "IN1": "8 (grey alternate: 38)"
+   },
+   "SAI2_I2S2": {
+    "MCLK2": "33",
+    "BCLK2": "4",
+    "LRCLK2": "3",
+    "OUT2": "2",
+    "IN2": "5"
+   },
+   "I2C_Wire (SDA/SCL)": {
+    "SDA": "18",
+    "SCL": "19"
+   },
+   "I2C_Wire1 (SDA1/SCL1)": {
+    "SDA1": "17",
+    "SCL1": "16"
+   },
+   "I2C_Wire2 (SDA2/SCL2)": {
+    "SDA2": "25",
+    "SCL2": "24"
+   },
+   "Serial1": {
+    "RX1": "0",
+    "TX1": "1"
+   },
+   "Serial2": {
+    "RX2": "7",
+    "TX2": "8"
+   },
+   "Serial3": {
+    "RX3": "15",
+    "TX3": "14"
+   },
+   "Serial4": {
+    "RX4": "16",
+    "TX4": "17"
+   },
+   "Serial5": {
+    "RX5": "21",
+    "TX5": "20"
+   },
+   "Serial6": {
+    "RX6": "25",
+    "TX6": "24"
+   },
+   "Serial7": {
+    "RX7": "28",
+    "TX7": "29"
+   },
+   "Serial8": {
+    "RX8": "34",
+    "TX8": "35"
+   },
+   "CAN": {
+    "CRX1": "23",
+    "CTX1": "22 and 11",
+    "CRX2": "0",
+    "CTX2": "1",
+    "CRX3": "30",
+    "CTX3": "31"
+   },
+   "MQS": {
+    "MQSR": "10",
+    "MQSL": "12"
+   },
+   "S/PDIF": {
+    "S/PDIF IN": "15",
+    "S/PDIF OUT": "14"
+   },
+   "Analog": {
+    "A0": "14",
+    "A1": "15",
+    "A2": "16",
+    "A3": "17",
+    "A4": "18",
+    "A5": "19",
+    "A6": "20",
+    "A7": "21",
+    "A8": "22",
+    "A9": "23",
+    "A10": "24",
+    "A11": "25",
+    "A12": "26",
+    "A13": "27",
+    "A14": "38",
+    "A15": "39",
+    "A16": "40",
+    "A17": "41"
+   },
+   "PWM_pins": [
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "18",
+    "19",
+    "22",
+    "23",
+    "24",
+    "25",
+    "28",
+    "29",
+    "33",
+    "36",
+    "37"
+   ]
+  },
+  "mechanical": {
+   "board_outline_mm": "60.96 x 17.78 (+/-0.6), PCB 1.57 thick",
+   "edge_pins": "48 = two rows of 24",
+   "pitch_mm": 2.54,
+   "row_spacing_mm": 15.24,
+   "row_centre_from_long_edge_mm": 1.27,
+   "usb": "micro-USB on one short edge, overhanging the board edge by 0.7 mm; connector 3.07 mm tall",
+   "hole_diameters": "Product page: 'Finished hole diameter is 0.965mm (59 locations) and 0.762mm (6 locations)'",
+   "other": "Inner 5-hole row = USB Host header (back card: +5V, D-, D+, GND, GND), 3.05 mm in from the adjacent edge row; Ethernet 2x3 pads (back card: RX+, LED, TX-, RX-, GND, TX+); USB-device pads VUSB/D-/D+ near the USB connector; program button about 41.66 mm from the first pin. See dimensions_teensy41.png"
+  },
+  "notes": "The card labels I2C as SDA/SCL, SDA1/SCL1 and SDA2/SCL2, and serial ports as RXn/TXn. The Wire/Wire1/Wire2 and Serial1-8 groupings above follow the label numbering; the card does not print the words 'Wire' or 'Serial'. On pins 38/39, CS1/IN1 and MISO1/OUT1A are printed in GREY text, unlike all other labels. The front card has no legend for the grey; the back card uses the same grey for secondary pin options, so these are alternate pins for SPI1 CS1/MISO1 and SAI1 IN1/OUT1A (primary: 0/1 and 8/7). CTX1 appears on both pin 11 and pin 22. CS is printed on 10, 36 and 37. Back card: 'Teensy 4.1 pins are not 5 volt tolerant. Do not apply more than 3.3V to any pin, except VIN & VUSB.' The store page notes cards printed before September 2021 wrongly showed pin 53 (underside pad) with PWM; the rev4 back card used here does not."
+ },
+ "PICO2": {
+  "source": "pico2.pdf (Raspberry Pi Pico 2 Datasheet): PDF p.5 / doc p.4 Figure 2 'The pinout of the Raspberry Pi Pico 2 board'; PDF p.8 / doc p.7 Figure 3 'The dimensions of the Raspberry Pi Pico 2 board' and Section 3 text; PDF p.9 / doc p.8 Figure 4 'The pin numbering' and Section 3.1 pin list (PIN40 VBUS ... PIN30 RUN)",
+  "pins": {
+   "1": "GP0",
+   "2": "GP1",
+   "3": "GND",
+   "4": "GP2",
+   "5": "GP3",
+   "6": "GP4",
+   "7": "GP5",
+   "8": "GND",
+   "9": "GP6",
+   "10": "GP7",
+   "11": "GP8",
+   "12": "GP9",
+   "13": "GND",
+   "14": "GP10",
+   "15": "GP11",
+   "16": "GP12",
+   "17": "GP13",
+   "18": "GND",
+   "19": "GP14",
+   "20": "GP15",
+   "21": "GP16",
+   "22": "GP17",
+   "23": "GND",
+   "24": "GP18",
+   "25": "GP19",
+   "26": "GP20",
+   "27": "GP21",
+   "28": "GND",
+   "29": "GP22",
+   "30": "RUN",
+   "31": "GP26",
+   "32": "GP27",
+   "33": "AGND",
+   "34": "GP28",
+   "35": "ADC_VREF",
+   "36": "3V3",
+   "37": "3V3_EN",
+   "38": "GND",
+   "39": "VSYS",
+   "40": "VBUS"
+  },
+  "debug_header": {
+   "D1": "SWCLK",
+   "D2": "GND",
+   "D3": "SWDIO"
+  },
+  "figure2_functions": {
+   "1": [
+    "GP0",
+    "SPI0 RX",
+    "I2C0 SDA",
+    "UART0 TX"
+   ],
+   "2": [
+    "GP1",
+    "SPI0 CSn",
+    "I2C0 SCL",
+    "UART0 RX"
+   ],
+   "4": [
+    "GP2",
+    "SPI0 SCK",
+    "I2C1 SDA"
+   ],
+   "5": [
+    "GP3",
+    "SPI0 TX",
+    "I2C1 SCL"
+   ],
+   "6": [
+    "GP4",
+    "SPI0 RX",
+    "I2C0 SDA",
+    "UART1 TX"
+   ],
+   "7": [
+    "GP5",
+    "SPI0 CSn",
+    "I2C0 SCL",
+    "UART1 RX"
+   ],
+   "9": [
+    "GP6",
+    "SPI0 SCK",
+    "I2C1 SDA"
+   ],
+   "10": [
+    "GP7",
+    "SPI0 TX",
+    "I2C1 SCL"
+   ],
+   "11": [
+    "GP8",
+    "SPI1 RX",
+    "I2C0 SDA",
+    "UART1 TX"
+   ],
+   "12": [
+    "GP9",
+    "SPI1 CSn",
+    "I2C0 SCL",
+    "UART1 RX"
+   ],
+   "14": [
+    "GP10",
+    "SPI1 SCK",
+    "I2C1 SDA"
+   ],
+   "15": [
+    "GP11",
+    "SPI1 TX",
+    "I2C1 SCL"
+   ],
+   "16": [
+    "GP12",
+    "SPI1 RX",
+    "I2C0 SDA",
+    "UART0 TX"
+   ],
+   "17": [
+    "GP13",
+    "SPI1 CSn",
+    "I2C0 SCL",
+    "UART0 RX"
+   ],
+   "19": [
+    "GP14",
+    "SPI1 SCK",
+    "I2C1 SDA"
+   ],
+   "20": [
+    "GP15",
+    "SPI1 TX",
+    "I2C1 SCL"
+   ],
+   "21": [
+    "GP16",
+    "SPI0 RX",
+    "I2C0 SDA",
+    "UART0 TX"
+   ],
+   "22": [
+    "GP17",
+    "SPI0 CSn",
+    "I2C0 SCL",
+    "UART0 RX"
+   ],
+   "24": [
+    "GP18",
+    "SPI0 SCK",
+    "I2C1 SDA"
+   ],
+   "25": [
+    "GP19",
+    "SPI0 TX",
+    "I2C1 SCL"
+   ],
+   "26": [
+    "GP20",
+    "I2C0 SDA"
+   ],
+   "27": [
+    "GP21",
+    "I2C0 SCL"
+   ],
+   "29": [
+    "GP22"
+   ],
+   "31": [
+    "GP26",
+    "ADC0",
+    "I2C1 SDA"
+   ],
+   "32": [
+    "GP27",
+    "ADC1",
+    "I2C1 SCL"
+   ],
+   "33": [
+    "GND",
+    "AGND"
+   ],
+   "34": [
+    "GP28",
+    "ADC2"
+   ],
+   "36": [
+    "3V3(OUT)"
+   ]
+  },
+  "figure2_defaults": "Darker-shaded labels in Figure 2 are marked '(default)' in its legend: UART0 TX/RX on GP0/GP1; I2C0 SDA/SCL on GP4/GP5; SPI0 RX/CSn/SCK/TX on GP16/GP17/GP18/GP19.",
+  "internal_gpio": {
+   "GPIO23": "OP, on-board SMPS Power Save pin (not on the edge connector; TP4)",
+   "GPIO24": "IP, VBUS sense (high if VBUS present)",
+   "GPIO25": "OP, user LED (TP5)",
+   "GPIO29": "IP, ADC3 measures VSYS/3"
+  },
+  "mechanical": {
+   "board_outline_mm": "51 x 21, 1 mm thick PCB; micro-USB overhangs the top (short) edge by 1.3 mm (typ)",
+   "orientation": "Top view with the micro-USB connector at the TOP edge (Figures 2 and 4): pins 1-20 run down the LEFT edge (pin 1 top-left, next to the USB connector, pin 20 bottom-left); pins 21-40 run UP the RIGHT edge (pin 21 bottom-right, pin 40 top-right next to the USB connector). Pin 40 (VBUS) is opposite pin 1 (GP0). The 3-pad debug header (D1 SWCLK, D2 GND, D3 SWDIO, left to right) is on the bottom short edge, opposite the USB.",
+   "row_spacing_mm": 17.78,
+   "pitch_mm": 2.54,
+   "pin_row_offset_from_long_edge_mm": 1.61,
+   "pin1_to_pin20_span_mm": 48.26,
+   "pin1_centre_from_top_edge_mm": 1.37,
+   "pin_hole_diameter_mm": 1.0,
+   "castellations": "all 40 edge pins are also castellated half-holes (Ø1 shown on the edge); SMT pads under the USB connector (A-D shell pads) and TP1-TP7 on the underside",
+   "mounting_holes": "4 x Ø2.1 (+/-0.05) mm; 11.4 mm apart across the board (each 4.8 mm from the long edge); centres 2 mm from the top edge (dimensioned) and, by the scaled drawing, 2 mm from the bottom edge, i.e. about 47 mm apart along the board (not explicitly dimensioned); Ø3.8 annular ring/keep-out shown around the holes",
+   "usb_connector_width_mm": 8,
+   "debug_pads": "middle debug pad on the board centreline (5.7 mm from the mounting-hole centre); pad hole centres 1.6 mm and pad extent 2.4 mm from the bottom edge",
+   "notes": "One 0.1 inch pitch wider than a standard 40-pin DIP (rows 0.7 inch apart)."
+  },
+  "notes": "Pin names are taken from the Section 3.1 text list where it gives one (PIN40 VBUS, PIN39 VSYS, PIN37 3V3_EN, PIN36 3V3, PIN35 ADC_VREF, PIN33 AGND, PIN30 RUN) and from Figure 2 otherwise. Figure 2 vs text: pin 36 is labelled '3V3(OUT)' in Figure 2 but '3V3' in the text; pin 33 is labelled 'GND' in the GPIO column AND 'AGND' in the ADC column of Figure 2 and 'AGND' in the text ('ground reference for GPIO26-29 ... can be connected to digital ground'). Pin numbering confirmed against Figure 4 (physical numbering). GP23, GP24, GP25 and GP29 are not on the 40-pin edge (internal functions)."
+ },
+ "RP2350_GPIO_FUNCTIONS": {
+  "source": "rp2350.txt / rp2350.pdf, Section 9.4 Function select, Table 677 \"General Purpose Input/Output (GPIO) Bank 0 Functions\" (doc pages 540-541, PDF pages 541-542). Duplicate of Table 3 in Section 1.2.3 (doc p.17). Function descriptions: Table 678.",
+  "columns": {
+   "F0": "HSTX (GPIO12-19 only)",
+   "F1": "SPI",
+   "F2": "UART",
+   "F3": "I2C",
+   "F4": "PWM",
+   "F5": "SIO",
+   "F6": "PIO0",
+   "F7": "PIO1",
+   "F8": "PIO2",
+   "F9": "QMI CS1n / TRACECLK, TRACEDATAx / CLOCK GPINx, GPOUTx",
+   "F10": "USB OVCUR DET / VBUS DET / VBUS EN",
+   "F11": "UART (auxiliary TX/RX on CTS/RTS-position pins)"
+  },
+  "gpio": {
+   "0": {
+    "F0": null,
+    "F1": "SPI0 RX",
+    "F2": "UART0 TX",
+    "F3": "I2C0 SDA",
+    "F4": "PWM0 A",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": "QMI CS1n",
+    "F10": "USB OVCUR DET",
+    "F11": null
+   },
+   "1": {
+    "F0": null,
+    "F1": "SPI0 CSn",
+    "F2": "UART0 RX",
+    "F3": "I2C0 SCL",
+    "F4": "PWM0 B",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": "TRACECLK",
+    "F10": "USB VBUS DET",
+    "F11": null
+   },
+   "2": {
+    "F0": null,
+    "F1": "SPI0 SCK",
+    "F2": "UART0 CTS",
+    "F3": "I2C1 SDA",
+    "F4": "PWM1 A",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": "TRACEDATA0",
+    "F10": "USB VBUS EN",
+    "F11": "UART0 TX"
+   },
+   "3": {
+    "F0": null,
+    "F1": "SPI0 TX",
+    "F2": "UART0 RTS",
+    "F3": "I2C1 SCL",
+    "F4": "PWM1 B",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": "TRACEDATA1",
+    "F10": "USB OVCUR DET",
+    "F11": "UART0 RX"
+   },
+   "4": {
+    "F0": null,
+    "F1": "SPI0 RX",
+    "F2": "UART1 TX",
+    "F3": "I2C0 SDA",
+    "F4": "PWM2 A",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": "TRACEDATA2",
+    "F10": "USB VBUS DET",
+    "F11": null
+   },
+   "5": {
+    "F0": null,
+    "F1": "SPI0 CSn",
+    "F2": "UART1 RX",
+    "F3": "I2C0 SCL",
+    "F4": "PWM2 B",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": "TRACEDATA3",
+    "F10": "USB VBUS EN",
+    "F11": null
+   },
+   "6": {
+    "F0": null,
+    "F1": "SPI0 SCK",
+    "F2": "UART1 CTS",
+    "F3": "I2C1 SDA",
+    "F4": "PWM3 A",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": null,
+    "F10": "USB OVCUR DET",
+    "F11": "UART1 TX"
+   },
+   "7": {
+    "F0": null,
+    "F1": "SPI0 TX",
+    "F2": "UART1 RTS",
+    "F3": "I2C1 SCL",
+    "F4": "PWM3 B",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": null,
+    "F10": "USB VBUS DET",
+    "F11": "UART1 RX"
+   },
+   "8": {
+    "F0": null,
+    "F1": "SPI1 RX",
+    "F2": "UART1 TX",
+    "F3": "I2C0 SDA",
+    "F4": "PWM4 A",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": "QMI CS1n",
+    "F10": "USB VBUS EN",
+    "F11": null
+   },
+   "9": {
+    "F0": null,
+    "F1": "SPI1 CSn",
+    "F2": "UART1 RX",
+    "F3": "I2C0 SCL",
+    "F4": "PWM4 B",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": null,
+    "F10": "USB OVCUR DET",
+    "F11": null
+   },
+   "10": {
+    "F0": null,
+    "F1": "SPI1 SCK",
+    "F2": "UART1 CTS",
+    "F3": "I2C1 SDA",
+    "F4": "PWM5 A",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": null,
+    "F10": "USB VBUS DET",
+    "F11": "UART1 TX"
+   },
+   "11": {
+    "F0": null,
+    "F1": "SPI1 TX",
+    "F2": "UART1 RTS",
+    "F3": "I2C1 SCL",
+    "F4": "PWM5 B",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": null,
+    "F10": "USB VBUS EN",
+    "F11": "UART1 RX"
+   },
+   "12": {
+    "F0": "HSTX",
+    "F1": "SPI1 RX",
+    "F2": "UART0 TX",
+    "F3": "I2C0 SDA",
+    "F4": "PWM6 A",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": "CLOCK GPIN0",
+    "F10": "USB OVCUR DET",
+    "F11": null
+   },
+   "13": {
+    "F0": "HSTX",
+    "F1": "SPI1 CSn",
+    "F2": "UART0 RX",
+    "F3": "I2C0 SCL",
+    "F4": "PWM6 B",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": "CLOCK GPOUT0",
+    "F10": "USB VBUS DET",
+    "F11": null
+   },
+   "14": {
+    "F0": "HSTX",
+    "F1": "SPI1 SCK",
+    "F2": "UART0 CTS",
+    "F3": "I2C1 SDA",
+    "F4": "PWM7 A",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": "CLOCK GPIN1",
+    "F10": "USB VBUS EN",
+    "F11": "UART0 TX"
+   },
+   "15": {
+    "F0": "HSTX",
+    "F1": "SPI1 TX",
+    "F2": "UART0 RTS",
+    "F3": "I2C1 SCL",
+    "F4": "PWM7 B",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": "CLOCK GPOUT1",
+    "F10": "USB OVCUR DET",
+    "F11": "UART0 RX"
+   },
+   "16": {
+    "F0": "HSTX",
+    "F1": "SPI0 RX",
+    "F2": "UART0 TX",
+    "F3": "I2C0 SDA",
+    "F4": "PWM0 A",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": null,
+    "F10": "USB VBUS DET",
+    "F11": null
+   },
+   "17": {
+    "F0": "HSTX",
+    "F1": "SPI0 CSn",
+    "F2": "UART0 RX",
+    "F3": "I2C0 SCL",
+    "F4": "PWM0 B",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": null,
+    "F10": "USB VBUS EN",
+    "F11": null
+   },
+   "18": {
+    "F0": "HSTX",
+    "F1": "SPI0 SCK",
+    "F2": "UART0 CTS",
+    "F3": "I2C1 SDA",
+    "F4": "PWM1 A",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": null,
+    "F10": "USB OVCUR DET",
+    "F11": "UART0 TX"
+   },
+   "19": {
+    "F0": "HSTX",
+    "F1": "SPI0 TX",
+    "F2": "UART0 RTS",
+    "F3": "I2C1 SCL",
+    "F4": "PWM1 B",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": "QMI CS1n",
+    "F10": "USB VBUS DET",
+    "F11": "UART0 RX"
+   },
+   "20": {
+    "F0": null,
+    "F1": "SPI0 RX",
+    "F2": "UART1 TX",
+    "F3": "I2C0 SDA",
+    "F4": "PWM2 A",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": "CLOCK GPIN0",
+    "F10": "USB VBUS EN",
+    "F11": null
+   },
+   "21": {
+    "F0": null,
+    "F1": "SPI0 CSn",
+    "F2": "UART1 RX",
+    "F3": "I2C0 SCL",
+    "F4": "PWM2 B",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": "CLOCK GPOUT0",
+    "F10": "USB OVCUR DET",
+    "F11": null
+   },
+   "22": {
+    "F0": null,
+    "F1": "SPI0 SCK",
+    "F2": "UART1 CTS",
+    "F3": "I2C1 SDA",
+    "F4": "PWM3 A",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": "CLOCK GPIN1",
+    "F10": "USB VBUS DET",
+    "F11": "UART1 TX"
+   },
+   "23": {
+    "F0": null,
+    "F1": "SPI0 TX",
+    "F2": "UART1 RTS",
+    "F3": "I2C1 SCL",
+    "F4": "PWM3 B",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": "CLOCK GPOUT1",
+    "F10": "USB VBUS EN",
+    "F11": "UART1 RX"
+   },
+   "24": {
+    "F0": null,
+    "F1": "SPI1 RX",
+    "F2": "UART1 TX",
+    "F3": "I2C0 SDA",
+    "F4": "PWM4 A",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": "CLOCK GPOUT2",
+    "F10": "USB OVCUR DET",
+    "F11": null
+   },
+   "25": {
+    "F0": null,
+    "F1": "SPI1 CSn",
+    "F2": "UART1 RX",
+    "F3": "I2C0 SCL",
+    "F4": "PWM4 B",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": "CLOCK GPOUT3",
+    "F10": "USB VBUS DET",
+    "F11": null
+   },
+   "26": {
+    "F0": null,
+    "F1": "SPI1 SCK",
+    "F2": "UART1 CTS",
+    "F3": "I2C1 SDA",
+    "F4": "PWM5 A",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": null,
+    "F10": "USB VBUS EN",
+    "F11": "UART1 TX"
+   },
+   "27": {
+    "F0": null,
+    "F1": "SPI1 TX",
+    "F2": "UART1 RTS",
+    "F3": "I2C1 SCL",
+    "F4": "PWM5 B",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": null,
+    "F10": "USB OVCUR DET",
+    "F11": "UART1 RX"
+   },
+   "28": {
+    "F0": null,
+    "F1": "SPI1 RX",
+    "F2": "UART0 TX",
+    "F3": "I2C0 SDA",
+    "F4": "PWM6 A",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": null,
+    "F10": "USB VBUS DET",
+    "F11": null
+   },
+   "29": {
+    "F0": null,
+    "F1": "SPI1 CSn",
+    "F2": "UART0 RX",
+    "F3": "I2C0 SCL",
+    "F4": "PWM6 B",
+    "F5": "SIO",
+    "F6": "PIO0",
+    "F7": "PIO1",
+    "F8": "PIO2",
+    "F9": null,
+    "F10": "USB VBUS EN",
+    "F11": null
+   }
+  },
+  "notes": "GPIO 0-29 only, as requested (30-47 are QFN-80 only). null = empty cell in the datasheet. Transcribed from pdftotext of Table 677 using column positions, then checked cell by cell against the rendered PDF pages 541-542. F9 is not purely clock: GPIO0/8/19 carry QMI CS1n and GPIO1-5 carry TRACECLK/TRACEDATA0-3; CLOCK GPIN0/GPOUT0/GPIN1/GPOUT1 appear on GPIO12-15 and again on 20-23; GPOUT2/GPOUT3 on 24/25. F11 UART aux: the F11 UARTx TX/RX sit on the pins whose F2 is UARTx CTS/RTS (e.g. GPIO2 F2 UART0 CTS, F11 UART0 TX), giving extra TX/RX placements. On Pico 2, GPIO23/24/25/29 are used on-board (SMPS PS, VBUS sense, LED, VSYS/3 ADC) and not on the edge connector."
+ },
+ "TPS54308DDCR": {
+  "package": "SOT-23-6 (DDC)",
+  "source": "TI SLUSCV2B (rev. Aug 2026) p.3 pin configuration and functions",
+  "pins": {
+   "1": "GND",
+   "2": "SW",
+   "3": "VIN",
+   "4": "FB",
+   "5": "EN",
+   "6": "BOOT"
+  },
+  "notes": "Same pinout as TPS54202DDCR. EN floats high (internal pull-up). VFB 0.596 V typ."
+ },
+ "XC6206P332MR": {
+  "package": "SOT-23 (MR)",
+  "source": "Torex XC6206 series datasheet (LCSC C5446 copy) p.2 pin assignment",
+  "pins": {
+   "1": "VSS",
+   "2": "VOUT",
+   "3": "VIN"
+  },
+  "notes": "Ceramic-capacitor compatible; CIN = CL = 1 uF in the typical circuit."
+ }
+}

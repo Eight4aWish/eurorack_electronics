@@ -47,6 +47,13 @@ python3 -m http.server 8000
 
 Or open `tools/visualizer/index.html` directly in a browser if you don't need module loading.
 
+### `hardware/analogue_board/` and `tools/analogue_board/`
+
+**Analogue board Rev A**: a general-purpose I/O board for a Pico 2 or Teensy 4.1 behind an n8synth Control Deck, heading for a JLCPCB assembly order. Spec and decision log: [`docs/analogue_board_spec.md`](docs/analogue_board_spec.md).
+
+- `hardware/analogue_board/`: the KiCad 9 project, the schematic PDF and the check results. Hardware licence CC BY-SA 4.0.
+- `tools/analogue_board/build.py`: generates the schematic, runs KiCad's ERC, exports the PDF, netlist and BOM, and checks every IC pin against its datasheet, the netlist against intent, decoupling and diode orientation. See [`hardware/analogue_board/README.md`](hardware/analogue_board/README.md).
+
 ### `tools/schematic/`
 
 Build-phase schematic generator for the **Dual Pingable LPG**. Produces per-phase PNGs (Phase 1 / Phase 2 / Mix) into `docs/schematics/`, with component values read live from the LPG layout JSON so the diagrams stay in sync with the design. Built on [Schemdraw](https://schemdraw.readthedocs.io/). See [`tools/schematic/README.md`](tools/schematic/README.md).

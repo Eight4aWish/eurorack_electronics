@@ -15,3 +15,10 @@ private/
 
 # Python virtualenv for the PCB tooling (kiutils, easyeda2kicad)
 .venv/
+
+# KiCad local state and backups
+*-backups/
+fp-info-cache
+*.kicad_prl
+_autosave-*
+~*.lck

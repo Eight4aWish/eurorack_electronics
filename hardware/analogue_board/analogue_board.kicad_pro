@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "filename": "analogue_board.kicad_pro",
+    "version": 3
+  },
+  "sheets": [
+    [
+      "e6cfe5fb-cd34-5945-b37d-aca61e0551b2",
+      "Root"
+    ],
+    [
+      "4cef8fc8-3b32-5d08-b124-a233d2d44e0a",
+      "Power"
+    ],
+    [
+      "47430451-5b2e-5bac-802f-17f0b1d5ba28",
+      "Codec & audio"
+    ],
+    [
+      "f50c8b2e-4172-5d1d-9028-6413c8b46ec0",
+      "CV jacks & ADC"
+    ],
+    [
+      "2774d978-be01-5b5c-a5c0-07bf73cc5d50",
+      "CV DAC"
+    ],
+    [
+      "dc311854-cb37-507b-8413-f8212c2c022c",
+      "Pots & gate outs"
+    ],
+    [
+      "7274a643-4869-5b98-9bfa-b631cd627243",
+      "Expander, I2C & LEDs"
+    ],
+    [
+      "d6661fdd-24ed-5770-a13b-db5d78a736eb",
+      "Gate ins & jack detect"
+    ],
+    [
+      "040e7b24-7d27-5978-9200-b15a621f45ee",
+      "Edge strips"
+    ]
+  ],
+  "schematic": {
+    "drawing": {
+      "default_line_thickness": 6.0
+    }
+  },
+  "erc": {
+    "rule_severities": {}
+  }
+}
