@@ -267,6 +267,33 @@ The Workshop System Computer is an RP2040 board (Music Thing Modular); EuroPi is
 Allen Synthesis's Pico board. Values above were read from their published schematics
 and firmware at commits `cced06a` and `1192d31`.
 
+### 6.5 Prior-art review, function by function
+
+WSC = Workshop System Computer Rev 1.0.0 (schematic PDF, `ComputerCard.h`); EuroPi =
+surface-mount revision (KiCad PCB netlist, firmware); Patch SM = Electrosmith datasheet
+v1.0.5 and libDaisy; Ogham = Keeos `ogham-merged-v1.0` sheets.
+
+| Function | WSC | EuroPi | Patch SM / Ogham | This board |
+|---|---|---|---|---|
+| **CV in** | 120k → inverting MCP6004 on 3.3 V, 33k‖4.7 nF, 100k from a −5 V ref: ±6 V → 0–3.3 V. RP2040 ADC via CD4052 mux, "really 8–10 bits" | 100k → TL074 ×−0.22 → MCP6002 on 3.3 V (stage credited to Émilie Gillet): 0–12 V, negatives read 0 | Patch SM: ±5 V, 100k in. Ogham: 470k into an MCP6004 summer with the pot and a −5 V ref | ADS8688 direct: ±10.24 / ±5.12 V native, 1 MΩ, 16-bit. No op-amp, no mux. |
+| **Input protection** | Large series R into a virtual ground; the 3.3 V rail-to-rail op-amp cannot drive the ADC past its rails | Same idea: TL074 then a 3.3 V MCP6002 that "will always clip" | Ogham: 470k series plus the op-amp's clamps | The ADS8688's own OVP (±20 V powered, ±11 V off) behind 1 kΩ |
+| **CV out** | PWM 11-bit at 60 kHz → 2-pole MFB on TL074H (gain −3.6, +5.97 V offset); sigma-delta in the PWM IRQ gives ~19 bits, ~5.9 mV calibrated | PWM 100 kHz → 1k/100 nF → TL074 ×3.2 → 1k: 0–10 V, ~1.5 kHz bandwidth | Patch SM: STM32 12-bit DAC, 0–5 V. Ogham: Seed DAC → TL072 ×3 | DAC8568 16-bit → TL074H ×4 with offset: ±5 V at ~31 kHz per channel |
+| **Audio out** | MCP4822 → TL074H inverting with −5 V ref: ±6 V, 1k out | — | Patch SM: PCM3060, DC-coupled ±5 V. Ogham: TL072 ×4.7 overshot to 19.5 Vpp | PCM3060 differential → difference amp ×1.25: ±5 V DC-coupled |
+| **Gate in** | 100k → NPN base, RP2040 pull-up as the load, no clamp; above 0.4 V = high | 100k → NPN, reverse diode on the base, 10k pull-up; 0.8 V threshold | Patch SM: BJT input, inverted in libDaisy. Ogham: LM393 with hysteresis for clock | 22k / 100k divider, BAV99 clamp, 74HC14 Schmitt. No reliance on module pull-ups (they differ between Pico, Teensy, XIAO) |
+| **Gate out** | GPIO → NPN, 10k to +12 V: ~7.2 V open-circuit, ~6 kΩ source, short-proof | — | Patch SM: 0–5 V, 100 Ω. Ogham: 74AHCT1G125 → 1k → Schottky clamps | 74HCT595 → 1k, BAV99 clamps: 0/5 V |
+| **Pots** | 3 × 100k from 3V3 through the mux; a 3-way switch read on one channel via 100k/100k | 2 × 10k from the Pico's 3V3 | Patch SM: pots from +5 V out (not ratiometric). Ogham: 1k + 100 nF + 100k pull-down | MCP3208, pots from its own reference: ratiometric |
+| **Buttons** | — | 1k series, 10k pull-up, 100 nF: 1 ms RC debounce | — | Adopt EuroPi's 1k / 10k / 100 nF on each expander button line [proposed] |
+| **LEDs** | NPN low-side switches from +12 V, keeping LED current off 3V3 | 5.1k off each op-amp output, so the LED shows the real output voltage | Patch SM: LED on CV out 2 | WS2812 chain on the digital 5 V buck |
+| **Jack detect** | One-GPIO pseudo-random probe through 100k to every input normal lug | 10k from a GPIO to each input's normal lug; unused by firmware | Patch SM: input 1 normalled to input 2 | WSC probe, adopted (§6.4) |
+| **Calibration** | ZD24C08 EEPROM, magic + CRC, up to 10 points per output, written from a web UI | Software on the Pico's flash; outputs looped into the input to find each volt | — | M24C64; DG412 loopback needs no cable |
+| **Power** | 5819 on each rail, 22 µF 35 V; CJA1117-5 from +12 V; 5 V → Schottky → VBUS → RT9193 3V3 | S2D rectifiers (not Schottky) on each rail; 7805 → diode → Pico VSYS | Ogham: SS14 + BLM18 ferrite + 10 µF 50 V per rail; the Seed fed from +12 V on its own; 7805 for logic only | SS14 + ferrite per rail; buck for digital 5 V; L78M05 for analogue 5 V; separate 3.3 V rails |
+| **ID** | GPIO straps read with pull-up then pull-down: three states per pin | GPIO straps, unused | — | Footprint ID and revision in the EEPROM |
+
+**Not adopted, and why:** PWM CV out (WSC, EuroPi) — the DAC8568 gives 16 bits at audio
+rate without filter ripple; the analogue mux (WSC) — the ADS8688 scans its own eight
+channels; NPN gate outs to +12 V (WSC) — a 5 V gate is what the Patch SM and Ogham
+produce, and the 595 drives eight from one chip.
+
 ## 7. Functional blocks
 
 | Block | Circuit | Part (LCSC) | Stock / $@10 | Status |
@@ -335,6 +362,11 @@ Studied: Electrosmith patch.init carrier (48.5 × 111 mm, 2-layer), Keeos Ogham
 | Pot inputs: 1 kΩ + 100 nF, 100 kΩ pull-down, pot top on the converter's reference rail | Ogham |
 | 74HCT595: OE pulled **high** (gates off) until firmware enables them from a TCA9555 line; MR to VCC. The storage register powers up undefined. | Datasheet behaviour; Ogham ties OE low |
 | Spare op-amp sections tied as followers with + to GND | Ogham |
+| Power-header symbol: join pins 1–2 (−12 V), 3–8 (GND), 9–10 (+12 V); then confirm every op-amp ±12 V pin has its 100 nF within ~3 mm | review of the boards |
+| No tantalum on the ±12 V rails; X7R 50 V instead | Ogham (schematic note) |
+| GND stitching vias at every decoupling cap and around the edge | Ogham (~37) |
+| Derate MLCC values for DC bias | reDIP-SID (capacitor notes) |
+| 0.45 / 0.2 mm vias only for fine-pitch fan-out (ADS8688 TSSOP-38); three fiducials | reDIP-SID; JLC practice |
 | Rules: 0.2 mm track and clearance, 0.5 mm power, via 0.6 / 0.3 mm, 0.5 mm copper to edge, a Power net class — JLCPCB's cheapest tier | Ogham, patch.init |
 | LCSC field on every machine-placed part; everything else marked do-not-place | Ogham |
 | Test pads on every rail and on I2S; fiducials | none of the four boards had them |
