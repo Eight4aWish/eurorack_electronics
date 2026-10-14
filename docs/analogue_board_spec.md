@@ -1,4 +1,4 @@
-# Analogue board — Rev A specification, v0.2
+# Analogue board — Rev A specification, v0.3
 
 A general-purpose Eurorack I/O board: a plug-in compute module on one side, an n8synth
 Control Deck on the other, and every analogue, gate and display interface in between.
@@ -7,6 +7,9 @@ End goal: one JLCPCB order for assembled boards.
 v0.1 was a handoff from a cloud session (2026-10-14) with nothing checked. This version
 checks that handoff against datasheets and live JLCPCB stock, adds an I/O audit of the
 existing modules, and settles the deck interface with David's answers.
+
+v0.3 (2026-10-14) adds §15: what the schematic (checkpoint 1) decided that this spec had
+left open, or changed.
 
 **Marks:** **[decided]** agreed with David · **[proposed]** recommended, not yet agreed ·
 **[open]** needs a decision · **†** not verified against a primary source in this pass.
@@ -185,8 +188,16 @@ x = 24.8): those are for stacking a second board, and nothing stacks on this one
   module and its parts ~2.5 ≈ **14 mm** against a 30.3 mm panel. Where the board sits
   across the 6HP width depends on where the deck's right-angle header lands — **to check on
   a real 6HP build.**
-- **USB:** all module USB connectors toward the **top short edge** (reachable in both
-  orientations), then a panel-mount USB-C extension. [proposed]
+- **USB:** each module's USB end points **toward the centre of the board**, with its far end
+  at the top short edge, as commercial boards do. The plug goes in parallel to the board and
+  lies over it, and the cable bends back into the depth of the case. Nothing crosses the rail.
+  v0.2's "USB to the top edge, then a panel-mount extension" is withdrawn. The board's top
+  edge sits a few millimetres from the rail, which leaves no room for a plug there, and at
+  10HP an extension has no way past the board to the panel. This was settled in the chat
+  behind v0.1 and lost from v0.2. **Keep-out** beyond each USB end: about 30 × 15 mm with
+  nothing taller than about 8 mm (the plug sits about 9-15 mm up on 8.5 mm headers);
+  estimates, to check at checkpoint 2 with real cables. The shrouded power header and the buck
+  inductor stay out of it. [proposed]
 - **Power header:** shrouded **2 × 5**, ±12 V only, at bottom centre (where the breadboard
   has its 2 × 8), on the outward face. [decided — David: the bus +5 V is not wanted]
 
@@ -212,7 +223,7 @@ function table); PJRC Teensy 4.1 product page, pinout cards and dimension drawin
   and the Teensy's (15.24 mm) cannot sit side by side in the ~34 mm available, so they
   overlap: align one row of each, put the other Teensy row 2.54 mm inside the Pico's, and
   stagger along the row where a shared hole would join incompatible nets. USB ends point
-  to the top edge. Fallback if routing fails: Pico footprint only, plus a bare 2-layer
+  toward the board centre (§4.3). Fallback if routing fails: Pico footprint only, plus a bare 2-layer
   adapter for the Teensy.
 - **Power:** 5 V reaches either module through a Schottky. Teensy: cut the VIN–VUSB pads
   before fitting.
@@ -221,6 +232,11 @@ function table); PJRC Teensy 4.1 product page, pinout cards and dimension drawin
   from the 3.3 V digital rail; the gate-in comparators' open-collector outputs are pulled
   up to it. The 5 V parts (74HCT595, AHCT1G125)
   only take 3.3 V in and drive jacks or LEDs, never a module pin.
+- **Waveshare ESP32-P4-WIFI6** (bought 2026-10-14, not a target): it fits the Pico header but
+  is not a drop-in. Pins 21, 22 and 24 (SPI-A) sit on an I/O bank whose supply firmware must
+  set to 3.3 V first. The board is 20 mm longer than a Pico, its USB-C is serial only, and its
+  Wi-Fi will be weak in the rack. Details: [`analogue_board_esp32p4.md`](analogue_board_esp32p4.md).
+  It prompted 10 kΩ pull-ups on CS_ADC, CS_DAC and CS_POT, which every module benefits from.
 - **Teensy 4.0** is not a target. If its pins prove to sit where the 4.1's first 14 per
   side do †, the bus-merge jumpers (§6.3) would let it run as a bonus.
 
@@ -574,7 +590,9 @@ repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No p
 1. **Schematic**, as a PDF: KiCad's electrical rules check clean; every IC pin scripted
    against its datasheet pinout; every power pin checked for its decoupling and every
    polarised part for orientation. The pin map (which Pico / Teensy pin goes where) is
-   the first sheet.
+   the first sheet. **Drafted 2026-10-14, awaiting review:**
+   [`hardware/analogue_board/analogue_board_schematic.pdf`](../hardware/analogue_board/analogue_board_schematic.pdf),
+   checks in [`output/checks.md`](../hardware/analogue_board/output/checks.md), decisions in §15.
 2. **1:1 printout** of the outline, edge strips, module footprints and power header. David
    lays a real breadboard, a Pico 2, a Teensy 4.1 and the deck header on it.
 3. **Placement renders**, before routing.
@@ -586,9 +604,55 @@ repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No p
 Rev A is expected to need a few bodge wires. An outside layout review (KiCad forum,
 r/PrintedCircuitBoard) is held in reserve for if it does not bring up.
 
-Add the CC BY-SA 4.0 licence alongside the first hardware files.
+The CC BY-SA 4.0 licence is in `hardware/analogue_board/LICENSE`.
 
-## 15. Sources
+## 15. Checkpoint 1: what the schematic decided [proposed]
+
+The schematic is generated by `tools/analogue_board/build.py` and checked by script: ERC 0 errors
+0 warnings; netlist identical to the generator's intent; every IC pin against
+`datasheet_pins.json`, transcribed from the datasheets independently of KiCad's library;
+footprint pads against symbol pins; a decoupling capacitor on all 34 IC power pins; all 18
+diodes oriented. 300 parts, 14 Extended part types (as §11 estimated), 32 Basic.
+
+### Changed from this spec
+
+| Item | Spec said | Schematic has | Why |
+|---|---|---|---|
+| +5 V digital buck | TPS54202 or AP63205 | **TPS54308DDCR** C168839 (1,005 / $1.79): forced PWM, 350 kHz. The TPS54202 drops into the same footprint with the same parts | Both listed parts pulse-skip at light load (TPS54202 below ~300 mA peak, AP63205 PFM), which puts switching bursts in the audio band: the noise the separate buck exists to avoid. Values from TI's 5 V table: 15 µH (SWPA5040S150MT, C44888), 2 × 22 µF; divider 15k/2k = 5.07 V from Basic parts |
+| 3.3 V rails | AMS1117-3.3 | **XC6206P332MR** C5446 (Basic), one per rail | The AMS1117 datasheet wants 22 µF solid tantalum on the output for stability, and JLC has no Basic 22 µF tantalum. XC6206: ceramic-stable, 200 mA (loads ≈50 mA and ≈6 mA) |
+| Gate-in comparator supply | LM393 on +5 V | **LM393 on +12 V** | The clamp holds the input at ≈3.6 V for any gate above ~4 V. At 5 V the LM393's common-mode range ends at 3.5 V; at 12 V, 10.5 V |
+| LM4040 | 4.096 V shunt for the calibration check | **dropped** | The ADS8688's gain error, ±0.05 % FSR max, beats the LM4040A's 0.1 %. Its AUX input's full scale is 4.096 V, so a 4.096 V reference would sit at the clip point |
+| DG412 enable pull-downs | "pull-down" | **4.7 kΩ** | The TCA9555 has internal pull-ups (IIL up to 100 µA): 4.7 kΩ holds a line at ≤ 0.47 V, under the DG412's 0.8 V |
+
+### Settled where the spec left it open
+
+| Item | Schematic has | Why |
+|---|---|---|
+| −5 V offset for the CV outs (§6.4) | Taken from the DAC8568's own 2.5 V reference: 10k/20k divider, 1 µF, a TL074H follower → OFFSET_REF 1.667 V into each stage's 10 kΩ; gain 1 + 30k/10k = 4, so Vout = 4·Vdac − 5 V | Mid-code is 0 V whatever the reference does. Costs a fourth TL074H (same part type, no fee); its three spare sections are grounded followers |
+| Codec straps | MODE 220 kΩ to ground (hardware mode, differential outputs). FMT, DEMP, IFMD each 10 kΩ to ground (I2S, no de-emphasis, slave). RST pulled up through 1 kΩ | Pull-downs rather than hard ties, so a strap can be changed with a bodge |
+| Audio in | 1 µF 50 V X7R, then 100 kΩ into an inverting TL074H with 33 kΩ ∥ 100 pF, + input on VCOM, then 1 kΩ into the codec's 10 kΩ: gain −0.30. 1 MΩ to ground at the jack. BAT54S clamps to +5VA | Inverting: firmware flips the sign |
+| Audio out | 12 kΩ / 15 kΩ difference amp (×1.25), 100 pF C0G across each 15 kΩ (pole at 106 kHz), 1 kΩ out | Larger C0G values are not Basic. The codec has its own RC filter; 330 pF (Extended) would move the pole to 32 kHz |
+| Gate-in values | 10 kΩ, BAT54S to +3V3D/GND, 100 kΩ to ground, 100 kΩ hysteresis, 10 kΩ pull-up. GATE_TH = 1.65 V from one 10k/10k divider | Trips at 1.98 V rising, 1.67 V falling at the jack |
+| Jack-detect probe | GPIO → 1 kΩ → bus with a BAT54S clamp → 14 holes: PR1-10 through 100 kΩ (audio and CV ins), PR11-14 through 22 kΩ (gate ins) | A 100 kΩ probe lifts an unpatched gate input only to ≈1.24 V, under the threshold |
+| Chip-select pull-ups | 10 kΩ to +3V3D on CS_ADC, CS_DAC, CS_POT | Every module leaves its pins floating while it boots; this keeps the converters deselected and off MISO |
+| Bus-merge jumpers (§6.3) | Not fitted | The Teensy 4.0 is not a target; both target modules have two hardware SPI buses |
+| Gate-out expansion | J603: QH′, SRCLK, RCLK, +5VD, GND | Chains a second 74HCT595 off-board (Boy's expander) |
+| Rail links and test pads (checkpoint 4) | A 0 Ω link after every regulator; test pads on every rail, on I2S and on both SPI buses and I2C | Fitted now rather than at layout |
+| Edge strips | 80 positions, outer and inner pads sharing a pad number; nothing tied to GND | All 80 stay free tie points; a GND wire goes to any free position if wanted |
+
+### For checkpoint 2
+
+The pin map (sheet 1) assumes the Pico and Teensy footprints **share no holes**, for example
+with the Teensy's rows one pitch outside and two pitches inside the Pico's. Sharing holes
+(§5) would tie each Pico pin choice to the Teensy pin in the same hole. A Pico GPIO that
+landed on a Teensy GND or 3.3 V pin would also be lost, and the Pico needs all 26 of its
+GPIOs. The 1:1 printout will show both arrangements.
+
+The printout also places each module with its USB end toward the board centre and its far end
+at the top edge. It marks the USB plug keep-out of §4.3, to be checked with the real cables
+(micro-B for the Pico 2 and Teensy 4.1).
+
+## 16. Sources
 
 - Datasheets (TI unless noted): MCP4802/4812/4822 (Microchip DS20002249B); PCM3060 SBAS437; ADS8684/8688 SBAS582C; DAC7568/8168/8568
   SBAS430F; DAC8564, DAC8565; MCP3204/3208 (Microchip DS21298); DG411/412/413 (Vishay
