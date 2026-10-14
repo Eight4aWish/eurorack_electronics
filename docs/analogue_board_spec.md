@@ -1,7 +1,7 @@
 # Analogue board — Rev A specification, v0.2
 
 A general-purpose Eurorack I/O board: a plug-in compute module on one side, an n8synth
-Control Deck on the other, and every analogue, gate, MIDI and display interface in between.
+Control Deck on the other, and every analogue, gate and display interface in between.
 End goal: one JLCPCB order for assembled boards.
 
 v0.1 was a handoff from a cloud session (2026-10-14) with nothing checked. This version
@@ -24,12 +24,11 @@ Datasheet facts carry the datasheet; stock and prices are from the JLCPCB parts 
 | DAC: DAC8568 vs 2 × quad, open | DAC8568 has **no IOVDD**: VINH = 0.625 × AVDD at 5 V, which 3.3 V logic misses at the top of the AVDD tolerance. Grade **A** run from a 3.3 V analogue rail has VINH = 0.7 × AVDD = 2.31 V — direct drive, no level shifter. IA $17.45 vs 2 × DAC8565 $27.49 | **DAC8568IAPWR on its own 3.3 V analogue rail** |
 | PCM3060 "outputs DC-coupled" | DAC outputs are **differential**, 1.6 × VCC = 8 Vpp | A difference amp gives a clean DC-coupled ±5 V out |
 | TL074 for all op-amps | TL07x swings ±10 V only into ≥2 kΩ on **±15 V**; from ±11.6 V rails ±10 V is not reliable | **±5 V is the CV range**; ±10 V needs a rail-to-rail part (OPA4197) |
-| Gate-in count 6, EYESPI colour TFT | The audit (§3) finds no own build with more than two gate ins, and none using a colour TFT | 4 direct gate ins; EYESPI dropped from Rev A |
+| Gate-in count 6, EYESPI colour TFT | The audit (§3) finds no own build with more than two gate ins, and none using a colour TFT | 4 direct gate ins; EYESPI dropped (both decided) |
 | Board "~50 mm wide", headers to the deck | David: **10HP mounts parallel to the panel, 6HP at 90°**, and the channel→cell wiring lives **on this board** | One PCB, the n8synth breadboard's footprint, serves both widths (§4) |
 | 24C02 EEPROM | The panel map plus calibration can outgrow 256 bytes | **M24C64** (8 KB), a Preferred part |
-| MIDI in only | One own build already uses TRS MIDI in **and** out | Add MIDI out (two resistors) |
-| XIAO subset keeps the codec | 11 pins cannot carry I2S plus a panel bus; the XIAO builds in the audit use no codec | XIAO tier drops the codec and keeps CV, pots, gates (§6.3) |
-| Teensy 4.x "full set" | Teensy 4.0's second SPI bus is on bottom pads a socket cannot reach | Bus-merge solder jumpers (§6.3) |
+| MIDI in via opto | David has only ever used TRS MIDI on the Big Genes | **No MIDI circuit in Rev A** (decided); its two pins go to the wiring field as spare GPIO |
+| Three module families incl. XIAO | 11 pins cannot carry I2S plus a panel bus | **Pico 2 and Teensy 4.1 only** (decided); XIAO dropped |
 
 ## 2. Goal and constraints
 
@@ -37,7 +36,7 @@ Datasheet facts carry the datasheet; stock and prices are from the JLCPCB parts 
   David solders only headers, sockets and the deck wiring. [decided]
 - **One design for both widths.** The same assembled board mounts parallel behind a 10HP
   deck and at 90° behind a 6HP deck (§4). Both versions come from one assembly order.
-  [proposed — depends on the 6HP and 10HP n8synth breadboards being the same board, §4.1]
+  [decided — David confirms the 6HP and 10HP kits use the same breadboard]
 - **Principle:** the board offers more channels than any one panel uses. It provides typed
   channels and never decides which deck cell they go to; David wires that per module on
   the board. [decided]
@@ -89,7 +88,8 @@ writes and would port here. Bought modules are benchmarks.
 6. **Pots: 3–4 typical, 8 at the top** (Girl).
 7. **Encoders:** two own builds (Girl, AMYboard) and two bought (Ogham, O&C) — v0.1 had none.
 8. **Displays: I2C OLEDs only** (9 of 13 builds; SSD1306 64×48 and 128×64, SH1106, SSD1327 128×128). No colour TFT anywhere.
-9. **MIDI:** USB MIDI via the module's own USB; TRS in and out once.
+9. **MIDI:** USB MIDI via the module's own USB. TRS appears once on paper (AMYboard), but
+   David has only ever used TRS MIDI on the Big Genes: low priority.
 10. **Panel ceiling:** a 10HP deck has 18 cells (6HP: 12), one panel part per cell. A
     Patch SM-style panel (4 knobs, 4 CV in, 2 gate in, 2 gate out, CV out, stereo out,
     button, toggle) already needs 17. The board's channel count only has to beat 18, not
@@ -104,20 +104,20 @@ writes and would port here. Bought modules are benchmarks.
 | CV bidirectional | 6 | ADC always reads the jack; DAC switched on for output |
 | CV in only | 2 | The ADC's spare channels |
 | CV out only | 2 | The DAC's spare channels |
-| Gate in | 4 | Direct GPIO, Schmitt input (v0.1 had 6) |
+| Gate in | 4 | Direct GPIO, Schmitt input (v0.1 had 6) [decided] |
 | Gate out | 8 | 0/5 V via shift register |
 | Pots | 8 | Ratiometric |
 | Buttons / switches / encoder | 9 lines | On the GPIO expander; one encoder needs 3 |
 | LEDs | 1 chain | WS2812, 5 V data |
-| MIDI | in + out | TRS type A |
-| Displays | Qwiic I2C | EYESPI dropped (no user) |
+| Spare GPIO | 2 | To the wiring field (the pins v0.1 gave to MIDI) [decided] |
+| Displays | Qwiic I2C | EYESPI dropped [decided] |
 
 So CV reaches 8 in or 8 out (O&C's count; eight of Girl's nine), and the gate outs cover
 Boy plus most of its expander.
 
 ## 4. Mechanical and the deck interface
 
-### 4.1 One board, two orientations [proposed]
+### 4.1 One board, two orientations [decided]
 
 David's build practice (2026-10-14): **10HP — the n8synth breadboard sits parallel behind
 the deck, using both edge strips; 4/6HP — the breadboard sits at 90° to the panel, the
@@ -132,9 +132,10 @@ replaces the breadboard in both widths:
 - **6HP:** at 90°; the deck's right-angle headers plug into the left strip's outer holes;
   the right strip is unused and that edge is the rear of the module.
 
-**To confirm (David):** the outline, hole positions and mounting holes, taken from a real
-breadboard. `docs/n8synth_platform.md` warns that the templates are a drawing, not the
-board.
+**David confirms (2026-10-14):** the 6HP and 10HP kits use the same breadboard; in 6HP only
+the left set of 40 positions can be connected. **Still to measure** from a real board: the
+outline, hole positions and mounting holes — `docs/n8synth_platform.md` warns that the
+templates are a drawing, not the board.
 
 ### 4.2 Edge strips and wiring field [decided: wiring on this board; geometry proposed]
 
@@ -159,8 +160,8 @@ board.
   deck's header pins.
 - **Low-profile SMT under the module** [decided, David 2026-10-14]. The modules sit on
   headers, so the area between and under their pin rows takes the logic (§10). Parts there
-  stay ≤ 2.5 mm tall; with 8.5 mm female headers that leaves ample clearance under a Pico,
-  Teensy or XIAO. Taller parts (DPAK regulator, buck inductor) go outside the module
+  stay ≤ 2.5 mm tall; with 8.5 mm female headers that leaves ample clearance under a Pico
+  or Teensy. Taller parts (DPAK regulator, buck inductor) go outside the module
   footprint.
 - **6HP height budget** (board at 90°): deck-side pin stubs ~1 + PCB 1.6 + header 8.5 +
   module and its parts ~2.5 ≈ **14 mm** against a 30.3 mm panel. Where the board sits
@@ -171,34 +172,33 @@ board.
 - **Power header:** shrouded 2×5 (or 2×8) on the outward face near the **right** long edge
   — the rear in the 6HP orientation. [proposed]
 
-## 5. Compute modules
+## 5. Compute modules [decided: Pico 2 and Teensy 4.1]
 
-Sources: Raspberry Pi *Pico 2 datasheet* and *RP2350 datasheet* (GPIO function table);
-PJRC Teensy 4.0 / 4.1 product pages, pinout cards and dimension drawings; Seeed XIAO
-schematics (RP2350, ESP32-S3, ESP32-C5). XIAO outline and row spacing are †.
+David, 2026-10-14: the XIAO is too limited; design for **Raspberry Pi Pico 2 and Teensy 4.1
+pin compatibility**. Sources: Raspberry Pi *Pico 2 datasheet* and *RP2350 datasheet* (GPIO
+function table); PJRC Teensy 4.1 product page, pinout cards and dimension drawing.
 
-| | Pico 2 (RP2350) | Teensy 4.0 | Teensy 4.1 | XIAO (RP2350 / S3 / C5) |
-|---|---|---|---|---|
-| Outline | 51 × 21 mm | 35.56 × 17.78 mm | 60.96 × 17.78 mm | 21 × 17.8 mm † |
-| Rows, pitch | 2 × 20, 17.78 mm apart | 2 × 14, 15.24 mm apart | 2 × 24, 15.24 mm apart | 2 × 7, 15.24 mm † |
-| GPIO a socket reaches | **26** (GPIO 0–22, 26–28) | **24** (0–23); 24–33 are bottom pads | **42** (0–41) | **11** (D0–D10) |
-| USB | Micro-B, short edge at pins 1/40 | Micro-B, short edge at pin 0 / VIN | Same end as 4.0 | USB-C, short edge † |
-| I2S | PIO on any GPIO; MCLK from GPOUT (GP13/15/21) or PIO | SAI1: MCLK 23, BCLK 21, LRCLK 20, TX 7, RX 8 | Same | RP2350: PIO; S3/C5: GPIO matrix † |
-| Hardware SPI | SPI0 and SPI1 groups both on the header | One bus (10–13). SPI1's MOSI/SCK are bottom pads 26/27 | Two buses on the edge (SPI1: 26, 27, 1, 0) | One (D8 SCK, D9 MISO, D10 MOSI) |
-| +5 V in | VSYS (1.8–5.5 V) through our Schottky — the datasheet's ORing arrangement; VBUS already has its own | VIN (3.6–5.5 V). **Cut the VIN–VUSB pads first** | Same | **5 V pin is VBUS itself** (RP2350, S3); C5 has a load switch behind it |
-| 3V3 out | < 300 mA | 250 mA | 250 mA | S3 600 mA; C5 1 A |
+| | Pico 2 (RP2350) | Teensy 4.1 |
+|---|---|---|
+| Outline | 51 × 21 mm | 60.96 × 17.78 mm |
+| Rows, pitch | 2 × 20, 17.78 mm apart | 2 × 24, 15.24 mm apart |
+| GPIO a header reaches | **26** (GPIO 0–22, 26–28) | **42** (0–41) |
+| USB | Micro-B, short edge at pins 1/40 | Micro-B, short edge at pin 0 / VIN |
+| I2S | PIO on any GPIO; MCLK from GPOUT (GP13/15/21) or PIO | SAI1: MCLK 23, BCLK 21, LRCLK 20, TX 7, RX 8 |
+| Hardware SPI | SPI0 and SPI1 groups both on the header | Two buses on the edge (SPI 10–13; SPI1 26, 27, 1, 0) |
+| +5 V in | VSYS (1.8–5.5 V) through our Schottky — the datasheet's ORing arrangement | VIN (3.6–5.5 V). **Cut the VIN–VUSB pads first** |
+| 3V3 out | < 300 mA | 250 mA |
 
-- **All footprints on the one board, wired to the same nets** [decided]. Inside the ~34 mm
-  between the wiring field and the far strip, the Pico (17.78 mm rows) and Teensy
-  (15.24 mm) cannot sit side by side. They must overlap: align one row of each, put the
-  other Teensy row 2.54 mm inside the Pico's, and stagger along the row where a shared
-  hole would join incompatible nets. All USB ends point to the top edge. Fallback if
-  routing fails: Pico footprint only, plus bare 2-layer adapter boards for Teensy and XIAO.
-- **Power:** 5 V reaches every module through a Schottky. Two module rules:
-  - **Teensy:** cut the VIN–VUSB pads before fitting.
-  - **XIAO:** its 5 V pin is USB VBUS, so rack power reaches a connected computer's USB
-    port. Use a data-only cable when the rack is on. [proposed]
-- Per-module pin budgets: §6.3.
+- **Both footprints on the one board, wired to the same nets.** The Pico's rows (17.78 mm)
+  and the Teensy's (15.24 mm) cannot sit side by side in the ~34 mm available, so they
+  overlap: align one row of each, put the other Teensy row 2.54 mm inside the Pico's, and
+  stagger along the row where a shared hole would join incompatible nets. USB ends point
+  to the top edge. Fallback if routing fails: Pico footprint only, plus a bare 2-layer
+  adapter for the Teensy.
+- **Power:** 5 V reaches either module through a Schottky. Teensy: cut the VIN–VUSB pads
+  before fitting.
+- **Teensy 4.0** is not a target. If its pins prove to sit where the 4.1's first 14 per
+  side do †, the bus-merge jumpers (§6.3) would let it run as a bonus.
 
 ## 6. Architecture
 
@@ -210,7 +210,6 @@ schematics (RP2350, ESP32-S3, ESP32-C5). XIAO outline and row spacing are †.
 | **SPI-A, converter bus** | ADS8688 (CS_ADC), DAC8568 (CS_DAC) | ≤ 17 MHz (ADS8688 limit) | Audio-rate CV needs the bus to itself |
 | **SPI-B, panel bus** | 74HCT595 (RCLK as CS), MCP3208 (CS_POT), expansion CS | ≤ 1 MHz for MCP3208 at 3.3 V | Slow devices off the converter bus |
 | **I2C** | TCA9555 expander, M24C64 EEPROM, Qwiic | 400 kHz | — |
-| **UART** | MIDI in / out | 31.25 kbaud | — |
 
 **SPI-A budget:** each ADS8688 conversion is a 32-clock frame, as is each DAC8568 write.
 At 16 MHz that is 500 k frames/s, so 8 ADC + 8 DAC channels run at **~31 kHz each**, or
@@ -238,26 +237,18 @@ self-calibration loopback.
 | SPI-B: SCK, MOSI, MISO, CS_595, CS_POT | 5 |
 | I2C: SDA, SCL | 2 |
 | Expander interrupt (buttons, encoder) | 1 |
-| UART: MIDI TX, RX | 2 |
+| Spare GPIO to the wiring field (UART-capable) | 2 |
 | WS2812 data | 1 |
 | Gate in | 4 |
 | Jack-detect probe | 1 |
 | **Total** | **26 nets** |
 
-**Bus-merge jumpers [proposed]:** three solder jumpers join SPI-B's SCK, MOSI and MISO to
-SPI-A's. Open, the Pico 2 and Teensy 4.1 run two buses. Closed, one bus carries all four
-chip selects (the MCP3208 transfers drop to ≤ 1 MHz) and three pins come free. No parts,
-no BOM cost.
+Pico 2: all 26 nets on 26 pins, with hardware SPI0 and SPI1 both reaching the header.
+Teensy 4.1: all 26 on 42 pins, ~16 spare.
 
-| Module | Pins | Fit |
-|---|---|---|
-| **Pico 2** | 26 | All 26 nets, jumpers open. Hardware SPI0 and SPI1 both reach the header. |
-| **Teensy 4.1** | 42 | All 26, jumpers open; ~16 spare for a second module revision. |
-| **Teensy 4.0** | 24 | Jumpers closed: 23 nets, one spare. |
-| **XIAO** | 11 | Jumpers closed. SCK, MOSI, MISO, the four chip selects, SDA, SCL and two gate ins — **no codec, MIDI or WS2812**. That suits the XIAO builds in the audit (MOD2/Melon, ClkLinkRec), neither of which uses a codec. [proposed] |
-
-On the XIAO, buttons, encoder and switch enables still work through the expander, but with
-no interrupt line it is polled.
+**Bus-merge jumpers [optional]:** three solder jumpers joining SPI-B's SCK, MOSI and MISO
+to SPI-A's would free three pins for a single-bus module (only relevant to Teensy 4.0,
+§5). No parts, no BOM cost; decide at schematic.
 
 ### 6.4 Borrowed from prior art
 
@@ -310,7 +301,7 @@ produce, and the 595 drives eight from one chip.
 | **Audio out** | Codec VOUT± → difference amp, gain 1.25 → ±5 V, **DC-coupled** → 1 kΩ → jack | op-amp | — | proposed |
 | **CV ADC** | ADS8688: 8 ch, 16-bit, 500 kSPS aggregate, per-channel ranges ±10.24 / ±5.12 / ±2.56 / 0–10.24 / 0–5.12 V, **1 MΩ** input, OVP ±20 V powered / **±11 V unpowered**, internal 4.096 V ref, AVDD 4.75–5.25 V, DVDD 1.65 V–AVDD, SCLK ≤ 17 MHz, 32-clock frames *(SBAS582C)*. No input op-amps needed. | ADS8688IDBTR **C527390** | 2,921 / $7.32 | proposed |
 | **CV DAC** | DAC8568 grade A: 8 ch, 16-bit, internal 2.5 V ref (off by default), output 0–2.5 V, resets to zero scale, SCLK ≤ 50 MHz. **AVDD = 3.3 V analogue rail**, so VINH = 0.7 × AVDD and 3.3 V logic drives it *(SBAS430F)*. Op-amp ×4 with −5 V offset → ±5 V. | DAC8568IAPWR **C486051** | 796 / $17.45 | proposed |
-| **Jack switch** | DG412 (logic 1 = on) with pull-downs, so jacks power up as inputs. ±12 V fine (V+ to V− ≤ 44 V), VL = 5 V, logic 0.8 / 2.4 V, RDS(on) 25 Ω typ, signals beyond the rails clamp through internal diodes, ≤ 30 mA *(Vishay 61564 rev B)* | 2 × DG412DQ-T1-E3 **C2651920** (TSSOP) | 5,903 / † | proposed |
+| **Jack switch** | DG412 (logic 1 = on) with pull-downs, so jacks power up as inputs. ±12 V fine (V+ to V− ≤ 44 V), VL = 5 V, logic 0.8 / 2.4 V, RDS(on) 25 Ω typ, signals beyond the rails clamp through internal diodes, ≤ 30 mA *(Vishay 61564 rev B)* | 2 × DG412DQ-T1-E3 **C2651920** (TSSOP) | 5,903 / $2.18 | proposed |
 | **CV op-amps** | 8 outputs at ±5 V: TL074H (no phase reversal, CM includes V+). The ±10 V option needs rail-to-rail output: OPA4197 footprint-compatible (SOIC-14) | TL074HIDR **C2878713**; option OPA4197IDR **C2058532** | 14,140 / $0.25; 8,474 / $2.73 | proposed |
 | **Reference** | LM4040 4.096 V shunt for the calibration check (0.1 % A-grade or 1 % D-grade) | LM4040AIM3-4.1 **C126807** / LM4040DIM3-4.1 **C202194** | 2,077 / $1.12; 6,187 / $0.47 | proposed |
 | **Pots** | MCP3208 on the 3.3 V analogue rail, VREF = that rail, pots fed from VREF + AGND (ratiometric). 50 ksps at 2.7 V, SCLK ≤ 1 MHz at 2.7 V *(DS21298)* | MCP3208-CI/SL **C16939** | 600 / $3.24 | proposed |
@@ -318,10 +309,67 @@ produce, and the 595 drives eight from one chip.
 | **Gate out** | 74HCT595 at 5 V (VIH 2.0 V, so 3.3 V drives it) → 1 kΩ → jack, BAV99 (Basic, C2500) clamp to +5 V / GND per output. OE pulled high until firmware enables (§10). | 74HCT595D **C282339** | 14,359 / $0.27 | decided |
 | **Expander** | 16 lines: 6 switch enables (DG412), 1 gate-output enable, 9 for buttons, switches, encoder; INT to a GPIO | TCA9555PWR **C465732** | 35,995 / $0.56 | proposed |
 | **LEDs** | WS2812 chain; data level-shifted to 5 V; LED supply on its own wiring-field holes | SN74AHCT1G125DBVR **C7484** | 49,818 / $0.10 | proposed |
-| **MIDI in** | TRS → 220 Ω → 3.3 V-capable opto → UART RX | TLP2362 **C37658** | 22,657 / $0.37 | proposed |
-| **MIDI out** | UART TX → 33 Ω / 10 Ω (3.3 V MIDI values) → TRS | resistors | — | proposed |
 | **EEPROM** | Board revision, footprint ID, calibration, panel map | M24C64-RMN6TP **C79988** (Preferred) | 103,045 / $0.15 | proposed |
 | **Qwiic** | JST SH 4-pin, 3.3 V from the display LDO | SM04B-SRSS-TB **C160404** | 10,257 / $0.21 | decided |
+
+### 7.1 The DAC choice: 16-bit DAC8568 or 12-bit MCP4822
+
+**What established modules use** (read from each module's firmware driver or published
+schematic, 2026-10-14):
+
+| Module | CV-out converter | Evidence |
+|---|---|---|
+| Ornament & Crime (open, Teensy) | TI **DAC8564 / DAC8565**, 16-bit quad | `software/o_c_REV/OC_DAC.cpp` |
+| Westlicht Performer (open sequencer) | TI **DAC8568**, A or C grade, 16-bit 8-channel | `src/platform/stm32/drivers/Dac.h`, `HardwareConfig.h` |
+| Mutable Instruments Marbles | 16-bit DAC (chip not named in the driver) | `marbles/drivers/dac.h` |
+| Music Thing Workshop Computer | PWM + sigma-delta, ~19-bit effective, for its 2 precision outs; **MCP4822** for its 2 audio/CV outs | schematic; `ComputerCard.h` |
+| EuroPi | Filtered 100 kHz PWM | firmware, PCB netlist |
+| Daisy Patch SM | STM32's internal 12-bit DAC | datasheet |
+| Alchemy Lab | MCP4728, 12-bit I2C quad | SDK layout header |
+| Your own builds (Boy, CortHex, Teensy Expander, OnC Lite) | MCP4822 / MCP4728, 12-bit | `MCU_MODULES.xlsx` |
+
+Closed premium modules (disting NT, Metropolix, Pamela's PRO Workout) do not name their
+converters on their product pages. On codecs, Mutable's newest module, **Beads, uses the
+PCM3060** (`beads/drivers/codec.h`); Clouds and Elements use the WM8731.
+
+The pattern: modules whose job is precise CV (O&C, Performer, Marbles) use 16-bit TI
+DAC85xx parts. Platforms where CV is secondary (Patch SM, Alchemy Lab, the Workshop
+Computer's audio outs) and David's own builds use 12-bit.
+
+**Side by side**, after scaling to ±5 V (a 10 V span, 1 V/oct):
+
+| | DAC8568IA | 4 × MCP4822 |
+|---|---|---|
+| Step | 10 V / 65,536 = 0.15 mV ≈ **0.2 cent** | 10 V / 4,096 = 2.44 mV ≈ **2.9 cents** |
+| Integral nonlinearity, max | ±12 LSB = ±1.8 mV ≈ ±2.2 cents | ±12 LSB = ±29 mV ≈ **±35 cents** (±2 LSB typ ≈ ±6 cents) |
+| Reference | internal 2.5 V, **2 ppm/°C** typ, 25 max | internal 2.048 V ±2 %, **45 ppm/°C** typ, 160 max |
+| Drift at the top of the range (+5 V, i.e. 10 V of span) over a 10 °C warm-up | 0.2 mV ≈ 0.2 cent typ; 2.5 mV ≈ 3 cents max | 4.5 mV ≈ **5 cents** typ; 16 mV ≈ 19 cents max |
+| Audio-rate output (~31 kHz) | ~96 dB resolution-limited | ~72 dB |
+| Channels / chip selects | 8 / **1** | 2 per chip, so 8 / **4** |
+| Board area | one TSSOP-16 | four SOIC-8 |
+| Parts cost, 8 channels | $17.45 | $8.52 |
+| JLC stock | 796 | 2,985 |
+| Datasheet | SBAS430F | DS20002249B |
+
+**What the numbers mean in use:**
+- **Pitch:** calibration in the EEPROM removes gain and offset error with either part. What
+  calibration cannot remove is step size and the INL left between calibration points.
+  At 12-bit that residue is a few cents on a good part, tens on a bad one unless many
+  points are stored, as the Workshop Computer does with up to 10 per output. At 16-bit it
+  is below a cent.
+- **Warm-up drift:** the MCP4822's reference moves the top of the range by about 5 cents
+  as the case warms 10 °C. The DAC8568's moves it by a fraction of a cent.
+- **Slow modulation:** a 2.44 mV step on a slow filter or VCA sweep is rarely audible.
+  12-bit is fine for modulation.
+- **Pins:** four MCP4822s need three more chip selects than one DAC8568. Rev A has exactly
+  two spare pins after MIDI was dropped, so going 12-bit also means 6 DAC channels, not 8,
+  or a decoder chip.
+- **Cost:** $8.93 a board, so $18 on a 2-board shakedown or $45 on 5.
+
+**Recommendation:** DAC8568IA. It is what O&C and Performer use, one chip fits the pin
+budget and the area, and at this volume the premium is under $50. The case for 12-bit is
+David's own standard — "it's Eurorack, not expected to be spot on" — and it has served
+every build so far. [open]
 
 ## 8. Power
 
@@ -388,17 +436,16 @@ datasheet's differential 8 Vpp (§7).
 | Group | $ |
 |---|---|
 | Converters: PCM3060 4.08, ADS8688 7.32, DAC8568IA 17.45, MCP3208 3.24 | 32.09 |
-| Switches and op-amps: 2 × DG412 (~4.40 †), 3 × TL074H 0.76 | ~5.16 |
-| Logic, I/O, memory: 74HC14 0.10, 74HCT595 0.27, AHCT1G125 0.10, TCA9555 0.56, M24C64 0.15, TLP2362 0.37 | 1.55 |
+| Switches and op-amps: 2 × DG412 4.36, 3 × TL074H 0.76 | 5.12 |
+| Logic, I/O, memory: 74HC14 0.10, 74HCT595 0.27, AHCT1G125 0.10, TCA9555 0.56, M24C64 0.15 | 1.18 |
 | Power and protection: buck + inductor ~0.30, L78M05 0.21, 2 × AMS1117 0.42, Schottkys, ferrites, BAV99 clamps ~0.60 | ~1.53 |
 | Reference, connectors: LM4040 0.47–1.12, JST SH 0.21 | 0.68–1.33 |
 | Passives (~150 Basic 0402/0603/0805) | ~1.50 |
-| **Total** | **~$42–43** |
+| **Total** | **~$41–42** |
 
 - **The DAC is the cost decision**, as v0.1 said, but bigger than it thought: the
-  DAC8568IA is 41 % of the parts cost. The 12-bit alternative is 4 × MCP4822 (C16040,
-  3,190 in stock †price): about $9 less a board, at 2.44 mV per step (≈ 3 cents at
-  1 V/oct). [open — see §13]
+  DAC8568IA is 42 % of the parts cost. The 12-bit alternative, 4 × MCP4822 (C16040,
+  2,985 in stock, $2.13), is $8.93 less a board. Full comparison: §7.1. [open — see §13]
 - **Extended part types:** ~15. Per-order fees (setup, stencil, Extended loading fee,
   4-layer PCB, shipping) are **not yet verified** (§12).
 - **6HP and 10HP from one design** means one assembly setup, not two.
@@ -408,9 +455,7 @@ datasheet's differential 8 Vpp (§7).
 1. JLCPCB rules today: does Economic PCBA take 4-layer boards; the Extended loading fee
    (v0.1 said $1.50 since Dec 2025, previously $3); whether Preferred parts are fee-free;
    setup and stencil fees; can 5 be ordered and 2 assembled.
-2. DG412 and MCP4822 prices (stock confirmed).
-3. A 0.5 mm 18-pin flip-lock FPC is moot now that EYESPI is out.
-4. n8synth breadboard outline and mounting holes, measured (§4.1).
+2. n8synth breadboard outline and mounting holes, measured (§4.1).
 
 ## 13. Decisions
 
@@ -426,22 +471,47 @@ datasheet's differential 8 Vpp (§7).
 - CV range: ±5 V standard; ±10 V via an OPA4197 option, because TL074 cannot reach it from
   ±12 V rails.
 
-### For David
+### Decided by David, 2026-10-14
 
-1. **One board for 6HP and 10HP** (§4.1): agree, and confirm on a real breadboard that the
-   6HP and 10HP kits use the same board?
-2. **DAC resolution:** 16-bit DAC8568 (~$42 a board) or 12-bit 4 × MCP4822 (~$33)?
-3. **EYESPI colour TFT:** drop from Rev A (no build uses one), or keep the footprint?
-4. **Gate ins:** 4 direct (audit maximum is 2), or 6 as in v0.1?
-5. **XIAO tier:** no codec, keeping CV, pots and gates (proposed, §6.3), or keep the codec
-   as v0.1 had it and lose the panel bus?
-6. **Hardware licence:** CERN-OHL-S (as the Tiliqua work) or more permissive.
+- One board for 6HP and 10HP: the kits share the breadboard; 6HP connects only the left 40.
+- EYESPI dropped.
+- Four gate ins.
+- XIAO dropped: Pico 2 and Teensy 4.1 only.
+- Modules on headers; low-profile SMT under them.
+
+### Open
+
+1. **DAC resolution:** 16-bit DAC8568 or 12-bit 4 × MCP4822 — comparison with the DACs in
+   established modules in progress.
+2. **Hardware licence.** What comparable open projects chose (each repo's README or
+   LICENSE, 2026-10-14):
+
+   | Project | Hardware | Code | Note |
+   |---|---|---|---|
+   | Mutable Instruments | CC BY-SA 3.0 | MIT | Why the CCTV and Behringer clones in the rack are legal |
+   | EuroPi | **CERN-OHL-S v2** | Apache 2.0 | Docs CC0; asks that modified builds not use the brand name |
+   | apf.audio Tiliqua | **CERN-OHL-S v2** | mixed | Addendum: derivatives may not use apf.audio names |
+   | Keeos Ogham | CC BY-SA 4.0 | MIT | |
+   | Westlicht Performer | MIT (everything) | MIT | Fully permissive |
+   | Workshop Computer, O&C | no hardware licence file in the repo | MIT / GPL-3 per program | |
+
+   The three families:
+   - **Strongly reciprocal** (CERN-OHL-S, CC BY-SA): anyone may build and sell it, but
+     anything derived must be published under the same terms.
+   - **Weakly reciprocal** (CERN-OHL-W): changes to this board must be shared, but it can sit
+     inside a closed product.
+   - **Permissive** (CERN-OHL-P, MIT): anything goes, attribution only.
+
+   CERN-OHL is written for hardware; CC BY-SA is a content licence borrowed for it. The
+   brand-name addendum (EuroPi, apf.audio) is the common way to stay open while protecting
+   the name. **Recommendation:** CERN-OHL-S v2 with an Eight4aWish name addendum, matching
+   the Tiliqua work and EuroPi; firmware MIT. [open]
 
 ## 14. Next steps
 
 1. Answer §13; verify §12.
 2. Interface contract: wiring-field channel list and order, per-module pin maps
-   (Pico 2, Teensy 4.0/4.1, XIAO), EEPROM layout.
+   (Pico 2, Teensy 4.1), EEPROM layout.
 3. Schematic in KiCad, ERC clean; JLCPCB part numbers in symbol fields.
 4. Layout to the measured breadboard outline; DRC clean; analogue routing reviewed by eye.
 5. JLCPCB outputs (gerbers, drill, BOM, CPL); check rotations in JLC's preview.
@@ -449,12 +519,14 @@ datasheet's differential 8 Vpp (§7).
 
 ## 15. Sources
 
-- Datasheets (TI unless noted): PCM3060 SBAS437; ADS8684/8688 SBAS582C; DAC7568/8168/8568
+- Datasheets (TI unless noted): MCP4802/4812/4822 (Microchip DS20002249B); PCM3060 SBAS437; ADS8684/8688 SBAS582C; DAC7568/8168/8568
   SBAS430F; DAC8564, DAC8565; MCP3204/3208 (Microchip DS21298); DG411/412/413 (Vishay
   61564, rev B 2025); TL07xx (TL07xH data); SN74HCT595; SN74HC14; LM4040.
 - Stock and prices: JLCPCB parts API (`selectSmtComponentList`), 2026-10-14.
 - I/O audit: `MCU_MODULES.xlsx` and `MODULES.md`, eight4awish repo.
 - Deck geometry: `docs/n8synth_platform.md`, `tools/visualizer/boards/*.json`,
   `tools/n8layout/*.n8layout`.
+- Module DAC survey: firmware drivers in `mxmxmx/O_C`, `westlicht/performer`,
+  `pichenettes/eurorack`, `TomWhitwell/Workshop_Computer`.
 - Prior art: Alchemy Lab SDK (DG411 routing, loopback calibration),
   Daisy Patch Submodule, Music Thing Workshop System Computer, EuroPi, Pico ADK.
