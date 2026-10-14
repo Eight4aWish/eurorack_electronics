@@ -146,12 +146,13 @@ not read from it (`docs/n8synth_platform.md`); dimensions are.
 | Edge strip, right | inner x = 45.14, outer x = 47.68 |
 | Edge positions 1–40 | y = 2.07 + 2.54·(n − 1), so 2.07 … 101.13 |
 | Power rails (breadboard only) | x = 7.57 (+12 V side) and 42.02 (−12 V side) |
-| Mounting holes | three, Ø 3.0, on the centre line x = 24.8, at y = 4.445, 42.545, 83.185 |
 | Eurorack power header (breadboard) | 2 × 8, pins at x = 15.91 … 33.69, y = 98.82 / 101.36 — bottom centre |
 | Deck headers (template) | female 1 × 40 into the outer columns of both strips |
 
-The board keeps the outline, both strips, the mounting holes and the power-header position.
-The breadboard's own power rails and main area are not reproduced.
+The board keeps the outline, both strips and the power-header position. It drops the
+breadboard's power rails, main area and its three centre-line mounting holes (Ø 3.0 at
+x = 24.8): those are for stacking a second board, and nothing stacks on this one
+[decided, David 2026-10-14].
 
 ### 4.2 Edge strips and wiring field [decided: wiring on this board; geometry proposed]
 
@@ -168,9 +169,6 @@ The breadboard's own power rails and main area are not reproduced.
   outward face, or underneath in the stand-off gap on the deck face.
 - **Deck ground bus (D pads):** one wire from any D pad to an AGND hole (pot and jack
   grounds are on D).
-- **Stacking:** keep power-rail-compatible pads at positions 1, 2, 39, 40 (GND, +12 V /
-  −12 V, as the breadboard's power rails) so a stock breadboard can still stack behind
-  for analogue extras. [proposed]
 
 ### 4.3 Faces and height
 
@@ -191,9 +189,6 @@ The breadboard's own power rails and main area are not reproduced.
   orientations), then a panel-mount USB-C extension. [proposed]
 - **Power header:** shrouded **2 × 5**, ±12 V only, at bottom centre (where the breadboard
   has its 2 × 8), on the outward face. [decided — David: the bus +5 V is not wanted]
-- **Mounting holes:** the three on the centre line stay. The module footprint will straddle
-  at least one, so keep a ~Ø 6 mm keep-out for SMT around each. A screw head under a
-  module on 8.5 mm headers clears.
 
 ## 5. Compute modules [decided: Pico 2 and Teensy 4.1]
 
@@ -211,6 +206,7 @@ function table); PJRC Teensy 4.1 product page, pinout cards and dimension drawin
 | Hardware SPI | SPI0 and SPI1 groups both on the header | Two buses on the edge (SPI 10–13; SPI1 26, 27, 1, 0) |
 | +5 V in | VSYS (1.8–5.5 V) through our Schottky — the datasheet's ORing arrangement | VIN (3.6–5.5 V). **Cut the VIN–VUSB pads first** |
 | 3V3 out | < 300 mA | 250 mA |
+| Logic level | 3.3 V; GPIO 5 V-tolerant while powered, 3.3 V-failsafe unpowered (RP2350 datasheet) | 3.3 V; **not 5 V-tolerant** (PJRC: "Do not drive any digital pin higher than 3.3 volts") |
 
 - **Both footprints on the one board, wired to the same nets.** The Pico's rows (17.78 mm)
   and the Teensy's (15.24 mm) cannot sit side by side in the ~34 mm available, so they
@@ -220,6 +216,10 @@ function table); PJRC Teensy 4.1 product page, pinout cards and dimension drawin
   adapter for the Teensy.
 - **Power:** 5 V reaches either module through a Schottky. Teensy: cut the VIN–VUSB pads
   before fitting.
+- **Every signal into the module is 3.3 V** (the Teensy sets the rule). The parts that
+  talk back to it — ADS8688 (DVDD), MCP3208, PCM3060 (VDD), TCA9555, EEPROM, 74HC14 —
+  all run their logic from the 3.3 V digital rail. The 5 V parts (74HCT595, AHCT1G125)
+  only take 3.3 V in and drive jacks or LEDs, never a module pin.
 - **Teensy 4.0** is not a target. If its pins prove to sit where the 4.1's first 14 per
   side do †, the bus-merge jumpers (§6.3) would let it run as a bonus.
 
