@@ -664,13 +664,15 @@ repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No p
      4 layers, and it is how Mutable's and 4ms's modules are built. Cost: about $50 setup,
      about $16 stencils and $1.50 per part type (Basic as well as Extended): roughly $159 for
      the assembly line items, about $100 more per order than Economic. Confirm on a live quote.
-   - **Floorplan** (`placement.py`, ANCHORS and HOLE_GROUPS) [proposed]:
-     - Analogue at the top, under the modules and furthest from the buck. On the outward face:
-       the ADC, codec, DAC, two CV op-amps, MCP3208 and one LM393 down the 9.7 mm channel between
-       the module rows. On the deck face: the DG412s, offset buffer, audio op-amp, 74HCT595,
-       second LM393 and EEPROM.
-     - TCA9555 below the modules; MIDI (H11L1, ~4 mm tall) bottom left; power around J201
-       bottom right.
+   - **Floorplan** (`placement.py`, ANCHORS and HOLE_GROUPS) [proposed; revised 2026-10-15,
+     see "Chips level with their bus pins" below]:
+     - Analogue at the top, under the modules and furthest from the buck.
+     - Down the 9.7 mm channel between the module rows, in the order of the module's buses.
+       Outward face: ADC, DAC, MCP3208, codec, TCA9555, one LM393. Deck face: the DG412s, offset
+       buffer, audio op-amp, EEPROM, second LM393. The 74HCT595 sits sideways right of the
+       channel, beside its gate-out holes.
+     - The two CV output op-amps in the top-right corner, one on each face.
+     - MIDI (H11L1, ~4 mm tall) bottom left; power around J201 bottom right.
      - The 99 wiring-field holes in three columns lined up with the edge-strip positions: two
        beside the left strip (the only one wired in 6HP), one beside the right strip, stopping
        above J201. Each group sits beside its circuit.
@@ -749,7 +751,35 @@ repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No p
      - Cost: the shortest wiring rises from 3.8 to 4.7 m. The module header rows on the right
        reach 100-108% of one-track-per-gap capacity at y 30-60; finer rules through the gaps
        would halve that.
-   - **Next:** finer rules through the header gaps, a trial autoroute (Freerouting) to measure
+   - **Design rules** (`pcb.py`, written into the project). Default net class: 0.15 mm tracks,
+     0.15 mm clearance, vias 0.45/0.2 mm. Power net class (the rails): 0.3 mm tracks, vias
+     0.6/0.3 mm. Both are inside JLC's 4-layer limits (0.09 mm tracks, 0.2 mm via drill).
+     In1 is a solid ground plane. Two 0.15 mm tracks fit through the 0.84 mm gap between two
+     1.7 mm header pads, so the header rows carry two tracks per gap per layer.
+   - **Chips level with their bus pins (2026-10-15).** The first trial autoroute stalled.
+     Freerouting's fan-out reached 93% of the pads, but 448 connections were still open when it
+     was stopped, because the floorplan had ignored the module pins. The codec sat in the top
+     right, 38 mm from the Pico's I2S pins, and the TCA9555 sat below the modules. Each bus
+     chip now sits level with its bus pins on both modules: SPI-A (ADC, DAC) at 19–38 mm,
+     SPI-B (MCP3208, 74HCT595) at 15–34 mm, I2S (codec) at 34–56 mm and I2C (TCA9555,
+     EEPROM) at 43–59 mm. The module pins for one bus sit at similar heights on the Pico and
+     the Teensy, so one position serves both.
+
+     Mean distance from each chip's pads to the module pins it connects to:
+
+     | Chip | Before: Pico / Teensy | After: Pico / Teensy |
+     |---|---|---|
+     | Codec | 38 / 44 mm | 6 / 11 mm |
+     | MCP3208 | 27 / 37 mm | 11 / 16 mm |
+     | TCA9555 | 22 / 28 mm | 13 / 11 mm |
+
+     The shortest total wiring falls from 4.7 to 4.4 m.
+
+     The busiest wall is still the Teensy's right row at y 30–60. Every Pico right-row signal
+     bound for the channel passes between its pins, a consequence of the two modules
+     interleaving. It is at 54–67% of capacity at two tracks per gap. All 430 parts are
+     placed, with parity clean, no overlaps and no height problems.
+   - **Next:** the trial autoroute (Freerouting) on the bus-ordered floorplan to measure
      completion, a review pass by block (analogue grouping, ground returns, the codec and ADC
      corners), the hole labels on the silkscreen (one channel name per hole, from wiring.py),
      then routing.

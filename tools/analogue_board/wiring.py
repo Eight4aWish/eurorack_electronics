@@ -112,14 +112,20 @@ def check():
 
 
 def place(sh, holes, sheet, at, max_y=268.0, col_dx=30.48):
-    """Draw this sheet's hole groups on its schematic page, stacked down from `at`."""
+    """Draw this sheet's hole groups on its schematic page, stacked down from `at`. KiCad's
+    connector symbols are drawn about their middle, so each group's anchor sits below its pin 1
+    by the symbol's own pin offset; the reference above and the value below get a pitch each."""
+    from kicad_lib import symbol_pins
     x, y = at
     for g in [g for g in groups() if g["sheet"] == sheet]:
-        h = (len(g["nets"]) + 2) * 2.54
+        n = len(g["nets"])
+        pins = symbol_pins(f"Connector_Generic:Conn_01x{n:02d}", {})
+        top = max(-p.y for p in pins if p.number == "1")      # pin 1 above the origin, sheet y down
+        h = (n + 3) * 2.54                                      # reference, the pins, the value text
         if y + h > max_y:
             x, y = x + col_dx, at[1]
-        holes(sh, (x, y), g["nets"], f"Holes, {BANK_NAMES[g['bank']]}", ref=g["ref"])
-        y += h + 2.54
+        holes(sh, (x, y + 2.54 - top), g["nets"], f"Holes, {BANK_NAMES[g['bank']]}", ref=g["ref"])
+        y += h
 
 
 check()

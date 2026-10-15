@@ -77,21 +77,24 @@ HOLE_GROUPS = {g["ref"]: (g["column"], g["slot"]) for g in wiring.groups()}   # 
 HOLE_GROUPS.update(wiring.UTILITY)
 
 # Anchors: ref -> (x, y, rotation, face) of the footprint origin (its centre, for ICs), board
-# coordinates as seen from the outward face. Analogue at the top, under the modules and furthest
-# from the buck; logic below it; power in the bottom-right corner around J201; MIDI bottom left
-# (the H11L1 is ~4 mm tall, so it stays outside the modules). Every SO/TSSOP courtyard is at least
-# 7.4 mm wide, so the 9.7 mm channel between the module rows takes one IC across, on each face.
+# coordinates as seen from the outward face. Every SO/TSSOP courtyard is at least 7.4 mm wide, so
+# the 9.7 mm channel between the module rows takes one IC across, on each face.
+# Each chip that talks to the module sits level with the module pins of its bus (both modules'
+# pins for one bus sit at similar heights): SPI-A (ADC, DAC) at 19-38 mm, SPI-B (pot ADC, gate
+# register) at 15-34, I2S (codec) at 34-56, I2C (expander, EEPROM) at 43-59. The CV output
+# op-amps, which only talk to the DAC and the jack switches, take the top-right corner. Power stays
+# in the bottom-right corner around J201, furthest from the converters; MIDI bottom left (the
+# H11L1 is ~4 mm tall, so it stays outside the modules).
 CENTRE_X = 22.26   # between the Pico's left row and the Teensy's right row
 ANCHORS = {
     # outward face (F)
-    "U401": (21.0, 9.6, 0, "F"),        # ADS8688, inputs toward the CV holes on the left
-    "U301": (35.5, 8.6, 0, "F"),        # PCM3060, top right beside the audio holes
-    "U501": (CENTRE_X, 21.0, 0, "F"),   # DAC8568
-    "U502": (CENTRE_X, 30.6, 0, "F"),   # TL074 CV1-4
-    "U503": (CENTRE_X, 41.0, 0, "F"),   # TL074 CV5-8
-    "U601": (CENTRE_X, 53.0, 0, "F"),   # MCP3208
-    "U801": (CENTRE_X, 63.0, 0, "F"),   # LM393 gates 1-2
-    "U701": (19.5, 77.0, 0, "F"),       # TCA9555
+    "U401": (21.0, 9.6, 0, "F"),        # ADS8688 (SPI-A), inputs toward the CV holes on the left
+    "U501": (CENTRE_X, 21.0, 0, "F"),   # DAC8568 (SPI-A)
+    "U601": (CENTRE_X, 30.3, 0, "F"),   # MCP3208 (SPI-B)
+    "U301": (CENTRE_X, 42.3, 0, "F"),   # PCM3060 (I2S), level with the I2S pins
+    "U701": (CENTRE_X, 53.3, 0, "F"),   # TCA9555 (I2C)
+    "U801": (CENTRE_X, 61.8, 0, "F"),   # LM393 gates 1-2
+    "U502": (35.5, 8.6, 0, "F"),        # TL074 CV1-4, top right near the DAC and the jack switches
     "U1002": (17.5, 97.0, 0, "F"),      # H11L1 (tall)
     "U202": (29.5, 96.5, 90, "F"),      # L78M05 DPAK
     "L201": (29.5, 86.5, 0, "F"),       # buck inductor (4 mm tall)
@@ -105,11 +108,13 @@ ANCHORS = {
     "U403": (21.0, 6.0, 0, "B"),        # DG412 CV5-6 + spares
     "U402": (21.0, 13.0, 0, "B"),       # DG412 CV1-4
     "U504": (CENTRE_X, 22.5, 0, "B"),   # TL074 offset buffer + spares
-    "U302": (35.5, 8.6, 0, "B"),        # TL074 audio, under the codec
+    "U503": (35.5, 8.6, 0, "B"),        # TL074 CV5-8, top right under U502
+    "U302": (CENTRE_X, 31.8, 0, "B"),   # TL074 audio, just above the codec, leaving the space under it for
+                                        # the codec's decoupling
     "U602": (38.15, 36.0, 90, "F"),     # 74HCT595 TSSOP, sideways in the right channel: gates 5-8 go to the right
                                         # banks beside it, gates 1-4 cross to the left banks (wiring.py)
-    "U802": (CENTRE_X, 63.0, 0, "B"),   # LM393 gates 3-4
-    "U702": (19.5, 77.0, 0, "B"),       # M24C64, under the TCA9555
+    "U802": (CENTRE_X, 61.8, 0, "B"),   # LM393 gates 3-4
+    "U702": (CENTRE_X, 53.3, 0, "B"),   # M24C64 (I2C), under the TCA9555
     "U1001": (16.0, 89.0, 0, "B"),      # AHCT1G125 MIDI out, under the MIDI corner
 }
 

@@ -6456,7 +6456,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x02")
-		(at 218.44 50.8 0)
+		(at 218.44 53.34 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -6464,40 +6464,40 @@
 		(dnp no)
 		(uuid "c4cb1e41-3d31-5374-a300-ce504b486d24")
 		(property "Reference" "J710"
-			(at 218.44 48.26 0)
+			(at 218.44 50.8 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Value" "Holes, left top"
-			(at 218.44 55.88 0)
+			(at 218.44 58.42 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Footprint" "analogue_board:WiringHoles_1x02"
-			(at 218.44 50.8 0)
+			(at 218.44 53.34 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
-			(at 218.44 50.8 0)
+			(at 218.44 53.34 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Description" ""
-			(at 218.44 50.8 0)
+			(at 218.44 53.34 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "JLC" "bare holes"
-			(at 218.44 50.8 0)
+			(at 218.44 53.34 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
@@ -6519,7 +6519,7 @@
 		)
 	)
 	(label "SW1"
-		(at 210.82 50.8 180)
+		(at 210.82 53.34 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -6527,7 +6527,7 @@
 		(uuid "d8554e5e-c964-5d92-8c7e-a5cc126b83a6")
 	)
 	(label "SW3"
-		(at 210.82 53.34 180)
+		(at 210.82 55.88 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -6536,7 +6536,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x01")
-		(at 218.44 63.5 0)
+		(at 218.44 66.04 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -6544,40 +6544,40 @@
 		(dnp no)
 		(uuid "234d40c0-1a0b-510d-bf82-3d38b42dfea9")
 		(property "Reference" "J711"
-			(at 218.44 60.96 0)
+			(at 218.44 63.5 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Value" "Holes, left bottom"
-			(at 218.44 66.04 0)
+			(at 218.44 68.58 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Footprint" "analogue_board:WiringHoles_1x01"
-			(at 218.44 63.5 0)
+			(at 218.44 66.04 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
-			(at 218.44 63.5 0)
+			(at 218.44 66.04 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Description" ""
-			(at 218.44 63.5 0)
+			(at 218.44 66.04 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "JLC" "bare holes"
-			(at 218.44 63.5 0)
+			(at 218.44 66.04 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
@@ -6596,7 +6596,7 @@
 		)
 	)
 	(label "SW4"
-		(at 210.82 63.5 180)
+		(at 210.82 66.04 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -6605,7 +6605,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x01")
-		(at 218.44 73.66 0)
+		(at 218.44 76.2 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -6613,40 +6613,40 @@
 		(dnp no)
 		(uuid "687b419b-74bd-5625-a9d7-67b19fdb9edd")
 		(property "Reference" "J712"
-			(at 218.44 71.12 0)
+			(at 218.44 73.66 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Value" "Holes, left top"
-			(at 218.44 76.2 0)
+			(at 218.44 78.74 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Footprint" "analogue_board:WiringHoles_1x01"
-			(at 218.44 73.66 0)
+			(at 218.44 76.2 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
-			(at 218.44 73.66 0)
+			(at 218.44 76.2 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Description" ""
-			(at 218.44 73.66 0)
+			(at 218.44 76.2 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "JLC" "bare holes"
-			(at 218.44 73.66 0)
+			(at 218.44 76.2 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
@@ -6665,7 +6665,7 @@
 		)
 	)
 	(label "SW2"
-		(at 210.82 73.66 180)
+		(at 210.82 76.2 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -6674,7 +6674,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x01")
-		(at 218.44 83.82 0)
+		(at 218.44 86.36 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -6682,40 +6682,40 @@
 		(dnp no)
 		(uuid "d2b6f801-7c8f-5b48-8ca5-e299305145cc")
 		(property "Reference" "J713"
-			(at 218.44 81.28 0)
+			(at 218.44 83.82 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Value" "Holes, left bottom"
-			(at 218.44 86.36 0)
+			(at 218.44 88.9 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Footprint" "analogue_board:WiringHoles_1x01"
-			(at 218.44 83.82 0)
+			(at 218.44 86.36 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
-			(at 218.44 83.82 0)
+			(at 218.44 86.36 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Description" ""
-			(at 218.44 83.82 0)
+			(at 218.44 86.36 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "JLC" "bare holes"
-			(at 218.44 83.82 0)
+			(at 218.44 86.36 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
@@ -6734,7 +6734,7 @@
 		)
 	)
 	(label "SW5"
-		(at 210.82 83.82 180)
+		(at 210.82 86.36 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -6743,7 +6743,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x03")
-		(at 218.44 93.98 0)
+		(at 218.44 99.06 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -6751,40 +6751,40 @@
 		(dnp no)
 		(uuid "a8c5cf77-a8e5-5787-bf99-2be5392e5697")
 		(property "Reference" "J714"
-			(at 218.44 88.9 0)
+			(at 218.44 93.98 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Value" "Holes, right top"
-			(at 218.44 99.06 0)
+			(at 218.44 104.14 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Footprint" "analogue_board:WiringHoles_1x03"
-			(at 218.44 93.98 0)
+			(at 218.44 99.06 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
-			(at 218.44 93.98 0)
+			(at 218.44 99.06 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Description" ""
-			(at 218.44 93.98 0)
+			(at 218.44 99.06 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "JLC" "bare holes"
-			(at 218.44 93.98 0)
+			(at 218.44 99.06 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
@@ -6809,7 +6809,7 @@
 		)
 	)
 	(label "SW6"
-		(at 210.82 91.44 180)
+		(at 210.82 96.52 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -6817,7 +6817,7 @@
 		(uuid "8249bc14-e76f-5d5a-a069-a7c6b8741597")
 	)
 	(label "SW7"
-		(at 210.82 93.98 180)
+		(at 210.82 99.06 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -6826,7 +6826,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 210.82 96.52 270)
+		(at 210.82 101.6 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -6834,35 +6834,35 @@
 		(dnp no)
 		(uuid "20df6758-8739-5455-bc68-5a81c0d95207")
 		(property "Reference" "#PWR317"
-			(at 204.47 96.52 90)
+			(at 204.47 101.6 90)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Value" "GND"
-			(at 207.01 96.52 90)
+			(at 207.01 101.6 90)
 			(effects
 				(font (size 1.27 1.27))
 				(justify right)
 			)
 		)
 		(property "Footprint" ""
-			(at 210.82 96.52 90)
+			(at 210.82 101.6 90)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
-			(at 210.82 96.52 90)
+			(at 210.82 101.6 90)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Description" ""
-			(at 210.82 96.52 90)
+			(at 210.82 101.6 90)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
@@ -6882,7 +6882,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x03")
-		(at 218.44 109.22 0)
+		(at 218.44 114.3 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -6890,40 +6890,40 @@
 		(dnp no)
 		(uuid "0f7b8d9b-799f-5328-ba0f-ae4858e1be1d")
 		(property "Reference" "J715"
-			(at 218.44 104.14 0)
+			(at 218.44 109.22 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Value" "Holes, right middle"
-			(at 218.44 114.3 0)
+			(at 218.44 119.38 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Footprint" "analogue_board:WiringHoles_1x03"
-			(at 218.44 109.22 0)
+			(at 218.44 114.3 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
-			(at 218.44 109.22 0)
+			(at 218.44 114.3 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Description" ""
-			(at 218.44 109.22 0)
+			(at 218.44 114.3 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "JLC" "bare holes"
-			(at 218.44 109.22 0)
+			(at 218.44 114.3 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
@@ -6948,7 +6948,7 @@
 		)
 	)
 	(label "SW8"
-		(at 210.82 106.68 180)
+		(at 210.82 111.76 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -6956,7 +6956,7 @@
 		(uuid "37363928-d58b-5574-b4aa-97e18f5dabd0")
 	)
 	(label "SW9"
-		(at 210.82 109.22 180)
+		(at 210.82 114.3 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -6965,7 +6965,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 210.82 111.76 270)
+		(at 210.82 116.84 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -6973,35 +6973,35 @@
 		(dnp no)
 		(uuid "4e287e3a-0abb-5af8-b3ec-1bedf5fed6fd")
 		(property "Reference" "#PWR318"
-			(at 204.47 111.76 90)
+			(at 204.47 116.84 90)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Value" "GND"
-			(at 207.01 111.76 90)
+			(at 207.01 116.84 90)
 			(effects
 				(font (size 1.27 1.27))
 				(justify right)
 			)
 		)
 		(property "Footprint" ""
-			(at 210.82 111.76 90)
+			(at 210.82 116.84 90)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
-			(at 210.82 111.76 90)
+			(at 210.82 116.84 90)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Description" ""
-			(at 210.82 111.76 90)
+			(at 210.82 116.84 90)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
@@ -10212,57 +10212,57 @@
 		(uuid "00b01f26-ffd5-519b-8f97-941879c76f6f")
 	)
 	(wire
-		(pts (xy 210.82 50.8) (xy 213.36 50.8))
+		(pts (xy 210.82 53.34) (xy 213.36 53.34))
 		(stroke (width 0) (type default))
 		(uuid "8c70bd21-ad4e-5fb2-a231-e68abc2f8863")
 	)
 	(wire
-		(pts (xy 210.82 53.34) (xy 213.36 53.34))
+		(pts (xy 210.82 55.88) (xy 213.36 55.88))
 		(stroke (width 0) (type default))
 		(uuid "79b320e0-4703-5c1c-ac16-f90df6f21a09")
 	)
 	(wire
-		(pts (xy 210.82 63.5) (xy 213.36 63.5))
+		(pts (xy 210.82 66.04) (xy 213.36 66.04))
 		(stroke (width 0) (type default))
 		(uuid "11fcda79-d2f3-5c30-bf73-97bea652ba11")
 	)
 	(wire
-		(pts (xy 210.82 73.66) (xy 213.36 73.66))
+		(pts (xy 210.82 76.2) (xy 213.36 76.2))
 		(stroke (width 0) (type default))
 		(uuid "acc8f7d2-cd61-5e34-b189-9c4dd3852503")
 	)
 	(wire
-		(pts (xy 210.82 83.82) (xy 213.36 83.82))
+		(pts (xy 210.82 86.36) (xy 213.36 86.36))
 		(stroke (width 0) (type default))
 		(uuid "07b4d35e-2d15-56f6-8a38-d0f4416e2e60")
 	)
 	(wire
-		(pts (xy 210.82 91.44) (xy 213.36 91.44))
+		(pts (xy 210.82 96.52) (xy 213.36 96.52))
 		(stroke (width 0) (type default))
 		(uuid "ea4ceff0-c7d9-56ac-8732-5d1540da64f5")
 	)
 	(wire
-		(pts (xy 210.82 93.98) (xy 213.36 93.98))
+		(pts (xy 210.82 99.06) (xy 213.36 99.06))
 		(stroke (width 0) (type default))
 		(uuid "fa395047-9400-505d-88ba-8e61f0f27eca")
 	)
 	(wire
-		(pts (xy 210.82 96.52) (xy 213.36 96.52))
+		(pts (xy 210.82 101.6) (xy 213.36 101.6))
 		(stroke (width 0) (type default))
 		(uuid "3239ebe3-cb77-5834-8655-b85d4c938187")
 	)
 	(wire
-		(pts (xy 210.82 106.68) (xy 213.36 106.68))
+		(pts (xy 210.82 111.76) (xy 213.36 111.76))
 		(stroke (width 0) (type default))
 		(uuid "1db4d5d7-0673-5d57-9c83-b1bb64310810")
 	)
 	(wire
-		(pts (xy 210.82 109.22) (xy 213.36 109.22))
+		(pts (xy 210.82 114.3) (xy 213.36 114.3))
 		(stroke (width 0) (type default))
 		(uuid "7556259c-7fb1-55fe-9f01-d6fff8fdc023")
 	)
 	(wire
-		(pts (xy 210.82 111.76) (xy 213.36 111.76))
+		(pts (xy 210.82 116.84) (xy 213.36 116.84))
 		(stroke (width 0) (type default))
 		(uuid "a51091c0-498b-5a50-8c3e-9ca4b4c0faed")
 	)

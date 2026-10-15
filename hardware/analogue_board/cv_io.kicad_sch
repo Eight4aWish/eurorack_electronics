@@ -14346,7 +14346,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x04")
-		(at 350.52 139.7 0)
+		(at 350.52 144.78 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -14354,40 +14354,40 @@
 		(dnp no)
 		(uuid "1981151a-0183-5c3d-a24e-095e35d30f9b")
 		(property "Reference" "J410"
-			(at 350.52 134.62 0)
+			(at 350.52 139.7 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Value" "Holes, left top"
-			(at 350.52 147.32 0)
+			(at 350.52 152.4 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Footprint" "analogue_board:WiringHoles_1x04"
-			(at 350.52 139.7 0)
+			(at 350.52 144.78 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
-			(at 350.52 139.7 0)
+			(at 350.52 144.78 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Description" ""
-			(at 350.52 139.7 0)
+			(at 350.52 144.78 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "JLC" "bare holes"
-			(at 350.52 139.7 0)
+			(at 350.52 144.78 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
@@ -14415,7 +14415,7 @@
 		)
 	)
 	(label "CV1"
-		(at 342.9 137.16 180)
+		(at 342.9 142.24 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -14423,7 +14423,7 @@
 		(uuid "f1da048c-3d2f-597a-8e7c-46f089cf27a6")
 	)
 	(label "CV2"
-		(at 342.9 139.7 180)
+		(at 342.9 144.78 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -14431,7 +14431,7 @@
 		(uuid "141bc02e-499e-5eed-b866-e73b37f408e5")
 	)
 	(label "CV5"
-		(at 342.9 142.24 180)
+		(at 342.9 147.32 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -14439,7 +14439,7 @@
 		(uuid "0069c34b-c3b2-5e12-8c21-68a476fb2363")
 	)
 	(label "CVI7"
-		(at 342.9 144.78 180)
+		(at 342.9 149.86 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -14448,7 +14448,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x02")
-		(at 350.52 157.48 0)
+		(at 350.52 160.02 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -14456,40 +14456,40 @@
 		(dnp no)
 		(uuid "1633c767-7e6e-59d8-9c5d-848dc7e037d9")
 		(property "Reference" "J411"
-			(at 350.52 154.94 0)
+			(at 350.52 157.48 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Value" "Holes, left bottom"
-			(at 350.52 162.56 0)
+			(at 350.52 165.1 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Footprint" "analogue_board:WiringHoles_1x02"
-			(at 350.52 157.48 0)
+			(at 350.52 160.02 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
-			(at 350.52 157.48 0)
+			(at 350.52 160.02 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Description" ""
-			(at 350.52 157.48 0)
+			(at 350.52 160.02 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "JLC" "bare holes"
-			(at 350.52 157.48 0)
+			(at 350.52 160.02 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
@@ -14511,7 +14511,7 @@
 		)
 	)
 	(label "CV3"
-		(at 342.9 157.48 180)
+		(at 342.9 160.02 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -14520,7 +14520,7 @@
 	)
 	(global_label "CVO7"
 		(shape bidirectional)
-		(at 342.9 160.02 180)
+		(at 342.9 162.56 180)
 		(fields_autoplaced yes)
 		(effects
 			(font (size 1.27 1.27))
@@ -14528,7 +14528,7 @@
 		)
 		(uuid "10b35067-15f9-5bcb-9195-dd69f69bff0b")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 342.9 160.02 0)
+			(at 342.9 162.56 0)
 			(effects
 				(font (size 1.27 1.27))
 				(justify right)
@@ -14538,7 +14538,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x01")
-		(at 350.52 170.18 0)
+		(at 350.52 172.72 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -14546,40 +14546,40 @@
 		(dnp no)
 		(uuid "31e23167-0e03-5bce-8bf9-9ae325a03b3b")
 		(property "Reference" "J412"
-			(at 350.52 167.64 0)
+			(at 350.52 170.18 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Value" "Holes, right top"
-			(at 350.52 172.72 0)
+			(at 350.52 175.26 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Footprint" "analogue_board:WiringHoles_1x01"
-			(at 350.52 170.18 0)
+			(at 350.52 172.72 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
-			(at 350.52 170.18 0)
+			(at 350.52 172.72 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Description" ""
-			(at 350.52 170.18 0)
+			(at 350.52 172.72 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "JLC" "bare holes"
-			(at 350.52 170.18 0)
+			(at 350.52 172.72 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
@@ -14598,7 +14598,7 @@
 		)
 	)
 	(label "CV4"
-		(at 342.9 170.18 180)
+		(at 342.9 172.72 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -14607,7 +14607,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x01")
-		(at 350.52 180.34 0)
+		(at 350.52 182.88 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -14615,40 +14615,40 @@
 		(dnp no)
 		(uuid "f5135e2f-f088-5ac6-a21b-8ff5c63b934e")
 		(property "Reference" "J413"
-			(at 350.52 177.8 0)
+			(at 350.52 180.34 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Value" "Holes, right top"
-			(at 350.52 182.88 0)
+			(at 350.52 185.42 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Footprint" "analogue_board:WiringHoles_1x01"
-			(at 350.52 180.34 0)
+			(at 350.52 182.88 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
-			(at 350.52 180.34 0)
+			(at 350.52 182.88 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Description" ""
-			(at 350.52 180.34 0)
+			(at 350.52 182.88 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "JLC" "bare holes"
-			(at 350.52 180.34 0)
+			(at 350.52 182.88 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
@@ -14667,7 +14667,7 @@
 		)
 	)
 	(label "CVI8"
-		(at 342.9 180.34 180)
+		(at 342.9 182.88 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -14676,7 +14676,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x01")
-		(at 350.52 190.5 0)
+		(at 350.52 193.04 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -14684,40 +14684,40 @@
 		(dnp no)
 		(uuid "5b18d5d0-fa47-5ae4-9a07-7dbe9574a821")
 		(property "Reference" "J414"
-			(at 350.52 187.96 0)
+			(at 350.52 190.5 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Value" "Holes, right middle"
-			(at 350.52 193.04 0)
+			(at 350.52 195.58 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Footprint" "analogue_board:WiringHoles_1x01"
-			(at 350.52 190.5 0)
+			(at 350.52 193.04 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
-			(at 350.52 190.5 0)
+			(at 350.52 193.04 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Description" ""
-			(at 350.52 190.5 0)
+			(at 350.52 193.04 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "JLC" "bare holes"
-			(at 350.52 190.5 0)
+			(at 350.52 193.04 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
@@ -14736,7 +14736,7 @@
 		)
 	)
 	(label "CV6"
-		(at 342.9 190.5 180)
+		(at 342.9 193.04 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -14745,7 +14745,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x01")
-		(at 350.52 200.66 0)
+		(at 350.52 203.2 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -14753,40 +14753,40 @@
 		(dnp no)
 		(uuid "4ebb9986-dc9c-51db-8960-560be6fd1a0e")
 		(property "Reference" "J415"
-			(at 350.52 198.12 0)
+			(at 350.52 200.66 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Value" "Holes, right middle"
-			(at 350.52 203.2 0)
+			(at 350.52 205.74 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Footprint" "analogue_board:WiringHoles_1x01"
-			(at 350.52 200.66 0)
+			(at 350.52 203.2 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
-			(at 350.52 200.66 0)
+			(at 350.52 203.2 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Description" ""
-			(at 350.52 200.66 0)
+			(at 350.52 203.2 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "JLC" "bare holes"
-			(at 350.52 200.66 0)
+			(at 350.52 203.2 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
@@ -14806,7 +14806,7 @@
 	)
 	(global_label "CVO8"
 		(shape bidirectional)
-		(at 342.9 200.66 180)
+		(at 342.9 203.2 180)
 		(fields_autoplaced yes)
 		(effects
 			(font (size 1.27 1.27))
@@ -14814,7 +14814,7 @@
 		)
 		(uuid "78ed3e74-c5df-5d42-8f9c-e58bef068acd")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 342.9 200.66 0)
+			(at 342.9 203.2 0)
 			(effects
 				(font (size 1.27 1.27))
 				(justify right)
@@ -15922,52 +15922,52 @@
 		(uuid "332786c4-7143-5de5-8420-7a7684e8ac43")
 	)
 	(wire
-		(pts (xy 342.9 137.16) (xy 345.44 137.16))
+		(pts (xy 342.9 142.24) (xy 345.44 142.24))
 		(stroke (width 0) (type default))
 		(uuid "2ac00365-fbbd-510e-87f0-6b8bebf7e21f")
 	)
 	(wire
-		(pts (xy 342.9 139.7) (xy 345.44 139.7))
+		(pts (xy 342.9 144.78) (xy 345.44 144.78))
 		(stroke (width 0) (type default))
 		(uuid "25959654-53ec-5aee-bc93-260960e92065")
 	)
 	(wire
-		(pts (xy 342.9 142.24) (xy 345.44 142.24))
+		(pts (xy 342.9 147.32) (xy 345.44 147.32))
 		(stroke (width 0) (type default))
 		(uuid "562a0b2c-fed2-5671-bf34-01b1096fbb2d")
 	)
 	(wire
-		(pts (xy 342.9 144.78) (xy 345.44 144.78))
+		(pts (xy 342.9 149.86) (xy 345.44 149.86))
 		(stroke (width 0) (type default))
 		(uuid "fea4e4f9-e736-508e-b943-136789c5a675")
 	)
 	(wire
-		(pts (xy 342.9 157.48) (xy 345.44 157.48))
+		(pts (xy 342.9 160.02) (xy 345.44 160.02))
 		(stroke (width 0) (type default))
 		(uuid "6c294675-b3c5-5180-8eeb-36aadf18515a")
 	)
 	(wire
-		(pts (xy 342.9 160.02) (xy 345.44 160.02))
+		(pts (xy 342.9 162.56) (xy 345.44 162.56))
 		(stroke (width 0) (type default))
 		(uuid "75a82824-98e8-56a1-99ef-29b6c3e112d3")
 	)
 	(wire
-		(pts (xy 342.9 170.18) (xy 345.44 170.18))
+		(pts (xy 342.9 172.72) (xy 345.44 172.72))
 		(stroke (width 0) (type default))
 		(uuid "63aa57f5-49c2-5e5f-8882-e3b4aac2cf1b")
 	)
 	(wire
-		(pts (xy 342.9 180.34) (xy 345.44 180.34))
+		(pts (xy 342.9 182.88) (xy 345.44 182.88))
 		(stroke (width 0) (type default))
 		(uuid "ddef8a73-b0b0-5a8e-b97b-e14f7fb98a4d")
 	)
 	(wire
-		(pts (xy 342.9 190.5) (xy 345.44 190.5))
+		(pts (xy 342.9 193.04) (xy 345.44 193.04))
 		(stroke (width 0) (type default))
 		(uuid "56df60b9-974c-5472-a0c7-3877c1187602")
 	)
 	(wire
-		(pts (xy 342.9 200.66) (xy 345.44 200.66))
+		(pts (xy 342.9 203.2) (xy 345.44 203.2))
 		(stroke (width 0) (type default))
 		(uuid "8186b986-6eb3-5ee1-9110-32aaf88c20e0")
 	)

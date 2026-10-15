@@ -317,6 +317,54 @@ def gr_rect(a, b, layer, w=0.1, tag="r"):
              S("uuid", uid("rect", tag, layer, a, b)))
 
 
+# Routing rules. JLC's multilayer limits: via 0.2 mm drill / 0.45 mm pad; track and space 0.09-0.127 mm
+# by their various pages, so 0.127 mm is the floor here on every layer. Signals at 0.15 mm put two
+# tracks through each gap between module header pins (0.84 mm between 1.7 mm pads).
+NET_CLASSES = [
+    # name, track, clearance, via diameter, via drill, priority (lower wins)
+    ("Default", 0.15, 0.15, 0.45, 0.2, 2147483647),
+    ("Power", 0.3, 0.15, 0.6, 0.3, 0),
+]
+POWER_PATTERNS = ["GND", "+12V", "-12V", "+5VD", "+5VA", "+3V3D", "+3V3A", "MOD_5V", "/Power/*"]
+RULES = {"min_clearance": 0.127, "min_track_width": 0.127, "min_via_diameter": 0.45, "min_through_hole_diameter": 0.2,
+         "min_via_annular_width": 0.1, "min_hole_clearance": 0.25, "min_hole_to_hole": 0.25,
+         "min_copper_edge_clearance": 0.5, "min_connection": 0.0, "min_microvia_diameter": 0.2,
+         "min_microvia_drill": 0.1, "min_resolved_spokes": 2, "min_silk_clearance": 0.0, "min_text_height": 0.8,
+         "min_text_thickness": 0.08, "max_error": 0.005, "solder_mask_to_copper_clearance": 0.0,
+         "use_height_for_length_calcs": True}
+
+
+def write_project_rules():
+    """Merge the net classes and board minimums into the KiCad project file (build.py owns the rest)."""
+    pro = os.path.join(HW, "analogue_board.kicad_pro")
+    with open(pro, encoding="utf-8") as f:
+        data = json.load(f)
+    classes = [{"name": n, "track_width": t, "clearance": c, "via_diameter": vd, "via_drill": vh,
+                "microvia_diameter": 0.3, "microvia_drill": 0.1, "diff_pair_gap": 0.2, "diff_pair_via_gap": 0.25,
+                "diff_pair_width": 0.2, "line_style": 0, "bus_width": 12, "wire_width": 6,
+                "pcb_color": "rgba(0, 0, 0, 0.000)", "schematic_color": "rgba(0, 0, 0, 0.000)", "priority": p}
+               for n, t, c, vd, vh, p in NET_CLASSES]
+    data["net_settings"] = {"classes": classes, "meta": {"version": 4}, "net_colors": None,
+                            "netclass_assignments": None,
+                            "netclass_patterns": [{"netclass": "Power", "pattern": p} for p in POWER_PATTERNS]}
+    ds = data.setdefault("board", {}).setdefault("design_settings", {})
+    ds.setdefault("rules", {}).update(RULES)
+    ds["track_widths"] = [0.0, 0.127, 0.15, 0.2, 0.3, 0.5]
+    ds["via_dimensions"] = [{"diameter": 0.0, "drill": 0.0}, {"diameter": 0.45, "drill": 0.2}, {"diameter": 0.6, "drill": 0.3}]
+    with open(pro, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+
+def ground_plane(net_ids):
+    """Inner layer 1: one unbroken ground plane over the whole board (spec §10)."""
+    m = 0.5   # copper to board edge
+    pts = [(BX + m, BY + m), (BX + P.BOARD_W - m, BY + m), (BX + P.BOARD_W - m, BY + P.BOARD_H - m), (BX + m, BY + P.BOARD_H - m)]
+    return S("zone", S("net", net_ids["GND"]), S("net_name", "GND"), S("layer", "In1.Cu"), S("uuid", uid("zone", "In1", "GND")),
+             S("hatch", Sym("edge"), 0.5), S("connect_pads", S("clearance", 0.2)), S("min_thickness", 0.2),
+             S("filled_areas_thickness", Sym("no")), S("fill", S("thermal_gap", 0.3), S("thermal_bridge_width", 0.3)),
+             S("polygon", S("pts", *[S("xy", round(x, 4), round(y, 4)) for x, y in pts])))
+
+
 def build():
     comps, pin_net, names = read()
     net_ids = {n: i + 1 for i, n in enumerate(names)}
@@ -345,6 +393,7 @@ def build():
         (x, y), rot, face = pos[ref]
         board.append(instance(ref, comp, (BX + x, BY + y), rot, net_ids, pin_net, face))
     board.append(gr_rect((BX, BY), (BX + P.BOARD_W, BY + P.BOARD_H), "Edge.Cuts", 0.1, "outline"))
+    board.append(ground_plane(net_ids))
     # USB plug keep-outs and the parking-area labels, for the reviewer
     for key, m in P.layout("A").items():
         k = m["keepout"]
@@ -471,6 +520,7 @@ def render():
 
 
 if __name__ == "__main__":
+    write_project_rules()
     comps, placed = build()
     print(OUT)
     area_budget(comps)

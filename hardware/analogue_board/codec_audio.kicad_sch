@@ -9645,7 +9645,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x01")
-		(at 340.36 60.96 0)
+		(at 340.36 63.5 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -9653,40 +9653,40 @@
 		(dnp no)
 		(uuid "490fa8d4-35d7-505c-8f55-f36404523a9c")
 		(property "Reference" "J310"
-			(at 340.36 58.42 0)
+			(at 340.36 60.96 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Value" "Holes, left top"
-			(at 340.36 63.5 0)
+			(at 340.36 66.04 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Footprint" "analogue_board:WiringHoles_1x01"
-			(at 340.36 60.96 0)
+			(at 340.36 63.5 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
-			(at 340.36 60.96 0)
+			(at 340.36 63.5 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Description" ""
-			(at 340.36 60.96 0)
+			(at 340.36 63.5 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "JLC" "bare holes"
-			(at 340.36 60.96 0)
+			(at 340.36 63.5 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
@@ -9705,7 +9705,7 @@
 		)
 	)
 	(label "AIN1"
-		(at 332.74 60.96 180)
+		(at 332.74 63.5 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -9714,7 +9714,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x01")
-		(at 340.36 71.12 0)
+		(at 340.36 73.66 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -9722,40 +9722,40 @@
 		(dnp no)
 		(uuid "5cb153eb-55fb-584c-a3ca-761c693300e3")
 		(property "Reference" "J311"
-			(at 340.36 68.58 0)
+			(at 340.36 71.12 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Value" "Holes, left bottom"
-			(at 340.36 73.66 0)
+			(at 340.36 76.2 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Footprint" "analogue_board:WiringHoles_1x01"
-			(at 340.36 71.12 0)
+			(at 340.36 73.66 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
-			(at 340.36 71.12 0)
+			(at 340.36 73.66 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Description" ""
-			(at 340.36 71.12 0)
+			(at 340.36 73.66 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "JLC" "bare holes"
-			(at 340.36 71.12 0)
+			(at 340.36 73.66 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
@@ -9774,7 +9774,7 @@
 		)
 	)
 	(label "AOUT1"
-		(at 332.74 71.12 180)
+		(at 332.74 73.66 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -9783,7 +9783,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x01")
-		(at 340.36 81.28 0)
+		(at 340.36 83.82 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -9791,40 +9791,40 @@
 		(dnp no)
 		(uuid "364980ca-a8b8-5337-abdb-c180ff9d01b6")
 		(property "Reference" "J312"
-			(at 340.36 78.74 0)
+			(at 340.36 81.28 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Value" "Holes, right top"
-			(at 340.36 83.82 0)
+			(at 340.36 86.36 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Footprint" "analogue_board:WiringHoles_1x01"
-			(at 340.36 81.28 0)
+			(at 340.36 83.82 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
-			(at 340.36 81.28 0)
+			(at 340.36 83.82 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Description" ""
-			(at 340.36 81.28 0)
+			(at 340.36 83.82 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "JLC" "bare holes"
-			(at 340.36 81.28 0)
+			(at 340.36 83.82 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
@@ -9843,7 +9843,7 @@
 		)
 	)
 	(label "AIN2"
-		(at 332.74 81.28 180)
+		(at 332.74 83.82 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -9852,7 +9852,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x01")
-		(at 340.36 91.44 0)
+		(at 340.36 93.98 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -9860,40 +9860,40 @@
 		(dnp no)
 		(uuid "fd15dfb0-40c5-5529-a04b-4e393321ca2b")
 		(property "Reference" "J313"
-			(at 340.36 88.9 0)
+			(at 340.36 91.44 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Value" "Holes, right middle"
-			(at 340.36 93.98 0)
+			(at 340.36 96.52 0)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
 		(property "Footprint" "analogue_board:WiringHoles_1x01"
-			(at 340.36 91.44 0)
+			(at 340.36 93.98 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
-			(at 340.36 91.44 0)
+			(at 340.36 93.98 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "Description" ""
-			(at 340.36 91.44 0)
+			(at 340.36 93.98 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
 		(property "JLC" "bare holes"
-			(at 340.36 91.44 0)
+			(at 340.36 93.98 0)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
@@ -9912,7 +9912,7 @@
 		)
 	)
 	(label "AOUT2"
-		(at 332.74 91.44 180)
+		(at 332.74 93.98 180)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
@@ -11054,22 +11054,22 @@
 		(uuid "72ea1637-e261-591e-9732-a6f1a600a4d0")
 	)
 	(wire
-		(pts (xy 332.74 60.96) (xy 335.28 60.96))
+		(pts (xy 332.74 63.5) (xy 335.28 63.5))
 		(stroke (width 0) (type default))
 		(uuid "21f3dff8-1090-58e6-b60c-8fe7381da00d")
 	)
 	(wire
-		(pts (xy 332.74 71.12) (xy 335.28 71.12))
+		(pts (xy 332.74 73.66) (xy 335.28 73.66))
 		(stroke (width 0) (type default))
 		(uuid "5bff15f4-88ef-5249-b2f7-3e1b3bd5a893")
 	)
 	(wire
-		(pts (xy 332.74 81.28) (xy 335.28 81.28))
+		(pts (xy 332.74 83.82) (xy 335.28 83.82))
 		(stroke (width 0) (type default))
 		(uuid "c84848cf-e384-5dcb-bb4c-79df3ace0091")
 	)
 	(wire
-		(pts (xy 332.74 91.44) (xy 335.28 91.44))
+		(pts (xy 332.74 93.98) (xy 335.28 93.98))
 		(stroke (width 0) (type default))
 		(uuid "2e43dbf6-c0aa-571a-bccf-be18b3322950")
 	)
