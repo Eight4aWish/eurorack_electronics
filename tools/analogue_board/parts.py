@@ -122,5 +122,5 @@ FP_C = {"0402": "Capacitor_SMD:C_0402_1005Metric", "0603": "Capacitor_SMD:C_0603
 
 def holes_part(n):
     return dict(lib=f"Connector_Generic:Conn_01x{n:02d}", value=f"holes 1x{n}",
-                fp=f"Connector_PinHeader_2.54mm:PinHeader_1x{n:02d}_P2.54mm_Vertical", lcsc="", mpn="",
+                fp=f"analogue_board:WiringHoles_1x{n:02d}", lcsc="", mpn="",
                 ds="", jlc="bare holes", prefix="J")

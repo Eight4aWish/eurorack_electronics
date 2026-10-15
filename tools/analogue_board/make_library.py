@@ -201,13 +201,18 @@ def rect(layer, a, b, width=0.12):
             S("stroke", S("width", width), S("type", Sym("solid"))), S("fill", Sym("no")), S("layer", layer)]
 
 
-def footprint(name, descr, pads, outline, courtyard):
+def footprint(name, descr, pads, outline, courtyards, silk=True):
+    """`courtyards` is a list of rectangles: a module socket's courtyard is its two header rows only,
+    because low parts may sit under the module (the outline stays on F.Fab)."""
     node = [Sym("footprint"), name, S("version", 20241229), S("generator", "analogue_board_make_library"),
             S("generator_version", "9.0"), S("layer", "F.Cu"), S("descr", descr),
             fp_text("Reference", "REF**", (outline[0][0], outline[0][1] - 1.5), "F.SilkS"),
             fp_text("Value", name, (outline[0][0], outline[1][1] + 1.5), "F.Fab"),
-            S("attr", Sym("through_hole")),
-            rect("F.SilkS", *outline), rect("F.Fab", *outline, width=0.1), rect("F.CrtYd", *courtyard, width=0.05)]
+            S("attr", Sym("through_hole"))]
+    if silk:
+        node.append(rect("F.SilkS", *outline))
+    node.append(rect("F.Fab", *outline, width=0.1))
+    node += [rect("F.CrtYd", *c, width=0.05) for c in courtyards]
     node += pads
     node.append(S("embedded_fonts", Sym("no")))
     return node
@@ -222,7 +227,10 @@ def module_socket(name, descr, rows, row_spacing, outline_wh, first_pad_offset):
     w, h = outline_wh
     x0 = row_spacing / 2 - w / 2
     y0 = -first_pad_offset
-    return footprint(name, descr, pads, ((x0, y0), (x0 + w, y0 + h)), ((x0 - 0.5, y0 - 0.5), (x0 + w + 0.5, y0 + h + 0.5)))
+    last = (rows - 1) * 2.54
+    # the header bodies, exactly one pitch wide: the Pico's and Teensy's left rows sit one pitch apart
+    rows_cy = [((cx - 1.27, -1.27), (cx + 1.27, last + 1.27)) for cx in (0, row_spacing)]
+    return footprint(name, descr, pads, ((x0, y0), (x0 + w, y0 + h)), rows_cy)
 
 
 def edge_strip_fp(name, inner_dx):
@@ -232,9 +240,18 @@ def edge_strip_fp(name, inner_dx):
         pads.append(pad(n, 0, y, "rect" if n == 1 else "circle"))
         pads.append(pad(n, inner_dx, y))
     xs = sorted([0, inner_dx])
+    box = ((xs[0] - 1.27, -1.27), (xs[1] + 1.27, 39 * 2.54 + 1.27))
     return footprint(name, "n8synth edge strip: outer hole (deck header) and inner wiring hole per position, same pad number",
-                     pads, ((xs[0] - 1.27, -1.27), (xs[1] + 1.27, 39 * 2.54 + 1.27)),
-                     ((xs[0] - 1.6, -1.6), (xs[1] + 1.6, 39 * 2.54 + 1.6)))
+                     pads, box, [box])
+
+
+def wiring_holes_fp(n):
+    """A column of n bare plated holes on 2.54 mm, courtyard exactly one pitch wide, so columns can sit
+    side by side and beside the edge strips (the wiring field)."""
+    pads = [pad(i + 1, 0, i * 2.54, "rect" if i == 0 else "circle") for i in range(n)]
+    box = ((-1.27, -1.27), (1.27, (n - 1) * 2.54 + 1.27))
+    return footprint(f"WiringHoles_1x{n:02d}", f"Wiring field: {n} bare plated holes, 2.54 mm pitch, pad 1 square",
+                     pads, box, [box])
 
 
 def write_footprints():
@@ -247,7 +264,7 @@ def write_footprints():
                       24, 15.24, (17.78, 60.96), (60.96 - 23 * 2.54) / 2),
         edge_strip_fp("EdgeStrip_40_Left", 2.54),
         edge_strip_fp("EdgeStrip_40_Right", -2.54),
-    ]
+    ] + [wiring_holes_fp(n) for n in range(2, 15)]
     for fp in fps:
         with open(os.path.join(d, fp[1] + ".kicad_mod"), "w", encoding="utf-8") as f:
             f.write(dumps(fp) + "\n")

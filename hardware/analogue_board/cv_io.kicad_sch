@@ -14335,7 +14335,7 @@
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x12_P2.54mm_Vertical"
+		(property "Footprint" "analogue_board:WiringHoles_1x12"
 			(at 350.52 165.1 0)
 			(effects
 				(font (size 1.27 1.27))

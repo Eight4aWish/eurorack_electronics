@@ -548,6 +548,9 @@ From JLCPCB's *PCB Assembly Cost: What Does the Price Include?* (help centre, up
 
 Still to check: the 4-layer bare-board price and shipping, both from JLC's online quote.
 
+**Superseded 2026-10-15: double-sided assembly needs Standard PCBA (§14, checkpoint 3),
+roughly $100 more per order than the figures below.**
+
 **Updated 2026-10-15:** the schematic has 17 Extended types (§15): 17 × $3.07 = $52.19,
 $9.21 more than the table. That gives about **$148** (2 assembled) and **$277** (5), before
 PCBs and shipping. Placement rises with the review's extra passives (353 machine-placed
@@ -644,7 +647,44 @@ repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No p
    far end, which put it about 2.5 mm past the board's top edge, toward the rail. The Teensy
    socket moved 3 mm down: far end 3.5 mm from the top, USB keep-out now ending at 94.5 mm,
    still clear of J201. The printout was regenerated with the card drawn.
-3. **Placement renders**, before routing.
+3. **Placement renders**, before routing. **Started 2026-10-15.**
+   - **The board generator.** `tools/analogue_board/pcb.py` writes `analogue_board.kicad_pcb` from
+     the schematic's netlist: the outline, a JLC 4-layer stack-up (JLC04161H-7628), and every
+     footprint with its nets and its link to the schematic. KiCad's schematic-parity check finds
+     0 differences. The script also renders both faces into `output/`.
+   - **Area budget: one face is not enough.** The courtyards come to 2,600 mm² of SMT parts,
+     639 mm² of wiring-field holes, 686 mm² of module header rows and 211 mm² of power header.
+     That is 104% of the 3,963 mm² between the edge strips, before any routing, against about
+     60–70% for a routable dense board. Cutting features could not close the gap.
+   - **Decided by David, 2026-10-15: double-sided assembly** (JLC Standard PCBA; Economic is
+     single-sided only). The deck face (B) takes passives and low ICs, about 1.75 mm tall at
+     most, which brings SMT use to about 56% of the two faces. That is tight but routable on
+     4 layers, and it is how Mutable's and 4ms's modules are built. Cost: about $50 setup,
+     about $16 stencils and $1.50 per part type (Basic as well as Extended): roughly $159 for
+     the assembly line items, about $100 more per order than Economic. Confirm on a live quote.
+   - **Floorplan** (`placement.py`, ANCHORS and HOLE_GROUPS) [proposed]:
+     - Analogue at the top, under the modules and furthest from the buck. On the outward face:
+       the ADC, codec, DAC, two CV op-amps, MCP3208 and one LM393 down the 9.7 mm channel between
+       the module rows. On the deck face: the DG412s, offset buffer, audio op-amp, 74HCT595,
+       second LM393 and EEPROM.
+     - TCA9555 below the modules; MIDI (H11L1, ~4 mm tall) bottom left; power around J201
+       bottom right.
+     - The 99 wiring-field holes in three columns lined up with the edge-strip positions: two
+       beside the left strip (the only one wired in 6HP), one beside the right strip, stopping
+       above J201. Each group sits beside its circuit.
+   - **Library changes for this:** the module sockets' courtyards are now their header rows
+     (low parts may sit under a module). The wiring holes have their own footprint
+     (`WiringHoles_1xNN`) with a one-pitch courtyard, so columns can sit side by side.
+   - **Answered by David, 2026-10-15:**
+     - *Deck-face clearance.* In 10HP the board sits 11 mm from the deck, and the deck's own
+       parts take 2 mm at most, so the deck face has about 9 mm free, room for ~1.75 mm parts
+       plus wires. In 6HP there is clearance to the neighbouring modules, helped by most modules
+       being shallower.
+     - *Wiring field.* The holes are tinned on both faces (HASL, §4.2), so wires route neatly on
+       either face, including from the right-hand column across to the left strip in 6HP.
+       The hole columns stand as proposed.
+   - **Next:** place the passives beside their ICs, then courtyard, height (≤ 2.5 mm under the
+     modules, ≤ 8 mm in the USB keep-outs) and clearance checks, then renders for review.
 4. **Routed board**, clean against the design rules, with test points on every rail and
    bus and 0 Ω links in each supply so a faulty rail can be isolated.
 5. **JLCPCB quote and preview**, rotations checked, "Confirm Parts Placement" ($0.45)

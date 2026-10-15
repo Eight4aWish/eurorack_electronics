@@ -6817,7 +6817,7 @@
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x12_P2.54mm_Vertical"
+		(property "Footprint" "analogue_board:WiringHoles_1x12"
 			(at 185.42 76.2 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -10371,7 +10371,7 @@
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x10_P2.54mm_Vertical"
+		(property "Footprint" "analogue_board:WiringHoles_1x10"
 			(at 370.84 76.2 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -10635,7 +10635,7 @@
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical"
+		(property "Footprint" "analogue_board:WiringHoles_1x06"
 			(at 370.84 160.02 0)
 			(effects
 				(font (size 1.27 1.27))
