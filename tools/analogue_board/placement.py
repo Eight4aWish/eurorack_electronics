@@ -29,18 +29,24 @@ def strip_y(n):
 # ESP32-P4-WIFI6: Pico pinout and pin rows, 71 x 21 mm; beyond the Pico's outline it extends
 # 3.2 mm at the USB end and 16.9 mm at the far (antenna) end (docs/analogue_board_esp32p4.md)
 P4_EXTRA_USB, P4_EXTRA_FAR = 3.2, 16.9
+# Teensy 4.1: a card in its microSD socket stands just under 3 mm past the far end (measured
+# by David on the checkpoint 2 printout, 2026-10-15), so the Teensy sits 3 mm lower
+TEENSY_SD_CARD = 3.0
 USB_KEEPOUT = (15.0, 30.0)   # width across the module, length beyond its USB end (spec §4.3)
+TOP_MARGIN = 0.5             # from the top edge to the furthest thing on a module
 
 # Module placements: centre line x and the far (non-USB) end y of the module body.
 # USB ends point down, toward the board centre; far ends toward the top edge (spec §4.3).
 ARRANGEMENTS = {
     # A, the schematic's pin map: no shared holes. Pico rows at 15.91 / 33.69; Teensy rows one
     # pitch outside (13.37) and two pitches inside (28.61). The Pico sits 16.9 mm down so an
-    # ESP32-P4 in its socket ends at the same top margin as the Teensy.
-    "A": {"pico": {"cx": 24.8, "far": 0.5 + P4_EXTRA_FAR}, "teensy": {"cx": 20.99, "far": 0.5}},
+    # ESP32-P4 in its socket ends at the top margin; the Teensy sits 3 mm down so its SD card does.
+    "A": {"pico": {"cx": 24.8, "far": TOP_MARGIN + P4_EXTRA_FAR},
+          "teensy": {"cx": 20.99, "far": TOP_MARGIN + TEENSY_SD_CARD}},
     # B, for comparison: Teensy's left row in the Pico's left-row holes, right row one pitch
-    # inside the Pico's; the Pico moved 0.78 mm down so the holes line up.
-    "B": {"pico": {"cx": 24.8, "far": 18.18}, "teensy": {"cx": 23.53, "far": 0.5}},
+    # inside the Pico's; the Pico moved down so the holes line up (7 pitches below the Teensy's).
+    "B": {"pico": {"cx": 24.8, "far": TOP_MARGIN + TEENSY_SD_CARD + 17.68},
+          "teensy": {"cx": 23.53, "far": TOP_MARGIN + TEENSY_SD_CARD}},
 }
 
 # 2x5 shrouded power header, KiCad IDC-Header_2x05_P2.54mm_Vertical in its own orientation

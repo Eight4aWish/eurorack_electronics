@@ -179,10 +179,15 @@ def draw_board(pg, ox, oy, lay, modules, number_strips=True, shared=(), annotate
             pg.text(X(cx), Y(b[1] + 5.5), "antenna end", 1.7, color=c, anchor="centre")
             pg.text(X(cx), Y(b[3] - depth - 4.2), "microSD underneath,", 1.4, color=c, anchor="centre")
             pg.text(X(cx), Y(b[3] - depth - 2.0), "card in at this end", 1.4, color=c, anchor="centre")
+        if key == "teensy":
+            # the card in its microSD socket stands TEENSY_SD_CARD past the far end (measured)
+            pg.rect(X(cx - 5.5), Y(b[1] - P.TEENSY_SD_CARD), X(cx + 5.5), Y(b[1]), stroke=c, fill=c, lw=0.2, alpha=0.18)
+            pg.rect(X(cx - 5.5), Y(b[1] - P.TEENSY_SD_CARD), X(cx + 5.5), Y(b[1]), stroke=c, lw=0.2)
         if annotate and key == "teensy":
             pg.rect(X(cx - 5.5), Y(b[1] + 0.4), X(cx + 5.5), Y(b[1] + 11.5), stroke=c, lw=0.2, dash=(0.6, 0.6))
             pg.text(X(cx), Y(b[1] + 5.4), "microSD", 1.5, color=c, anchor="centre")
             pg.text(X(cx), Y(b[1] + 7.6), "(approx.)", 1.4, color=c, anchor="centre")
+            pg.text(X(cx), Y(b[1] - 0.9), "card, 3 mm", 1.3, color=c, anchor="centre")
         if key != "p4" or "pico" not in modules:
             for n, x, y, shape in m["pads"]:
                 if n == "1":
@@ -276,9 +281,10 @@ def page_overlay(lay):
     y = pg.para(x, y + 3, [
         "Why the Pico sits 17 mm down: an ESP32-P4 in the Pico's holes runs",
         "16.9 mm past a Pico's far end. With the Pico at the top edge it would",
-        "overhang the board, which ends a few mm from the rail. So the P4 and",
-        "the Teensy share the top margin, and the P4's keep-out ends 1.4 mm",
-        "from the bottom edge.",
+        "overhang the board, which ends a few mm from the rail. So the P4 ends",
+        "0.5 mm from the top edge, and its keep-out 1.4 mm from the bottom.",
+        "The Teensy sits 3 mm lower: a card in its microSD socket stands just",
+        "under 3 mm past its far end (measured), and now ends 0.5 mm in too.",
         "",
         "Why the header is bottom right: every USB keep-out runs to the bottom",
         "centre, where the breadboard has its 2 x 8. Bottom right keeps it clear,",
@@ -302,7 +308,8 @@ def page_overlay(lay):
         "   does the plug, and the cable's bend back into the case, stay inside its tinted keep-out?",
         "5. Put the shrouded 2 x 5 header and the ribbon's plug on the orange outline. In 6HP the board",
         "   stands at 90 degrees and the left strip meets the deck: is bottom right a good place for the ribbon?",
-        "6. Teensy: with a card in its microSD socket, does the card pass the top edge?",
+        "6. Teensy: with a card in its microSD socket, does the card stay on the board? (First print: it stood",
+        "   just under 3 mm past the Teensy's far end, so the Teensy moved 3 mm down.)",
         "7. Note anything that disagrees, in mm. Positions are in tools/analogue_board/placement.py.",
     ], 2.5, lead=1.45, bold_first=True)
     scale_bar(pg, 18, 272)
@@ -325,7 +332,8 @@ def page_singles(lay):
             "p4": ["Body 21 x 71 mm in the Pico's holes.", "Far (antenna) end 0.5 mm from the",
                    f"top edge. USB-C edge at {fmt(m['usb_y'])} mm;", f"keep-out to {fmt(m['keepout'][3])} mm.",
                    "USB-C is serial only (CH343).", "Bridge JP201 when fitted."],
-            "teensy": ["Body 17.8 x 61 mm, far end 0.5 mm", "from the top edge.",
+            "teensy": [f"Body 17.8 x 61 mm, far end {fmt(m['body'][1])} mm", "down, so a microSD card (3 mm)",
+                       "ends 0.5 mm from the top edge.",
                        f"USB edge at {fmt(m['usb_y'])} mm; keep-out", f"to {fmt(m['keepout'][3])} mm.",
                        "Cut the VIN-VUSB pads first."],
         }[key]
