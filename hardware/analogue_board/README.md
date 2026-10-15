@@ -15,6 +15,7 @@ with TRS MIDI added. Awaiting sign-off.
 |---|---|
 | [`analogue_board_schematic.pdf`](analogue_board_schematic.pdf) | The schematic, 10 A3 sheets. Sheet 1 is the module pin map. |
 | [`output/checks.md`](output/checks.md) | Every checkpoint-1 check and its result: ERC, netlist, pins against datasheets, footprints, decoupling, diode orientation |
+| [`checkpoint2_printout.pdf`](checkpoint2_printout.pdf) | Checkpoint 2: the 1:1 printout (A4, print at 100 %) of the outline, edge strips, module sockets, USB keep-outs and power header, to lay real parts on |
 | `output/erc.rpt`, `output/analogue_board.net`, `output/analogue_board_bom.csv` | KiCad's ERC report, netlist and grouped BOM with LCSC numbers |
 | `analogue_board.kicad_pro`, `*.kicad_sch` | The KiCad 9 project |
 | `analogue_board.kicad_sym`, `analogue_board.pretty/` | Project symbols (DAC8568, Pico 2, Teensy 4.1, edge strip) and footprints (module sockets, edge strips) |
@@ -42,6 +43,8 @@ check fails. Needs KiCad 9 at `/Applications/KiCad` and Python 3, nothing else.
 | `parts.py` | Every part: symbol, footprint, LCSC number, datasheet |
 | `datasheet_pins.json` | Each IC's pinout transcribed from its datasheet, independently of KiCad's library. `checks.py` compares the two. |
 | `checks.py` | The checkpoint-1 checks |
+| `placement.py` | Checkpoint 2 geometry: outline, strips, module, keep-out and header positions |
+| `printout.py` | Writes `checkpoint2_printout.pdf` from those positions and the footprints: `python3 tools/analogue_board/printout.py` |
 
 The netlist check works from intent. Every connection the generator draws is also recorded as
 "pin X belongs on net Y". The check then compares those records with the netlist KiCad computes.
