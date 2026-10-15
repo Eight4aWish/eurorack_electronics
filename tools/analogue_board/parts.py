@@ -21,8 +21,9 @@ ICS = {
                    lcsc="C2878713", mpn="TL074HIDR", ds="https://www.ti.com/lit/ds/symlink/tl074h.pdf", jlc="Extended"),
     "LM393": dict(lib="Comparator:LM393", value="LM393DR2G", fp="Package_SO:SOIC-8_3.9x4.9mm_P1.27mm",
                   lcsc="C7955", mpn="LM393DR2G", ds="https://www.onsemi.com/pdf/datasheet/lm393-d.pdf", jlc="Basic"),
-    "74HCT595": dict(lib="74xx:74HCT595", value="74HCT595D", fp="Package_SO:SOIC-16_3.9x9.9mm_P1.27mm",
-                     lcsc="C282339", mpn="74HCT595D,118", ds="https://assets.nexperia.com/documents/data-sheet/74HC_HCT595.pdf", jlc="Extended"),
+    # TSSOP-16 (checkpoint 3): turned sideways it fits the channel beside the gate-out holes
+    "74HCT595": dict(lib="74xx:74HCT595", value="74HCT595PW", fp="Package_SO:TSSOP-16_4.4x5mm_P0.65mm",
+                     lcsc="C99710", mpn="74HCT595PW,118", ds="https://assets.nexperia.com/documents/data-sheet/74HC_HCT595.pdf", jlc="Extended"),
     "TCA9555": dict(lib="Interface_Expansion:TCA9555PWR", value="TCA9555PWR", fp="Package_SO:TSSOP-24_4.4x7.8mm_P0.65mm",
                     lcsc="C465732", mpn="TCA9555PWR", ds="https://www.ti.com/lit/ds/symlink/tca9555.pdf", jlc="Extended"),
     "M24C64": dict(lib="Memory_EEPROM:M24C01-RMN", value="M24C64-RMN6TP", fp="Package_SO:SOIC-8_3.9x4.9mm_P1.27mm",
@@ -53,9 +54,12 @@ ICS = {
     "EURO_PWR": dict(lib="Connector_Generic:Conn_02x05_Odd_Even", value="Eurorack power 2x5 shrouded",
                      fp="Connector_IDC:IDC-Header_2x05_P2.54mm_Vertical", lcsc="", mpn="2x5 2.54 mm shrouded box header",
                      ds="", jlc="hand-soldered", prefix="J"),
-    "QWIIC": dict(lib="Connector_Generic_MountingPin:Conn_01x04_MountingPin", value="Qwiic SM04B-SRSS-TB",
-                  fp="Connector_JST:JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal", lcsc="C160404",
-                  mpn="SM04B-SRSS-TB(LF)(SN)", ds="", jlc="Extended", prefix="J"),
+    # vertical (top-entry), checkpoint 3: the cable leaves straight up from the outward face. A
+    # side-entry socket would need a clear run for the plug along the board, which it does not have
+    "QWIIC": dict(lib="Connector_Generic_MountingPin:Conn_01x04_MountingPin", value="Qwiic BM04B-SRSS-TB",
+                  fp="Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical", lcsc="C160390",
+                  mpn="BM04B-SRSS-TB(LF)(SN)", ds="https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_JST-BM04B-SRSS-TB-LF-SN_C160390.pdf",
+                  jlc="Extended", prefix="J"),
     "PICO2": dict(lib=f"{LIB}:RaspberryPi_Pico2", value="Raspberry Pi Pico 2", fp=f"{LIB}:Pico2_Socket",
                   lcsc="", mpn="SC1631 on 2x20 female headers", ds="https://datasheets.raspberrypi.com/pico/pico-2-datasheet.pdf",
                   jlc="hand-soldered", prefix="A"),

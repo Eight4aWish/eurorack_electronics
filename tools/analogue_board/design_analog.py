@@ -1,5 +1,6 @@
 """Sheets 3-5: codec and audio, CV jacks and ADC, CV DAC."""
 
+import wiring
 from blocks import NC, C, R, decap, decaps, holes, ic, part, tp
 from parts import ICS
 
@@ -179,8 +180,7 @@ def sheet_codec(sh):
     ic(sh, "TL074H", (281.94, 190.5), {4: "+12V", 11: "-12V"}, unit=5, ref="U302")
     decap(sh, (294.64, 182.88), "100n", "0603", "+12V", "U302 V+ pin 4")
     decap(sh, (294.64, 198.12), "100n", "0603", "-12V", "U302 V- pin 11")
-    holes(sh, (340.36, 66.04), ["AIN1", "AIN2", "GND"], "Audio in holes", ref="J301")
-    holes(sh, (340.36, 177.8), ["AOUT1", "AOUT2", "GND"], "Audio out holes", ref="J302")
+    wiring.place(sh, holes, "codec", (340.36, 60.96), max_y=245)   # audio holes, one in each bank
     for i, net in enumerate(["MCLK", "BCK", "LRCK", "I2S_DOUT", "I2S_DIN"]):
         tp(sh, (30.48 + i * 12.7, 238.76), net)
     sh.text("I2S test pads", (25.4, 226), size=1.27)
@@ -289,8 +289,7 @@ def sheet_cv_in(sh):
         ic(sh, "DG412", (280 + j * 50.8, 116.84), {pins[0]: "GND", pins[1]: "GND", pins[2]: "GND"}, unit=unit, ref="U403",
            hide_value=True)
 
-    holes(sh, (350.52, 165.1), ["CV1", "CV2", "CV3", "CV4", "CV5", "CV6", "CVI7", "CVI8", "CVO7", "CVO8", "GND", "GND"],
-          "CV jack holes", ref="J401")
+    wiring.place(sh, holes, "cv", (350.52, 139.7), max_y=245)   # CV jack holes, spread over the four banks
     for i, net in enumerate(["SPIA_SCK", "SPIA_MOSI", "SPIA_MISO", "CS_ADC", "CS_DAC"]):
         tp(sh, (264.16 + i * 12.7, 160.02), net)
     sh.text("Converter bus test pads", (259, 148), size=1.27)

@@ -174,7 +174,9 @@ x = 24.8): those are for stacking a second board, and nothing stacks on this one
   plated hole next to the circuit it belongs to, labelled on both faces, plus a few AGND,
   VREF (pot top), +5 V LED and DGND holes. Each module is wired exactly like a
   breadboard: short wires from those holes to the inner ("second") hole of the deck
-  position each cell occupies.
+  position each cell occupies. **Superseded 2026-10-15 (§14, checkpoint 3):** the holes now
+  sit in four mixed banks, one per quarter of the board, each with some of every channel
+  type, so a panel part anywhere on the deck has its channel close by (`wiring.py`).
 - **Pads tinned on both faces** (HASL finish), so wires can run on either face: across the
   outward face, or underneath in the stand-off gap on the deck face.
 - **Deck ground bus (D pads):** one wire from any D pad to an AGND hole (pot and jack
@@ -226,7 +228,7 @@ function table); PJRC Teensy 4.1 product page, pinout cards and dimension drawin
 | USB | Micro-B, short edge at pins 1/40 | Micro-B, short edge at pin 0 / VIN |
 | I2S | PIO on any GPIO; MCLK from GPOUT (GP13/15/21) or PIO | SAI1: MCLK 23, BCLK 21, LRCLK 20, TX 7, RX 8 |
 | Hardware SPI | SPI0 and SPI1 groups both on the header | Two buses on the edge (SPI 10–13; SPI1 26, 27, 1, 0) |
-| +5 V in | VSYS (1.8–5.5 V) through our Schottky — the datasheet's ORing arrangement | VIN (3.6–5.5 V). **Cut the VIN–VUSB pads first** |
+| +5 V in | VSYS (1.8–5.5 V) through our Schottky — the datasheet's ORing arrangement | VIN (3.6–5.5 V). **Cut the VIN–VUSB pads first**. Headers on pins 1-19 and 29-48 only (checkpoint 3) |
 | 3V3 out | < 300 mA | 250 mA |
 | Logic level | 3.3 V; GPIO 5 V-tolerant while powered, 3.3 V-failsafe unpowered (RP2350 datasheet) | 3.3 V; **not 5 V-tolerant** (PJRC: "Do not drive any digital pin higher than 3.3 volts") |
 
@@ -360,11 +362,11 @@ produce, and the 595 drives eight from one chip.
 | **Reference** | LM4040 4.096 V shunt for the calibration check (0.1 % A-grade or 1 % D-grade). **Dropped at checkpoint 1 (§15)** | LM4040AIM3-4.1 **C126807** / LM4040DIM3-4.1 **C202194** | 2,077 / $1.12; 6,187 / $0.47 | dropped |
 | **Pots** | MCP3208 on the 3.3 V analogue rail, VREF = that rail, pots fed from VREF + AGND (ratiometric). 50 ksps at 2.7 V, SCLK ≤ 1 MHz at 2.7 V *(DS21298)* | MCP3208-CI/SL **C16939** | 600 / $3.24 | proposed |
 | **Gate in** | Ogham's clock input (Keeos `ogham-merged-v1.0`): jack → 10 kΩ → BAT54S clamp to 3.3 V / GND, 100 kΩ to GND → LM393 (+5 V) + input; − input at 1.65 V from a 3.3 V divider; ~100 kΩ hysteresis; open-collector output, 10 kΩ pull-up to 3.3 V → GPIO, not inverted. Trips at ~1.8 V at the jack, set by resistors, not by logic-gate tolerance — a 3.3 V gate clears it by 1.5 V. ±12 V clamps at ~0.8 mA. Values to tune at schematic. | 2 × LM393DR2G **C7955** (Basic); 4 × BAT54S **C408389** | 213,954 / $0.07; 817,166 / $0.02 | decided |
-| **Gate out** | 74HCT595 at 5 V (VIH 2.0 V, so 3.3 V drives it) → 1 kΩ → jack, BAV99 (Basic, C2500) clamp to +5 V / GND per output. OE pulled high until firmware enables (§10). | 74HCT595D **C282339** | 14,359 / $0.27 | decided |
+| **Gate out** | 74HCT595 at 5 V (VIH 2.0 V, so 3.3 V drives it) → 1 kΩ → jack, BAV99 (Basic, C2500) clamp to +5 V / GND per output. OE pulled high until firmware enables (§10). | 74HCT595D **C282339**. **From checkpoint 3: 74HCT595PW,118 C99710 (TSSOP-16, 3,956 / $0.40)** | 14,359 / $0.27 | decided |
 | **Expander** | 16 lines: 6 switch enables (DG412), 1 gate-output enable, 9 for buttons, switches, encoder; INT to a GPIO | TCA9555PWR **C465732** | 35,995 / $0.56 | proposed |
 | **LEDs** | WS2812 chain; data level-shifted to 5 V; LED supply on its own wiring-field holes | SN74AHCT1G125DBVR **C7484** | 49,818 / $0.10 | proposed |
 | **EEPROM** | Board revision, footprint ID, calibration, panel map | M24C64-RMN6TP **C79988** (Preferred) | 103,045 / $0.15 | proposed |
-| **Qwiic** | JST SH 4-pin, 3.3 V from the display LDO | SM04B-SRSS-TB **C160404** | 10,257 / $0.21 | decided |
+| **Qwiic** | JST SH 4-pin, 3.3 V from the display LDO | SM04B-SRSS-TB **C160404**. **From checkpoint 3: vertical BM04B-SRSS-TB(LF)(SN) C160390 (39,935 / $0.25)** | 10,257 / $0.21 | decided |
 
 ### 7.1 The DAC choice: 16-bit DAC8568 or 12-bit MCP4822 [decided: DAC8568]
 
@@ -683,8 +685,74 @@ repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No p
      - *Wiring field.* The holes are tinned on both faces (HASL, §4.2), so wires route neatly on
        either face, including from the right-hand column across to the left strip in 6HP.
        The hole columns stand as proposed.
-   - **Next:** place the passives beside their ICs, then courtyard, height (≤ 2.5 mm under the
-     modules, ≤ 8 mm in the USB keep-outs) and clearance checks, then renders for review.
+   - **Shorter Teensy headers (David's suggestion, 2026-10-15).** The Teensy's nine far-end
+     pins, 20-28 (D28-D36), are all unconnected, so its socket has no holes there. The headers
+     become 1×19 (pins 1-19) and 1×20 (pins 29-48), from the USB end. That frees the top
+     corners under the module, the most crowded area, and cuts the header-row area from 686 to
+     510 mm². `checks.py` lets a socket leave out only pins the netlist leaves unconnected.
+     **Build rule:** fit the Teensy with headers on pins 1-19 and 29-48 only. Full-length
+     headers would leave bare pin tips about 2.5 mm above parts up to 1.75 mm tall.
+   - **First-pass placement of every part (2026-10-15)** by `tools/analogue_board/autoplace.py`.
+     Each part goes as close as it fits to the pins it connects to. A decoupling capacitor aims
+     at the exact pin its Decouples field names. A part prefers its IC's face, and chains grow
+     outward from the ICs. The buck's capacitors and its inductor stay on its face, so the
+     switching loop never runs through vias.
+     - Result: all 406 parts placed, 206 on the outward face and 200 on the deck face.
+     - Checks: no courtyard overlaps, schematic parity clean, and nothing over 2.5 mm under
+       the modules or over 8 mm in the USB keep-outs.
+     - Reference designators are off the silkscreen for passives (still on the fab layer); ICs,
+       connectors and hole groups keep theirs.
+   - **Routability estimate (2026-10-15).** The signal nets need about 530 connections and
+     about 3.8 m at their shortest. Three signal layers hold roughly twice that, so the board
+     as a whole has room. There are at least 500 vias: the ground and rail pads, plus the
+     connections that change face.
+     The constraint is the module header rows. A gap between two header pins takes one
+     track per layer at 0.2 mm rules. The gate outputs crossing the rows were at 117–167% of
+     that capacity, and the pot inputs at 100%.
+   - **Space reclaimed (David's suggestion, checked against
+     `tools/visualizer/boards/n8synth-10hp.json`).** The right strip serves only the 10HP
+     deck, whose headers sit at 1–10, 16–25 and 31–40. Positions 11–15 and 26–30 never carry a
+     header, so they have no holes (`placement.STRIP_OMIT`). Positions 10, 16 and 31 are pins
+     of the 10-pin headers that no cell uses, so they keep only the outer hole
+     (`placement.STRIP_OMIT_INNER`, David). The left strip
+     keeps all 40, because a 6HP deck claims everything except 19–22 and the 10HP deck uses
+     those.
+   - **74HCT595 in TSSOP-16** (74HCT595PW,118, C99710, Nexperia, same pinout as the SO16 on
+     the same datasheet page). Turned sideways, it fits the channel beside its gate-out holes,
+     so only its four control lines cross the module rows. With the right strip cut, the gate
+     crossings drop to 50–75% of capacity. The pot crossings (Pico left row, y 50–60) stay at
+     100%; finer track rules through the header gaps (0.127 mm) would double that band's
+     capacity.
+   - **Qwiic socket vertical (David, 2026-10-15):** BM04B-SRSS-TB(LF)(SN), C160390, in place of the
+     side-entry SM04B. The side-entry socket's plug would have had to enter along the board,
+     straight into the MIDI opto. The vertical one sits just below the modules at (37.4, 74.6),
+     outside the USB plug zones and clear of J201, and its cable leaves straight up from the
+     outward face.
+   - **The wiring field becomes four mixed banks (David, 2026-10-15).** Each bank sits in a
+     quarter of the board and holds some of every channel type, so a panel part anywhere on
+     the deck has its channel close by. Previously each function's holes sat in one group on
+     one side. The split is 50/50 left and right: David's point is that even a 6HP build
+     (left strip only) has plenty within reach.
+     - Left top: CV1, CV2, CV5, CVI7, AIN1, POT1-2, GIN1, GOUT1-2, SW1-3.
+     - Left bottom: CV3, CVO7, AOUT1, POT3-4, GIN2, GOUT3-4, SW4-5.
+     - Right top: CV4, CVI8, AIN2, POT5-6, GIN3, GOUT5-6, SW6-7.
+     - Right middle: CV6, CVO8, AOUT2, POT7-8, GIN4, GOUT7-8, SW8-9.
+     - Every bank has one pot-top reference hole and one ground hole; pot and jack grounds
+       go to the deck's D bus.
+     - Each input's jack-detect hole sits beside it: on the left in the inner column next to
+       the input, on the right directly below it.
+     - The utility groups (spare GPIO and MIDI links, codec reset, MIDI, I2C display, LED
+       chain, gate expansion) stay whole on the left.
+     - The right column's 30 slots above J201 set the CV split at 6 left / 4 right.
+     - 94 holes, down from 99. `tools/analogue_board/wiring.py` holds the plan slot by slot; the
+       schematic and placement both read it.
+     - Cost: the shortest wiring rises from 3.8 to 4.7 m. The module header rows on the right
+       reach 100-108% of one-track-per-gap capacity at y 30-60; finer rules through the gaps
+       would halve that.
+   - **Next:** finer rules through the header gaps, a trial autoroute (Freerouting) to measure
+     completion, a review pass by block (analogue grouping, ground returns, the codec and ADC
+     corners), the hole labels on the silkscreen (one channel name per hole, from wiring.py),
+     then routing.
 4. **Routed board**, clean against the design rules, with test points on every rail and
    bus and 0 Ω links in each supply so a faulty rail can be isolated.
 5. **JLCPCB quote and preview**, rotations checked, "Confirm Parts Placement" ($0.45)

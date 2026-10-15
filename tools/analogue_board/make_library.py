@@ -8,7 +8,8 @@ Pin names and numbers come from the datasheets; check_pins.py compares them agai
 import os
 import sys
 
-from sexpr import Sym, dumps
+from placement import STRIP_OMIT, STRIP_OMIT_INNER
+from sexpr import Sym, dumps, find
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.normpath(os.path.join(HERE, "..", "..", "hardware", "analogue_board"))
@@ -218,31 +219,65 @@ def footprint(name, descr, pads, outline, courtyards, silk=True):
     return node
 
 
-def module_socket(name, descr, rows, row_spacing, outline_wh, first_pad_offset):
-    """Two rows of `rows` holes; pad 1 top-left, numbering counter-clockwise (left down, right up)."""
+def module_socket(name, descr, rows, row_spacing, outline_wh, first_pad_offset, omit=()):
+    """Two rows of `rows` holes; pad 1 top-left, numbering counter-clockwise (left down, right up).
+    `omit`: module pins with no hole, a run at the far end of each row that the board never uses,
+    so the female headers can be shorter and the area under them is free."""
     pads = []
     for i in range(rows):
-        pads.append(pad(i + 1, 0, i * 2.54, "rect" if i == 0 else "circle"))
-        pads.append(pad(2 * rows - i, row_spacing, i * 2.54))
+        if i + 1 not in omit:
+            pads.append(pad(i + 1, 0, i * 2.54, "rect" if i == 0 else "circle"))
+        if 2 * rows - i not in omit:
+            pads.append(pad(2 * rows - i, row_spacing, i * 2.54))
     w, h = outline_wh
     x0 = row_spacing / 2 - w / 2
     y0 = -first_pad_offset
-    last = (rows - 1) * 2.54
-    # the header bodies, exactly one pitch wide: the Pico's and Teensy's left rows sit one pitch apart
-    rows_cy = [((cx - 1.27, -1.27), (cx + 1.27, last + 1.27)) for cx in (0, row_spacing)]
+    # the header bodies, exactly one pitch wide (the Pico's and Teensy's left rows sit one pitch
+    # apart), as long as the holes each row keeps
+    rows_cy = []
+    for cx in (0, row_spacing):
+        ys = [float(find(p, "at")[2]) for p in pads if abs(float(find(p, "at")[1]) - cx) < 0.01]
+        rows_cy.append(((cx - 1.27, min(ys) - 1.27), (cx + 1.27, max(ys) + 1.27)))
     return footprint(name, descr, pads, ((x0, y0), (x0 + w, y0 + h)), rows_cy)
 
 
-def edge_strip_fp(name, inner_dx):
+def edge_strip_fp(name, inner_dx, omit=(), omit_inner=(), descr=""):
+    """40 doublets: outer hole (deck header) and inner wiring hole per position, same pad number.
+    `omit`: positions with no holes at all, where no deck header ever sits. `omit_inner`: positions
+    that keep only the outer hole (a header pin no deck cell uses). Each column's courtyard covers
+    only the holes it keeps, so the board where holes are left out is free for parts."""
     pads = []
     for n in range(1, 41):
+        if n in omit:
+            continue
         y = (n - 1) * 2.54
         pads.append(pad(n, 0, y, "rect" if n == 1 else "circle"))
-        pads.append(pad(n, inner_dx, y))
+        if n not in omit_inner:
+            pads.append(pad(n, inner_dx, y))
+
+    # one courtyard rectangle per run of positions in the same state (both holes, outer only),
+    # 0.005 mm apart where runs meet: KiCad rejects courtyard shapes that touch
+    def state(n):
+        return None if (n < 1 or n > 40 or n in omit) else ("outer" if n in omit_inner else "both")
+
     xs = sorted([0, inner_dx])
-    box = ((xs[0] - 1.27, -1.27), (xs[1] + 1.27, 39 * 2.54 + 1.27))
-    return footprint(name, "n8synth edge strip: outer hole (deck header) and inner wiring hole per position, same pad number",
-                     pads, box, [box])
+    boxes, n = [], 1
+    while n <= 40:
+        s = state(n)
+        if s is None:
+            n += 1
+            continue
+        m = n
+        while state(m + 1) == s:
+            m += 1
+        top = (n - 1) * 2.54 - 1.27 + (0.005 if state(n - 1) else 0)
+        bottom = (m - 1) * 2.54 + 1.27 - (0.005 if state(m + 1) else 0)
+        x0, x1 = (xs[0] - 1.27, xs[1] + 1.27) if s == "both" else (-1.27, 1.27)
+        boxes.append(((x0, top), (x1, bottom)))
+        n = m + 1
+    outline = ((xs[0] - 1.27, -1.27), (xs[1] + 1.27, 39 * 2.54 + 1.27))
+    return footprint(name, descr or "n8synth edge strip: outer hole (deck header) and inner wiring hole per position, "
+                     "same pad number", pads, outline, boxes)
 
 
 def wiring_holes_fp(n):
@@ -260,11 +295,18 @@ def write_footprints():
     fps = [
         module_socket("Pico2_Socket", "Raspberry Pi Pico 2 on 2x20 female headers, 17.78 mm rows. Overlay with the Teensy footprint is settled at checkpoint 2.",
                       20, 17.78, (21.0, 51.0), (51.0 - 19 * 2.54) / 2),
-        module_socket("Teensy41_Socket", "Teensy 4.1 on 2x24 female headers (outer pins), 15.24 mm rows. Overlay with the Pico footprint is settled at checkpoint 2.",
-                      24, 15.24, (17.78, 60.96), (60.96 - 23 * 2.54) / 2),
+        module_socket("Teensy41_Socket", "Teensy 4.1 on 1x19 + 1x20 female headers from the USB end, 15.24 mm rows. "
+                      "No holes for pins 20-28 (D28-D36, never used on this board): fit the Teensy with headers "
+                      "on pins 1-19 and 29-48 only.",
+                      24, 15.24, (17.78, 60.96), (60.96 - 23 * 2.54) / 2, omit=range(20, 29)),
         edge_strip_fp("EdgeStrip_40_Left", 2.54),
-        edge_strip_fp("EdgeStrip_40_Right", -2.54),
-    ] + [wiring_holes_fp(n) for n in range(2, 15)]
+        # the right strip serves only the 10HP deck, whose headers sit at 1-10, 16-25 and 31-40:
+        # positions 11-15 and 26-30 never carry a header, so they have no holes, and 10, 16 and 31
+        # (header pins no cell uses) keep only the outer hole (placement.STRIP_OMIT, STRIP_OMIT_INNER)
+        edge_strip_fp("EdgeStrip_40_Right", -2.54, omit=STRIP_OMIT["right"], omit_inner=STRIP_OMIT_INNER["right"],
+                      descr="n8synth edge strip, right (10HP only): doublets at positions 1-9, 17-25 and 32-40; "
+                            "outer hole only at 10, 16 and 31; none at 11-15 and 26-30"),
+    ] + [wiring_holes_fp(n) for n in range(1, 15)]
     for fp in fps:
         with open(os.path.join(d, fp[1] + ".kicad_mod"), "w", encoding="utf-8") as f:
             f.write(dumps(fp) + "\n")

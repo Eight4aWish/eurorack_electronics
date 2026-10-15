@@ -24,7 +24,7 @@ FOOTPRINTS = "/Applications/KiCad/KiCad.app/Contents/SharedSupport/footprints"
 
 # part key -> datasheet entry in datasheet_pins.json
 DATASHEET = {"PCM3060": "PCM3060PWR", "ADS8688": "ADS8688IDBTR", "DAC8568": "DAC8568IAPWR", "MCP3208": "MCP3208-CI/SL",
-             "DG412": "DG412DQ-T1-E3", "TL074H": "TL074HIDR", "LM393": "LM393DR2G", "74HCT595": "74HCT595D",
+             "DG412": "DG412DQ-T1-E3", "TL074H": "TL074HIDR", "LM393": "LM393DR2G", "74HCT595": "74HCT595PW",
              "TCA9555": "TCA9555PWR", "M24C64": "M24C64-RMN6TP", "AHCT1G125": "SN74AHCT1G125DBVR",
              "XC6206": "XC6206P332MR", "L78M05": "L78M05ABDT", "TPS54308": "TPS54308DDCR", "BAT54S": "BAT54S",
              "BAV99": "BAV99", "QWIIC": "SM04B-SRSS-TB", "PICO2": "PICO2", "TEENSY41": "TEENSY41",
@@ -150,7 +150,13 @@ def footprint_pads(fp):
     return {str(pd[1]) for pd in find_all(tree, "pad") if str(pd[1])}
 
 
-def check_footprints(comps, project_libs):
+def check_footprints(comps, project_libs, nets=None):
+    """Every symbol pin has a pad and every pad a pin. A module socket may leave out the holes for
+    module pins the board never uses (shorter female headers), but only pins the netlist leaves
+    unconnected: anything else is a mismatch."""
+    connected = {node for nodes in (nets or {}).values() for node in nodes} if nets else set()
+    unconnected_nets = {n for n in (nets or {}) if n.startswith("unconnected-")}
+    nc_nodes = {node for n in unconnected_nets for node in nets[n]}
     seen, lines, bad = {}, [], 0
     for ref, c in comps.items():
         if ref.startswith("#"):
@@ -161,10 +167,18 @@ def check_footprints(comps, project_libs):
         seen[key] = ref
         pins = {p.number for p in symbol_pins(c["lib"], project_libs)}
         pads = footprint_pads(c["footprint"])
-        ok = pins == pads
+        omitted = pins - pads
+        # project footprints (module sockets, the right edge strip) may leave out holes for pins
+        # that nothing connects to; any other omission, or one on a connected pin, is a mismatch
+        allowed = c["footprint"].startswith("analogue_board:") and nets is not None and all(
+            (ref, n) in nc_nodes or (ref, n) not in connected for n in omitted)
+        ok = (pins == pads) or (allowed and not (pads - pins))
         bad += not ok
         if not ok:
             lines.append(f"| {c['lib']} | {c['footprint']} | MISMATCH: symbol only {sorted(pins - pads)}, footprint only {sorted(pads - pins)} |")
+        elif omitted:
+            lines.append(f"| {c['lib']} | {c['footprint']} | {len(pads)} pads match; no holes for unconnected pins "
+                         f"{', '.join(sorted(omitted, key=int))} (by design) |")
         else:
             lines.append(f"| {c['lib']} | {c['footprint']} | {len(pads)} pads match |")
     return bad, lines
@@ -312,7 +326,7 @@ def run(pr, out):
     n_warn = sum(v for (sev, _t), v in counts.items() if sev == "warning")
     net_problems, unnamed, n_nets, n_pins = check_netlist(pr, nets)
     pin_bad, pin_rows = check_pins(pr.project_libs)
-    fp_bad, fp_rows = check_footprints(comps, pr.project_libs)
+    fp_bad, fp_rows = check_footprints(comps, pr.project_libs, nets)
     dec_bad, dec_rows = check_decoupling(comps, nets, pr)
     pol_bad, pol_rows = check_polarity(comps, nets)
 

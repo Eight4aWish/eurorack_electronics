@@ -207,6 +207,29 @@
   },
   "notes": "Drawing and Table 2 agree. Overbars on MR (10, master reset, active LOW) and OE (13, output enable, active LOW). VCC is printed V_CC (subscript). Nexperia naming differs from the TI-style names a library symbol may use (SER/SRCLK/RCLK/SRCLR/QA..QH/QH'): DS = serial data in, SHCP = shift register clock, STCP = storage register clock, Q7S = serial data out, Q0..Q7 = parallel outputs. Q0 is on pin 15 (opposite side from Q1..Q7). Minor table quirk: Table 2 lists Q0 twice (in the 'Q0..Q7 = 15,1,2,...,7' row and again as its own row 'Q0 15'). SO16 has no exposed pad (only the DHVQFN16/DHXQFN16 variants have a GND centre pad)."
  },
+ "74HCT595PW": {
+  "package": "TSSOP16 (SOT403-1, body width 4.4 mm)",
+  "source": "74hct595.pdf p.4 (6.1 Pinning, 'PW package SOT403-1 (TSSOP16)', aaa-035350) and p.5 (Table 2 Pin description). Nexperia 74HC_HCT595 Rev. 12, 20 March 2024",
+  "pins": {
+   "1": "Q1",
+   "2": "Q2",
+   "3": "Q3",
+   "4": "Q4",
+   "5": "Q5",
+   "6": "Q6",
+   "7": "Q7",
+   "8": "GND",
+   "9": "Q7S",
+   "10": "MR",
+   "11": "SHCP",
+   "12": "STCP",
+   "13": "OE",
+   "14": "DS",
+   "15": "Q0",
+   "16": "VCC"
+  },
+  "notes": "Identical pin for pin to the SO16 (74HCT595D) drawing beside it on the same page. Chosen 2026-10-15 at checkpoint 3: the TSSOP turned sideways (5.5 mm courtyard across) fits the 6.4 mm channel beside the gate-out holes, so the eight gate outputs no longer cross the module header rows."
+ },
  "TCA9555PWR": {
   "package": "TSSOP-24 (PW)",
   "source": "tca9555.pdf p.4 (6 Pin Configuration and Functions: 'DB, PW Package 24-Pin TSSOP Top View' drawing and Pin Functions table, DB/PW column), SCPS200E (Rev. E, April 2019)",

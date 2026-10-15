@@ -1,5 +1,6 @@
 """Sheets 6-9: pots and gate outputs, expander/I2C/LEDs, gate inputs and jack detect, edge strips."""
 
+import wiring
 from blocks import NC, C, R, decap, decaps, holes, ic, part, tp
 from design_analog import clamp_below
 
@@ -52,9 +53,9 @@ def sheet_pots_gates(sh):
         sh.connect(rpd, "2", "GND", stub=0)
         sh.tie(f"POT{n}", (r, "1"))
         sh.tie(f"POT_IN{n}", (r, "2"), (c, "1"), (rpd, "1"))
-    holes(sh, (185.42, 76.2), [f"POT{n}" for n in range(1, 9)] + ["POT_REF", "POT_REF", "GND", "GND"],
-          "Pot wiper holes; pot tops to POT_REF", ref="J601")
-    sh.text("Pot tops to the POT_REF\nholes, bottoms to GND\n(the deck's D bus).", (192, 96), size=1.27)
+    # pot and gate-out holes, spread over the four banks (wiring.py); pot tops to a bank's POT_REF
+    # hole, pot bottoms to the deck's D bus
+    wiring.place(sh, holes, "pots", (185.42, 50.8), max_y=165)
 
     # gate outputs
     ic(sh, "74HCT595", (55.88, 190.5), {14: "SPIB_MOSI", 11: "SPIB_SCK", 10: "+5VD", 12: "CS_595", 13: "GATE_OE_N",
@@ -82,7 +83,6 @@ def sheet_pots_gates(sh):
         d = clamp_below(sh, "BAV99", node, "+5VD")
         sh.tie(f"GQ{n}", (r, "1"))
         sh.tie(f"GOUT{n}", (r, "2"), (d, "3"))
-    holes(sh, (370.84, 76.2), [f"GOUT{n}" for n in range(1, 9)] + ["GND", "GND"], "Gate out holes", ref="J602")
     holes(sh, (370.84, 160.02), ["GATE_SER_OUT", "SPIB_SCK", "CS_595", "GATE_OE_N", "+5VD", "GND"],
           "Gate expansion: QH', SRCLK, RCLK, OE", ref="J603")
     sh.text("Chain a second 74HCT595 off-board from J603\n(74HCT595 only: a 74HC595 at 5 V needs\n3.15 V inputs). OE keeps it off at boot too.", (330, 180), size=1.27)
@@ -127,9 +127,8 @@ def sheet_expander(sh):
         sh.connect(c, "2", "GND", stub=0)
         sh.tie(f"SW{n}", (r, "1"))
         sh.tie(f"BTN{n}", (r, "2"), (rpu, "2"), (c, "1"))
-    holes(sh, (218.44, 101.6), [f"SW{n}" for n in range(1, 10)] + ["GND", "GND"],
-          "Button / switch / encoder holes", ref="J701")
-    sh.text("Encoder A/B: use gate inputs\n3-4 (see note above); push\nswitch on any SW hole.", (225, 120), size=1.27)
+    wiring.place(sh, holes, "expander", (218.44, 50.8), max_y=150)   # button holes, spread over the four banks
+    sh.text("Encoder A/B: use gate inputs\n3-4 (see note above); push\nswitch on any SW hole.", (250, 50.8), size=1.27)
 
     # EEPROM, pull-ups, Qwiic
     ic(sh, "M24C64", (68.58, 182.88), {1: "GND", 2: "GND", 3: "GND", 4: "GND", 5: "SDA", 6: "SCL", 7: "GND",
@@ -218,7 +217,9 @@ def sheet_gate_in(sh):
     sh.connect(rb, 2, "GND", stub=0)
     sh.connect(c, 2, "GND", stub=0)
     sh.tie("GATE_TH", (rt, "2"), (rb, "1"), (c, "1"))
-    holes(sh, (279.4, 66.04), ["GIN1", "GIN2", "GIN3", "GIN4", "GND"], "Gate in holes", ref="J801")
+    # gate-in and jack-detect holes, spread over the four banks; each input's probe hole sits
+    # beside it (wiring.py)
+    wiring.place(sh, holes, "gatein", (330.2, 50.8), max_y=245)
 
     # jack-detect probe
     sh.text("JACK DETECT (Workshop System Computer): PROBE drives a pseudo-random bit through a resistor to each input's\n"
@@ -242,7 +243,6 @@ def sheet_gate_in(sh):
         sh.tie(f"PR{k}", (rr, "2"))
     sh.label("PROBE_BUS", (bus_x, top + 3.81), 0)
     sh.tie("PROBE_BUS", (r, "2"), (d, "3"))
-    holes(sh, (243.84, 203.2), [f"PR{k}" for k in range(1, 15)], "Probe holes: PR1-10 100 kΩ, PR11-14 22 kΩ", ref="J802")
     tp(sh, (147.32, 160.02), "PROBE")
 
 

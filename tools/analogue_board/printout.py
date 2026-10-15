@@ -136,11 +136,14 @@ def draw_board(pg, ox, oy, lay, modules, number_strips=True, shared=(), annotate
             pg.rect(X(s["outer"] - 1.3), Y(P.strip_y(a) - 1.3), X(s["outer"] + 1.3), Y(P.strip_y(b) + 1.3),
                     stroke=None, fill=(0.86, 0.86, 0.86))
         for n in range(1, 41):
+            if n in P.STRIP_OMIT[side]:
+                continue
             y = Y(P.strip_y(n))
             pg.circle(X(s["outer"]), y, 0.85, stroke=GREY, lw=0.12)
             pg.circle(X(s["outer"]), y, 0.5, stroke=None, fill=(0.25, 0.25, 0.25))
-            pg.circle(X(s["inner"]), y, 0.85, stroke=GREY, lw=0.12)
-            pg.circle(X(s["inner"]), y, 0.12, stroke=None, fill=GREY)
+            if n not in P.STRIP_OMIT_INNER[side]:
+                pg.circle(X(s["inner"]), y, 0.85, stroke=GREY, lw=0.12)
+                pg.circle(X(s["inner"]), y, 0.12, stroke=None, fill=GREY)
         if number_strips:
             for n in (1, 10, 16, 25, 31, 40):
                 y = Y(P.strip_y(n)) + 0.55

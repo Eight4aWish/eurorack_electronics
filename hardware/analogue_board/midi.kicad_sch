@@ -1608,7 +1608,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "d895c6d8-bbce-5c3e-a669-4e27da6a4eb6")
-		(property "Reference" "#PWR381"
+		(property "Reference" "#PWR374"
 			(at 53.34 67.31 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -1648,7 +1648,7 @@
 		(instances
 			(project "analogue_board"
 				(path "/e6cfe5fb-cd34-5945-b37d-aca61e0551b2/ed07e321-f38a-541e-a882-770fdceb04e7"
-					(reference "#PWR381")
+					(reference "#PWR374")
 					(unit 1)
 				)
 			)
@@ -1663,7 +1663,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "a8231d5d-c787-57ef-af93-bc71925b31e6")
-		(property "Reference" "#PWR382"
+		(property "Reference" "#PWR375"
 			(at 73.66 52.07 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -1703,7 +1703,7 @@
 		(instances
 			(project "analogue_board"
 				(path "/e6cfe5fb-cd34-5945-b37d-aca61e0551b2/ed07e321-f38a-541e-a882-770fdceb04e7"
-					(reference "#PWR382")
+					(reference "#PWR375")
 					(unit 1)
 				)
 			)
@@ -1718,7 +1718,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "72c81db5-b9ee-5c1a-9d5e-dfa7c1de9265")
-		(property "Reference" "#PWR383"
+		(property "Reference" "#PWR376"
 			(at 68.58 62.23 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -1758,7 +1758,7 @@
 		(instances
 			(project "analogue_board"
 				(path "/e6cfe5fb-cd34-5945-b37d-aca61e0551b2/ed07e321-f38a-541e-a882-770fdceb04e7"
-					(reference "#PWR383")
+					(reference "#PWR376")
 					(unit 1)
 				)
 			)
@@ -1773,7 +1773,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "0e8533bf-fd59-55cc-9706-f0ffc2ab9a79")
-		(property "Reference" "#PWR384"
+		(property "Reference" "#PWR377"
 			(at 68.58 90.17 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -1813,7 +1813,7 @@
 		(instances
 			(project "analogue_board"
 				(path "/e6cfe5fb-cd34-5945-b37d-aca61e0551b2/ed07e321-f38a-541e-a882-770fdceb04e7"
-					(reference "#PWR384")
+					(reference "#PWR377")
 					(unit 1)
 				)
 			)
@@ -2075,7 +2075,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "53a0c94f-9b78-5f24-bbf0-3622b1ea1ba2")
-		(property "Reference" "#PWR385"
+		(property "Reference" "#PWR378"
 			(at 78.74 85.09 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -2115,7 +2115,7 @@
 		(instances
 			(project "analogue_board"
 				(path "/e6cfe5fb-cd34-5945-b37d-aca61e0551b2/ed07e321-f38a-541e-a882-770fdceb04e7"
-					(reference "#PWR385")
+					(reference "#PWR378")
 					(unit 1)
 				)
 			)
@@ -2130,7 +2130,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "71bcb83b-297e-5922-8701-8ee85f265a0a")
-		(property "Reference" "#PWR386"
+		(property "Reference" "#PWR379"
 			(at 101.6 87.63 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -2170,7 +2170,7 @@
 		(instances
 			(project "analogue_board"
 				(path "/e6cfe5fb-cd34-5945-b37d-aca61e0551b2/ed07e321-f38a-541e-a882-770fdceb04e7"
-					(reference "#PWR386")
+					(reference "#PWR379")
 					(unit 1)
 				)
 			)
@@ -2341,7 +2341,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "ee70cf2b-69f8-58c2-aa26-53cd8a79a432")
-		(property "Reference" "#PWR387"
+		(property "Reference" "#PWR380"
 			(at 91.44 97.79 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -2381,7 +2381,7 @@
 		(instances
 			(project "analogue_board"
 				(path "/e6cfe5fb-cd34-5945-b37d-aca61e0551b2/ed07e321-f38a-541e-a882-770fdceb04e7"
-					(reference "#PWR387")
+					(reference "#PWR380")
 					(unit 1)
 				)
 			)
@@ -2498,7 +2498,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "ff96462e-89f9-5817-811c-b83be1c67ef1")
-		(property "Reference" "#PWR388"
+		(property "Reference" "#PWR381"
 			(at 35.56 102.87 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -2538,7 +2538,7 @@
 		(instances
 			(project "analogue_board"
 				(path "/e6cfe5fb-cd34-5945-b37d-aca61e0551b2/ed07e321-f38a-541e-a882-770fdceb04e7"
-					(reference "#PWR388")
+					(reference "#PWR381")
 					(unit 1)
 				)
 			)
@@ -2553,7 +2553,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "528e0741-17b0-570c-bf8a-f92dd8240502")
-		(property "Reference" "#PWR389"
+		(property "Reference" "#PWR382"
 			(at 35.56 110.49 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -2593,7 +2593,7 @@
 		(instances
 			(project "analogue_board"
 				(path "/e6cfe5fb-cd34-5945-b37d-aca61e0551b2/ed07e321-f38a-541e-a882-770fdceb04e7"
-					(reference "#PWR389")
+					(reference "#PWR382")
 					(unit 1)
 				)
 			)
@@ -2890,7 +2890,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "5119c99f-1904-59fc-a332-d31ebbc55755")
-		(property "Reference" "#PWR390"
+		(property "Reference" "#PWR383"
 			(at 91.44 151.13 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -2930,7 +2930,7 @@
 		(instances
 			(project "analogue_board"
 				(path "/e6cfe5fb-cd34-5945-b37d-aca61e0551b2/ed07e321-f38a-541e-a882-770fdceb04e7"
-					(reference "#PWR390")
+					(reference "#PWR383")
 					(unit 1)
 				)
 			)
@@ -2945,7 +2945,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "bc37bb73-9c44-5bc3-b730-45b196884074")
-		(property "Reference" "#PWR391"
+		(property "Reference" "#PWR384"
 			(at 91.44 173.99 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -2985,7 +2985,7 @@
 		(instances
 			(project "analogue_board"
 				(path "/e6cfe5fb-cd34-5945-b37d-aca61e0551b2/ed07e321-f38a-541e-a882-770fdceb04e7"
-					(reference "#PWR391")
+					(reference "#PWR384")
 					(unit 1)
 				)
 			)
@@ -3172,7 +3172,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "bd41d403-e46a-5f6c-8608-b212e9b830e4")
-		(property "Reference" "#PWR392"
+		(property "Reference" "#PWR385"
 			(at 104.14 153.67 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -3212,7 +3212,7 @@
 		(instances
 			(project "analogue_board"
 				(path "/e6cfe5fb-cd34-5945-b37d-aca61e0551b2/ed07e321-f38a-541e-a882-770fdceb04e7"
-					(reference "#PWR392")
+					(reference "#PWR385")
 					(unit 1)
 				)
 			)
@@ -3339,7 +3339,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "17a8432b-8176-5113-866c-76079dd4aa7e")
-		(property "Reference" "#PWR393"
+		(property "Reference" "#PWR386"
 			(at 127 148.59 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -3379,7 +3379,7 @@
 		(instances
 			(project "analogue_board"
 				(path "/e6cfe5fb-cd34-5945-b37d-aca61e0551b2/ed07e321-f38a-541e-a882-770fdceb04e7"
-					(reference "#PWR393")
+					(reference "#PWR386")
 					(unit 1)
 				)
 			)
@@ -3394,7 +3394,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "af1a956d-9f72-5f1f-97a0-735954b28afa")
-		(property "Reference" "#PWR394"
+		(property "Reference" "#PWR387"
 			(at 127 156.21 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -3434,7 +3434,7 @@
 		(instances
 			(project "analogue_board"
 				(path "/e6cfe5fb-cd34-5945-b37d-aca61e0551b2/ed07e321-f38a-541e-a882-770fdceb04e7"
-					(reference "#PWR394")
+					(reference "#PWR387")
 					(unit 1)
 				)
 			)
@@ -3551,7 +3551,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "5687a99b-c49b-5b42-a204-13228298b753")
-		(property "Reference" "#PWR395"
+		(property "Reference" "#PWR388"
 			(at 55.88 191.77 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -3591,7 +3591,7 @@
 		(instances
 			(project "analogue_board"
 				(path "/e6cfe5fb-cd34-5945-b37d-aca61e0551b2/ed07e321-f38a-541e-a882-770fdceb04e7"
-					(reference "#PWR395")
+					(reference "#PWR388")
 					(unit 1)
 				)
 			)
@@ -3722,7 +3722,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "bdd2d759-01b9-5c25-b451-45a347eea3a0")
-		(property "Reference" "#PWR396"
+		(property "Reference" "#PWR389"
 			(at 186.69 109.22 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -3763,7 +3763,7 @@
 		(instances
 			(project "analogue_board"
 				(path "/e6cfe5fb-cd34-5945-b37d-aca61e0551b2/ed07e321-f38a-541e-a882-770fdceb04e7"
-					(reference "#PWR396")
+					(reference "#PWR389")
 					(unit 1)
 				)
 			)

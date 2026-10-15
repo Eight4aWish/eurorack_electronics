@@ -18,6 +18,14 @@ KICAD_FP = "/Applications/KiCad/KiCad.app/Contents/SharedSupport/footprints"
 BOARD_W, BOARD_H = 49.6, 103.0
 STRIPS = {"left": {"outer": 1.92, "inner": 4.46}, "right": {"outer": 47.68, "inner": 45.14}}
 DECK_CELLS = [(1, 10), (16, 25), (31, 40)]   # edge positions a deck header occupies
+# The right strip serves only the 10HP deck (6HP wires everything to the left strip), whose
+# headers sit at 1-10, 16-25 and 31-40: positions 11-15 and 26-30 get no holes (David,
+# 2026-10-15; tools/visualizer/boards/n8synth-10hp.json, headerSpans and gapRows). The left
+# strip keeps all 40: a 6HP deck claims every position except 19-22, which the 10HP deck uses.
+STRIP_OMIT = {"left": set(), "right": set(range(11, 16)) | set(range(26, 31))}
+# Positions 10, 16 and 31 sit inside the 10HP deck's 10-pin headers but no cell uses them: they
+# keep the outer hole (the header pin) and lose the inner wiring hole (David, 2026-10-15).
+STRIP_OMIT_INNER = {"left": set(), "right": {10, 16, 31}}
 BREADBOARD_HEADER = {"x": [15.91 + 2.54 * i for i in range(8)], "y": [98.82, 101.36]}  # the breadboard's 2x8, dropped
 
 
@@ -60,23 +68,13 @@ HEADER_PIN1 = (36.83, 83.35)   # shroud 1.7 mm from the strip's wiring holes, 1.
 # parts up to 2.5 mm under the modules, taller parts elsewhere); B = deck face (low parts only).
 # Wiring-field holes sit in columns lined up with the edge-strip positions: two beside the
 # left strip (the only one wired in 6HP), one beside the right strip, stopping above J201.
-HOLE_COLUMNS = {"left_outer": 7.0, "left_inner": 9.54, "right": 42.6}
-HOLE_GROUPS = {  # ref -> (column, first edge position); the group runs down from there, beside its circuit
-    "J401": ("left_outer", 1),    # CV jacks (12), beside the ADC and jack switches
-    "J601": ("left_outer", 14),   # pot wipers and tops (12), beside the MCP3208
-    "J703": ("left_outer", 27),   # I2C for a wired display (4), beside the expander
-    "J1001": ("left_outer", 34),  # TRS MIDI (6), beside the H11L1
-    "J802": ("left_inner", 1),    # jack-detect probe (14), beside the CV holes it serves
-    "J101": ("left_inner", 15),   # spare GPIO, MIDI links, RUN (6)
-    "J801": ("left_inner", 22),   # gate ins (5), beside the LM393s
-    "J701": ("left_inner", 27),   # buttons, switches, encoder (11), beside the TCA9555
-    "J301": ("right", 1),         # audio in (3), beside the codec
-    "J302": ("right", 4),         # audio out (3)
-    "J303": ("right", 7),         # codec reset (2)
-    "J602": ("right", 10),        # gate outs (10), beside their clamps
-    "J603": ("right", 20),        # gate expansion (6)
-    "J704": ("right", 26),        # WS2812 chain (5), beside its buffer
-}
+# The wiring field (wiring.py): four banks of channel holes, one per quarter of the board, each
+# with a mix of every channel type, in two columns beside the left strip and one beside the right.
+import wiring  # noqa: E402
+
+HOLE_COLUMNS = wiring.COLUMNS
+HOLE_GROUPS = {g["ref"]: (g["column"], g["slot"]) for g in wiring.groups()}   # ref -> (column, first slot)
+HOLE_GROUPS.update(wiring.UTILITY)
 
 # Anchors: ref -> (x, y, rotation, face) of the footprint origin (its centre, for ICs), board
 # coordinates as seen from the outward face. Analogue at the top, under the modules and furthest
@@ -97,15 +95,22 @@ ANCHORS = {
     "U1002": (17.5, 97.0, 0, "F"),      # H11L1 (tall)
     "U202": (29.5, 96.5, 90, "F"),      # L78M05 DPAK
     "L201": (29.5, 86.5, 0, "F"),       # buck inductor (4 mm tall)
-    "U703": (37.9, 70.6, 0, "F"),       # AHCT1G125 LED buffer, beside J704
+    "U201": (29.5, 80.8, 0, "F"),       # TPS54308 beside its inductor: the switching loop stays on one face
+    "J702": (37.4, 74.6, 0, "F"),       # Qwiic, vertical: cable straight up, just below the modules, near their
+                                        # I2C pins, outside the USB plug zones and clear of J201 (David, 2026-10-15)
+    "FID901": (12.4, 1.8, 0, "F"),      # fiducials: three corners of the free area
+    "FID902": (38.5, 1.8, 0, "F"),
+    "FID903": (24.0, 101.6, 0, "F"),
     # deck face (B)
     "U403": (21.0, 6.0, 0, "B"),        # DG412 CV5-6 + spares
     "U402": (21.0, 13.0, 0, "B"),       # DG412 CV1-4
     "U504": (CENTRE_X, 22.5, 0, "B"),   # TL074 offset buffer + spares
     "U302": (35.5, 8.6, 0, "B"),        # TL074 audio, under the codec
-    "U602": (CENTRE_X, 34.0, 0, "B"),   # 74HCT595
+    "U602": (38.15, 36.0, 90, "F"),     # 74HCT595 TSSOP, sideways in the right channel: gates 5-8 go to the right
+                                        # banks beside it, gates 1-4 cross to the left banks (wiring.py)
     "U802": (CENTRE_X, 63.0, 0, "B"),   # LM393 gates 3-4
     "U702": (19.5, 77.0, 0, "B"),       # M24C64, under the TCA9555
+    "U1001": (16.0, 89.0, 0, "B"),      # AHCT1G125 MIDI out, under the MIDI corner
 }
 
 

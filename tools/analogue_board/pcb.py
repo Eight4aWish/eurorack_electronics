@@ -23,6 +23,7 @@ from collections import OrderedDict
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
+import autoplace  # noqa: E402
 import placement as P  # noqa: E402
 from sexpr import Sym, dumps, find, find_all, parse  # noqa: E402
 
@@ -33,6 +34,9 @@ KICAD_CLI = "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli"
 BX, BY = 30.0, 30.0          # the board's top-left corner on the A3 page
 PARK_X0, PARK_X1 = 100.0, 405.0
 NS = uuid.UUID("5f0c8a2e-7d1b-4f43-9a1e-3c2b6a9d4e10")
+# reference designators kept off the silkscreen: the board is too dense for them, assembly does
+# not need them, and they stay on the fab layers. ICs, connectors and hole groups keep theirs.
+SILK_HIDDEN = {"R", "C", "D", "L", "FB", "Q", "TP", "FID", "JP"}
 
 
 def S(*a):
@@ -56,6 +60,7 @@ def read():
             "path": find(sp, "tstamps")[1] + find(c, "tstamps")[1],
             "sheet": find(sp, "names")[1], "sheetname": props.get("Sheetname", ""), "sheetfile": props.get("Sheetfile", ""),
             "attrs": [a for a in ("exclude_from_bom", "dnp") if a in props],
+            "props": props,
         }
     pin_net = {}
     names = []
@@ -120,6 +125,27 @@ def to_world(local, at, rot, face):
     return (at[0] + lx * math.cos(t) + ly * math.sin(t), at[1] - lx * math.sin(t) + ly * math.cos(t))
 
 
+def courtyard_rects(fp):
+    """Front courtyard as rectangles in footprint coordinates: one per fp_rect (a module socket
+    has two, its header rows), else the bounding box of the outline."""
+    rects, other = [], []
+    for g in fp:
+        if not (isinstance(g, list) and g and str(g[0]) in ("fp_line", "fp_rect", "fp_poly", "fp_arc", "fp_circle")):
+            continue
+        lay = find(g, "layer")
+        if not lay or lay[1] != "F.CrtYd":
+            continue
+        if str(g[0]) == "fp_rect":
+            s, e = find(g, "start"), find(g, "end")
+            rects.append((min(float(s[1]), float(e[1])), min(float(s[2]), float(e[2])),
+                          max(float(s[1]), float(e[1])), max(float(s[2]), float(e[2]))))
+        else:
+            other.append(g)
+    if other or not rects:
+        rects.append(courtyard_box([None, None] + other) if other else courtyard_box(fp))
+    return rects
+
+
 def instance(ref, comp, at, rot, net_ids, pin_net, face="F"):
     """A board footprint node: the library footprint, renamed, placed (on either face), linked and
     with pad nets."""
@@ -171,6 +197,9 @@ def instance(ref, comp, at, rot, net_ids, pin_net, face="F"):
         if h == "property":
             if c[1] == "Reference":
                 c[2] = ref
+                hole_group = comp["fp"].startswith("analogue_board:WiringHoles")   # labelled hole by hole instead
+                if (ref.rstrip("0123456789") in SILK_HIDDEN or hole_group) and not find(c, "hide"):
+                    c.insert(min(5, len(c)), S("hide", Sym("yes")))
             elif c[1] == "Value":
                 c[2] = comp["value"]
             if not find(c, "uuid"):
@@ -292,8 +321,16 @@ def build():
     comps, pin_net, names = read()
     net_ids = {n: i + 1 for i, n in enumerate(names)}
     fixed = fixed_positions(comps)
-    parked, labels = park(comps, fixed)
-    pos = {**parked, **fixed}
+    placer = autoplace.Placer(comps, pin_net, fixed, library_footprint, courtyard_rects, to_world)
+    unplaced = placer.run([r for r in comps if r not in fixed])
+    placed = {r: p for r, p in placer.pos.items()}
+    parked, labels = park(comps, placed)
+    pos = {**parked, **placed}
+    faces = {"F": 0, "B": 0}
+    for r, (_o, _rot, f) in placed.items():
+        faces[f] += 1
+    print(f"Placed {len(placed)} of {len(comps)} parts (outward face {faces['F']}, deck face {faces['B']}); "
+          f"not placed: {len(unplaced)} {' '.join(sorted(unplaced)[:20])}")
     board = [Sym("kicad_pcb"), S("version", 20241229), S("generator", "analogue_board_pcb"), S("generator_version", "9.0"),
              S("general", S("thickness", 1.6), S("legacy_teardrops", Sym("no"))), S("paper", "A3"),
              S("title_block", S("title", "Analogue board Rev A"), S("rev", "A"), S("company", "Eight4aWish"),
@@ -318,7 +355,7 @@ def build():
     board.append(S("embedded_fonts", Sym("no")))
     with open(OUT, "w", encoding="utf-8") as f:
         f.write(dumps(board) + "\n")
-    return comps, fixed
+    return comps, placed
 
 
 def area_budget(comps):
@@ -331,14 +368,17 @@ def area_budget(comps):
         kind = ("wiring-field holes" if "WiringHoles" in name else "power header" if "IDC" in name else "SMT parts")
         n, a = rows.get(kind, (0, 0.0))
         rows[kind] = (n + 1, a + (x1 - x0) * (y1 - y0))
-    # the module sockets occupy only their header rows: 2.54 mm + 0.5 mm courtyard per row
-    rows["module header rows"] = (4, 2 * 3.04 * (19 * 2.54 + 3.04) + 2 * 3.04 * (23 * 2.54 + 3.04))
-    usable = (P.STRIPS["right"]["inner"] - 0.85 - 0.25 - (P.STRIPS["left"]["inner"] + 0.85 + 0.25)) * P.BOARD_H
+    # the module sockets occupy only their header rows (their courtyards)
+    rows["module header rows"] = (4, sum((r[2] - r[0]) * (r[3] - r[1]) for ref in ("A101", "A102")
+                                         for r in courtyard_rects(library_footprint(comps[ref]["fp"]))))
+    # board area outside the edge strips' courtyards and the 0.65 mm edge slivers beside them
+    usable = P.BOARD_W * P.BOARD_H - 2 * 0.65 * P.BOARD_H - sum(
+        (r[2] - r[0]) * (r[3] - r[1]) for ref in ("J901", "J902") for r in courtyard_rects(library_footprint(comps[ref]["fp"])))
     total = sum(a for _, a in rows.values())
     print("Courtyard area budget:")
     for k, (n, a) in sorted(rows.items(), key=lambda kv: -kv[1][1]):
         print(f"  {k:22s} {n:4d} {a:7.0f} mm2")
-    print(f"  total {total:.0f} mm2 against {usable:.0f} mm2 between the edge strips: {100 * total / usable:.0f}%")
+    print(f"  total {total:.0f} mm2 against {usable:.0f} mm2 outside the edge strips (one face): {100 * total / usable:.0f}%")
     return rows, usable
 
 
@@ -351,8 +391,22 @@ def drc():
         return None
     with open(rpt, encoding="utf-8") as f:
         d = json.load(f)
-    parity = d.get("schematic_parity", [])
-    print(f"Schematic parity: {len(parity)} issues")
+    # project footprints leave out holes nothing uses (the Teensy's far-end pins, the right strip's
+    # positions 11-15 and 26-30; checks.py confirms they are unconnected): KiCad reports each as a
+    # pin with no pad, which is the intent
+    comps = read()[0]
+    intended = set()
+    for ref, c in comps.items():
+        if c["fp"].startswith("analogue_board:"):
+            pads = {str(p[1]) for p in find_all(library_footprint(c["fp"]), "pad")}
+            for n in range(1, 100):
+                if str(n) not in pads:
+                    intended.add(f"No pad found for pin {n} in schematic.|{ref}")
+    parity = [p for p in d.get("schematic_parity", [])
+              if not any(f"{p.get('description')}|{i.get('description', '').split()[-1]}" in intended
+                         for i in p.get("items", []))]
+    omitted = len(d.get("schematic_parity", [])) - len(parity)
+    print(f"Schematic parity: {len(parity)} issues ({omitted} intended: holes left out where nothing connects)")
     for p in parity[:20]:
         print("  ", p.get("type"), p.get("description"), [i.get("description") for i in p.get("items", [])][:2])
     # placement problems among parts already on the board (parked parts are off the board by design)
@@ -364,6 +418,44 @@ def drc():
     for v in found[:30]:
         print("  ", v["type"], " / ".join(i.get("description", "") for i in v.get("items", [])))
     return d
+
+
+# maximum package height above the board, mm, by footprint name prefix (datasheet maxima, rounded up)
+HEIGHTS = [("R_0402", 0.4), ("C_0402", 0.6), ("R_0603", 0.6), ("C_0603", 0.9), ("L_0603", 0.9), ("R_0805", 0.7),
+           ("C_0805", 1.45), ("R_1206", 0.7), ("C_1206", 1.8), ("SOT-23-5", 1.45), ("SOT-23-6", 1.45), ("SOT-23", 1.2),
+           ("D_SOD-323", 1.1), ("D_SMA", 2.45), ("SOIC", 1.75), ("TSSOP", 1.2), ("TO-252", 2.4), ("SMDIP", 4.3),
+           ("L_Sunlord_SWPA5040", 4.2), ("JST_SH", 4.25), ("TestPoint", 0.1), ("Fiducial", 0.1), ("SolderJumper", 0.1),
+           ("WiringHoles", 0.0), ("EdgeStrip", 0.0), ("IDC", 9.0), ("Pico2", 11.0), ("Teensy41", 11.0)]
+
+
+def height(fp):
+    name = fp.split(":")[1]
+    for prefix, h in HEIGHTS:
+        if name.startswith(prefix):
+            return h
+    raise KeyError(f"no height for {fp}")
+
+
+def height_check(comps, placed):
+    """Outward-face parts under a module body (the P4's envelope included) must be <= 2.5 mm;
+    parts in a USB plug keep-out <= 8 mm. Uses each part's courtyard centre."""
+    lay = P.layout("A")
+    bodies = [lay[k]["body"] for k in ("p4", "pico", "teensy")]
+    keepouts = [lay[k]["keepout"] for k in ("p4", "pico", "teensy")]
+    inside = lambda pt, r: r[0] <= pt[0] <= r[2] and r[1] <= pt[1] <= r[3]  # noqa: E731
+    bad = []
+    for ref, ((x, y), rot, face) in placed.items():
+        if face != "F" or ref in ("A101", "A102"):
+            continue
+        x0, y0, x1, y1 = courtyard_box(library_footprint(comps[ref]["fp"]))
+        c = to_world(((x0 + x1) / 2, (y0 + y1) / 2), (x, y), rot, face)
+        h = height(comps[ref]["fp"])
+        if any(inside(c, b) for b in bodies) and h > 2.5:
+            bad.append(f"{ref} {h} mm under a module")
+        elif any(inside(c, k) for k in keepouts) and h > 8.0:
+            bad.append(f"{ref} {h} mm in a USB keep-out")
+    print(f"Height check: {len(bad)} problems" + ("".join(f"\n   {b}" for b in bad)))
+    return bad
 
 
 def render():
@@ -379,8 +471,9 @@ def render():
 
 
 if __name__ == "__main__":
-    comps, fixed = build()
+    comps, placed = build()
     print(OUT)
     area_budget(comps)
     drc()
+    height_check(comps, placed)
     render()
