@@ -5,13 +5,15 @@ an n8synth Control Deck on the other, and every audio, CV, gate, pot and display
 between. The design brief and every decision behind it are in
 [`docs/analogue_board_spec.md`](../../docs/analogue_board_spec.md).
 
-**Status:** checkpoint 1 (schematic), drafted 2026-10-14, awaiting review.
+**Status:** checkpoint 1 (schematic). Drafted 2026-10-14; rebuilt 2026-10-15 after a
+block-by-block prior-art review ([`docs/analogue_board_review/`](../../docs/analogue_board_review/)),
+with TRS MIDI added. Awaiting sign-off.
 
 ## What's here
 
 | File | What it is |
 |---|---|
-| [`analogue_board_schematic.pdf`](analogue_board_schematic.pdf) | The schematic, 9 A3 sheets. Sheet 1 is the module pin map. |
+| [`analogue_board_schematic.pdf`](analogue_board_schematic.pdf) | The schematic, 10 A3 sheets. Sheet 1 is the module pin map. |
 | [`output/checks.md`](output/checks.md) | Every checkpoint-1 check and its result: ERC, netlist, pins against datasheets, footprints, decoupling, diode orientation |
 | `output/erc.rpt`, `output/analogue_board.net`, `output/analogue_board_bom.csv` | KiCad's ERC report, netlist and grouped BOM with LCSC numbers |
 | `analogue_board.kicad_pro`, `*.kicad_sch` | The KiCad 9 project |
@@ -28,7 +30,7 @@ KiCad files become the source and the generator is retired.
 python3 tools/analogue_board/build.py
 ```
 
-One run regenerates the libraries and all nine sheets. It then runs KiCad's ERC and exports the
+One run regenerates the libraries and all ten sheets. It then runs KiCad's ERC and exports the
 PDF, netlist and BOM through `kicad-cli`, and finally runs the checks. It exits non-zero if any
 check fails. Needs KiCad 9 at `/Applications/KiCad` and Python 3, nothing else.
 
@@ -36,7 +38,7 @@ check fails. Needs KiCad 9 at `/Applications/KiCad` and Python 3, nothing else.
 |---|---|
 | `design.py` | Pin map, root sheet, power sheet |
 | `design_analog.py` | Codec and audio, CV jacks and ADC, CV DAC |
-| `design_digital.py` | Pots and gate outs, expander/I2C/LEDs, gate ins and jack detect, edge strips |
+| `design_digital.py` | Pots and gate outs, expander/I2C/LEDs, gate ins and jack detect, edge strips, TRS MIDI |
 | `parts.py` | Every part: symbol, footprint, LCSC number, datasheet |
 | `datasheet_pins.json` | Each IC's pinout transcribed from its datasheet, independently of KiCad's library. `checks.py` compares the two. |
 | `checks.py` | The checkpoint-1 checks |
@@ -55,3 +57,6 @@ is marked [proposed] until you agree. The ones that change the spec:
 - the 3.3 V rails use XC6206 LDOs rather than AMS1117s;
 - the gate-input comparators run from +12 V;
 - the LM4040 is dropped.
+
+The 2026-10-15 rebuild applied every must-fix and worth-adopting item from the review. Its
+decisions, the 17 Extended part types and the firmware requirements are also in §15.

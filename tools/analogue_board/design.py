@@ -45,12 +45,13 @@ PINMAP = [
     ("GATE_IN4", "Gate input 4", 12, "GP9", "5", ""),
     ("PROBE", "Jack-detect probe", 20, "GP15", "6", ""),
     ("LED_DATA", "WS2812 data (buffered to 5 V)", 7, "GP5", "17", "Teensy TX4 (WS2812Serial)"),
-    ("SPARE1", "Spare GPIO 1 to wiring field", 1, "GP0", "1", "Pico UART0 TX · Teensy TX1"),
-    ("SPARE2", "Spare GPIO 2 to wiring field", 2, "GP1", "0", "Pico UART0 RX · Teensy RX1"),
+    ("SPARE1", "Spare GPIO 1, or MIDI out (link hole)", 1, "GP0", "1", "Pico UART0 TX · Teensy TX1"),
+    ("SPARE2", "Spare GPIO 2, or MIDI in (link hole)", 2, "GP1", "0", "Pico UART0 RX · Teensy RX1"),
 ]
 MODULE_NETS = [r[0] for r in PINMAP]
 
-INTERSHEET = set(MODULE_NETS) | {f"CVDRV{i}" for i in range(1, 9)} | {f"SW_EN{i}" for i in range(1, 7)} | {"GATE_OE_N"}
+INTERSHEET = (set(MODULE_NETS) | {f"CVDRV{i}" for i in range(1, 7)} | {f"SW_EN{i}" for i in range(1, 7)}
+              | {"GATE_OE_N", "PICO_VBUS", "CVO7", "CVO8", "MIDI_TX", "MIDI_RX"})
 
 
 def new_project():
@@ -72,7 +73,9 @@ def sheet_root(pr):
             "Every signal into a module is 3.3 V: the Teensy 4.1 is not 5 V tolerant.\n"
             "Pico 2: 5 V reaches VSYS through D203 (Schottky, net MOD_5V), VBUS is left to USB.\n"
             "Teensy 4.1: cut the VIN–VUSB pads before fitting; VIN takes MOD_5V.\n"
-            "Neither module's own 3.3 V output is used: the board makes its own +3V3A and +3V3D.",
+            "Neither module's own 3.3 V output is used: the board makes its own +3V3A and +3V3D.\n"
+            "ESP32-P4-WIFI6 (Pico pinout): firmware must set LDO channel 4 to 3.3 V first (pins 21, 22, 24 are on that bank);\n"
+            "bridge JP201 for its supply margin. See docs/analogue_board_esp32p4.md.",
             (20, 24), size=1.6)
 
     # Pico 2
@@ -81,8 +84,8 @@ def sheet_root(pr):
         pico_nets[pin] = net
     for n, name in {3: "GND", 8: "GND", 13: "GND", 18: "GND", 23: "GND", 28: "GND", 33: "GND", 38: "GND"}.items():
         pico_nets[n] = "GND"
-    pico_nets.update({30: "RUN", 39: "MOD_5V", 40: NC, 36: NC, 37: NC, 35: NC})
-    ic(sh, "PICO2", (75, 110), pico_nets, ref="A101")
+    pico_nets.update({30: "RUN", 39: "MOD_5V", 40: "PICO_VBUS", 36: NC, 37: NC, 35: NC})
+    ic(sh, "PICO2", (75, 110), pico_nets, ref="A101", stubs={30: 12.7})  # RUN label clear of BCK
 
     # Teensy 4.1
     tpins = teensy41_pins()
@@ -101,15 +104,18 @@ def sheet_root(pr):
             tnets[n] = NC  # 3V3 outputs and unused GPIO
     ic(sh, "TEENSY41", (185, 115), tnets, ref="A102")
 
-    holes(sh, (75, 168), ["SPARE1", "SPARE2", "RUN", "GND"], "Spare GPIO, Pico RUN", ref="J101")
-    sh.text("RUN: wire a reset button to GND (Pico only;\nthe Teensy has no reset at its edge).", (85, 163), size=1.27)
+    holes(sh, (75, 170.18), ["SPARE1", "MIDI_TX", "SPARE2", "MIDI_RX", "RUN", "GND"], "Spare GPIO, MIDI links, Pico RUN", ref="J101",
+          stubs={5: 15.24})
+    sh.text("MIDI: bridge SPARE1-MIDI_TX and SPARE2-MIDI_RX (adjacent holes)\nwith a wire or shunt. Left open, SPARE1/2 are plain GPIO.\n"
+            "On a Pico, move the SDK console off UART0 to USB.\nRUN: wire a reset button to GND (Pico or ESP32-P4).", (85, 162), size=1.27)
 
     # pin map table
     rows = [["Net", "Function", "Pico 2", "Teensy 4.1", "Why this pin"]]
     for net, func, pin, gpio, tl, note in PINMAP:
         rows.append([net, func, f"{gpio} (pin {pin})", tl, note])
-    rows.append(["MOD_5V", "Module 5 V in", "VSYS (pin 39)", "VIN", "Through Schottky D203"])
-    rows.append(["RUN", "Pico reset", "RUN (pin 30)", "—", "To hole J101-3"])
+    rows.append(["MOD_5V", "Module 5 V in", "VSYS (pin 39)", "VIN", "Schottky D203; Q201 bypass if JP201"])
+    rows.append(["PICO_VBUS", "Module USB 5 V sense", "VBUS (pin 40)", "—", "Q201 gate: off with USB plugged in"])
+    rows.append(["RUN", "Pico reset", "RUN (pin 30)", "—", "To hole J101-5"])
     sh.text("PIN MAP", (238, 18), size=2.0, bold=True)
     sh.table((238, 22), [22, 50, 25, 17, 52], rows, row_h=5.08)
 
@@ -123,11 +129,12 @@ def sheet_root(pr):
         ("Expander, I2C & LEDs", "expander_i2c.kicad_sch", "TCA9555 buttons, EEPROM, Qwiic, WS2812"),
         ("Gate ins & jack detect", "gate_in.kicad_sch", "LM393 gate inputs, probe resistors"),
         ("Edge strips", "edge_strips.kicad_sch", "n8synth edge strips, fiducials"),
+        ("TRS MIDI", "midi.kicad_sch", "MIDI in (H11L1) and out (5 V buffered), Type A"),
     ]
     subs = []
     for i, (name, fn, desc) in enumerate(sheets):
-        x = 20 + (i % 4) * 62
-        y = 214 + (i // 4) * 30
+        x = 20 + (i % 5) * 62
+        y = 214 + (i // 5) * 30
         subs.append(pr.add_sheet(name, fn, name, at=(x, y), size=(50.8, 15.24)))
         sh.text(desc, (x + 1.27, y + 2.54), size=1.27)
     sh.text("SHEETS", (20, 208), size=2.0, bold=True)
@@ -201,7 +208,7 @@ def sheet_power(sh):
     for net, y, d_rot, din, dout in (("+12V", 55.88, 180, "2", "1"), ("-12V", 86.36, 0, "1", "2")):
         x0 = 76.2
         sh.label(f"{net}_IN", (x0, y), 180)
-        d = part(sh, "SS14", (x0 + 10.16, y), rot=d_rot, ref="D201" if net == "+12V" else "D202")
+        d = part(sh, "SS34", (x0 + 10.16, y), rot=d_rot, ref="D201" if net == "+12V" else "D202")
         fb = part(sh, "FERRITE", (x0 + 30.48, y), rot=90, ref="FB201" if net == "+12V" else "FB202", value="BLM18PG121")
         node = (x0 + 43.18, y)
         chain_h(sh, (x0, y), [(d, din, dout), (fb, "1", "2")], node)
@@ -217,7 +224,8 @@ def sheet_power(sh):
             sh.connect(c, 2, "GND", stub=0)
             sh.tie(net, (c, "1"))
         tp(sh, (x0 + 88.9, y - 5.08), net, ref="TP201" if net == "+12V" else "TP202")
-    sh.text("SS14 per rail: reverse-polarity protection. A reversed ribbon blocks on both rails.", (76.2, 96), size=1.27)
+    sh.text("SS34 per rail: reverse-polarity protection. A reversed ribbon blocks on both rails.\n"
+            "3 A parts: +12 V can reach ≈0.75 A with an ESP32-P4 and a lit LED chain.", (76.2, 96), size=1.27)
     sh.power("GND", (190.5, 66.04))
     sh.pwr_flag((190.5, 66.04))
     tp(sh, (200.66, 63.5), "GND", ref="TP203")
@@ -225,17 +233,36 @@ def sheet_power(sh):
     sh.text("GND test pads", (195, 52), size=1.27)
 
     # ---- +5VD buck
-    bx, by = 66.04, 135.89
+    bx, by = 81.28, 135.89
     sh.text("+5VD: TPS54308 forced-PWM buck, 350 kHz (TPS54202 is a pin- and value-compatible fallback)", (20, 108), size=1.5, bold=True)
-    sh.text("Vout = 0.596 V × (1 + 15k/2k) = 5.07 V. L and Cout from TI's table for 5 V. EN floats (internal pull-up) = on.", (20, 112.5), size=1.27)
+    sh.text("Vout = 0.596 V × (1 + 15k/2k) = 5.07 V; L and Cout from TI's table for 5 V. Input: own ferrite and 2 × 10 µF, keeping the\n"
+            "350 kHz input ripple off the ±12 V rail the op-amps share. EN divider 510k/75k: starts at ≈9.2 V, stops at ≈8.1 V,\n"
+            "so the digital 5 V never runs while the analogue 5 V (L78M05) is down: TI's power-up order for the codec.",
+            (20, 112.5), size=1.27)
     u = part(sh, "TPS54308", (bx, by), ref="U201")
     sh.connect(u, "1", "GND")
-    sh.no_connect(u, "5")
+    sh.connect(u, "5", "BUCK_EN")
     vin = u.p("3")
-    sh.wire(vin, (vin[0] - 10.16, vin[1]))
-    sh.power("+12V", (vin[0] - 10.16, vin[1]))
-    sh.tie("+12V", (u, "3"))
-    decaps(sh, 20.32, by + 7.62, "+12V", [("10u", "1206"), ("100n", "0603")], "U201 VIN pin 3")
+    fbin = part(sh, "FERRITE", (vin[0] - 17.78, vin[1]), rot=90, ref="FB203", value="BLM18PG121")
+    sh.wire(vin, fbin.p("2"))
+    sh.wire(fbin.p("1"), (fbin.p("1")[0] - 5.08, vin[1]))
+    sh.power("+12V", (fbin.p("1")[0] - 5.08, vin[1]))
+    sh.label("BUCK_VIN", (vin[0] - 5.08, vin[1]), 90)
+    sh.tie("+12V", (fbin, "1"))
+    sh.tie("BUCK_VIN", (fbin, "2"), (u, "3"))
+    for i, (v, sz) in enumerate([("10u", "1206"), ("10u", "1206"), ("100n", "0603")]):
+        c = C(sh, v, (20.32 + i * 12.7, 160.02), size=sz, decouples="U201 VIN pin 3")
+        if i == 0:
+            sh.flagged_stub(c, 1, "BUCK_VIN")
+        else:
+            sh.connect(c, 1, "BUCK_VIN")
+        sh.connect(c, 2, "GND", stub=0)
+    r = R(sh, "510k", (60.96, 160.02), size="0603", fields={"Note": "EN divider (UVLO), top"})
+    sh.connect(r, 1, "BUCK_VIN")
+    sh.connect(r, 2, "BUCK_EN")
+    r = R(sh, "75k", (71.12, 160.02), size="0603", fields={"Note": "EN divider (UVLO), bottom"})
+    sh.connect(r, 1, "BUCK_EN")
+    sh.connect(r, 2, "GND", stub=0)
     boot, sw, fb = u.p("6"), u.p("2"), u.p("4")
     cb = C(sh, "100n", (boot[0] + 10.16, boot[1] - 2.54), size="0402", fields={"Note": "bootstrap"})
     sh.wire(boot, (boot[0] + 2.54, boot[1]), (boot[0] + 2.54, cb.p("1")[1]), cb.p("1"))
@@ -245,27 +272,30 @@ def sheet_power(sh):
     sh.wire(sw, l1.p("1"))
     sh.tie("SW", (u, "2"), (cb, "2"), (l1, "1"))
     vb = (l1.p("2")[0] + 2.54, sw[1])
-    # divider: Rtop from 5V_BUCK down to the FB node, Rbot to ground; optional feed-forward cap across Rtop
+    # divider: Rtop from 5V_BUCK to the FB node, Rbot to ground. Optional feed-forward (not fitted): 470 pF + 2 kΩ across Rtop
     rt = R(sh, "15k", (vb[0] + 7.62, vb[1] + 5.08))
-    rb = R(sh, "2k", (vb[0] + 7.62, vb[1] + 12.7))
-    cff = C(sh, "47p", (vb[0] + 17.78, vb[1] + 5.08), dnp=True, fields={"Note": "feed-forward, fit only if the loop needs phase boost"})
+    rb = R(sh, "2k", (vb[0] + 7.62, vb[1] + 17.78))
+    cff = C(sh, "470p", (vb[0] + 17.78, vb[1] + 5.08), dnp=True, lcsc=False,
+            fields={"Note": "feed-forward, fit only if the loop needs phase boost (TI table: ~75 pF × 100k/15k, 2 kΩ in series)"})
+    rff = R(sh, "2k", (vb[0] + 17.78, vb[1] + 10.16), dnp=True, fields={"Note": "feed-forward series resistor, fit with the capacitor"})
+    fbn_y = vb[1] + 12.7
     sh.wire((rt.p("1")[0], vb[1]), rt.p("1"))
     sh.wire((cff.p("1")[0], vb[1]), cff.p("1"))
-    fbn = (rt.p("2")[0], rt.p("2")[1] + 1.27)
-    sh.wire(rt.p("2"), fbn, rb.p("1"))
-    sh.wire(fb, (fb[0] + 2.54, fb[1]), (fb[0] + 2.54, fbn[1]), fbn, (cff.p("2")[0], fbn[1]), cff.p("2"))
+    sh.wire(rt.p("2"), (rt.p("2")[0], fbn_y), rb.p("1"))
+    sh.wire(fb, (fb[0] + 2.54, fb[1]), (fb[0] + 2.54, fbn_y), (rff.p("2")[0], fbn_y), rff.p("2"))
     sh.connect(rb, "2", "GND", stub=0)
     sh.tie("5V_BUCK", (l1, "2"), (rt, "1"), (cff, "1"))
-    sh.tie("FB", (u, "4"), (rt, "2"), (rb, "1"), (cff, "2"))
-    sh.wire(l1.p("2"), (vb[0] + 22.86, vb[1]))
-    o = rail_out(sh, (vb[0] + 22.86, vb[1]), "0805", "+5VD", "5V_BUCK", "TP205",
+    sh.tie("FB", (u, "4"), (rt, "2"), (rb, "1"), (rff, "2"))
+    sh.tie("FF", (cff, "2"), (rff, "1"))
+    sh.wire(l1.p("2"), (vb[0] + 27.94, vb[1]))
+    o = rail_out(sh, (vb[0] + 27.94, vb[1]), "0805", "+5VD", "5V_BUCK", "TP205",
                  [("22u", "1206"), ("22u", "1206"), ("100n", "0402")], "buck output", label=False)
     sh.label("5V_BUCK", (vb[0] + 2.54, vb[1]), 0)
     decaps(sh, o[0] + 17.78, vb[1] + 5.08, "+5VD", [("10u", "0805")], "+5VD distribution")
 
     # ---- +5VA linear
-    lx, ly = 66.04, 200.66
-    sh.text("+5VA: L78M05 from +12 V, its own regulator (PCM3060 VCC, ADS8688 AVDD, +3V3A LDO)", (20, 178), size=1.5, bold=True)
+    lx, ly = 66.04, 210.82
+    sh.text("+5VA: L78M05 from +12 V, its own regulator (PCM3060 VCC, ADS8688 AVDD, +3V3A LDO)", (20, 188), size=1.5, bold=True)
     u = part(sh, "L78M05", (lx, ly), ref="U202")
     sh.connect(u, "2", "GND")
     vi, vo = u.p("1"), u.p("3")
@@ -287,17 +317,27 @@ def sheet_power(sh):
         sh.tie(vin, (u, "3"))
         decaps(sh, x - 30.48, y + 7.62, vin, [("1u", "0402")], f"{u.ref} VI pin 3")
         sh.tie(regnet, (u, "2"))
-        rail_out(sh, vo, "0603", out, regnet, ref_tp, [("10u", "0805")], f"{u.ref} output (ceramic-stable LDO)")
-        return u
+        o = rail_out(sh, vo, "0603", out, regnet, ref_tp, [("10u", "0805")], f"{u.ref} output (ceramic-stable LDO)")
+        return u, o
 
-    ldo(266.7, 66.04, "+5VA", "3V3A_REG", "+3V3A", "+3V3A: XC6206 from +5VA (DAC8568, MCP3208 and pot reference)", "TP207")
-    ldo(266.7, 111.76, "+5VD", "3V3D_REG", "+3V3D", "+3V3D: XC6206 from +5VD (codec VDD, ADS8688 DVDD, logic, Qwiic)", "TP208")
+    ldo(266.7, 66.04, "+5VA", "3V3A_REG", "+3V3A", "+3V3A: XC6206 from +5VA (DAC8568, MCP3208, pot reference via POT_REF)", "TP207")
+    _, o = ldo(266.7, 111.76, "+5VD", "3V3D_REG", "+3V3D", "+3V3D: XC6206 from +5VD (codec VDD, ADS8688 DVDD, logic, Qwiic, MIDI)", "TP208")
+    r = R(sh, "680R", (o[0] + 17.78, 116.84), size="0603",
+          fields={"Note": "minimum load: absorbs gate-input clamp current, which the LDO cannot sink"})
+    sh.connect(r, 1, "+3V3D", stub=2.54)
+    sh.connect(r, 2, "GND", stub=0)
+    sh.text("680 Ω minimum load: four 12 V gates push ≈3.4 mA\ninto +3V3D through their clamps; the\nXC6206 cannot sink it (4.85 mA here).",
+            (o[0] + 22.86, 121.92), size=1.27)
 
     # ---- module supply
-    mx, my = 256.54, 160.02
-    sh.text("MOD_5V: +5VD through a Schottky to Pico VSYS / Teensy VIN", (231.14, 142.24), size=1.5, bold=True)
+    mx, my = 256.54, 185.42
+    sh.text("MOD_5V: +5VD through a Schottky to Pico VSYS / Teensy VIN / ESP32-P4 VCC_5V", (231.14, 154.94), size=1.5, bold=True)
+    sh.text("Q201 bypasses D203 when JP201 is bridged, for the ESP32-P4, whose regulator needs ≥ 4.5 V at 0.5-0.7 A.\n"
+            "Its gate follows the Pico/P4 VBUS pin (pin 40): with USB plugged in the FET turns off, as in the Pico 2\n"
+            "datasheet's VSYS circuit. Leave JP201 open for a Teensy (an uncut VIN-VUSB link would tie USB to the buck).",
+            (231.14, 159.2), size=1.27)
     sh.power("+5VD", (mx - 7.62, my))
-    d = part(sh, "SS14", (mx + 5.08, my), rot=180, ref="D203")
+    d = part(sh, "SS34", (mx + 5.08, my), rot=180, ref="D203")
     sh.wire((mx - 7.62, my), d.p("2"))
     sh.tie("+5VD", (d, "2"))
     o = (d.p("1")[0] + 15.24, my)
@@ -307,7 +347,28 @@ def sheet_power(sh):
     sh.tie("MOD_5V", (d, "1"))
     decaps(sh, o[0] + 12.7, my + 5.08, "MOD_5V", [("10u", "0805")], "module supply: A101 VSYS pin 39, A102 VIN pin 48")
     tp(sh, (o[0] + 25.4, my - 5.08), "MOD_5V", ref="TP209")
+    q = part(sh, "AO3401A", (mx + 5.08, my + 20.32), ref="Q201")
+    sh.connect(q, "3", "+5VD")
+    sh.connect(q, "2", "MOD_5V")
+    sh.connect(q, "1", "PICO_VBUS", kind="global")
+    # gate network on one row: PICO_VBUS node (1M up to MOD_5V) - JP201 - FET_EN node (100k down to GND)
+    gy = my + 27.94
+    nv, nf = (mx + 33.02, gy), (mx + 55.88, gy)
+    r = R(sh, "1M", (nv[0], gy - 5.08), fields={"Note": "holds Q201 off while JP201 is open"})
+    sh.connect(r, 1, "MOD_5V", stub=0)
+    sh.wire(r.p("2"), nv)
+    sh.wire((nv[0] - 5.08, gy), nv)
+    sh.label("PICO_VBUS", (nv[0] - 5.08, gy), 180, kind="global")
+    jp = part(sh, "SJ_OPEN", (mx + 44.45, gy), ref="JP201", value="ESP32-P4: bridge")
+    sh.wire(nv, jp.p("1"))
+    sh.wire(jp.p("2"), nf)
+    sh.label("FET_EN", nf, 0)
+    r2 = R(sh, "100k", (nf[0], gy + 5.08))
+    sh.wire(nf, r2.p("1"))
+    sh.connect(r2, 2, "GND", stub=0)
+    sh.tie("PICO_VBUS", (r, "2"), (jp, "1"))
+    sh.tie("FET_EN", (jp, "2"), (r2, "1"))
 
-    sh.text("Load estimate: +12 V ≈ 120 mA typical, ~350 mA worst case (Teensy at full clock plus a lit LED chain\n"
-            "through the buck); -12 V ≈ 25 mA (op-amps). XC6206: 200 mA each; +3V3D ≈ 50 mA, +3V3A ≈ 6 mA.",
-            (231.14, 185), size=1.27)
+    sh.text("Load estimate: +12 V ≈ 120 mA typical, ~350 mA worst case with a Teensy and a lit LED chain; with an\n"
+            "ESP32-P4 (0.45-0.7 A at 5 V) plus LEDs, ≈0.75 A. -12 V ≈ 25 mA. XC6206: 200 mA each; +3V3D ≈ 50 mA.",
+            (231.14, 233.68), size=1.27)

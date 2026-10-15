@@ -342,6 +342,15 @@
   },
   "notes": "The datasheet assigns NO pin numbers (no 1/2); it only states 'Color band denotes cathode end'. In the outline top view the band (double line) is at the LEFT end of the body, and the diode symbol beneath it has its bar and triangle tip on the left, so the left/banded terminal is the cathode. Any 1/2 numbering in a library symbol/footprint is the library's convention, not the datasheet's. SS14 = 40 V, 1.0 A, VF max 0.55 V at 1.0 A. Two-terminal SMA package with J-bend leads, body 4.50/3.80 mm long, 2.80/2.30 mm wide, overall 5.30/4.70 mm."
  },
+ "SS34": {
+  "package": "SMA (DO-214AC) (MDD)",
+  "source": "MDD SS32 THRU SS3200 (SMA) could not be downloaded on 2026-10-15 (LCSC served HTML); read instead: MDD SS32C THRU SS3200C (SMC sibling, same die family), Rev:2020A1 p.1, 'Polarity: Color band denotes cathode end', VF max 0.55 V at 3.0 A for SS34C",
+  "pins": {
+   "band_end": "cathode",
+   "plain_end": "anode"
+  },
+  "notes": "Same marking convention as the SS14 entry: no pin numbers in the datasheet, the band marks the cathode. Replaces SS14 at D201-D203 (2026-10-15) for 3 A rating in the same SMA footprint. Check the SMA sheet itself when it can be fetched."
+ },
  "SN74AHCT1G125DBVR": {
   "package": "SOT-23-5 (DBV)",
   "source": "sn74ahct1g125.pdf p.3 (4 Pin Configuration and Functions: 'DBV PACKAGE (TOP VIEW)' drawing and Table 4-1 Pin Functions). TI SCLS378P (Aug 1997, revised March 2024)",
@@ -1461,5 +1470,28 @@
    "3": "VIN"
   },
   "notes": "Ceramic-capacitor compatible; CIN = CL = 1 uF in the typical circuit."
+ },
+ "H11L1M": {
+  "package": "6-pin DIP, surface-mount lead form (H11L1SR2M)",
+  "source": "onsemi H11L1M/H11L2M/H11L3M datasheet, pin definitions (p.1)",
+  "pins": {
+   "1": "ANODE",
+   "2": "CATHODE",
+   "3": "NC",
+   "4": "VO",
+   "5": "GND",
+   "6": "VCC"
+  },
+  "notes": "Schmitt-trigger open-collector output; LED on = output low. VCC 3-15 V."
+ },
+ "AO3401A": {
+  "package": "SOT-23",
+  "source": "Alpha & Omega AO3401A datasheet Rev 3.1 (Dec 2023) p.1 pin drawing",
+  "pins": {
+   "1": "G",
+   "2": "S",
+   "3": "D"
+  },
+  "notes": "P-channel, VDS -30 V, VGS ±12 V."
  }
 }

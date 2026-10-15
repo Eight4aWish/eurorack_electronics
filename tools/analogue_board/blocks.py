@@ -27,11 +27,11 @@ def part(sh, key, at, rot=0, mirror=None, unit=1, ref=None, value=None, fields=N
 
 
 def ic(sh, key, at, nets, rot=0, mirror=None, unit=1, ref=None, value=None, stub=2.54, fields=None, p=None, stubs=None,
-       hide_value=False):
+       hide_value=False, **kw):
     """Place a part and tie every pin (of this unit) to a net with a stub and label / power symbol.
     `nets` maps pin number -> net name, or NC. Pins stacked at one position are tied together.
     Raises if any pin of the unit is left out, so nothing is forgotten."""
-    pl = part(sh, key, at, rot, mirror, unit, ref, value, fields, p, hide_value=hide_value)
+    pl = part(sh, key, at, rot, mirror, unit, ref, value, fields, p, hide_value=hide_value, **kw)
     nets = {str(k): v for k, v in nets.items()}
     groups = {}
     for n, pin in pl.pins.items():
@@ -46,7 +46,7 @@ def ic(sh, key, at, nets, rot=0, mirror=None, unit=1, ref=None, value=None, stub
         net = given.pop()
         vis = [n for n in nums if not pl.pins[n].hidden] or nums
         if net is NC:
-            if all(pl.pins[n].etype == "no_connect" for n in nums) and all(pl.pins[n].hidden for n in nums):
+            if all(pl.pins[n].etype == "no_connect" for n in nums):
                 for n in nums:
                     sh.connections.append((pl.ref, n, None, pos))
             else:
@@ -65,21 +65,23 @@ def ic(sh, key, at, nets, rot=0, mirror=None, unit=1, ref=None, value=None, stub
     return pl
 
 
-def R(sh, value, at, rot=0, size="0402", ref=None, fields=None, dnp=False):
+def R(sh, value, at, rot=0, size="0402", ref=None, fields=None, dnp=False, text_left=False):
     f = {"LCSC": RES[(value, size)], "JLC": "Basic", "Tolerance": "1%"}
     f.update(fields or {})
     return sh.place("Device:R_Small", ref=ref, value=value, at=at, rot=rot, footprint=FP_R[size],
-                    fields=f, prefix="R", dnp=dnp)
+                    fields=f, prefix="R", dnp=dnp, text_left=text_left)
 
 
-def C(sh, value, at, rot=0, size="0402", ref=None, decouples=None, fields=None, dnp=False, lcsc=True):
-    code, volts, diel = CAP[(value, size)]
-    f = {"LCSC": code if lcsc else "", "JLC": "Basic", "Voltage": volts, "Dielectric": diel}
+def C(sh, value, at, rot=0, size="0402", ref=None, decouples=None, fields=None, dnp=False, lcsc=True, text_left=False):
+    entry = CAP[(value, size)]
+    code, volts, diel = entry[:3]
+    jlc = entry[3] if len(entry) > 3 else "Basic"
+    f = {"LCSC": code if lcsc else "", "JLC": jlc, "Voltage": volts, "Dielectric": diel}
     if decouples:
         f["Decouples"] = decouples
     f.update(fields or {})
     return sh.place("Device:C_Small", ref=ref, value=f"{value} {volts}", at=at, rot=rot, footprint=FP_C[size],
-                    fields=f, prefix="C", dnp=dnp)
+                    fields=f, prefix="C", dnp=dnp, text_left=text_left)
 
 
 def decap(sh, at, value, size, rail, decouples, gnd="GND"):
@@ -104,11 +106,11 @@ def two_pin(sh, pl, net1, net2, stub=2.54):
     return pl
 
 
-def holes(sh, at, nets, title, ref=None, rot=0, mirror=None):
+def holes(sh, at, nets, title, ref=None, rot=0, mirror=None, stubs=None):
     """A row of bare plated holes (the wiring field), one per entry of `nets` (top to bottom)."""
     p = holes_part(len(nets))
     p = dict(p, value=title)
-    return ic(sh, None, at, {i + 1: n for i, n in enumerate(nets)}, rot=rot, mirror=mirror, ref=ref, p=p)
+    return ic(sh, None, at, {i + 1: n for i, n in enumerate(nets)}, rot=rot, mirror=mirror, ref=ref, p=p, stubs=stubs)
 
 
 def tp(sh, at, net, ref=None, label=None):

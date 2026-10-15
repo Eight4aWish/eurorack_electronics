@@ -20,7 +20,7 @@ sys.path.insert(0, HERE)
 import make_library  # noqa: E402
 from design import OUT, new_project, sheet_power, sheet_root  # noqa: E402
 from design_analog import sheet_codec, sheet_cv_dac, sheet_cv_in  # noqa: E402
-from design_digital import sheet_edge, sheet_expander, sheet_gate_in, sheet_pots_gates  # noqa: E402
+from design_digital import sheet_edge, sheet_expander, sheet_gate_in, sheet_midi, sheet_pots_gates  # noqa: E402
 
 KICAD_CLI = "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli"
 NAME = "analogue_board"
@@ -55,7 +55,7 @@ def generate():
     pr = new_project()
     subs = sheet_root(pr)
     for sh, fn in zip(subs, [sheet_power, sheet_codec, sheet_cv_in, sheet_cv_dac,
-                             sheet_pots_gates, sheet_expander, sheet_gate_in, sheet_edge]):
+                             sheet_pots_gates, sheet_expander, sheet_gate_in, sheet_edge, sheet_midi]):
         fn(sh)
     pr.write(OUT)
     write_project_files(pr)

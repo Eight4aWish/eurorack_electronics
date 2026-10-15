@@ -27,7 +27,8 @@ DATASHEET = {"PCM3060": "PCM3060PWR", "ADS8688": "ADS8688IDBTR", "DAC8568": "DAC
              "DG412": "DG412DQ-T1-E3", "TL074H": "TL074HIDR", "LM393": "LM393DR2G", "74HCT595": "74HCT595D",
              "TCA9555": "TCA9555PWR", "M24C64": "M24C64-RMN6TP", "AHCT1G125": "SN74AHCT1G125DBVR",
              "XC6206": "XC6206P332MR", "L78M05": "L78M05ABDT", "TPS54308": "TPS54308DDCR", "BAT54S": "BAT54S",
-             "BAV99": "BAV99", "QWIIC": "SM04B-SRSS-TB", "PICO2": "PICO2", "TEENSY41": "TEENSY41"}
+             "BAV99": "BAV99", "QWIIC": "SM04B-SRSS-TB", "PICO2": "PICO2", "TEENSY41": "TEENSY41",
+             "H11L1": "H11L1M", "AO3401A": "AO3401A"}
 
 # Datasheet name -> KiCad library name, where the two spell the same pin differently (normalised forms).
 ALIASES = {
@@ -70,6 +71,11 @@ def semantic(key, pin, pins_by_unit):
         if n != "~":
             return n
         return {"input": None, "tri_state": "Y"}[pin.etype] if pin.etype == "tri_state" else ("OE" if pin.y > 0 else "A")
+    if key == "H11L1":
+        # KiCad leaves these pins unnamed: check the number's role by its electrical type
+        role = {"1": ("ANODE", "passive"), "2": ("CATHODE", "passive"), "3": ("NC", "no_connect"),
+                "4": ("VO", "output"), "5": ("GND", "power_in"), "6": ("VCC", "power_in")}[pin.number]
+        return role[0] if pin.etype == role[1] else f"{role[0]}?TYPE {pin.etype}"
     if key == "TEENSY41":
         return {"3V3": "3.3V", "VIN": "VIN"}.get(n, n[1:] if n.startswith("D") and n[1:].isdigit() else n)
     return n
@@ -111,7 +117,7 @@ def check_pins(project_libs):
                 continue
             if norm(got) != want:
                 problems.append(f"pin {pin.number}: library {pin.name!r} vs datasheet {dpins[pin.number]!r}")
-            elif norm(dpins[pin.number]) != norm(pin.name) and key not in ("TL074H", "LM393", "AHCT1G125"):
+            elif norm(dpins[pin.number]) != norm(pin.name) and key not in ("TL074H", "LM393", "AHCT1G125", "H11L1"):
                 renamed.append(f"{pin.number} {dpins[pin.number]}→{pin.name}")
         if key == "DG412":
             units = defaultdict(list)
@@ -258,11 +264,22 @@ POLARITY_RULES = {
 def check_polarity(comps, nets):
     pin_net = {node: name for name, nodes in nets.items() for node in nodes}
     rows, bad = [], 0
+    opto = next((r for r, c in comps.items() if c["lib"] == "Isolator:H11L1"), None)
     for ref, c in sorted(comps.items()):
-        if not ref.startswith("D"):
+        if not (ref.startswith("D") or ref.startswith("Q")):
             continue
         got = {pn: pin_net.get((ref, pn)) for pn in ("1", "2", "3") if (ref, pn) in pin_net}
-        if ref in POLARITY_RULES:
+        if c["lib"] == "Transistor_FET:AO3401A":
+            why = "MOD_5V bypass: drain on +5VD, source on MOD_5V, gate on PICO_VBUS (body diode +5VD → MOD_5V)"
+            ok = got.get("3") == "+5VD" and got.get("2") == "MOD_5V" and got.get("1") == "PICO_VBUS"
+        elif c["lib"] == "Diode:1N4148WS" and opto:
+            why = "reverse-parallel across the H11L1 LED: cathode on its anode (pin 1), anode on its cathode (pin 2)"
+            ok = got.get("1") == pin_net.get((opto, "1")) and got.get("2") == pin_net.get((opto, "2"))
+        elif c["lib"] == "Device:D_TVS":
+            why = "bidirectional TVS: one side on a CV jack, the other on GND"
+            nets = {got.get("1"), got.get("2")}
+            ok = "GND" in nets and any(n and re.search(r"/(CV\d|CVI\d)$", n) for n in nets)
+        elif ref in POLARITY_RULES:
             want, why = POLARITY_RULES[ref]
             ok = all(got.get(k) == v for k, v in want.items())
         elif c["lib"] == "Diode:BAT54S":

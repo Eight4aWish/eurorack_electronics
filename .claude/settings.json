@@ -2,6 +2,43 @@
   "permissions": {
     "additionalDirectories": [
       "../eurorack_daisy_patch_init"
+    ],
+    "allow": [
+      "WebSearch",
+      "Bash(pdfinfo *)",
+      "Bash(gh search *)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:hermeticmodular.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:community.daisy.audio)",
+      "WebFetch(domain:www.nonlinearcircuits.com)",
+      "WebFetch(domain:modulargrid.net)",
+      "WebFetch(domain:forum.electro-smith.com)",
+      "WebFetch(domain:www.modwiggler.com)",
+      "WebFetch(domain:docs.espressif.com)",
+      "WebFetch(domain:modwiggler.com)",
+      "WebFetch(domain:www.waveshare.com)",
+      "WebFetch(domain:www.thonk.co.uk)",
+      "WebFetch(domain:llllllll.co)",
+      "WebFetch(domain:pichenettes.github.io)",
+      "WebFetch(domain:www.musicthing.co.uk)",
+      "Bash(pdftotext *)",
+      "Bash(pdftoppm *)",
+      "Bash(mkdir *)",
+      "WebFetch(domain:api.github.com)",
+      "Read(//Users/dbaghurst/GitHub/**)",
+      "WebFetch(domain:www.midi.org)",
+      "WebFetch(domain:midi.org)",
+      "WebFetch(domain:learn.adafruit.com)",
+      "WebFetch(domain:www.pjrc.com)",
+      "WebFetch(domain:www.ti.com)",
+      "WebFetch(domain:docs.daisy.audio)",
+      "WebFetch(domain:www.befaco.org)",
+      "WebFetch(domain:befaco.org)",
+      "WebFetch(domain:www.doepfer.de)",
+      "WebFetch(domain:doepfer.de)",
+      "WebFetch(domain:4mscompany.com)",
+      "WebFetch(domain:www.4mscompany.com)"
     ]
   }
 }

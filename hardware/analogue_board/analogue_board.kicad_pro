@@ -39,6 +39,10 @@
     [
       "040e7b24-7d27-5978-9200-b15a621f45ee",
       "Edge strips"
+    ],
+    [
+      "ed07e321-f38a-541e-a882-770fdceb04e7",
+      "TRS MIDI"
     ]
   ],
   "schematic": {

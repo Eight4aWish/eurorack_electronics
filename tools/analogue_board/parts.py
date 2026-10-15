@@ -38,6 +38,9 @@ ICS = {
                      note="Forced-PWM (FCCM). Pin-compatible fallback with the same values: TPS54202DDCR C191884 (pulse-skips at light load)"),
     "SS14": dict(lib="Diode:SS14", value="SS14", fp="Diode_SMD:D_SMA", lcsc="C2480", mpn="SS14",
                  ds="https://www.lcsc.com/datasheet/lcsc_datasheet_2407101109_MDD-Microdiode-Semiconductor-SS14_C2480.pdf", jlc="Basic", prefix="D"),
+    # 3 A in the same SMA footprint: the +12 V entry can carry ~0.75 A with an ESP32-P4 and a lit LED chain
+    "SS34": dict(lib="Diode:SS34", value="SS34", fp="Diode_SMD:D_SMA", lcsc="C8678", mpn="SS34",
+                 ds="https://www.lcsc.com/datasheet/lcsc_datasheet_2407101107_MDD-Microdiode-Semiconductor-SS34_C8678.pdf", jlc="Basic", prefix="D"),
     "BAT54S": dict(lib="Diode:BAT54S", value="BAT54S", fp="Package_TO_SOT_SMD:SOT-23", lcsc="C408389", mpn="BAT54S",
                    ds="https://www.lcsc.com/datasheet/lcsc_datasheet_2407101108_MDD-Microdiode-Semiconductor-BAT54S_C408389.pdf", jlc="Extended", prefix="D"),
     # BAV99 uses the BAT54S symbol: both datasheets give 1 = anode, 2 = cathode, 3 = common (series pair)
@@ -63,6 +66,18 @@ ICS = {
                    mpn="", ds="docs/n8synth_platform.md", jlc="bare holes", prefix="J"),
     "EDGE_R": dict(lib=f"{LIB}:EdgeStrip_40", value="Edge strip, right", fp=f"{LIB}:EdgeStrip_40_Right", lcsc="",
                    mpn="", ds="docs/n8synth_platform.md", jlc="bare holes", prefix="J"),
+    "H11L1": dict(lib="Isolator:H11L1", value="H11L1SR2M", fp="Package_DIP:SMDIP-6_W7.62mm", lcsc="C20082",
+                  mpn="H11L1SR2M", ds="https://www.onsemi.com/pdf/datasheet/h11l1m-d.pdf", jlc="Extended"),
+    "AO3401A": dict(lib="Transistor_FET:AO3401A", value="AO3401A", fp="Package_TO_SOT_SMD:SOT-23", lcsc="C15127",
+                    mpn="AO3401A", ds="https://www.aosmd.com/res/datasheets/AO3401A.pdf", jlc="Basic", prefix="Q"),
+    "1N4148WS": dict(lib="Diode:1N4148WS", value="1N4148WS", fp="Diode_SMD:D_SOD-323", lcsc="C2128", mpn="1N4148WS",
+                     ds="", jlc="Basic", prefix="D"),
+    "TVS15": dict(lib="Device:D_TVS", value="PESD15VL1BA", fp="Diode_SMD:D_SOD-323", lcsc="C85378",
+                  mpn="PESD15VL1BA,115", ds="https://assets.nexperia.com/documents/data-sheet/PESD15VL1BA.pdf",
+                  jlc="Extended", prefix="D"),
+    "SJ_OPEN": dict(lib="Jumper:SolderJumper_2_Open", value="SolderJumper open",
+                    fp="Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm", lcsc="", mpn="", ds="",
+                    jlc="bare pad", prefix="JP"),
     "TP": dict(lib="Connector:TestPoint", value="TP", fp="TestPoint:TestPoint_Pad_D1.0mm", lcsc="", mpn="",
                ds="", jlc="bare pad", prefix="TP"),
     "FID": dict(lib="Mechanical:Fiducial", value="Fiducial", fp="Fiducial:Fiducial_1mm_Mask2mm", lcsc="", mpn="",
@@ -78,6 +93,9 @@ RES = {  # (value, size) -> LCSC, all JLC Basic, 1 %
     ("33k", "0402"): "C25779", ("47k", "0402"): "C25792", ("51k", "0402"): "C25794", ("100k", "0402"): "C25741",
     ("200k", "0402"): "C25764", ("1M", "0402"): "C26083",
     ("13k", "0603"): "C22797", ("30k", "0603"): "C22984", ("220k", "0603"): "C22961",
+    ("680R", "0603"): "C23228", ("5.1R", "0603"): "C25197", ("510k", "0603"): "C23192", ("75k", "0603"): "C23242",
+    ("100R", "0805"): "C17408", ("220R", "0805"): "C17557", ("1k", "0805"): "C17513",
+    ("100R", "1206"): "C17901", ("1k", "1206"): "C4410",
 }
 
 CAP = {  # (value, size) -> (LCSC, rating, dielectric), all JLC Basic
@@ -90,9 +108,14 @@ CAP = {  # (value, size) -> (LCSC, rating, dielectric), all JLC Basic
     ("1u", "0805"): ("C28323", "50V", "X7R"), ("10u", "0805"): ("C15850", "25V", "X5R"),
     ("22u", "0805"): ("C45783", "25V", "X5R"),
     ("10u", "1206"): ("C13585", "50V", "X5R"), ("22u", "1206"): ("C12891", "25V", "X5R"),
+    ("47u", "1206"): ("C96123", "10V", "X5R"),
+    # Extended or not fitted: (LCSC, rating, dielectric, JLC library)
+    ("1n C0G", "0603"): ("C106246", "50V", "C0G", "Extended"),
+    ("470p", "0402"): ("", "50V", "C0G", "not fitted"),
 }
 
-FP_R = {"0402": "Resistor_SMD:R_0402_1005Metric", "0603": "Resistor_SMD:R_0603_1608Metric", "0805": "Resistor_SMD:R_0805_2012Metric"}
+FP_R = {"0402": "Resistor_SMD:R_0402_1005Metric", "0603": "Resistor_SMD:R_0603_1608Metric", "0805": "Resistor_SMD:R_0805_2012Metric",
+        "1206": "Resistor_SMD:R_1206_3216Metric"}
 FP_C = {"0402": "Capacitor_SMD:C_0402_1005Metric", "0603": "Capacitor_SMD:C_0603_1608Metric",
         "0805": "Capacitor_SMD:C_0805_2012Metric", "1206": "Capacitor_SMD:C_1206_3216Metric"}
 

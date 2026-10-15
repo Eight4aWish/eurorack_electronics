@@ -1,7 +1,7 @@
 {
     "$schema": "https://schemas.kicad.org/erc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-10-14T21:49:13+0100",
+    "date": "2026-10-15T11:47:12+0100",
     "kicad_version": "9.0.7",
     "sheets": [
         {
@@ -47,6 +47,11 @@
         {
             "path": "/Edge strips/",
             "uuid_path": "/e6cfe5fb-cd34-5945-b37d-aca61e0551b2/040e7b24-7d27-5978-9200-b15a621f45ee",
+            "violations": []
+        },
+        {
+            "path": "/TRS MIDI/",
+            "uuid_path": "/e6cfe5fb-cd34-5945-b37d-aca61e0551b2/ed07e321-f38a-541e-a882-770fdceb04e7",
             "violations": []
         }
     ],

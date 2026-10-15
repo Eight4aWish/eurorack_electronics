@@ -14,6 +14,7 @@ from sexpr import Sym, dumps, find, find_all
 
 GRID = 1.27
 TWO_PIN = {"Device:R_Small", "Device:C_Small", "Device:L_Small", "Device:FerriteBead_Small"}
+DIODE_2PIN = {"Device:D_TVS", "Diode:1N4148WS", "Diode:SS14", "Diode:SS34", "Device:D", "Device:D_Schottky"}
 FONT = [Sym("font"), [Sym("size"), 1.27, 1.27]]
 
 
@@ -138,7 +139,7 @@ class Sheet:
     # ------------------------------------------------------------ symbols
     def place(self, lib_id, ref=None, value=None, at=(0, 0), rot=0, mirror=None, unit=1, footprint="",
               datasheet="", fields=None, in_bom=True, on_board=True, dnp=False, hide_value=False,
-              hide_ref=False, prefix=None, ref_at=None, value_at=None):
+              hide_ref=False, prefix=None, ref_at=None, value_at=None, text_left=False):
         libs = self.project.project_libs
         self._use(lib_id)
         allpins = symbol_pins(lib_id, libs)
@@ -177,13 +178,24 @@ class Sheet:
             (vx, vy), vj = value_at, "left"
         if lib_id in TWO_PIN and not (ref_at or value_at):
             # small two-pin parts: text beside a vertical part, above/below a horizontal one
-            if rot in (0, 180):
+            if rot in (0, 180) and text_left:
+                (rx, ry), rj = (at[0] - 2.54, at[1] - 0.762), "right"
+                (vx, vy), vj = (at[0] - 2.54, at[1] + 1.778), "right"
+            elif rot in (0, 180):
                 (rx, ry), rj = (at[0] + 2.54, at[1] - 0.762), "left"
                 (vx, vy), vj = (at[0] + 2.54, at[1] + 1.778), "left"
             else:
-                d = 3.302 if lib_id == "Device:C_Small" else 2.032
+                d = 3.302 if lib_id in ("Device:C_Small", "Device:FerriteBead_Small") else 2.032
                 (rx, ry), rj = (at[0], at[1] - d), None
                 (vx, vy), vj = (at[0], at[1] + d), None
+        elif lib_id in DIODE_2PIN and rot in (90, 270) and not (ref_at or value_at):
+            # a vertical diode: text beside it, like a vertical resistor. At rot 90 KiCad draws the field turned
+            # through 180° and mirrors its justification, so ask for the opposite side (found by rendering)
+            sx, j = (-2.54, "right") if text_left else (2.54, "left")
+            if rot == 90:
+                j = {"left": "right", "right": "left"}[j]
+            (rx, ry), rj = (at[0] + sx, at[1] - 1.27), j
+            (vx, vy), vj = (at[0] + sx, at[1] + 1.27), j
         elif rot in (90, 270) and not power:
             rj = vj = None  # centred above/below a rotated part reads best
         if power:
@@ -291,9 +303,18 @@ class Sheet:
             rot = {"up": 0, "down": 180, "left": 90, "right": 270}[direction]
         return self.place(lib_id, ref=self.project.next_power_ref(), value=net, at=at, rot=rot)
 
-    def pwr_flag(self, at):
-        """PWR_FLAG with its pin at `at`, graphic above."""
-        return self.place("power:PWR_FLAG", ref=self.project.next_flag_ref(), value="PWR_FLAG", at=at, hide_value=True)
+    def pwr_flag(self, at, rot=0):
+        """PWR_FLAG with its pin at `at`, graphic above (rot 270: to the right, for a flag on a vertical stub)."""
+        return self.place("power:PWR_FLAG", ref=self.project.next_flag_ref(), value="PWR_FLAG", at=at, rot=rot,
+                          hide_value=True)
+
+    def flagged_stub(self, pl, number, net):
+        """Pin to a net on a 5.08 mm stub, with a PWR_FLAG pointing sideways from the middle of the stub,
+        so the flag stays clear of the label at the stub's end."""
+        end = self.connect(pl, number, net, stub=5.08)
+        x, y = pl.p(str(number))
+        self.pwr_flag(((x + end[0]) / 2, (y + end[1]) / 2), rot=270)
+        return end
 
     # ------------------------------------------------------------ connection helpers
     def connect(self, pl, number, net, kind=None, stub=2.54, shape="bidirectional", outward=False):

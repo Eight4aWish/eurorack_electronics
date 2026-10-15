@@ -1,4 +1,4 @@
-# Analogue board — Rev A specification, v0.3
+# Analogue board — Rev A specification, v0.4
 
 A general-purpose Eurorack I/O board: a plug-in compute module on one side, an n8synth
 Control Deck on the other, and every analogue, gate and display interface in between.
@@ -10,6 +10,12 @@ existing modules, and settles the deck interface with David's answers.
 
 v0.3 (2026-10-14) adds §15: what the schematic (checkpoint 1) decided that this spec had
 left open, or changed.
+
+v0.4 (2026-10-15) records the block-by-block prior-art review
+(`docs/analogue_board_review/`), the schematic pass that applied it, and David's decisions
+on it: TVS diodes on the CV jacks, CV kept at ±5 V, the ESP32-P4-WIFI6 accommodated, the
+power header free to move, TRS MIDI back. It also collects every firmware requirement in
+one list (§15). Superseded lines elsewhere are marked inline and point to §15.
 
 **Marks:** **[decided]** agreed with David · **[proposed]** recommended, not yet agreed ·
 **[open]** needs a decision · **†** not verified against a primary source in this pass.
@@ -26,11 +32,11 @@ Datasheet facts carry the datasheet; stock and prices are from the JLCPCB parts 
 | 74HCT595 not found at LCSC | Nexperia 74HCT595D **C282339**, 14,359 in stock | Gate outs as designed |
 | DAC: DAC8568 vs 2 × quad, open | DAC8568 has **no IOVDD**: VINH = 0.625 × AVDD at 5 V, which 3.3 V logic misses at the top of the AVDD tolerance. Grade **A** run from a 3.3 V analogue rail has VINH = 0.7 × AVDD = 2.31 V — direct drive, no level shifter. IA $17.45 vs 2 × DAC8565 $27.49 | **DAC8568IAPWR on its own 3.3 V analogue rail** |
 | PCM3060 "outputs DC-coupled" | DAC outputs are **differential**, 1.6 × VCC = 8 Vpp | A difference amp gives a clean DC-coupled ±5 V out |
-| TL074 for all op-amps | TL07x swings ±10 V only into ≥2 kΩ on **±15 V**; from ±11.6 V rails ±10 V is not reliable | **±5 V is the CV range**; ±10 V needs a rail-to-rail part (OPA4197) |
+| TL074 for all op-amps | TL07x swings ±10 V only into ≥2 kΩ on **±15 V**; from ±11.6 V rails ±10 V is not reliable. **Corrected 2026-10-15 (§15):** that was the old TL07x die; the TL07xH swings within 0.2 V of the rails into 10 kΩ | **±5 V is the CV range**; ±10 V needs a rail-to-rail part (OPA4197) (superseded, §15) |
 | Gate-in count 6, EYESPI colour TFT | The audit (§3) finds no own build with more than two gate ins, and none using a colour TFT | 4 direct gate ins; EYESPI dropped (both decided) |
 | Board "~50 mm wide", headers to the deck | David: **10HP mounts parallel to the panel, 6HP at 90°**, and the channel→cell wiring lives **on this board** | One PCB, the n8synth breadboard's footprint, serves both widths (§4) |
 | 24C02 EEPROM | The panel map plus calibration can outgrow 256 bytes | **M24C64** (8 KB), a Preferred part |
-| MIDI in via opto | David has only ever used TRS MIDI on the Big Genes | **No MIDI circuit in Rev A** (decided); its two pins go to the wiring field as spare GPIO |
+| MIDI in via opto | David has only ever used TRS MIDI on the Big Genes | **No MIDI circuit in Rev A** (decided). **Reversed 2026-10-15: TRS MIDI in and out are back (§15)** |
 | Three module families incl. XIAO | 11 pins cannot carry I2S plus a panel bus | **Pico 2 and Teensy 4.1 only** (decided); XIAO dropped |
 
 ## 2. Goal and constraints
@@ -102,8 +108,8 @@ writes and would port here. Bought modules are benchmarks.
 
 | Type | Count | Notes |
 |---|---|---|
-| Audio in | 2 | AC-coupled, 10 Vpp nominal, ±10 V tolerant |
-| Audio out | 2 | DC-coupled, ±5 V; doubles as high-resolution CV out |
+| Audio in | 2 | AC-coupled, 10 Vpp nominal, ±10 V tolerant. **Full scale 20 Vpp from 2026-10-15 (§15)** |
+| Audio out | 2 | DC-coupled, ±5 V; doubles as high-resolution CV out. **Full scale 20 Vpp from 2026-10-15 (§15)** |
 | CV bidirectional | 6 | ADC always reads the jack; DAC switched on for output |
 | CV in only | 2 | The ADC's spare channels |
 | CV out only | 2 | The DAC's spare channels |
@@ -112,7 +118,8 @@ writes and would port here. Bought modules are benchmarks.
 | Pots | 8 | Ratiometric |
 | Buttons / switches / encoder | 9 lines | On the GPIO expander; one encoder needs 3 |
 | LEDs | 1 chain | WS2812, 5 V data |
-| Spare GPIO | 2 | To the wiring field (the pins v0.1 gave to MIDI) [decided] |
+| Spare GPIO | 2 | To the wiring field (the pins v0.1 gave to MIDI) [decided]. **From 2026-10-15 they can carry TRS MIDI through link holes (§15)** |
+| TRS MIDI | 1 in, 1 out | **Added 2026-10-15 [decided]:** Type A, H11L1 opto in, 5 V buffered out (§15) |
 | Displays | Qwiic I2C | EYESPI dropped [decided] |
 
 So CV reaches 8 in or 8 out (O&C's count; eight of Girl's nine), and the gate outs cover
@@ -200,6 +207,10 @@ x = 24.8): those are for stacking a second board, and nothing stacks on this one
   inductor stay out of it. [proposed]
 - **Power header:** shrouded **2 × 5**, ±12 V only, at bottom centre (where the breadboard
   has its 2 × 8), on the outward face. [decided — David: the bus +5 V is not wanted]
+  **Position superseded 2026-10-15 [decided]:** it need not be bottom centre; the
+  patch.init has its socket on a long edge. Place it with the buck and the rail filters at
+  one end, away from the codec, ADS8688, DAC8568 and their op-amps, and outside the USB
+  keep-out. Its only constraint is keeping power-rail noise away from sensitive parts.
 
 ## 5. Compute modules [decided: Pico 2 and Teensy 4.1]
 
@@ -237,6 +248,9 @@ function table); PJRC Teensy 4.1 product page, pinout cards and dimension drawin
   set to 3.3 V first. The board is 20 mm longer than a Pico, its USB-C is serial only, and its
   Wi-Fi will be weak in the rack. Details: [`analogue_board_esp32p4.md`](analogue_board_esp32p4.md).
   It prompted 10 kΩ pull-ups on CS_ADC, CS_DAC and CS_POT, which every module benefits from.
+  **Accommodated from 2026-10-15 [decided]:** bridging JP201 lets Q201 bypass the Schottky
+  for its supply margin. Firmware sets LDO channel 4 to 3.3 V before using pins 21, 22 or 24.
+  Checkpoint 2 finds room for its extra length (§15).
 - **Teensy 4.0** is not a target. If its pins prove to sit where the 4.1's first 14 per
   side do †, the bus-merge jumpers (§6.3) would let it run as a bonus.
 
@@ -316,7 +330,7 @@ v1.0.5 and libDaisy; Ogham = Keeos `ogham-merged-v1.0` sheets.
 | **CV in** | 120k → inverting MCP6004 on 3.3 V, 33k‖4.7 nF, 100k from a −5 V ref: ±6 V → 0–3.3 V. RP2040 ADC via CD4052 mux, "really 8–10 bits" | 100k → TL074 ×−0.22 → MCP6002 on 3.3 V (stage credited to Émilie Gillet): 0–12 V, negatives read 0 | Patch SM: ±5 V, 100k in. Ogham: 470k into an MCP6004 summer with the pot and a −5 V ref | ADS8688 direct: ±10.24 / ±5.12 V native, 1 MΩ, 16-bit. No op-amp, no mux. |
 | **Input protection** | Large series R into a virtual ground; the 3.3 V rail-to-rail op-amp cannot drive the ADC past its rails | Same idea: TL074 then a 3.3 V MCP6002 that "will always clip" | Ogham: 470k series plus the op-amp's clamps | The ADS8688's own OVP (±20 V powered, ±11 V off) behind 1 kΩ |
 | **CV out** | PWM 11-bit at 60 kHz → 2-pole MFB on TL074H (gain −3.6, +5.97 V offset); sigma-delta in the PWM IRQ gives ~19 bits, ~5.9 mV calibrated | PWM 100 kHz → 1k/100 nF → TL074 ×3.2 → 1k: 0–10 V, ~1.5 kHz bandwidth | Patch SM: STM32 12-bit DAC, 0–5 V. Ogham: Seed DAC → TL072 ×3 | DAC8568 16-bit → TL074H ×4 with offset: ±5 V at ~31 kHz per channel |
-| **Audio out** | MCP4822 → TL074H inverting with −5 V ref: ±6 V, 1k out | — | Patch SM: PCM3060, DC-coupled ±5 V. Ogham: TL072 ×4.7 overshot to 19.5 Vpp | PCM3060 differential → difference amp ×1.25: ±5 V DC-coupled |
+| **Audio out** | MCP4822 → TL074H inverting with −5 V ref: ±6 V, 1k out | — | Patch SM: PCM3060, DC-coupled, **17.3 Vpp full scale** (corrected 2026-10-15; it was given as ±5 V). Ogham: TL072 ×4.7 overshot to 19.5 Vpp | PCM3060 differential → difference amp ×1.25: ±5 V DC-coupled |
 | **Gate in** | 100k → NPN base, RP2040 pull-up as the load, no clamp; above 0.4 V = high | 100k → NPN, reverse diode on the base, 10k pull-up; 0.8 V threshold | Patch SM: BJT input, inverted in libDaisy. Ogham: LM393 with hysteresis for clock Ogham's clock input, adopted: 10k series, BAT54S clamps, LM393 against 1.65 V with hysteresis, own 3.3 V pull-up. No reliance on module pull-ups |
 | **Gate out** | GPIO → NPN, 10k to +12 V: ~7.2 V open-circuit, ~6 kΩ source, short-proof | — | Patch SM: 0–5 V, 100 Ω. Ogham: 74AHCT1G125 → 1k → Schottky clamps | 74HCT595 → 1k, BAV99 clamps: 0/5 V |
 | **Pots** | 3 × 100k from 3V3 through the mux; a 3-way switch read on one channel via 100k/100k | 2 × 10k from the Pico's 3V3 | Patch SM: pots from +5 V out (not ratiometric). Ogham: 1k + 100 nF + 100k pull-down | MCP3208, pots from its own reference: ratiometric |
@@ -337,13 +351,13 @@ produce, and the 595 drives eight from one chip.
 | Block | Circuit | Part (LCSC) | Stock / $@10 | Status |
 |---|---|---|---|---|
 | **Codec** | PCM3060 in hardware-control mode (no control bus). VCC 4.5–5.5 V analogue, VDD 2.7–3.6 V digital. ADC: single-ended, full scale 0.6 × VCC = 3 Vpp around VCOM = 2.5 V, Zin 10 kΩ. DAC: differential, 8 Vpp; load ≥ 10 kΩ DC-coupled. SCKI (MCLK) 2.048–36.864 MHz is required. *(PCM3060 datasheet SBAS437, 2008)* | PCM3060PWR **C2651841** | 1,955 / $4.08 | proposed |
-| **Audio in** | Eurorack 10 Vpp → AC-couple → inverting amp, gain −0.3, biased to VCOM → codec. Clamp to the codec rails. | op-amp | — | proposed |
-| **Audio out** | Codec VOUT± → difference amp, gain 1.25 → ±5 V, **DC-coupled** → 1 kΩ → jack | op-amp | — | proposed |
+| **Audio in** | Eurorack 10 Vpp → AC-couple → inverting amp, gain −0.3, biased to VCOM → codec. Clamp to the codec rails. **Superseded 2026-10-15: 20 Vpp full scale, gain −0.136 (§15)** | op-amp | — | proposed |
+| **Audio out** | Codec VOUT± → difference amp, gain 1.25 → ±5 V, **DC-coupled** → 1 kΩ → jack. **Superseded 2026-10-15: balanced second-order MFB, gain 2.5, 20 Vpp (§15)** | op-amp | — | proposed |
 | **CV ADC** | ADS8688: 8 ch, 16-bit, 500 kSPS aggregate, per-channel ranges ±10.24 / ±5.12 / ±2.56 / 0–10.24 / 0–5.12 V, **1 MΩ** input, OVP ±20 V powered / **±11 V unpowered**, internal 4.096 V ref, AVDD 4.75–5.25 V, DVDD 1.65 V–AVDD, SCLK ≤ 17 MHz, 32-clock frames *(SBAS582C)*. No input op-amps needed. | ADS8688IDBTR **C527390** | 2,921 / $7.32 | proposed |
 | **CV DAC** | DAC8568 grade A: 8 ch, 16-bit, internal 2.5 V ref (off by default), output 0–2.5 V, resets to zero scale, SCLK ≤ 50 MHz. **AVDD = 3.3 V analogue rail**, so VINH = 0.7 × AVDD and 3.3 V logic drives it *(SBAS430F)*. Op-amp ×4 with −5 V offset → ±5 V. | DAC8568IAPWR **C486051** | 796 / $17.45 | decided |
 | **Jack switch** | DG412 (logic 1 = on) with pull-downs, so jacks power up as inputs. ±12 V fine (V+ to V− ≤ 44 V), VL = 5 V, logic 0.8 / 2.4 V, RDS(on) 25 Ω typ, signals beyond the rails clamp through internal diodes, ≤ 30 mA *(Vishay 61564 rev B)* | 2 × DG412DQ-T1-E3 **C2651920** (TSSOP) | 5,903 / $2.18 | proposed |
-| **CV op-amps** | 8 outputs at ±5 V: TL074H (no phase reversal, CM includes V+). The ±10 V option needs rail-to-rail output: OPA4197 footprint-compatible (SOIC-14) | TL074HIDR **C2878713**; option OPA4197IDR **C2058532** | 14,140 / $0.25; 8,474 / $2.73 | proposed |
-| **Reference** | LM4040 4.096 V shunt for the calibration check (0.1 % A-grade or 1 % D-grade) | LM4040AIM3-4.1 **C126807** / LM4040DIM3-4.1 **C202194** | 2,077 / $1.12; 6,187 / $0.47 | proposed |
+| **CV op-amps** | 8 outputs at ±5 V: TL074H (no phase reversal, CM includes V+). The ±10 V option needs rail-to-rail output: OPA4197 footprint-compatible (SOIC-14). **Superseded 2026-10-15: the TL074H swings ±10 V on our rails; ±10 V is a resistor variant (§15)** | TL074HIDR **C2878713**; option OPA4197IDR **C2058532** | 14,140 / $0.25; 8,474 / $2.73 | decided (±5 V) |
+| **Reference** | LM4040 4.096 V shunt for the calibration check (0.1 % A-grade or 1 % D-grade). **Dropped at checkpoint 1 (§15)** | LM4040AIM3-4.1 **C126807** / LM4040DIM3-4.1 **C202194** | 2,077 / $1.12; 6,187 / $0.47 | dropped |
 | **Pots** | MCP3208 on the 3.3 V analogue rail, VREF = that rail, pots fed from VREF + AGND (ratiometric). 50 ksps at 2.7 V, SCLK ≤ 1 MHz at 2.7 V *(DS21298)* | MCP3208-CI/SL **C16939** | 600 / $3.24 | proposed |
 | **Gate in** | Ogham's clock input (Keeos `ogham-merged-v1.0`): jack → 10 kΩ → BAT54S clamp to 3.3 V / GND, 100 kΩ to GND → LM393 (+5 V) + input; − input at 1.65 V from a 3.3 V divider; ~100 kΩ hysteresis; open-collector output, 10 kΩ pull-up to 3.3 V → GPIO, not inverted. Trips at ~1.8 V at the jack, set by resistors, not by logic-gate tolerance — a 3.3 V gate clears it by 1.5 V. ±12 V clamps at ~0.8 mA. Values to tune at schematic. | 2 × LM393DR2G **C7955** (Basic); 4 × BAT54S **C408389** | 213,954 / $0.07; 817,166 / $0.02 | decided |
 | **Gate out** | 74HCT595 at 5 V (VIH 2.0 V, so 3.3 V drives it) → 1 kΩ → jack, BAV99 (Basic, C2500) clamp to +5 V / GND per output. OE pulled high until firmware enables (§10). | 74HCT595D **C282339** | 14,359 / $0.27 | decided |
@@ -382,8 +396,8 @@ Computer's audio outs) and David's own builds use 12-bit.
 |---|---|---|
 | Step | 10 V / 65,536 = 0.15 mV ≈ **0.2 cent** | 10 V / 4,096 = 2.44 mV ≈ **2.9 cents** |
 | Integral nonlinearity, max | ±12 LSB = ±1.8 mV ≈ ±2.2 cents | ±12 LSB = ±29 mV ≈ **±35 cents** (±2 LSB typ ≈ ±6 cents) |
-| Reference | internal 2.5 V, **2 ppm/°C** typ, 25 max | internal 2.048 V ±2 %, **45 ppm/°C** typ, 160 max |
-| Drift at the top of the range (+5 V, i.e. 10 V of span) over a 10 °C warm-up | 0.2 mV ≈ 0.2 cent typ; 2.5 mV ≈ 3 cents max | 4.5 mV ≈ **5 cents** typ; 16 mV ≈ 19 cents max |
+| Reference | internal 2.5 V, **5 ppm/°C** typ, 25 max for grade A (corrected 2026-10-15: 2 ppm typ is grade C) | internal 2.048 V ±2 %, **45 ppm/°C** typ, 160 max |
+| Drift at the top of the range (+5 V, i.e. 10 V of span) over a 10 °C warm-up | 0.5 mV ≈ 0.6 cent typ; 2.5 mV ≈ 3 cents max | 4.5 mV ≈ **5 cents** typ; 16 mV ≈ 19 cents max |
 | Audio-rate output (~31 kHz) | ~96 dB resolution-limited | ~72 dB |
 | Channels / chip selects | 8 / **1** | 2 per chip, so 8 / **4** |
 | Board area | one TSSOP-16 | four SOIC-8 |
@@ -415,11 +429,11 @@ every build so far.
 
 | Rail | Source | Loads | Part |
 |---|---|---|---|
-| ±12 V in | Eurorack header → series Schottky each rail → ferrite | — | SS14 **C2480** (Basic) |
-| +5 V digital | Buck from +12 V | module, Qwiic, WS2812, 595, VL | TPS54202DDCR **C191884** (261k / $0.18) or AP63205WU-7 **C2071056** (fixed 5 V) |
+| ±12 V in | Eurorack header → series Schottky each rail → ferrite | — | SS14 **C2480** (Basic). **From 2026-10-15: SS34 C8678 (Basic, 3 A, same SMA footprint), §15** |
+| +5 V digital | Buck from +12 V | module, Qwiic, WS2812, 595, VL | TPS54202DDCR **C191884** (261k / $0.18) or AP63205WU-7 **C2071056** (fixed 5 V). **Schematic: TPS54308 (§15)** |
 | +5 V analogue | Linear from +12 V, own ground return | PCM3060 VCC, ADS8688 AVDD | L78M05ABDT **C58069** (Basic); low-noise option TPS7A4901 **C16430** ($1.26) |
-| +3.3 V analogue | LDO from +5 V analogue | DAC8568, MCP3208 + pot reference | AMS1117-3.3 **C6186** (Basic) or LP2985-33 **C95414** |
-| +3.3 V digital | LDO from +5 V digital | PCM3060 VDD, ADS8688 DVDD, gate-in pull-ups and threshold, expander, EEPROM, Qwiic | AMS1117-3.3 **C6186** (Basic) |
+| +3.3 V analogue | LDO from +5 V analogue | DAC8568, MCP3208 + pot reference | AMS1117-3.3 **C6186** (Basic) or LP2985-33 **C95414**. **Schematic: XC6206 (§15)** |
+| +3.3 V digital | LDO from +5 V digital | PCM3060 VDD, ADS8688 DVDD, gate-in pull-ups and threshold, expander, EEPROM, Qwiic, MIDI | AMS1117-3.3 **C6186** (Basic). **Schematic: XC6206 with a 680 Ω minimum load (§15)** |
 
 - **Why a buck:** David's hand-built Daisy modules showed a block-rate comb traced to a
   shared +5 V rail, with a dedicated buck as the fix. Digital and analogue 5 V stay
@@ -427,6 +441,9 @@ every build so far.
 - **Budget (estimate):** +12 V ≈ 120 mA typical, ~350 mA worst case (ESP32 Wi-Fi peaks
   plus a lit LED chain through the buck); −12 V ≈ 25 mA (op-amps). The bus +5 V is never
   used [decided]: every 5 V rail is made on the board.
+  **ESP32-P4 case (added 2026-10-15):** the P4 draws 0.45–0.7 A at 5 V. With a lit LED chain
+  that is ≈0.75 A from +12 V, hence 3 A Schottkys at the rail entry and Q201 bypassing D203.
+  Document it: a module this hungry needs a rack supply with headroom.
 
 ## 9. Grounding [proposed]
 
@@ -450,7 +467,7 @@ Studied: Electrosmith patch.init carrier (48.5 × 111 mm, 2-layer), Keeos Ogham
 | **Zone along the length:** power entry and buck at one end; module and logic in the middle; ADS8688, DAC8568, DG412, PCM3060 and their op-amps at the far end from the buck | Ogham |
 | **Low-profile logic under the module on its headers** (MCP3208, 595, LM393s, TCA9555, EEPROM, ≤ 2.5 mm) — agreed. That brings demand from ~85–120 % of the free area down to ~60 % | Ogham (TL072 stage under the Seed); area estimate |
 | **0402 passives, TSSOP wherever a variant exists** | area estimate |
-| Rail entry: series Schottky → BLM18PG121 ferrite → 10 µF 50 V X7R + 100 nF, per rail | Ogham |
+| Rail entry: series Schottky → BLM18PG121 ferrite → 10 µF 50 V X7R + 100 nF, per rail (the Basic 10 µF 50 V 1206, C13585, is **X5R**: corrected 2026-10-15) | Ogham |
 | Pot and converter references on a linear rail, never the buck or the module's 5 V | Ogham; David's bench notes |
 | Gate out: HCT part → 1 kΩ → Schottky clamps to +5 V and GND | Ogham (74AHCT1G125) |
 | Gate in: 10k series, BAT54 clamps, then a comparator with a set threshold and hysteresis | Ogham (clock input) |
@@ -458,7 +475,7 @@ Studied: Electrosmith patch.init carrier (48.5 × 111 mm, 2-layer), Keeos Ogham
 | 74HCT595: OE pulled **high** (gates off) until firmware enables them from a TCA9555 line; MR to VCC. The storage register powers up undefined. | Datasheet behaviour; Ogham ties OE low |
 | Spare op-amp sections tied as followers with + to GND | Ogham |
 | Power-header symbol: join pins 1–2 (−12 V), 3–8 (GND), 9–10 (+12 V); then confirm every op-amp ±12 V pin has its 100 nF within ~3 mm | review of the boards |
-| No tantalum on the ±12 V rails; X7R 50 V instead | Ogham (schematic note) |
+| No tantalum on the ±12 V rails; X7R 50 V instead (X5R 50 V in the schematic: the Basic 10 µF 50 V part; derate for DC bias) | Ogham (schematic note) |
 | GND stitching vias at every decoupling cap and around the edge | Ogham (~37) |
 | Derate MLCC values for DC bias | reDIP-SID (capacitor notes) |
 | 0.45 / 0.2 mm vias only for fine-pitch fan-out (ADS8688 TSSOP-38); three fiducials | reDIP-SID; JLC practice |
@@ -468,7 +485,7 @@ Studied: Electrosmith patch.init carrier (48.5 × 111 mm, 2-layer), Keeos Ogham
 | Test pads on every rail and on I2S; fiducials | none of the four boards had them |
 | Check every decoupling cap's two nets and every polarised part in the PCB, then step through rotations in JLC's preview | review of the boards |
 
-One codec data point: Ogham measured its PCM3060 (single-ended, AC-coupled on the Seed)
+One codec data point (**unverified, 2026-10-15:** Ogham has a PCM3060 only if a Daisy Seed Rev7 is fitted, and its parts list names Rev4): Ogham measured its PCM3060 (single-ended, AC-coupled on the Seed)
 at ~4 Vpp, not the 2 Vpp it assumed, and overshot to 19.5 Vpp. Our gain is set from the
 datasheet's differential 8 Vpp (§7).
 
@@ -489,6 +506,8 @@ datasheet's differential 8 Vpp (§7).
   2,985 in stock, $2.13), is $8.93 less a board. Comparison and decision: §7.1.
 - **Extended part types:** ~14 (PCM3060, ADS8688, DAC8568, DG412, MCP3208, TL074H, BAT54S,
   74HCT595, TCA9555, AHCT1G125, LM4040, buck, its inductor, JST SH). Order fees: §12.
+  **The schematic has 17 (2026-10-15):** LM4040 dropped; M24C64 (Preferred) counted; the
+  review added the 15 V TVS, the 1 nF C0G and the H11L1 (MIDI). List in §15.
 - **6HP and 10HP from one design** means one assembly setup, not two.
 
 ## 12. JLCPCB rules and order cost
@@ -529,6 +548,11 @@ From JLCPCB's *PCB Assembly Cost: What Does the Price Include?* (help centre, up
 
 Still to check: the 4-layer bare-board price and shipping, both from JLC's online quote.
 
+**Updated 2026-10-15:** the schematic has 17 Extended types (§15): 17 × $3.07 = $52.19,
+$9.21 more than the table. That gives about **$148** (2 assembled) and **$277** (5), before
+PCBs and shipping. Placement rises with the review's extra passives (353 machine-placed
+parts).
+
 ## 13. Decisions
 
 ### Settled by evidence in this pass
@@ -541,7 +565,7 @@ Still to check: the 4-layer bare-board price and shipping, both from JLC's onlin
   enables, buttons and an encoder share it.
 - EEPROM: M24C64.
 - CV range: ±5 V standard; ±10 V via an OPA4197 option, because TL074 cannot reach it from
-  ±12 V rails.
+  ±12 V rails. (Corrected in §15: the TL074H can, so ±10 V is a resistor variant.)
 
 ### Decided by David, 2026-10-14
 
@@ -550,8 +574,17 @@ Still to check: the 4-layer bare-board price and shipping, both from JLC's onlin
 - Four gate ins.
 - XIAO dropped: Pico 2 and Teensy 4.1 only.
 - Modules on headers; low-profile SMT under them.
-- No TRS MIDI in Rev A.
+- No TRS MIDI in Rev A. (Reversed 2026-10-15: TRS MIDI is back, §15.)
 - DAC: DAC8568IA (§7.1).
+
+### Decided by David, 2026-10-15
+
+- TRS MIDI in and out are back; audio full scale is 20 Vpp in and out; every block gets a
+  prior-art review before the schematic pass.
+- 15 V TVS diodes at the CV jacks (one new Extended type).
+- CV range stays **±5 V**, with a documented ±10 V resistor variant (§15).
+- The board accommodates the **ESP32-P4-WIFI6** (§5, §15).
+- The power header can go anywhere that keeps power-rail noise away from sensitive parts (§4.3).
 
 ### Hardware licence: CC BY-SA 4.0 (decided)
 
@@ -590,7 +623,8 @@ repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No p
 1. **Schematic**, as a PDF: KiCad's electrical rules check clean; every IC pin scripted
    against its datasheet pinout; every power pin checked for its decoupling and every
    polarised part for orientation. The pin map (which Pico / Teensy pin goes where) is
-   the first sheet. **Drafted 2026-10-14, awaiting review:**
+   the first sheet. **Drafted 2026-10-14; rebuilt 2026-10-15 after the block review,
+   awaiting David's sign-off:**
    [`hardware/analogue_board/analogue_board_schematic.pdf`](../hardware/analogue_board/analogue_board_schematic.pdf),
    checks in [`output/checks.md`](../hardware/analogue_board/output/checks.md), decisions in §15.
 2. **1:1 printout** of the outline, edge strips, module footprints and power header. David
@@ -614,6 +648,15 @@ The schematic is generated by `tools/analogue_board/build.py` and checked by scr
 footprint pads against symbol pins; a decoupling capacitor on all 34 IC power pins; all 18
 diodes oriented. 300 parts, 14 Extended part types (as §11 estimated), 32 Basic.
 
+**Rebuilt 2026-10-15** after the block review, with the same checks:
+- ERC 0 errors, 0 warnings.
+- Netlist identical to intent: 345 nets, 1,274 pins.
+- 21 ICs against their datasheets; 48 symbol/footprint pairs.
+- Decoupling on all 36 IC power pins; all 29 diodes and the FET oriented.
+- 356 BOM parts, 353 of them machine-placed: **17 Extended part types**, 44 Basic.
+
+Ten sheets, the pin map first; every sheet was also checked by eye for overlapping text.
+
 ### Changed from this spec
 
 | Item | Spec said | Schematic has | Why |
@@ -628,10 +671,10 @@ diodes oriented. 300 parts, 14 Extended part types (as §11 estimated), 32 Basic
 
 | Item | Schematic has | Why |
 |---|---|---|
-| −5 V offset for the CV outs (§6.4) | Taken from the DAC8568's own 2.5 V reference: 10k/20k divider, 1 µF, a TL074H follower → OFFSET_REF 1.667 V into each stage's 10 kΩ; gain 1 + 30k/10k = 4, so Vout = 4·Vdac − 5 V | Mid-code is 0 V whatever the reference does. Costs a fourth TL074H (same part type, no fee); its three spare sections are grounded followers |
+| −5 V offset for the CV outs (§6.4) | Taken from the DAC8568's own 2.5 V reference: 10k/20k divider, 1 µF, a TL074H follower → OFFSET_REF 1.667 V into each stage's 10 kΩ; gain 1 + 30k/10k = 4, so Vout = 4·Vdac − 5 V. **Changed 2026-10-15:** 12k/22k divider and 1 nF → OFFSET_REF 1.618 V; gain 1 + 33k/10k = 4.3, so −5.34 … +5.41 V, ±5 V inside the DAC's specified codes | Mid-code is 0 V whatever the reference does. Costs a fourth TL074H (same part type, no fee); its three spare sections are grounded followers |
 | Codec straps | MODE 220 kΩ to ground (hardware mode, differential outputs). FMT, DEMP, IFMD each 10 kΩ to ground (I2S, no de-emphasis, slave). RST pulled up through 1 kΩ | Pull-downs rather than hard ties, so a strap can be changed with a bodge |
-| Audio in | 1 µF 50 V X7R, then 100 kΩ into an inverting TL074H with 33 kΩ ∥ 100 pF, + input on VCOM, then 1 kΩ into the codec's 10 kΩ: gain −0.30. 1 MΩ to ground at the jack. BAT54S clamps to +5VA | Inverting: firmware flips the sign |
-| Audio out | 12 kΩ / 15 kΩ difference amp (×1.25), 100 pF C0G across each 15 kΩ (pole at 106 kHz), 1 kΩ out | Larger C0G values are not Basic. The codec has its own RC filter; 330 pF (Extended) would move the pole to 32 kHz |
+| Audio in | 1 µF 50 V X7R, then 100 kΩ into an inverting TL074H with 33 kΩ ∥ 100 pF, + input on VCOM, then 1 kΩ into the codec's 10 kΩ: gain −0.30. 1 MΩ to ground at the jack. BAT54S clamps to +5VA. **Changed 2026-10-15:** feedback 15 kΩ ∥ 100 pF, gain −0.136, so 22 Vpp → 3 Vpp; 100 nF on each + input | Inverting: firmware flips the sign |
+| Audio out | 12 kΩ / 15 kΩ difference amp (×1.25), 100 pF C0G across each 15 kΩ (pole at 106 kHz), 1 kΩ out. **Changed 2026-10-15:** balanced second-order MFB (Beads' topology), 12k in, 1k to each input, 30k feedback and 30k to ground, 1 nF C0G across the two nodes, 100 pF at each input: gain 2.5, f0 ≈ 65 kHz, Q ≈ 0.73; 1 kΩ 1206 out | Larger C0G values are not Basic. The codec has its own RC filter; 330 pF (Extended) would move the pole to 32 kHz. The MFB needs one Extended 1 nF C0G |
 | Gate-in values | 10 kΩ, BAT54S to +3V3D/GND, 100 kΩ to ground, 100 kΩ hysteresis, 10 kΩ pull-up. GATE_TH = 1.65 V from one 10k/10k divider | Trips at 1.98 V rising, 1.67 V falling at the jack |
 | Jack-detect probe | GPIO → 1 kΩ → bus with a BAT54S clamp → 14 holes: PR1-10 through 100 kΩ (audio and CV ins), PR11-14 through 22 kΩ (gate ins) | A 100 kΩ probe lifts an unpatched gate input only to ≈1.24 V, under the threshold |
 | Chip-select pull-ups | 10 kΩ to +3V3D on CS_ADC, CS_DAC, CS_POT | Every module leaves its pins floating while it boots; this keeps the converters deselected and off MISO |
@@ -640,7 +683,121 @@ diodes oriented. 300 parts, 14 Extended part types (as §11 estimated), 32 Basic
 | Rail links and test pads (checkpoint 4) | A 0 Ω link after every regulator; test pads on every rail, on I2S and on both SPI buses and I2C | Fitted now rather than at layout |
 | Edge strips | 80 positions, outer and inner pads sharing a pad number; nothing tied to GND | All 80 stay free tie points; a GND wire goes to any free position if wanted |
 
+### Decided and corrected, 2026-10-15
+
+**Decided by David:**
+- **TRS MIDI in and out are back** in Rev A, reversing §1 and §13. They use the two
+  UART-capable spare pins (Pico GP0/GP1 = UART0, Teensy 1/0 = Serial1); no other pins are
+  needed. The circuit comes from the block review below.
+- **Audio full scale is 20 Vpp, in and out**, as every published PCM3060 Eurorack design
+  has it. Firmware runs at about 10 Vpp nominal, leaving 6 dB for peaks, and hot 20 Vpp
+  sources no longer clip the inputs.
+- **Block-by-block prior-art review** of every stage before the schematic pass, with
+  results in `docs/analogue_board_review/`.
+
+**Corrections to earlier sections:**
+- **TL074H swing** (§1, §7, §13): the TL07xH datasheet (SLOS080W) gives output swing within
+  0.2 V of each rail into 10 kΩ, about 1 V into 2 kΩ. From ±11.6 V rails that is
+  about ±11.4 V, so 20 Vpp audio and ±10 V CV are open to the TL074H. The "needs OPA4197"
+  claim came from the old TL07x die.
+- **Patch SM audio out** (§6.5): 17.3 Vpp full scale from a balanced second-order MFB at
+  ×2.17, not ±5 V (survey: `docs/analogue_board_review/codec_pcm3060.md`).
+- **Ogham's codec** (§6.5, §10): it is a PCM3060 only if its Daisy Seed is Rev7; its parts
+  list names Rev4 (AK4556). The 4 Vpp data point is unverified.
+
+**Decided by David, later the same day** (on the review's open items):
+- **15 V TVS at each CV jack: yes.** PESD15VL1BA (C85378), one new Extended type.
+- **CV range stays ±5 V**, with a documented ±10 V resistor variant: Rf 75k, divider 15k/20k,
+  all Basic. That gives gain 8.5, OFFSET_REF 1.429 V and −10.71 … +10.54 V; it needs ≥ 10 kΩ
+  loads and is calibrated within the ADC's ±10.24 V range.
+- **The ESP32-P4-WIFI6 is accommodated** (§5): Q201 and JP201 below, a firmware rule, and
+  board length at checkpoint 2.
+- **The power header is free to move** (§4.3): place it to keep power-rail noise away
+  from sensitive parts.
+- **DAC8568 grade A reference drift** (§7.1): 5 ppm/°C typ, 25 max. The 2 ppm figure is
+  grade C.
+- **Rail capacitors** (§10): the Basic 10 µF 50 V 1206 is X5R, not X7R. Allow for DC-bias
+  derating.
+
+### Applied from the block review, 2026-10-15
+
+Every A and B item in `docs/analogue_board_review/README.md`, as now drawn:
+
+| Block | In the schematic | Cost |
+|---|---|---|
+| Power | 680 Ω minimum load on +3V3D (R210): the gate-input clamps push ≈3.4 mA into a rail whose XC6206 can't sink it | Basic |
+| Power | Buck input on its own ferrite (FB203) with 2 × 10 µF 50 V + 100 nF; EN divider 510k/75k, so +5VD starts at ≈9.2 V and stops at ≈8.1 V, never running without +5VA; feed-forward 470 pF + 2 kΩ drawn, not fitted | Basic |
+| Power | **SS34** (C8678, 3 A, same SMA footprint) for D201–D203 in place of the 1 A SS14: +12 V can reach ≈0.75 A with an ESP32-P4 and a lit LED chain | Basic |
+| Power | **MOD_5V bypass for the ESP32-P4:** Q201 (AO3401A, C15127) across D203, gate on PICO_VBUS, 1 MΩ to MOD_5V. JP201 (open by default) ties the gate to 100 kΩ to ground. Bridged: the FET is on, unless USB powers the module, which turns it off (the Pico 2 datasheet's VSYS circuit). Open, for a Teensy: off | Basic |
+| Codec | Ferrite into VCC (FB301), 5.1 Ω into VDD (R304), each with its own 10 µF + 100 nF; 100 nF from VCOM at each audio-input + pin; CODEC_RST to a hole (J303) | Basic |
+| Codec | 20 Vpp in and out (the two rows above) | one Extended (1 nF C0G) |
+| CV in | 15 V TVS at each jack; 1 nF at each ADC input; the switch-path 1 kΩ in 1206; 10 kΩ from +5VA to ground, so the ADS8688's ±20 V protection holds unpowered (TI's condition, to measure at bring-up) | one Extended (TVS) |
+| CV out | 12k/22k offset divider with 1 nF; 33k feedback (±5 V inside the DAC's specified codes); CV7–8 take feedback from the jack side of their 1 kΩ 1206, with the 100 pF at the op-amp pin; every jack-facing resistor 1206 | Basic |
+| Gates | 10 kΩ pull-up on CS_595; GATE_OE_N on the J603 expansion holes, labelled "74HCT595 only" | Basic |
+| Panel | Wiper pull-downs 1 MΩ; POT_REF (MCP3208 VREF and pot tops) from +3V3A through 100 Ω with 10 µF + 100 nF; buttons hole → 1 kΩ → node (10 kΩ up, 100 nF, or 10 nF on SW5–SW8 for encoders); 47 µF at the LED holes; the encoder is documented on gate inputs 3–4 | Basic |
+| MIDI | Sheet 10, Type A (RP-054), values from CA-033. **Out:** 74AHCT1G125 at +5VD → 2 × 100 Ω 1206 per leg, BAT54S clamp on the driver. **In:** 220 Ω → H11L1 (C20082) with a 1N4148WS reverse diode, 1 kΩ pull-up to +3V3D, 1 kΩ series to the module. The IN sleeve goes to ground through 100 nF, never directly. Enabled by link holes on J101 (SPARE1-MIDI_TX, SPARE2-MIDI_RX) | one Extended (H11L1) |
+
+**Extended part types (17):** PCM3060, ADS8688, DAC8568, DG412, MCP3208, TL074H, 74HCT595,
+TCA9555, M24C64 (Preferred), SN74AHCT1G125, BAT54S, TPS54308, the 15 µH inductor, JST SH,
+PESD15VL1BA, the 1 nF C0G and H11L1. At $3.07 each, $52.19 an order (§12).
+
+### Firmware requirements
+
+The hardware assumes these. Each is cheap in code and costly to rediscover on the bench.
+
+**Boot and power**
+1. Probe the M24C64 at 0x50 before starting MCLK, I2S or SPI. If it does not answer, the
+   rack is off and the module runs on USB: keep those pins, SPI-B and LED_DATA as inputs, so
+   the module does not power the board's chips through their input clamps.
+2. **ESP32-P4:** first, set LDO channel 4 to 3.3 V (`esp_ldo_acquire_channel`). Pins 21, 22
+   and 24 (SPI-A) are dead until then. Bridge JP201.
+3. **DAC8568 start-up**, in order ([cv_out.md](analogue_board_review/cv_out.md) B1):
+   1. TCA9555 port 0 to 0, then outputs, so every jack switch is off.
+   2. Write the 0 V code (≈32544) to all eight channels.
+   3. Enable the internal reference as flexible and always on (0x090A0000).
+   4. Wait about 10 ms (to confirm on the bench).
+   5. Write the targets.
+   6. Close each switch only once its channel holds the wanted value.
+   7. Never send the software reset on a warm restart.
+4. **74HCT595:** keep GATE_OE_N high until a full gate word has been shifted and latched.
+5. **Codec:** it starts by itself (RST pulled up). If CODEC_RST is wired from J303, hold it
+   low until MCLK runs, as Beads does.
+
+**Audio**
+6. The audio inputs invert: negate the ADC samples.
+7. Run at about 10 Vpp nominal, 6 dB under the 20 Vpp full scale.
+
+**CV**
+8. An unpatched CV input reads about +0.2 V (the ADS8688's internal bias). Trust the
+   jack-detect probe and force 0. Default every channel to ±10.24 V; oversample for
+   audio-rate CV.
+9. **CV1–6 load correction:** with a switch on, the ADC reads the jack. Servo out the load
+   sag (≈10 ms), clamp the correction to ±3 %, and flag a jack driven by another output.
+10. Calibrate the outputs at more points (one per volt, as O&C). CV7–8 have no ADC path:
+    calibrate them with a cable to CVI7–8.
+11. Hold a channel's DAC steady while its jack is an input (switch off-isolation), and
+    write every sample: block-rate CV updates step audibly.
+
+**Gates, panel, LEDs, MIDI**
+12. Gate inputs are active-high. Mask them while the jack-detect probe runs, and catch
+    100 µs triggers with edge interrupts or PIO.
+13. **Encoder:** A and B on gate inputs 3–4 (PIO quadrature on Pico GP8/GP9, QuadEncoder on
+    Teensy 4/5), not through the TCA9555, whose shared I2C bus a busy OLED holds for about
+    23 ms. Debounce buttons in firmware. Treat the TCA9555 INT as a level and poll as a
+    backstop.
+14. **Panel bus:** the 74HCT595 sees every MCP3208 frame (SER = MOSI, SRCLK = SCK). Always
+    shift a full gate word before pulsing RCLK, and keep SCLK ≤ 1 MHz while CS_POT is low.
+15. Cap the total LED current (for example ≤ 150 mA at 5 V).
+16. **MIDI:** UART0 on the Pico (GP0/GP1), Serial1 on the Teensy (1/0). On a Pico, move the
+    SDK console from UART0 to USB. There is no hardware THRU; echo IN to OUT in firmware if
+    wanted.
+
 ### For checkpoint 2
+
+- **ESP32-P4 length:** it is 71 mm long, 20 mm more than a Pico 2, with its USB at the same
+  end. Check that its far end fits on the printout, or move the module.
+- **Power header:** place it with the buck and rail filters, away from the converters and
+  op-amps, and clear of the USB keep-out (§4.3).
 
 The pin map (sheet 1) assumes the Pico and Teensy footprints **share no holes**, for example
 with the Teensy's rows one pitch outside and two pitches inside the Pico's. Sharing holes
