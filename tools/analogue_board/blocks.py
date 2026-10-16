@@ -108,7 +108,7 @@ def two_pin(sh, pl, net1, net2, stub=2.54):
 
 def holes(sh, at, nets, title, ref=None, rot=0, mirror=None, stubs=None):
     """A row of bare plated holes (the wiring field), one per entry of `nets` (top to bottom)."""
-    p = holes_part(len(nets))
+    p = holes_part(nets, tuple(sh.project.ground_nets))
     p = dict(p, value=title)
     return ic(sh, None, at, {i + 1: n for i, n in enumerate(nets)}, rot=rot, mirror=mirror, ref=ref, p=p, stubs=stubs)
 

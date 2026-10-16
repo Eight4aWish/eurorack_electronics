@@ -1,5 +1,6 @@
 """Sheets 3-5: codec and audio, CV jacks and ADC, CV DAC."""
 
+import variant
 import wiring
 from blocks import NC, C, R, decap, decaps, holes, ic, part, tp
 from parts import ICS
@@ -188,6 +189,8 @@ def sheet_codec(sh):
 
 # =====================================================================================  4  CV in
 CV_JACK = {1: "CV1", 2: "CV2", 3: "CV3", 4: "CV4", 5: "CV5", 6: "CV6", 7: "CVI7", 8: "CVI8"}
+FIXED_CV = variant.has("fixed_cv")   # CVI7-8 (in only) and CVO7-8 (out only); the core board has the six switchable jacks only
+CV_CHANNELS = range(1, 9) if FIXED_CV else range(1, 7)
 # CV1-6 bidirectional through DG412 switches; (chip ref, unit, jack-side pin, op-amp-side pin, IN pin)
 SWITCHES = {1: ("U402", 1, "2", "3", "1"), 2: ("U402", 4, "15", "14", "16"), 3: ("U402", 3, "10", "11", "9"),
             4: ("U402", 2, "6", "7", "8"), 5: ("U403", 1, "2", "3", "1"), 6: ("U403", 4, "15", "14", "16")}
@@ -197,12 +200,13 @@ def sheet_cv_in(sh):
     sh.text("CV JACKS AND ADC", (20, 18), size=2.5, bold=True)
     sh.text("ADS8688: 8 channels, 16-bit, 1 MΩ inputs with ±10.24 / ±5.12 V ranges per channel (firmware default ±10.24 V), OVP ±20 V.\n"
             "Each CV jack: 15 V TVS at the hole, read through 1 kΩ with 1 nF at the ADC pin (TI's EVM). 100 kΩ to ground, but the\n"
-            "ADC's 1 MΩ returns to an internal bias, so an UNPATCHED input reads ≈ +0.2 V: firmware trusts the jack-detect probe.\n"
+            "ADC's 1 MΩ returns to an internal bias, so an UNPATCHED input reads ≈ +0.2 V (no jack detect since 2026-10-16).\n"
             "CV1-6 are bidirectional: a DG412 switch (on at logic 1) joins the DAC stage through 1 kΩ (1206); with it on the ADC\n"
             "reads the jack itself. 4.7 kΩ pull-downs beat the TCA9555's internal pull-ups: every jack starts as an input.",
             (20, 23), size=1.5)
     adc_nets = {16: "ADC_IN1", 18: "ADC_IN2", 21: "ADC_IN3", 23: "ADC_IN4", 25: "ADC_IN5", 27: "ADC_IN6",
-                12: "ADC_IN7", 14: "ADC_IN8", 17: "GND", 19: "GND", 20: "GND", 22: "GND", 24: "GND", 26: "GND",
+                12: "ADC_IN7" if FIXED_CV else "GND", 14: "ADC_IN8" if FIXED_CV else "GND",
+                17: "GND", 19: "GND", 20: "GND", 22: "GND", 24: "GND", 26: "GND",
                 13: "GND", 15: "GND", 10: "GND", 11: "GND",
                 36: "SPIA_MISO", 1: "SPIA_MOSI", 37: "SPIA_SCK", 38: "CS_ADC", 3: "GND", 2: "ADC_RST", 4: "GND",
                 35: NC, 7: "REFCAP", 5: "REFIO", 6: "GND", 9: "+5VA", 30: "+5VA", 34: "+3V3D",
@@ -233,7 +237,7 @@ def sheet_cv_in(sh):
 
     # channel rows
     x_sw, x_j, y0, pitch = 172.72, 200.66, 45.72, 20.32
-    for n in range(1, 9):
+    for n in CV_CHANNELS:
         y = y0 + (n - 1) * pitch
         jn = (x_j, y)
         radc = R(sh, "1k", (x_j + 7.62, y), rot=90)
@@ -273,8 +277,11 @@ def sheet_cv_in(sh):
             sh.wire((jn[0] - 5.08, y), jn)
             sh.label(CV_JACK[n], (jn[0] - 5.08, y), 180)
 
-    sh.text("CVO7, CVO8 (out only): their 1 kΩ sits inside the DAC stage's\nfeedback loop on the CV DAC sheet, so the jack holds its voltage\nunder load. Calibrate them with a cable to CVI7 / CVI8.",
-            (x_sw - 10, y0 + 8 * pitch + 2), size=1.27)
+    if FIXED_CV:
+        sh.text("CVO7, CVO8 (out only): their 1 kΩ sits inside the DAC stage's\nfeedback loop on the CV DAC sheet, so the jack holds its voltage\n"
+                "under load. Calibrate them with a cable to CVI7 / CVI8.", (x_sw - 10, y0 + 8 * pitch + 2), size=1.27)
+    else:
+        sh.text("ADC channels 7 and 8 are unused on this board: inputs grounded.", (x_sw - 10, y0 + 6 * pitch + 2), size=1.27)
 
     # switch power and spares
     for i, ref in enumerate(("U402", "U403")):
@@ -307,7 +314,8 @@ def sheet_cv_dac(sh):
             "OFFSET_REF 1.429 V, −10.71 … +10.54 V; needs ≥ 10 kΩ loads. The TL074H can swing it.",
             (20, 23), size=1.5)
     dac = {2: "CS_DAC", 16: "SPIA_SCK", 15: "SPIA_MOSI", 1: "GND", 9: "+3V3A", 8: "DAC_VREF",
-           4: "DAC1", 13: "DAC2", 5: "DAC3", 12: "DAC4", 6: "DAC5", 11: "DAC6", 7: "DAC7", 10: "DAC8",
+           4: "DAC1", 13: "DAC2", 5: "DAC3", 12: "DAC4", 6: "DAC5", 11: "DAC6",
+           7: "DAC7" if FIXED_CV else NC, 10: "DAC8" if FIXED_CV else NC,
            3: "+3V3A", 14: "GND"}
     ic(sh, "DAC8568", (66.04, 88.9), dac, ref="U501")
     sh.text("LDAC low: each write updates its output.\nCLR high: clear pin unused.", (40, 116), size=1.27)
@@ -345,7 +353,12 @@ def sheet_cv_dac(sh):
     sh.tie("OFFSET_REF", (op, "1"), (op, "2"))
 
     # gain stages
-    stages = [(n, "U502" if n <= 4 else "U503", (n - 1) % 4 + 1) for n in range(1, 9)]
+    # CV1-4 on U502; CV5-8 on U503. The core board has no CV7-8, so CV5-6 take two of the offset
+    # buffer's spare sections (U504 B, C) and U503 goes
+    if FIXED_CV:
+        stages = [(n, "U502" if n <= 4 else "U503", (n - 1) % 4 + 1) for n in range(1, 9)]
+    else:
+        stages = [(n, "U502", n) for n in range(1, 5)] + [(5, "U504", 2), (6, "U504", 3)]
     pins = {1: ("2", "3", "1"), 2: ("6", "5", "7"), 3: ("9", "10", "8"), 4: ("13", "12", "14")}
     for n, ref, unit in stages:
         col, row = (n - 1) // 4, (n - 1) % 4
@@ -382,11 +395,12 @@ def sheet_cv_dac(sh):
         sh.label(f"DAC{n}", (op.p(non)[0] - 5.08, op.p(non)[1]), 180)
         sh.tie(f"CVDAC{n}_N", (op, inv), (rf, "1"), (cfb, "1"), (rg, "2"))
         sh.tie(f"DAC{n}", (op, non))
-    sh.text("CVDRV1-6 go to the DG412 switches (sheet CV jacks & ADC). CVO7-8 go straight to their holes.",
-            (190, 180), size=1.27)
+    sh.text("CVDRV1-6 go to the DG412 switches (sheet CV jacks & ADC)." + (" CVO7-8 go straight to their holes." if FIXED_CV
+            else " CV5-6 run on U504 B and C."), (190, 180), size=1.27)
 
     # spare sections of U504 as grounded followers, and the op-amp supplies
-    for k, (unit, (inv, non, out)) in enumerate([(2, ("6", "5", "7")), (3, ("9", "10", "8")), (4, ("13", "12", "14"))]):
+    spares = [(2, ("6", "5", "7")), (3, ("9", "10", "8")), (4, ("13", "12", "14"))] if FIXED_CV else [(4, ("13", "12", "14"))]
+    for k, (unit, (inv, non, out)) in enumerate(spares):
         ox, oy = 147.32, 195.58 + k * 20.32
         op = part(sh, "TL074H", (ox, oy), unit=unit, ref="U504", hide_value=True)
         sh.connect(op, non, "GND")
@@ -395,7 +409,7 @@ def sheet_cv_dac(sh):
         sh.wire(op.p(out), o, (o[0], m[1] + 5.08), (m[0] - 2.54, m[1] + 5.08), (m[0] - 2.54, m[1]), m)
         sh.tie(f"U504_SPARE{unit}", (op, out), (op, inv))
     sh.text("Spare U504 sections: followers with + to GND", (120, 186), size=1.27)
-    for i, ref in enumerate(("U502", "U503", "U504")):
+    for i, ref in enumerate(("U502", "U503", "U504") if FIXED_CV else ("U502", "U504")):
         x = 210 + i * 35.56
         ic(sh, "TL074H", (x, 215.9), {4: "+12V", 11: "-12V"}, unit=5, ref=ref)
         decap(sh, (x + 12.7, 208.28), "100n", "0603", "+12V", f"{ref} V+ pin 4")

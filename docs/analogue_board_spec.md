@@ -1,4 +1,4 @@
-# Analogue board — Rev A specification, v0.4
+# Analogue board — Rev A specification, v0.5
 
 A general-purpose Eurorack I/O board: a plug-in compute module on one side, an n8synth
 Control Deck on the other, and every analogue, gate and display interface in between.
@@ -16,6 +16,13 @@ v0.4 (2026-10-15) records the block-by-block prior-art review
 on it: TVS diodes on the CV jacks, CV kept at ±5 V, the ESP32-P4-WIFI6 accommodated, the
 power header free to move, TRS MIDI back. It also collects every firmware requirement in
 one list (§15). Superseded lines elsewhere are marked inline and point to §15.
+
+v0.5 (2026-10-16): **Rev A becomes two boards** (David), one for the Pico 2 or ESP32-P4 and one
+for the Teensy 4.1, each with one module socket. Everything else is shared: the peripheral
+circuits, the libraries, the edge strips and the wiring field. The reason is routing. With both
+modules on one board, the trial autoroutes stalled where the two modules' header rows
+interleave (§14, checkpoint 3). Where this spec says "the board", read "each board". Lines the
+split supersedes are marked inline.
 
 **Marks:** **[decided]** agreed with David · **[proposed]** recommended, not yet agreed ·
 **[open]** needs a decision · **†** not verified against a primary source in this pass.
@@ -84,8 +91,34 @@ writes and would port here. Bought modules are benchmarks.
 | Ornament & Crime v4.1 (Teensy 4.1) | 8 | — | 8 | — | 2 / 2 | 2 encoders, 5 buttons | OLED |
 | Workshop Computer (RP2040) | 2 + 2 audio/CV | 2 | 2 precision + 2 audio/CV | 2 | shared | 3 knobs, Z switch | 6 LEDs |
 | EuroPi (Pico 2 W) | 1 | 1 | 6 | — | — | 2 knobs, 2 buttons | OLED |
-| Alchemy Lab (Daisy Seed 2) | 6 bidirectional | — | (same 6) | — | 2 / 2 | 6 pots, 3 buttons | 102 RGB LEDs |
+| Alchemy Lab (Hermetic Modular, Daisy Seed 2), 12HP | 6 bidirectional | — | (same 6; V2 drives four through an MCP4728) | — | 2 / 2 | 6 pots, 3 buttons | 102 RGB LEDs; USB-C MIDI, microSD |
 | Ogham (Daisy Seed) | 2 | 2 | 1 | 1 | — / 2 | 4 pots, encoder, toggle | display |
+
+The Alchemy Lab also hosts two own firmwares, Secret (the Teensy Chaos's successor) and Wish
+(Mutable Beads), so it is both a benchmark and a target (MODULES.md).
+
+### Reference platforms, not in the rack (added 2026-10-16)
+
+Noise Engineering's two Daisy Seed platforms, from NE's manuals and libDaisy's board files
+(`daisy_versio.h`, `daisy_legio.h`). Each platform runs many firmwares on one panel layout.
+
+| Platform | CV in | Gate in | CV out | Gate out | Audio | Controls | LEDs |
+|---|---|---|---|---|---|---|---|
+| Versio (Noise Engineering), 10HP | 7, 0–5 V, each summed with its pot | 1 (FSU, trips above 2 V) | — | — | 2 / 2, inputs clip at about 16 Vpp | 7 pots, 2 three-position switches, 1 button | 4 RGB |
+| Legio (Noise Engineering), 6HP | 1 per the manuals (1 V/oct pitch, −2 to +5 V) † | 1 (rising edge at about 1.6 V) | — | — | 2 / 2, AC-coupled in, out up to 16 Vpp | encoder with press, 2 pots, 2 three-position switches | 2 RGB † |
+
+† **Legio CV inputs:** a press roundup says each of the three controls has a CV input, but
+the Sinc and Tymp Legio manuals list one CV jack. **Legio LEDs:** libDaisy's header enum has
+two, while a comment in the same file says four.
+
+What they add:
+- **Audio-first.** Both are stereo in and out with no CV or gate outputs, only CV inputs.
+  Noise Engineering states that pitch-accurate CV inputs need more circuitry than the Versio
+  has. Its CV inputs are 0–5 V, summed with a pot into the MCU's ADC.
+- **Small and focused.** A Versio-class design needs 7 knob-plus-CV pairs, 1 gate and stereo
+  audio. A Legio-class design needs even less. Both fit the Patch SM pattern (4 CV in, 2 gate
+  in, stereo audio) or fall below it, and both fit a much smaller board than Rev A's full
+  channel set.
 
 ### What it says
 
@@ -114,7 +147,7 @@ writes and would port here. Bought modules are benchmarks.
 | CV in only | 2 | The ADC's spare channels |
 | CV out only | 2 | The DAC's spare channels |
 | Gate in | 4 | Direct GPIO, comparator input with a set threshold (v0.1 had 6) [decided] |
-| Gate out | 8 | 0/5 V via shift register |
+| Gate out | ~~8~~ **4** | 0/5 V via shift register. **Cut to 4, one per wiring bank, 2026-10-16 (David, to ease routing); the expansion holes still chain a second 595** |
 | Pots | 8 | Ratiometric |
 | Buttons / switches / encoder | 9 lines | On the GPIO expander; one encoder needs 3 |
 | LEDs | 1 chain | WS2812, 5 V data |
@@ -228,16 +261,16 @@ function table); PJRC Teensy 4.1 product page, pinout cards and dimension drawin
 | USB | Micro-B, short edge at pins 1/40 | Micro-B, short edge at pin 0 / VIN |
 | I2S | PIO on any GPIO; MCLK from GPOUT (GP13/15/21) or PIO | SAI1: MCLK 23, BCLK 21, LRCLK 20, TX 7, RX 8 |
 | Hardware SPI | SPI0 and SPI1 groups both on the header | Two buses on the edge (SPI 10–13; SPI1 26, 27, 1, 0) |
-| +5 V in | VSYS (1.8–5.5 V) through our Schottky — the datasheet's ORing arrangement | VIN (3.6–5.5 V). **Cut the VIN–VUSB pads first**. Headers on pins 1-19 and 29-48 only (checkpoint 3) |
+| +5 V in | VSYS (1.8–5.5 V) through our Schottky — the datasheet's ORing arrangement | VIN (3.6–5.5 V). **Cut the VIN–VUSB pads first**. Full 2 × 24 headers (its own board, 2026-10-16) |
 | 3V3 out | < 300 mA | 250 mA |
 | Logic level | 3.3 V; GPIO 5 V-tolerant while powered, 3.3 V-failsafe unpowered (RP2350 datasheet) | 3.3 V; **not 5 V-tolerant** (PJRC: "Do not drive any digital pin higher than 3.3 volts") |
 
-- **Both footprints on the one board, wired to the same nets.** The Pico's rows (17.78 mm)
-  and the Teensy's (15.24 mm) cannot sit side by side in the ~34 mm available, so they
-  overlap: align one row of each, put the other Teensy row 2.54 mm inside the Pico's, and
-  stagger along the row where a shared hole would join incompatible nets. USB ends point
-  toward the board centre (§4.3). Fallback if routing fails: Pico footprint only, plus a bare 2-layer
-  adapter for the Teensy.
+- ~~**Both footprints on the one board, wired to the same nets.**~~ **Superseded 2026-10-16:
+  one board per module (David).** The overlapping footprints did not route (§14, checkpoint 3).
+  Each board carries one socket on the board's centre line, with the same pin functions as
+  the shared pin map, so firmware is unchanged. USB ends point toward the board centre (§4.3).
+  The generator builds both boards (`tools/analogue_board/variant.py`). The Pico board also
+  takes the ESP32-P4.
 - **Power:** 5 V reaches either module through a Schottky. Teensy: cut the VIN–VUSB pads
   before fitting.
 - **Every signal into the module is 3.3 V** (the Teensy sets the rule). The parts that
@@ -310,7 +343,7 @@ to SPI-A's would free three pins for a single-bus module (only relevant to Teens
 
 | Idea | Source | Use here |
 |---|---|---|
-| **Jack-detect probe:** one GPIO drives 100 kΩ into each input jack's switch (normal) lug, with a BAT54S clamp. Firmware sends a pseudo-random bit every 16 samples and calls an input patched when its readings stop following the sequence. No extra ADC channels. | Workshop System Computer Rev 1.0.0, R63–R68, `ComputerCard.h` L617–623, L834–874 | Adopt. A PROBE column in the wiring field (one 100 kΩ per hole) reaches the switch pad of any input jack cell. [proposed] |
+| **Jack-detect probe** (**dropped 2026-10-16**, David, to ease routing; the pin it used is free): one GPIO drives 100 kΩ into each input jack's switch (normal) lug, with a BAT54S clamp. Firmware sends a pseudo-random bit every 16 samples and calls an input patched when its readings stop following the sequence. No extra ADC channels. | Workshop System Computer Rev 1.0.0, R63–R68, `ComputerCard.h` L617–623, L834–874 | Adopt. A PROBE column in the wiring field (one 100 kΩ per hole) reaches the switch pad of any input jack cell. [proposed] |
 | Calibration in an EEPROM on the board, magic number + CRC, 3 points per channel (−2/0/+2 V) written by a web UI | Workshop System Computer (ZD24C08, 0x50) | Same scheme in the M24C64 |
 | Closed-loop output calibration: calibrate the input against known voltages, then loop each output into it — no meter | EuroPi `calibrate.py` | The DG412 loopback does this with no patch cable |
 | Series Schottky on both rails, 22 µF 35 V + 100 nF | Workshop System Computer | As §8 |
@@ -510,7 +543,9 @@ datasheet's differential 8 Vpp (§7).
   74HCT595, TCA9555, AHCT1G125, LM4040, buck, its inductor, JST SH). Order fees: §12.
   **The schematic has 17 (2026-10-15):** LM4040 dropped; M24C64 (Preferred) counted; the
   review added the 15 V TVS, the 1 nF C0G and the H11L1 (MIDI). List in §15.
-- **6HP and 10HP from one design** means one assembly setup, not two.
+- **6HP and 10HP from one design** means one assembly setup per board, not two. With the
+  2026-10-16 split there are two designs, the Pico board and the Teensy board, each with its own
+  setup, stencils and feeder fees (§12).
 
 ## 12. JLCPCB rules and order cost
 
@@ -558,6 +593,13 @@ $9.21 more than the table. That gives about **$148** (2 assembled) and **$277** 
 PCBs and shipping. Placement rises with the review's extra passives (353 machine-placed
 parts).
 
+**Two boards (2026-10-16): one order, two line items.** JLC takes several designs in one cart
+and ships them together, so shipping is paid once. Everything else is charged per design: the
+bare PCBs, the assembly setup, the stencils and the per-part-type fees. The assembly
+therefore costs about twice the one-board figure. A multi-design panel would save a little on
+PCBs, but it carries a panel fee and complicates assembly, so two separate designs is the
+plan. Confirm on a live quote.
+
 ## 13. Decisions
 
 ### Settled by evidence in this pass
@@ -590,6 +632,17 @@ parts).
 - CV range stays **±5 V**, with a documented ±10 V resistor variant (§15).
 - The board accommodates the **ESP32-P4-WIFI6** (§5, §15).
 - The power header can go anywhere that keeps power-rail noise away from sensitive parts (§4.3).
+
+### Decided by David, 2026-10-16
+
+- **Two boards:** one for the Pico 2 / ESP32-P4, one for the Teensy 4.1. Both are developed
+  together and, if both route, ordered together (§12).
+- The Teensy board has **all 48 holes**, so standard full-length headers fit.
+- **Four gate outs, no jack detect** (§14, checkpoint 3), to ease routing.
+- **The switchable CV jacks stay.** They are the Alchemy Lab's big step in flexibility.
+  Alchemy Lab uses the same scheme: an MCU-controlled analogue switch connects or disconnects
+  each jack's DAC, with separate input and output scaling. If more must go, TRS MIDI and the
+  display connections go first.
 
 ### Hardware licence: CC BY-SA 4.0 (decided)
 
@@ -630,13 +683,17 @@ repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No p
    polarised part for orientation. The pin map (which Pico / Teensy pin goes where) is
    the first sheet. **Drafted 2026-10-14; rebuilt 2026-10-15 after the block review,
    awaiting David's sign-off:**
-   [`hardware/analogue_board/analogue_board_schematic.pdf`](../hardware/analogue_board/analogue_board_schematic.pdf),
-   checks in [`output/checks.md`](../hardware/analogue_board/output/checks.md), decisions in §15.
+   decisions in §15. Since the 2026-10-16 split, each board has its own schematic and checks:
+   [Pico board](../hardware/analogue_board/pico/analogue_board_pico_schematic.pdf)
+   ([checks](../hardware/analogue_board/pico/output/checks.md)),
+   [Teensy board](../hardware/analogue_board/teensy/analogue_board_teensy_schematic.pdf)
+   ([checks](../hardware/analogue_board/teensy/output/checks.md)).
 2. **1:1 printout** of the outline, edge strips, module footprints and power header. David
    lays a real breadboard, a Pico 2, a Teensy 4.1 and the deck header on it. **Prepared
    2026-10-15:**
    [`hardware/analogue_board/checkpoint2_printout.pdf`](../hardware/analogue_board/checkpoint2_printout.pdf)
-   (A4, three pages, print at 100 %), generated by `tools/analogue_board/printout.py` from
+   (A4, three pages, print at 100 %; since the split, `boards_printout.pdf` has one page with
+   each board's module), generated by `tools/analogue_board/printout.py` from
    `placement.py` and the footprints. Proposed there [proposed]:
    - The Pico socket sits 17.4 mm below the top edge, so an ESP32-P4 in it ends 0.5 mm from
      the top. The Teensy sits 3.5 mm down (see the result below).
@@ -679,6 +736,14 @@ repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No p
    - **Library changes for this:** the module sockets' courtyards are now their header rows
      (low parts may sit under a module). The wiring holes have their own footprint
      (`WiringHoles_1xNN`) with a one-pitch courtyard, so columns can sit side by side.
+   - **Square means ground in the wiring field (David, 2026-10-15).** Every wiring hole is
+     round except the ground holes, which are square. KiCad's usual square pin 1 means nothing
+     for a single wire, and in the right column, where nearly every hole is its own group, it
+     read as a row of grounds. A group with a ground uses a marked variant, such as
+     `WiringHoles_1x03_G2` with pad 2 the ground. The schematic decides which variants are
+     needed, and `build.py` writes them. There are 11 ground holes: one per bank, plus the
+     grounds in the utility groups. The headers keep their square pin 1: the module sockets,
+     the edge strips' outer holes, and J201, where it marks −12 V.
    - **Answered by David, 2026-10-15:**
      - *Deck-face clearance.* In 10HP the board sits 11 mm from the deck, and the deck's own
        parts take 2 mm at most, so the deck face has about 9 mm free, room for ~1.75 mm parts
@@ -687,7 +752,8 @@ repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No p
      - *Wiring field.* The holes are tinned on both faces (HASL, §4.2), so wires route neatly on
        either face, including from the right-hand column across to the left strip in 6HP.
        The hole columns stand as proposed.
-   - **Shorter Teensy headers (David's suggestion, 2026-10-15).** The Teensy's nine far-end
+   - ~~**Shorter Teensy headers**~~ **Superseded 2026-10-16:** the Teensy has its own board, with
+     all 48 holes and standard headers. (David's suggestion, 2026-10-15.) The Teensy's nine far-end
      pins, 20-28 (D28-D36), are all unconnected, so its socket has no holes there. The headers
      become 1×19 (pins 1-19) and 1×20 (pins 29-48), from the USB end. That frees the top
      corners under the module, the most crowded area, and cuts the header-row area from 686 to
@@ -779,10 +845,173 @@ repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No p
      bound for the channel passes between its pins, a consequence of the two modules
      interleaving. It is at 54–67% of capacity at two tracks per gap. All 430 parts are
      placed, with parity clean, no overlaps and no height problems.
-   - **Next:** the trial autoroute (Freerouting) on the bus-ordered floorplan to measure
-     completion, a review pass by block (analogue grouping, ground returns, the codec and ADC
-     corners), the hole labels on the silkscreen (one channel name per hole, from wiring.py),
-     then routing.
+   - **Trial autoroutes on the shared board (2026-10-15/16)**, with Freerouting 2.5 run by
+     `tools/analogue_board/autoroute.py` on a copy of the board:
+     - First run, 80% routed. Freerouting also routed signals through In1, which cut the ground
+       plane into islands. Fix: In1 is now a "power" layer, so autorouters keep off it.
+     - Second run, In1 kept whole: 283 of 992 connections unrouted after filling the plane.
+       39 were ground, 36 power (pours on the final board), and **208 signal**. 192 of those
+       208 were in the module area (x 12–37, y 10–62 mm), between the interleaved header rows.
+       The wiring field and the bottom third routed. Four layers could not carry two
+       interleaved modules.
+   - **Two boards (David, 2026-10-16).** One board for the Pico 2 / ESP32-P4 and one for the
+     Teensy 4.1, from the same generator (`variant.py`; every script takes `pico` or `teensy`).
+     - **Shared:** every peripheral sheet, the libraries
+       (`hardware/analogue_board/analogue_board.pretty`, `.kicad_sym`), the edge strips, the
+       wiring field and the power corner.
+     - **Each board:** its own project (`hardware/analogue_board/pico/`, `.../teensy/`), root
+       sheet and floorplan.
+     - **The Pico board only:** the ESP32-P4 bypass (Q201, JP201) and J101's RUN hole. The
+       Teensy board's J101 has five holes.
+     - **Module positions:** each module sits on the board's centre line, at the height
+       checkpoint 2 settled. That moves the Teensy 3.8 mm right of its checkpoint 2 position,
+       which gives it a 5 mm passives lane on its left and a 7.6 mm chip lane on its right.
+       `boards_printout.pdf` has the new positions to check with real parts.
+     - **Floorplans** (`placement.ANCHORS_BOARD`): each bus chip is level with its bus pins on
+       the side they come out.
+       - *Pico board:* the CV converters and op-amps sit above the pins, under the ESP32-P4's
+         antenna end. Down the channel: MCP3208, codec and TCA9555, each on the side of its
+         bus. In the right lane: the 74HCT595 and the comparators.
+       - *Teensy board:* down the channel in bus order: MCP3208, ADS8688, codec, TCA9555. In
+         the right lane: the 74HCT595, the CV op-amps, the DAC (sideways, beside its op-amps)
+         and the comparators.
+     - **Result:**
+
+       | | Pico board | Teensy board |
+       |---|---|---|
+       | Parts | 429 | 425 |
+       | One-face area use | 89% (95% on the shared board) | 89% |
+       | Shortest wiring | 3.9 m (4.4 m shared) | 4.2 m |
+       | Busiest header wall | 58% | 83% |
+
+       Both boards have every part placed, parity clean, no overlaps and no height problems.
+   - **Trimmed to ease routing (David, 2026-10-16).**
+     - **Four gate outs**, one per bank, from QA–QD of the 74HCT595. QE–QH are unused; J603
+       still chains a second 595.
+     - **No jack detect.** The probe network (15 resistors, a clamp, a test pad) and its 14
+       holes are gone, and the module pin it used (Pico GP15, Teensy D6) is free.
+     - **The banks are packed from the top of each:**
+       - Left top, slots 1–7: CV1, CV2, CV5, CVI7, AIN1, GIN1, POT1–2, GOUT1, SW1–3.
+       - Left bottom, slots 21–26: CV3, CVO7, AOUT1, GIN2, POT3–4, GOUT2, SW4–5.
+       - Right top, slots 1–11: CV4, CVI8, AIN2, GIN3, POT5–6, GOUT3, SW6–7.
+       - Right middle, slots 17–27: CV6, CVO8, AOUT2, GIN4, POT7–8, GOUT4, SW8–9.
+       - Each bank keeps its POT_REF and ground hole.
+     - **Result:** 398 parts on the Pico board and 394 on the Teensy board, 31 fewer each.
+       One-face area use falls to 83–84%. The wiring field drops from 94 to 76 holes (75 on
+       the Teensy board).
+   - **Trial autoroutes, 2026-10-16** (Freerouting 2.5, this project's rules, In1 a solid ground
+     plane). The table counts the signal connections left unrouted; ground and rail leftovers
+     come on top, about 60–85 per board:
+
+     | Board | 4 layers | 6 layers |
+     |---|---|---|
+     | Shared board, full feature set | 208 | 142 |
+     | Pico board, before trims | 182 | — |
+     | Pico board, trimmed | 162 | 106 (81% of all connections routed) |
+     | Teensy board, before trims | 183 | — |
+     | Teensy board, trimmed | 170 | 102 (81%) |
+
+     - **Value of each change:** six layers removes about 35% of the leftovers, the split about
+       12% and the trims 7–11%.
+     - **Where the leftovers are:** on every board they concentrate around the CV converters and
+       their op-amps. The auto-placer packs each passive against its chip and leaves no track
+       channels, so placement, not layer count, is now the main limit.
+     - **Freerouting itself:** each run's first pass was within one connection of its final
+       result, so later passes add nothing.
+     - **Not yet routable:** neither board routes on 4 or 6 layers as placed.
+     - **The shared board, revisited (`build.py shared`, the same trims and fixes, both sockets
+       interleaved, the Teensy on shortened headers):** 184 signal connections left unrouted on
+       4 layers and 139 on 6. The current Pico board leaves 88 on 6 layers, 37% fewer.
+     - **Totals across both split boards:** about 190 to finish by hand, against 139 on the one
+       shared board.
+     - **The trims barely help the shared board** (142 down to 139). Its limit is the
+       interleaved header rows.
+     - **Repeatability:** a repeat run on the Pico board gave the same fan-out and a total
+       within 3%.
+   - **Quilter (quilter.ai), 2026-10-16, Pico board, 6 layers.** Quilter placed and routed a
+     candidate: 877 of 885 connections, parity clean, no height problems. It is not usable as it
+     stands:
+     - It placed the ±12 V entry diodes and ferrites about 80 mm from J201.
+     - It placed the codec, the audio op-amp and the DAC within about 10 mm of the buck.
+     - It routed every rail at 0.133 mm, having replaced our Power net class with its 0.127 mm
+       default.
+     - It used 0.127 mm rules, the spacing it chose (about 0.4 mm), and almost nothing under the
+       module.
+
+     What it proved: the board can route on 6 layers once the parts are spaced out. Quilter is
+     also tied to its web interface, which only David can drive.
+   - **The core board and the two-stage route (2026-10-16).** `pico_core` is the Pico board
+     without the fixed-direction CV channels, TRS MIDI or the Qwiic socket, with six pots.
+     - **Kept:** the six switchable CV jacks, stereo audio, four gate ins and outs, nine button
+       lines, the LED chain, the EEPROM and the I2C display holes. David's line: fewer than six
+       switchable jacks and the board is no better than a patch.Init.
+     - **Size:** 354 parts, 72% of one face.
+     - **Placement and rules:** parts placed 0.4 mm apart (`variant.SPACING`), signals at
+       0.127 mm track and space (`variant.TRACK`), rails still 0.3 mm.
+
+     Freerouting on 6 layers, leftovers:
+
+     | Run | Signals | Rails | Ground | Routed |
+     |---|---|---|---|---|
+     | Defaults | 47 | 7 | 27 | 89.8% |
+     | Higher start rip-up cost (400) | 23 | 7 | 22 | 93.4%, but 142 tracks narrowed below 0.127 mm by the fan-out stage |
+     | No fan-out stage | 1 | 39 | 200 | 69.7% |
+     | No fan-out, cheaper vias (20, plane 2) | 1 | 23 | 200 | 71.8% |
+     | **Stage 2:** the run above, every track locked, fan-out on | 1 | 7 | 41 | 93.8% |
+     | **Stage 3:** locked again, plane vias 1, rip-up 400 | 1 (CODEC_VCC, a supply node) | 6 | 30 | 95.3% |
+
+     - **The finding:** Freerouting's fan-out stage drops a via beside every SMD pin before
+       routing, and on a board this dense those vias block the tracks. That is also why no pass
+       ever beat the first. Routing the signals with fan-out off, then locking them and running
+       again with fan-out on for the ground and rail connections, routes every signal.
+     - **What is left:** 30 ground pads that need a via to the plane, 6 rail connections and
+       CODEC_VCC. The DRC findings are small fixes:
+       - 17 copper-to-edge
+       - 11 hole clearance
+       - 10 vias that came back from the session import as 0.45/0.3 mm
+       - 6 clearance
+       - 3 mask bridges
+     - **Kept:** the routed board is in `hardware/analogue_board/pico_core/routed_trial/`.
+     - **How to repeat it:**
+
+       ```sh
+       autoroute.py pico_core 20 6 nofanoutcheap --router.automatic_neckdown=false \
+           --router.hole_clearance_um=250 --router.fanout.enabled=false \
+           --router.scoring.via_costs=20 --router.scoring.plane_via_costs=2
+       ```
+
+       Then run it again on the trial board it writes, with `--lock-existing` and the fan-out
+       left on.
+     - **Freerouting's own settings:** its usage analytics were on by default; `autoroute.py`
+       now switches them off on every run. The v1.9 algorithm named in its settings is not in
+       the 2.5 build, which falls back to the current one.
+     - **Next:** Quilter (quilter.ai, place and route) as an independent check of whether
+       better placement routes. `pcb.py <board> --quilter` writes the upload sets to
+       `<board>/output/quilter/`, on 6 layers. In1 is GND and In4 is PWR, the power layer for
+       rail pours that Quilter asks for.
+   - **One pin per pad (2026-10-16).** Quilter's first run warned of a "pin count mismatch"
+     between schematic and board. KiCad accepts the parts that caused it, but a strict importer
+     does not, so every part now matches pin for pin:
+     - **Edge strips:** each hole has its own pin, the deck hole *n* and its wiring hole *n*+40,
+       joined by the net DECK_L*n* or DECK_R*n*. The right strip's symbol has pins only for the
+       holes that exist.
+     - **Qwiic socket:** each mounting tab is its own pin.
+     - **L78M05:** the DPAK's paste openings are stencil shapes, not unnumbered pads.
+     - **Result:** the copper is unchanged, and the parity check no longer needs its "intended
+       omission" exception. Only the fiducials keep 0 pins against 1 pad, as every board does.
+   - **USB keep-out.** It constrains almost nothing. The module stands on 8.5 mm headers, so a
+     USB plug passes over anything shorter than about 8 mm. Only J201 with its ribbon plug,
+     and a Qwiic cable, are tall enough to matter, and both sit outside the zone. The
+     auto-placer ignores the zone; `pcb.py` only flags parts over 8 mm inside it.
+   - **Next (paused 2026-10-16):**
+     1. Run the full Pico board, and then the Teensy board, through the two-stage route with
+        0.4 mm spacing and 0.127 mm rules, to see whether the full feature set routes as the
+        core set did.
+     2. Script the ground vias for whatever is left, then fix the remaining DRC findings.
+     3. Review by block: analogue grouping, ground returns, the codec and ADC corners, rail
+        widths and pours.
+     4. Put the hole labels on the silkscreen, one channel name per hole, from `wiring.py`.
+     5. Confirm the 6-layer price on a live JLC quote, then order.
 4. **Routed board**, clean against the design rules, with test points on every rail and
    bus and 0 Ω links in each supply so a faulty rail can be isolated.
 5. **JLCPCB quote and preview**, rotations checked, "Confirm Parts Placement" ($0.45)
@@ -829,7 +1058,7 @@ Ten sheets, the pin map first; every sheet was also checked by eye for overlappi
 | Audio in | 1 µF 50 V X7R, then 100 kΩ into an inverting TL074H with 33 kΩ ∥ 100 pF, + input on VCOM, then 1 kΩ into the codec's 10 kΩ: gain −0.30. 1 MΩ to ground at the jack. BAT54S clamps to +5VA. **Changed 2026-10-15:** feedback 15 kΩ ∥ 100 pF, gain −0.136, so 22 Vpp → 3 Vpp; 100 nF on each + input | Inverting: firmware flips the sign |
 | Audio out | 12 kΩ / 15 kΩ difference amp (×1.25), 100 pF C0G across each 15 kΩ (pole at 106 kHz), 1 kΩ out. **Changed 2026-10-15:** balanced second-order MFB (Beads' topology), 12k in, 1k to each input, 30k feedback and 30k to ground, 1 nF C0G across the two nodes, 100 pF at each input: gain 2.5, f0 ≈ 65 kHz, Q ≈ 0.73; 1 kΩ 1206 out | Larger C0G values are not Basic. The codec has its own RC filter; 330 pF (Extended) would move the pole to 32 kHz. The MFB needs one Extended 1 nF C0G |
 | Gate-in values | 10 kΩ, BAT54S to +3V3D/GND, 100 kΩ to ground, 100 kΩ hysteresis, 10 kΩ pull-up. GATE_TH = 1.65 V from one 10k/10k divider | Trips at 1.98 V rising, 1.67 V falling at the jack |
-| Jack-detect probe | GPIO → 1 kΩ → bus with a BAT54S clamp → 14 holes: PR1-10 through 100 kΩ (audio and CV ins), PR11-14 through 22 kΩ (gate ins) | A 100 kΩ probe lifts an unpatched gate input only to ≈1.24 V, under the threshold |
+| Jack-detect probe (**dropped 2026-10-16**) | GPIO → 1 kΩ → bus with a BAT54S clamp → 14 holes: PR1-10 through 100 kΩ (audio and CV ins), PR11-14 through 22 kΩ (gate ins) | A 100 kΩ probe lifts an unpatched gate input only to ≈1.24 V, under the threshold |
 | Chip-select pull-ups | 10 kΩ to +3V3D on CS_ADC, CS_DAC, CS_POT | Every module leaves its pins floating while it boots; this keeps the converters deselected and off MISO |
 | Bus-merge jumpers (§6.3) | Not fitted | The Teensy 4.0 is not a target; both target modules have two hardware SPI buses |
 | Gate-out expansion | J603: QH′, SRCLK, RCLK, +5VD, GND | Chains a second 74HCT595 off-board (Boy's expander) |
@@ -921,9 +1150,10 @@ The hardware assumes these. Each is cheap in code and costly to rediscover on th
 7. Run at about 10 Vpp nominal, 6 dB under the 20 Vpp full scale.
 
 **CV**
-8. An unpatched CV input reads about +0.2 V (the ADS8688's internal bias). Trust the
-   jack-detect probe and force 0. Default every channel to ±10.24 V; oversample for
-   audio-rate CV.
+8. An unpatched CV input reads about +0.2 V (the ADS8688's internal bias). With jack detect
+   dropped (2026-10-16), firmware cannot tell it from a patched 0.2 V: treat it as an offset
+   to calibrate out, or use a switched jack wired to ground. Default every channel to
+   ±10.24 V; oversample for audio-rate CV.
 9. **CV1–6 load correction:** with a switch on, the ADC reads the jack. Servo out the load
    sag (≈10 ms), clamp the correction to ±3 %, and flag a jack driven by another output.
 10. Calibrate the outputs at more points (one per volt, as O&C). CV7–8 have no ADC path:
@@ -932,8 +1162,7 @@ The hardware assumes these. Each is cheap in code and costly to rediscover on th
     write every sample: block-rate CV updates step audibly.
 
 **Gates, panel, LEDs, MIDI**
-12. Gate inputs are active-high. Mask them while the jack-detect probe runs, and catch
-    100 µs triggers with edge interrupts or PIO.
+12. Gate inputs are active-high. Catch 100 µs triggers with edge interrupts or PIO.
 13. **Encoder:** A and B on gate inputs 3–4 (PIO quadrature on Pico GP8/GP9, QuadEncoder on
     Teensy 4/5), not through the TCA9555, whose shared I2C bus a busy OLED holds for about
     23 ms. Debounce buttons in firmware. Treat the TCA9555 INT as a level and poll as a

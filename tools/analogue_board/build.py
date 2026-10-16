@@ -1,8 +1,8 @@
-"""Build the analogue board schematic and run every checkpoint-1 check.
+"""Build an analogue board schematic and run every checkpoint-1 check.
 
-    python3 tools/analogue_board/build.py
+    python3 tools/analogue_board/build.py [pico|teensy]      (no argument: both boards)
 
-1. regenerate the project symbol and footprint libraries
+1. regenerate the project symbol and footprint libraries (shared by both boards)
 2. regenerate every .kicad_sch sheet from design*.py
 3. KiCad ERC, netlist and PDF through kicad-cli
 4. the checks in checks.py: intended vs KiCad netlist, every IC pin against its datasheet,
@@ -17,22 +17,28 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
+import variant  # noqa: E402
+
+variant.run_each(os.path.abspath(__file__))
+
 import make_library  # noqa: E402
+import parts  # noqa: E402
 from design import OUT, new_project, sheet_power, sheet_root  # noqa: E402
 from design_analog import sheet_codec, sheet_cv_dac, sheet_cv_in  # noqa: E402
 from design_digital import sheet_edge, sheet_expander, sheet_gate_in, sheet_midi, sheet_pots_gates  # noqa: E402
 
 KICAD_CLI = "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli"
-NAME = "analogue_board"
+NAME = variant.NAME
 
 
 def write_project_files(pr):
+    # the libraries sit one level up, shared by both boards
     with open(os.path.join(OUT, "sym-lib-table"), "w") as f:
         f.write('(sym_lib_table\n  (version 7)\n  (lib (name "analogue_board")(type "KiCad")'
-                '(uri "${KIPRJMOD}/analogue_board.kicad_sym")(options "")(descr "Analogue board project symbols"))\n)\n')
+                '(uri "${KIPRJMOD}/../analogue_board.kicad_sym")(options "")(descr "Analogue board project symbols"))\n)\n')
     with open(os.path.join(OUT, "fp-lib-table"), "w") as f:
         f.write('(fp_lib_table\n  (version 7)\n  (lib (name "analogue_board")(type "KiCad")'
-                '(uri "${KIPRJMOD}/analogue_board.pretty")(options "")(descr "Analogue board project footprints"))\n)\n')
+                '(uri "${KIPRJMOD}/../analogue_board.pretty")(options "")(descr "Analogue board project footprints"))\n)\n')
     pro = os.path.join(OUT, f"{NAME}.kicad_pro")
     data = {}
     if os.path.exists(pro):
@@ -57,6 +63,7 @@ def generate():
     for sh, fn in zip(subs, [sheet_power, sheet_codec, sheet_cv_in, sheet_cv_dac,
                              sheet_pots_gates, sheet_expander, sheet_gate_in, sheet_edge, sheet_midi]):
         fn(sh)
+    make_library.write_wiring_footprints(parts.WIRING_FOOTPRINTS)   # ground-marked hole groups, as drawn
     pr.write(OUT)
     write_project_files(pr)
     return pr

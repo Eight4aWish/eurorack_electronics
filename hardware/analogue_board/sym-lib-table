@@ -1,4 +1,0 @@
-(sym_lib_table
-  (version 7)
-  (lib (name "analogue_board")(type "KiCad")(uri "${KIPRJMOD}/analogue_board.kicad_sym")(options "")(descr "Analogue board project symbols"))
-)

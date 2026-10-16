@@ -8,11 +8,12 @@ positions are proposals for checkpoint 2; checkpoint 3 (placement) starts from t
 
 import os
 
+import variant
 from sexpr import find, find_all, parse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
-PRETTY = os.path.join(REPO, "hardware", "analogue_board", "analogue_board.pretty")
+PRETTY = os.path.join(variant.SHARED, "analogue_board.pretty")
 KICAD_FP = "/Applications/KiCad/KiCad.app/Contents/SharedSupport/footprints"
 
 BOARD_W, BOARD_H = 49.6, 103.0
@@ -45,6 +46,12 @@ TOP_MARGIN = 0.5             # from the top edge to the furthest thing on a modu
 
 # Module placements: centre line x and the far (non-USB) end y of the module body.
 # USB ends point down, toward the board centre; far ends toward the top edge (spec §4.3).
+# Rev A is two boards, one module each (David, 2026-10-16), both modules on the board's centre
+# line at the heights checkpoint 2 settled: the Pico 16.9 mm down so an ESP32-P4 in its socket
+# ends at the top margin, the Teensy 3 mm down so its SD card does.
+BOARD_MODULES = {"pico": {"cx": BOARD_W / 2, "far": TOP_MARGIN + P4_EXTRA_FAR},
+                 "teensy": {"cx": BOARD_W / 2, "far": TOP_MARGIN + TEENSY_SD_CARD}}
+# Checkpoint 2's two arrangements, with both modules on one board; A is the shared board's
 ARRANGEMENTS = {
     # A, the schematic's pin map: no shared holes. Pico rows at 15.91 / 33.69; Teensy rows one
     # pitch outside (13.37) and two pitches inside (28.61). The Pico sits 16.9 mm down so an
@@ -64,8 +71,8 @@ HEADER_PIN1 = (36.83, 83.35)   # shroud 1.7 mm from the strip's wiring holes, 1.
 
 
 # ------------------------------------------------------------------ checkpoint 3: floorplan
-# Both faces carry parts (decided 2026-10-15: double-sided assembly). F = outward face (modules,
-# parts up to 2.5 mm under the modules, taller parts elsewhere); B = deck face (low parts only).
+# Both faces carry parts (decided 2026-10-15: double-sided assembly). F = outward face (module,
+# parts up to 2.5 mm under it, taller parts elsewhere); B = deck face (low parts only).
 # Wiring-field holes sit in columns lined up with the edge-strip positions: two beside the
 # left strip (the only one wired in 6HP), one beside the right strip, stopping above J201.
 # The wiring field (wiring.py): four banks of channel holes, one per quarter of the board, each
@@ -76,47 +83,98 @@ HOLE_COLUMNS = wiring.COLUMNS
 HOLE_GROUPS = {g["ref"]: (g["column"], g["slot"]) for g in wiring.groups()}   # ref -> (column, first slot)
 HOLE_GROUPS.update(wiring.UTILITY)
 
-# Anchors: ref -> (x, y, rotation, face) of the footprint origin (its centre, for ICs), board
-# coordinates as seen from the outward face. Every SO/TSSOP courtyard is at least 7.4 mm wide, so
-# the 9.7 mm channel between the module rows takes one IC across, on each face.
-# Each chip that talks to the module sits level with the module pins of its bus (both modules'
-# pins for one bus sit at similar heights): SPI-A (ADC, DAC) at 19-38 mm, SPI-B (pot ADC, gate
-# register) at 15-34, I2S (codec) at 34-56, I2C (expander, EEPROM) at 43-59. The CV output
-# op-amps, which only talk to the DAC and the jack switches, take the top-right corner. Power stays
-# in the bottom-right corner around J201, furthest from the converters; MIDI bottom left (the
-# H11L1 is ~4 mm tall, so it stays outside the modules).
-CENTRE_X = 22.26   # between the Pico's left row and the Teensy's right row
-ANCHORS = {
-    # outward face (F)
-    "U401": (21.0, 9.6, 0, "F"),        # ADS8688 (SPI-A), inputs toward the CV holes on the left
-    "U501": (CENTRE_X, 21.0, 0, "F"),   # DAC8568 (SPI-A)
-    "U601": (CENTRE_X, 30.3, 0, "F"),   # MCP3208 (SPI-B)
-    "U301": (CENTRE_X, 42.3, 0, "F"),   # PCM3060 (I2S), level with the I2S pins
-    "U701": (CENTRE_X, 53.3, 0, "F"),   # TCA9555 (I2C)
-    "U801": (CENTRE_X, 61.8, 0, "F"),   # LM393 gates 1-2
-    "U502": (35.5, 8.6, 0, "F"),        # TL074 CV1-4, top right near the DAC and the jack switches
+# Anchors: ref -> (x, y, rotation, face) of the courtyard centre, board coordinates as seen from
+# the outward face. Every SO/TSSOP courtyard is 7.4-7.7 mm wide (5.4-5.5 mm turned sideways).
+# Each board has its own floorplan, because each module brings its buses out at different pins:
+# every chip that talks to the module sits level with its bus pins, on the side they are on.
+# Power stays in the bottom-right corner around J201, furthest from the converters; MIDI bottom
+# left (the H11L1 is ~4 mm tall, so it stays clear of the module).
+ANCHORS_COMMON = {
     "U1002": (17.5, 97.0, 0, "F"),      # H11L1 (tall)
     "U202": (29.5, 96.5, 90, "F"),      # L78M05 DPAK
     "L201": (29.5, 86.5, 0, "F"),       # buck inductor (4 mm tall)
     "U201": (29.5, 80.8, 0, "F"),       # TPS54308 beside its inductor: the switching loop stays on one face
-    "J702": (37.4, 74.6, 0, "F"),       # Qwiic, vertical: cable straight up, just below the modules, near their
-                                        # I2C pins, outside the USB plug zones and clear of J201 (David, 2026-10-15)
+    "J702": (37.4, 74.6, 0, "F"),       # Qwiic, vertical: cable straight up, just below the module, outside the
+                                        # USB plug zone and clear of J201 (David, 2026-10-15)
     "FID901": (12.4, 1.8, 0, "F"),      # fiducials: three corners of the free area
     "FID902": (38.5, 1.8, 0, "F"),
     "FID903": (24.0, 101.6, 0, "F"),
-    # deck face (B)
-    "U403": (21.0, 6.0, 0, "B"),        # DG412 CV5-6 + spares
-    "U402": (21.0, 13.0, 0, "B"),       # DG412 CV1-4
-    "U504": (CENTRE_X, 22.5, 0, "B"),   # TL074 offset buffer + spares
-    "U503": (35.5, 8.6, 0, "B"),        # TL074 CV5-8, top right under U502
-    "U302": (CENTRE_X, 31.8, 0, "B"),   # TL074 audio, just above the codec, leaving the space under it for
-                                        # the codec's decoupling
-    "U602": (38.15, 36.0, 90, "F"),     # 74HCT595 TSSOP, sideways in the right channel: gates 5-8 go to the right
-                                        # banks beside it, gates 1-4 cross to the left banks (wiring.py)
-    "U802": (CENTRE_X, 61.8, 0, "B"),   # LM393 gates 3-4
-    "U702": (CENTRE_X, 53.3, 0, "B"),   # M24C64 (I2C), under the TCA9555
     "U1001": (16.0, 89.0, 0, "B"),      # AHCT1G125 MIDI out, under the MIDI corner
 }
+ANCHORS_BOARD = {
+    # Pico 2 / ESP32-P4: rows at x 15.91 and 33.69 from y 18.8 to 67.0, a 15.2 mm channel between
+    # their courtyards and a 6.4 mm lane right of the right row. SPI-A and I2S come out on the left
+    # row (y 19-31 and 34-52), SPI-B, the gate inputs and I2C on the right (y 21-34, 39-47, 54-59).
+    # Above the pins, under the ESP32-P4's antenna end (parts up to 2.5 mm), the CV converters and
+    # their op-amps: the analogue corner, furthest from the buck.
+    "pico": {
+        # outward face (F)
+        "U401": (16.0, 9.0, 0, "F"),        # ADS8688 (SPI-A), top left beside the CV holes
+        "U501": (24.8, 7.5, 0, "F"),        # DAC8568 (SPI-A), between the ADC and its output op-amps
+        "U502": (33.5, 9.0, 0, "F"),        # TL074 CV1-4
+        "U601": (27.8, 25.5, 0, "F"),       # MCP3208 (SPI-B), right of the channel beside the SPI-B pins
+        "U301": (21.8, 43.5, 0, "F"),       # PCM3060 (I2S), left of the channel beside the I2S pins
+        "U701": (27.8, 57.0, 0, "F"),       # TCA9555 (I2C), right of the channel beside the I2C pins
+        "U602": (38.15, 35.0, 90, "F"),     # 74HCT595 (SPI-B), sideways in the right lane
+        "U801": (38.15, 45.0, 90, "F"),     # LM393 gates 1-2, right lane beside the gate-input pins
+        # deck face (B)
+        "U403": (16.0, 6.0, 0, "B"),        # DG412 CV5-6 + spares, under the ADC
+        "U402": (16.0, 13.0, 0, "B"),       # DG412 CV1-4
+        "U504": (24.8, 7.5, 0, "B"),        # TL074 offset buffer + spares, under the DAC
+        "U503": (33.5, 9.0, 0, "B"),        # TL074 CV5-8, under U502
+        "U302": (21.8, 31.5, 0, "B"),       # TL074 audio, above the codec, leaving the space under it for its decoupling
+        "U702": (27.8, 57.0, 0, "B"),       # M24C64 (I2C), under the TCA9555
+        "U802": (38.15, 45.0, 90, "B"),     # LM393 gates 3-4, under U801
+    },
+    # Teensy 4.1: rows at x 17.18 and 32.42 from y 4.8 to 63.2, a 12.7 mm channel between their
+    # courtyards and a 7.6 mm lane right of the right row; everything above y 64.5 is under the
+    # Teensy (parts up to 2.5 mm). Top to bottom the buses come out SPI-B (y 15-20), SPI-A (30-38),
+    # then I2S (40-56), I2C (43-53) and the gate inputs (48-56, right row), so the chips stack
+    # down the channel in that order, and the right lane takes the op-amps and comparators.
+    "teensy": {
+        # outward face (F)
+        "U601": (24.8, 10.0, 0, "F"),       # MCP3208 (SPI-B)
+        "U602": (37.5, 18.0, 90, "F"),      # 74HCT595 (SPI-B), sideways in the right lane
+        "U401": (24.8, 22.0, 0, "F"),       # ADS8688 (SPI-A)
+        "U501": (37.5, 39.0, 90, "F"),      # DAC8568 (SPI-A), sideways in the right lane beside its output op-amps:
+                                            # three SPI lines cross the right row instead of eight outputs
+        "U502": (37.5, 30.0, 0, "F"),       # TL074 CV1-4, right lane
+        "U301": (24.8, 47.0, 0, "F"),       # PCM3060 (I2S)
+        "U801": (37.5, 52.0, 90, "F"),      # LM393 gates 1-2, right lane beside the gate-input pins
+        "U701": (24.8, 58.5, 0, "F"),       # TCA9555 (I2C)
+        # deck face (B)
+        "U403": (24.8, 7.0, 0, "B"),        # DG412 CV5-6 + spares
+        "U402": (24.8, 13.5, 0, "B"),       # DG412 CV1-4
+        "U504": (24.8, 34.0, 0, "B"),       # TL074 offset buffer + spares
+        "U503": (37.5, 30.0, 0, "B"),       # TL074 CV5-8, under U502
+        "U302": (37.5, 41.0, 0, "B"),       # TL074 audio, right lane beside the codec
+        "U802": (37.5, 52.0, 90, "B"),      # LM393 gates 3-4, under U801
+        "U702": (24.8, 58.5, 0, "B"),       # M24C64 (I2C), under the TCA9555
+    },
+    # The shared board (both modules, arrangement A), as committed at 56660f9: the 9.7 mm channel
+    # between the Pico's left row and the Teensy's right row takes one IC across on each face, in
+    # the order of the buses (both modules' pins for one bus sit at similar heights)
+    "shared": {
+        # outward face (F)
+        "U401": (21.0, 9.6, 0, "F"),        # ADS8688 (SPI-A), inputs toward the CV holes on the left
+        "U501": (22.26, 21.0, 0, "F"),      # DAC8568 (SPI-A)
+        "U601": (22.26, 30.3, 0, "F"),      # MCP3208 (SPI-B)
+        "U301": (22.26, 42.3, 0, "F"),      # PCM3060 (I2S), level with the I2S pins
+        "U701": (22.26, 53.3, 0, "F"),      # TCA9555 (I2C)
+        "U801": (22.26, 61.8, 0, "F"),      # LM393 gates 1-2
+        "U502": (35.5, 8.6, 0, "F"),        # TL074 CV1-4, top right near the DAC and the jack switches
+        "U602": (38.15, 36.0, 90, "F"),     # 74HCT595 TSSOP, sideways in the right channel
+        # deck face (B)
+        "U403": (21.0, 6.0, 0, "B"),        # DG412 CV5-6 + spares
+        "U402": (21.0, 13.0, 0, "B"),       # DG412 CV1-4
+        "U504": (22.26, 22.5, 0, "B"),      # TL074 offset buffer + spares
+        "U503": (35.5, 8.6, 0, "B"),        # TL074 CV5-8, top right under U502
+        "U302": (22.26, 31.8, 0, "B"),      # TL074 audio, just above the codec
+        "U802": (22.26, 61.8, 0, "B"),      # LM393 gates 3-4
+        "U702": (22.26, 53.3, 0, "B"),      # M24C64 (I2C), under the TCA9555
+    },
+}
+ANCHORS = {**ANCHORS_COMMON, **ANCHORS_BOARD.get(variant.FLOORPLAN, {})}
 
 
 def anchor_positions():
@@ -173,20 +231,43 @@ def header():
             [((a[0] + x0, a[1] + y0), (b[0] + x0, b[1] + y0)) for a, b in lines])
 
 
-def layout(name):
-    """Everything for one arrangement: modules with their bodies, USB ends and keep-outs."""
-    arr = ARRANGEMENTS[name]
+def _entry(pads, body):
+    cx, usb = (body[0] + body[2]) / 2, body[3]
+    kw, kl = USB_KEEPOUT
+    return {"pads": pads, "body": body, "usb_y": usb,
+            "keepout": (cx - kw / 2, usb, cx + kw / 2, min(usb + kl, BOARD_H)),
+            "keepout_clipped": usb + kl > BOARD_H}
+
+
+def _modules(where, keys):
     out = {}
-    pp, pb = module("Pico2_Socket", **arr["pico"])
-    tp, tb = module("Teensy41_Socket", **arr["teensy"])
-    p4 = (pb[0], pb[1] - P4_EXTRA_FAR, pb[2], pb[3] + P4_EXTRA_USB)
-    for key, pads, body in (("pico", pp, pb), ("p4", pp, p4), ("teensy", tp, tb)):
-        cx, usb = (body[0] + body[2]) / 2, body[3]
-        kw, kl = USB_KEEPOUT
-        out[key] = {"pads": pads, "body": body, "usb_y": usb,
-                    "keepout": (cx - kw / 2, usb, cx + kw / 2, min(usb + kl, BOARD_H)),
-                    "keepout_clipped": usb + kl > BOARD_H}
+    if "pico" in keys:
+        pp, pb = module("Pico2_Socket", **where["pico"])
+        out["pico"] = _entry(pp, pb)
+        out["p4"] = _entry(pp, (pb[0], pb[1] - P4_EXTRA_FAR, pb[2], pb[3] + P4_EXTRA_USB))
+    if "teensy" in keys:
+        out["teensy"] = _entry(*module("Teensy41_Socket", **where["teensy"]))
     return out
+
+
+def layout(name):
+    """Checkpoint 2: both modules in one arrangement, with their bodies, USB ends and keep-outs."""
+    return _modules(ARRANGEMENTS[name], ("pico", "teensy"))
+
+
+def boards_layout():
+    """Every module where its own board puts it (the Pico's entry also stands for the P4), for the printout."""
+    return _modules(BOARD_MODULES, ("pico", "teensy"))
+
+
+def board_layout():
+    """This board's modules, keyed "pico" / "teensy", each with its body, USB end and keep-out;
+    with a Pico also the ESP32-P4's larger envelope ("p4"), which shares the Pico's pads. The
+    shared board has both, interleaved as checkpoint 2's arrangement A."""
+    variant.require()
+    if len(variant.REF) == 2:
+        return layout("A")
+    return _modules(BOARD_MODULES, tuple(variant.REF))
 
 
 def shared_holes(lay, tol=0.01):

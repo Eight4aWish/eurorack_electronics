@@ -1,0 +1,4 @@
+# trial autoroutes (tools/analogue_board/autoroute.py): measurements, not the boards' routing
+*/output/autoroute/
+# upload sets for Quilter (pcb.py --quilter): copies of the project files
+*/output/quilter/

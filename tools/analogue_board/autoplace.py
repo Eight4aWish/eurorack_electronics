@@ -17,9 +17,10 @@ import math
 import re
 
 import placement as P
+import variant
 
 RES = 0.1            # occupancy grid, mm
-MARGIN = 0.05        # courtyard growth on each side, mm (courtyards already hold 0.25 mm around the pads)
+MARGIN = variant.SPACING / 2   # courtyard growth on each side, mm (courtyards already hold 0.25 mm around the pads)
 EDGE = 0.3           # courtyard to board edge, mm
 MAX_R = 22.0         # search radius, mm
 OTHER_FACE = 1.5     # cost of using the face the target part is not on, mm

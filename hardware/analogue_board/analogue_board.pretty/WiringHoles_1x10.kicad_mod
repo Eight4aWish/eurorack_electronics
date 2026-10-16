@@ -3,7 +3,7 @@
 	(generator "analogue_board_make_library")
 	(generator_version "9.0")
 	(layer "F.Cu")
-	(descr "Wiring field: 10 bare plated holes, 2.54 mm pitch, pad 1 square")
+	(descr "Wiring field: 10 bare plated holes, 2.54 mm pitch, all signal (round)")
 	(property "Reference" "REF**"
 		(at -1.27 -2.77 0)
 		(layer "F.SilkS")
@@ -42,7 +42,7 @@
 		(fill no)
 		(layer "F.CrtYd")
 	)
-	(pad "1" thru_hole rect
+	(pad "1" thru_hole circle
 		(at 0 0)
 		(size 1.7 1.7)
 		(drill 1)

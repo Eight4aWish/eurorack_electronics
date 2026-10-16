@@ -32,7 +32,8 @@ ICS = {
                       lcsc="C7484", mpn="SN74AHCT1G125DBVR", ds="https://www.ti.com/lit/ds/symlink/sn74ahct1g125.pdf", jlc="Extended"),
     "XC6206": dict(lib="Regulator_Linear:XC6206PxxxMR", value="XC6206P332MR-G", fp="Package_TO_SOT_SMD:SOT-23",
                    lcsc="C5446", mpn="XC6206P332MR-G", ds="https://www.torexsemi.com/file/xc6206/XC6206.pdf", jlc="Basic"),
-    "L78M05": dict(lib="Regulator_Linear:LM78M05_TO252", value="L78M05ABDT-TR", fp="Package_TO_SOT_SMD:TO-252-2",
+    # KiCad's TO-252-2 with its tab paste openings as shapes, not unnumbered pads (make_library.derived_footprints)
+    "L78M05": dict(lib="Regulator_Linear:LM78M05_TO252", value="L78M05ABDT-TR", fp=f"{LIB}:TO-252-2_PasteShapes",
                    lcsc="C58069", mpn="L78M05ABDT-TR", ds="https://www.st.com/resource/en/datasheet/l78m.pdf", jlc="Basic"),
     "TPS54308": dict(lib="Regulator_Switching:TPS54202DDC", value="TPS54308DDCR", fp="Package_TO_SOT_SMD:SOT-23-6",
                      lcsc="C168839", mpn="TPS54308DDCR", ds="https://www.ti.com/lit/ds/symlink/tps54308.pdf", jlc="Extended",
@@ -56,8 +57,9 @@ ICS = {
                      ds="", jlc="hand-soldered", prefix="J"),
     # vertical (top-entry), checkpoint 3: the cable leaves straight up from the outward face. A
     # side-entry socket would need a clear run for the plug along the board, which it does not have
-    "QWIIC": dict(lib="Connector_Generic_MountingPin:Conn_01x04_MountingPin", value="Qwiic BM04B-SRSS-TB",
-                  fp="Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical", lcsc="C160390",
+    # each mounting tab its own pin (5, 6), so pins and pads match one for one (make_library.qwiic)
+    "QWIIC": dict(lib=f"{LIB}:Qwiic_JST_SH4_Vertical", value="Qwiic BM04B-SRSS-TB",
+                  fp=f"{LIB}:JST_SH_BM04B-SRSS-TB_1x04-2MP_P1.00mm_Vertical", lcsc="C160390",
                   mpn="BM04B-SRSS-TB(LF)(SN)", ds="https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_JST-BM04B-SRSS-TB-LF-SN_C160390.pdf",
                   jlc="Extended", prefix="J"),
     "PICO2": dict(lib=f"{LIB}:RaspberryPi_Pico2", value="Raspberry Pi Pico 2", fp=f"{LIB}:Pico2_Socket",
@@ -66,9 +68,9 @@ ICS = {
     "TEENSY41": dict(lib=f"{LIB}:Teensy41", value="Teensy 4.1", fp=f"{LIB}:Teensy41_Socket", lcsc="",
                      mpn="PJRC Teensy 4.1 on 2x24 female headers", ds="https://www.pjrc.com/store/teensy41.html",
                      jlc="hand-soldered", prefix="A"),
-    "EDGE_L": dict(lib=f"{LIB}:EdgeStrip_40", value="Edge strip, left", fp=f"{LIB}:EdgeStrip_40_Left", lcsc="",
+    "EDGE_L": dict(lib=f"{LIB}:EdgeStrip_Left", value="Edge strip, left", fp=f"{LIB}:EdgeStrip_40_Left", lcsc="",
                    mpn="", ds="docs/n8synth_platform.md", jlc="bare holes", prefix="J"),
-    "EDGE_R": dict(lib=f"{LIB}:EdgeStrip_40", value="Edge strip, right", fp=f"{LIB}:EdgeStrip_40_Right", lcsc="",
+    "EDGE_R": dict(lib=f"{LIB}:EdgeStrip_Right", value="Edge strip, right", fp=f"{LIB}:EdgeStrip_40_Right", lcsc="",
                    mpn="", ds="docs/n8synth_platform.md", jlc="bare holes", prefix="J"),
     "H11L1": dict(lib="Isolator:H11L1", value="H11L1SR2M", fp="Package_DIP:SMDIP-6_W7.62mm", lcsc="C20082",
                   mpn="H11L1SR2M", ds="https://www.onsemi.com/pdf/datasheet/h11l1m-d.pdf", jlc="Extended"),
@@ -124,7 +126,20 @@ FP_C = {"0402": "Capacitor_SMD:C_0402_1005Metric", "0603": "Capacitor_SMD:C_0603
         "0805": "Capacitor_SMD:C_0805_2012Metric", "1206": "Capacitor_SMD:C_1206_3216Metric"}
 
 
-def holes_part(n):
+WIRING_FOOTPRINTS = set()   # (n, ground pad numbers) of every hole group drawn; make_library writes them
+
+
+def holes_part(nets, ground_nets=("GND",)):
+    """Bare holes, one per net. Every hole is round except the ground holes, which are square, so on
+    the board square always means ground (pin 1 means nothing for a single wire)."""
+    n = len(nets)
+    grounds = tuple(i + 1 for i, net in enumerate(nets) if net in ground_nets)
+    WIRING_FOOTPRINTS.add((n, grounds))
     return dict(lib=f"Connector_Generic:Conn_01x{n:02d}", value=f"holes 1x{n}",
-                fp=f"analogue_board:WiringHoles_1x{n:02d}", lcsc="", mpn="",
+                fp=f"analogue_board:{wiring_holes_name(n, grounds)}", lcsc="", mpn="",
                 ds="", jlc="bare holes", prefix="J")
+
+
+def wiring_holes_name(n, grounds=()):
+    """WiringHoles_1x03, or WiringHoles_1x03_G2 with pad 2 a ground (square) hole."""
+    return f"WiringHoles_1x{n:02d}" + ("_G" + "_".join(map(str, grounds)) if grounds else "")

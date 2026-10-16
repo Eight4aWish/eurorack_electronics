@@ -1,8 +1,10 @@
-"""Sheets 6-9: pots and gate outputs, expander/I2C/LEDs, gate inputs and jack detect, edge strips."""
+"""Sheets 6-9: pots and gate outputs, expander/I2C/LEDs, gate inputs, edge strips."""
 
+import variant
 import wiring
 from blocks import NC, C, R, decap, decaps, holes, ic, part, tp
 from design_analog import clamp_below
+from placement import STRIP_OMIT, STRIP_OMIT_INNER
 
 
 def AHCT_TEXT(x, y):
@@ -16,13 +18,14 @@ def sheet_pots_gates(sh):
     sh.text("Pots: MCP3208 on +3V3A. Its VREF and the pot tops share POT_REF (100 Ω + 10 µF from +3V3A), so readings are\n"
             "ratiometric and the hand-wired pot leads can't disturb the DAC's supply. Each wiper: 1 kΩ + 100 nF, 1 MΩ to\n"
             "ground so an unwired channel reads 0 (100 kΩ would bend a 100 kΩ pot's response by up to 12 %).\n"
-            "Gate outs: 74HCT595 at 5 V (VIH 2.0 V, so 3.3 V logic drives it) → 1 kΩ → jack, BAV99 clamps to +5VD and GND.\n"
+            "Gate outs: four, one per wiring bank (2026-10-16), from QA-QD of a 74HCT595 at 5 V (VIH 2.0 V, so 3.3 V logic drives\n"
+            "it) → 1 kΩ → jack, BAV99 clamps to +5VD and GND. QE-QH are unused; QH' still chains a second 595 from J603.\n"
             "OE is held high (outputs off) by a pull-up until firmware drives GATE_OE_N low: the 595's register powers up random.",
             (20, 23), size=1.5)
-    ic(sh, "MCP3208", (55.88, 83.82), {1: "POT_IN1", 2: "POT_IN2", 3: "POT_IN3", 4: "POT_IN4", 5: "POT_IN5",
-                                        6: "POT_IN6", 7: "POT_IN7", 8: "POT_IN8", 13: "SPIB_SCK", 12: "SPIB_MISO",
-                                        11: "SPIB_MOSI", 10: "CS_POT", 15: "POT_REF", 16: "+3V3A", 14: "GND", 9: "GND"},
-       ref="U601")
+    # channel n is pin n; channels beyond this board's pot count are grounded
+    adc = {n: f"POT_IN{n}" if n <= variant.POTS else "GND" for n in range(1, 9)}
+    adc.update({13: "SPIB_SCK", 12: "SPIB_MISO", 11: "SPIB_MOSI", 10: "CS_POT", 15: "POT_REF", 16: "+3V3A", 14: "GND", 9: "GND"})
+    ic(sh, "MCP3208", (55.88, 83.82), adc, ref="U601")
     decaps(sh, 30.48, 116.84, "+3V3A", [("1u", "0402"), ("100n", "0402")], "U601 VDD pin 16")
     for i, (v, sz) in enumerate([("10u", "0805"), ("100n", "0402")]):
         c = C(sh, v, (60.96 + i * 12.7, 124.46), size=sz, decouples="U601 VREF pin 15 (POT_REF)")
@@ -39,7 +42,7 @@ def sheet_pots_gates(sh):
     sh.connect(r, 2, "CS_POT")
 
     x0, y0 = 104.14, 50.8
-    for n in range(1, 9):
+    for n in range(1, variant.POTS + 1):
         y = y0 + (n - 1) * 12.7
         r = R(sh, "1k", (x0 + 5.08, y), rot=90)
         node = (x0 + 12.7, y)
@@ -59,7 +62,7 @@ def sheet_pots_gates(sh):
 
     # gate outputs
     ic(sh, "74HCT595", (55.88, 190.5), {14: "SPIB_MOSI", 11: "SPIB_SCK", 10: "+5VD", 12: "CS_595", 13: "GATE_OE_N",
-                                         15: "GQ1", 1: "GQ2", 2: "GQ3", 3: "GQ4", 4: "GQ5", 5: "GQ6", 6: "GQ7", 7: "GQ8",
+                                         15: "GQ1", 1: "GQ2", 2: "GQ3", 3: "GQ4", 4: NC, 5: NC, 6: NC, 7: NC,
                                          9: "GATE_SER_OUT", 16: "+5VD", 8: "GND"}, ref="U602")
     decap(sh, (30.48, 223.52), "100n", "0402", "+5VD", "U602 VCC pin 16")
     r = R(sh, "10k", (25.4, 175.26), fields={"Note": "OE pull-up: gates off until firmware enables"})
@@ -71,7 +74,7 @@ def sheet_pots_gates(sh):
     sh.text("SRCLR tied high. Boot order: OE off, clear\nthe register, then enable (firmware).", (20, 238), size=1.27)
 
     x0, y0 = 220.98, 45.72
-    for n in range(1, 9):
+    for n in range(1, 5):
         col, row = (n - 1) // 4, (n - 1) % 4
         x, y = x0 + col * 76.2, y0 + row * 25.4
         r = R(sh, "1k", (x + 5.08, y), rot=90)
@@ -139,8 +142,9 @@ def sheet_expander(sh):
         r = R(sh, "2.2k", (101.6 + i * 10.16, 177.8))
         sh.connect(r, 1, "+3V3D", stub=0)
         sh.connect(r, 2, net)
-    q = ic(sh, "QWIIC", (137.16, 185.42), {1: "GND", 2: "+3V3D", 3: "SDA", 4: "SCL", "MP": "GND"}, ref="J702")
-    sh.text("Qwiic: 1 GND, 2 3.3 V, 3 SDA, 4 SCL", (95.25, 165), size=1.27)
+    if variant.has("qwiic"):
+        ic(sh, "QWIIC", (137.16, 185.42), {1: "GND", 2: "+3V3D", 3: "SDA", 4: "SCL", 5: "GND", 6: "GND"}, ref="J702")
+        sh.text("Qwiic: 1 GND, 2 3.3 V, 3 SDA, 4 SCL", (95.25, 165), size=1.27)
     holes(sh, (190.5, 218.44), ["SDA", "SCL", "+3V3D", "GND"], "I2C holes for a wired display", ref="J703")
     tp(sh, (101.6, 205.74), "SDA")
     tp(sh, (114.3, 205.74), "SCL")
@@ -161,14 +165,14 @@ def sheet_expander(sh):
 
 # =====================================================================================  8  gate ins, probe
 def sheet_gate_in(sh):
-    sh.text("GATE INPUTS AND JACK DETECT", (20, 18), size=2.5, bold=True)
+    sh.text("GATE INPUTS", (20, 18), size=2.5, bold=True)
     sh.text("Adapted from Ogham's clock input (Ogham feeds the comparator's − input; this one is non-inverting, so four channels\n"
             "share one threshold divider): 10 kΩ, BAT54S clamps to +3V3D / GND, 100 kΩ to ground, LM393 against GATE_TH = 1.65 V with\n"
             "100 kΩ hysteresis. Trips at ≈1.98 V rising, ≈1.67 V falling at the jack. The LM393 runs from +12 V so the clamped\n"
             "input (up to ≈3.6 V) stays inside its common-mode range (VCC − 1.5 V; at 5 V that would be 3.5 V). Open-collector\n"
             "output pulled up to +3V3D: GATE_INn is high while the gate is high, safe for any module. Firmware: catch 100 µs\n"
-            "triggers with edge interrupts or PIO; mask the inputs while the jack-detect probe runs. The clamps push up to ≈3.4 mA\n"
-            "into +3V3D: the 680 Ω minimum load on the power sheet absorbs it.",
+            "triggers with edge interrupts or PIO. The clamps push up to ≈3.4 mA into +3V3D: the 680 Ω minimum load on the\n"
+            "power sheet absorbs it.",
             (20, 23), size=1.5)
     units = [("U801", 1, ("3", "2", "1")), ("U801", 2, ("5", "6", "7")), ("U802", 1, ("3", "2", "1")), ("U802", 2, ("5", "6", "7"))]
     for n, (ref, unit, (pp, pm, po)) in enumerate(units, start=1):
@@ -217,46 +221,32 @@ def sheet_gate_in(sh):
     sh.connect(rb, 2, "GND", stub=0)
     sh.connect(c, 2, "GND", stub=0)
     sh.tie("GATE_TH", (rt, "2"), (rb, "1"), (c, "1"))
-    # gate-in and jack-detect holes, spread over the four banks; each input's probe hole sits
-    # beside it (wiring.py)
+    # gate-in holes, one per bank (wiring.py). Jack detect (a probe into every input's switch lug)
+    # was dropped on 2026-10-16 to ease routing.
     wiring.place(sh, holes, "gatein", (330.2, 50.8), max_y=245)
-
-    # jack-detect probe
-    sh.text("JACK DETECT (Workshop System Computer): PROBE drives a pseudo-random bit through a resistor to each input's\n"
-            "switch (normal) lug. Unpatched, the jack follows the sequence; patched, the lug opens. 100 kΩ for CV and audio\n"
-            "inputs; 22 kΩ for gate inputs, whose 1.98 V threshold a 100 kΩ probe cannot reach (it gives ≈1.24 V).",
-            (160, 120), size=1.5)
-    r = R(sh, "1k", (172.72, 152.4), rot=90)
-    sh.connect(r, 1, "PROBE")
-    bus_x, top = 180.34, 152.4
-    sh.wire(r.p("2"), (bus_x, top))
-    d = clamp_below(sh, "BAT54S", (bus_x, top), "+3V3D", drop=-10.16)
-    vals = ["100k"] * 10 + ["22k"] * 4
-    bus_y0 = 160.02
-    sh.wire((bus_x, top), (bus_x, bus_y0 + 13 * 6.35))
-    for k, v in enumerate(vals, start=1):
-        y = bus_y0 + (k - 1) * 6.35
-        rr = R(sh, v, (bus_x + 2.54, y), rot=90)
-        sh.wire(rr.p("2"), (rr.p("2")[0] + 2.54, y))
-        sh.label(f"PR{k}", (rr.p("2")[0] + 2.54, y), 0)
-        sh.tie("PROBE_BUS", (rr, "1"))
-        sh.tie(f"PR{k}", (rr, "2"))
-    sh.label("PROBE_BUS", (bus_x, top + 3.81), 0)
-    sh.tie("PROBE_BUS", (r, "2"), (d, "3"))
-    tp(sh, (147.32, 160.02), "PROBE")
 
 
 # =====================================================================================  9  edge strips
 def sheet_edge(sh):
     sh.text("EDGE STRIPS", (20, 18), size=2.5, bold=True)
     sh.text("Two n8synth-style edge strips, 40 positions each at 2.54 mm. Each position is an outer hole (the deck's\n"
-            "header pin) joined to an inner hole (a wiring point): both pads carry the same pad number, so they share a net.\n"
-            "Nothing on the board connects to them: each module is wired by hand from the channel holes to the inner\n"
-            "holes. Deck cells occupy positions 1-10, 16-25 and 31-40; 11-15 and 26-30 are free tie points.\n"
+            "header pin, Dn) joined to an inner hole (a wiring point, Wn) by the net DECK_Ln / DECK_Rn: one pin per hole.\n"
+            "Nothing else on the board connects to them: each module is wired by hand from the channel holes to the inner\n"
+            "holes. Deck cells occupy positions 1-10, 16-25 and 31-40. The right strip serves only the 10HP deck: it has no\n"
+            "holes at 11-15 and 26-30, and only the deck hole at 10, 16 and 31.\n"
             "10HP: the board sits parallel behind the deck and both strips are used. 6HP: the board sits at 90° and\n"
             "only the left strip meets the deck's right-angle header.", (20, 23), size=1.5)
-    for ref, key, x in (("J901", "EDGE_L", 80), ("J902", "EDGE_R", 200)):
-        ic(sh, key, (x, 140), {n: NC for n in range(1, 41)}, ref=ref)
+    for ref, key, x, side, omit, omit_inner in (("J901", "EDGE_L", 80, "L", set(), set()),
+                                                 ("J902", "EDGE_R", 200, "R", STRIP_OMIT["right"], STRIP_OMIT_INNER["right"])):
+        nets = {}
+        for n in range(1, 41):
+            if n in omit:
+                continue
+            if n in omit_inner:
+                nets[n] = NC
+            else:
+                nets[n] = nets[n + 40] = f"DECK_{side}{n}"
+        ic(sh, key, (x, 150), nets, ref=ref)
     for i in range(3):
         part(sh, "FID", (300 + i * 15.24, 60), ref=f"FID90{i + 1}")
     sh.text("Fiducials for JLCPCB assembly", (295, 48), size=1.27)

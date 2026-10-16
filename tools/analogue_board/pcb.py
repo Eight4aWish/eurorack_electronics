@@ -1,8 +1,8 @@
 """Checkpoint 3: the PCB, generated from the schematic's netlist.
 
-    python3 tools/analogue_board/pcb.py
+    python3 tools/analogue_board/pcb.py [pico|teensy]      (no argument: both boards)
 
-Writes hardware/analogue_board/analogue_board.kicad_pcb:
+Writes hardware/analogue_board/<board>/analogue_board_<board>.kicad_pcb:
 - the 49.6 x 103 mm outline and a JLC 4-layer stack-up (JLC04161H-7628);
 - every footprint in the netlist, from KiCad's library or the project's, with its nets
   and its link to the schematic symbol, so KiCad's "Update PCB from Schematic" recognises it;
@@ -23,13 +23,20 @@ from collections import OrderedDict
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
+import variant  # noqa: E402
+
+if __name__ == "__main__":
+    variant.run_each(os.path.abspath(__file__))
+variant.require()
+
 import autoplace  # noqa: E402
 import placement as P  # noqa: E402
 from sexpr import Sym, dumps, find, find_all, parse  # noqa: E402
 
-HW = os.path.join(P.REPO, "hardware", "analogue_board")
-NETLIST = os.path.join(HW, "output", "analogue_board.net")
-OUT = os.path.join(HW, "analogue_board.kicad_pcb")
+HW = variant.DIR
+NETLIST = os.path.join(HW, "output", f"{variant.NAME}.net")
+OUT = os.path.join(HW, f"{variant.NAME}.kicad_pcb")
+MODULES = variant.MODULES   # module socket ref -> "pico" | "teensy"
 KICAD_CLI = "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli"
 BX, BY = 30.0, 30.0          # the board's top-left corner on the A3 page
 PARK_X0, PARK_X1 = 100.0, 405.0
@@ -79,7 +86,7 @@ _cache = {}
 def library_footprint(libid):
     if libid not in _cache:
         lib, name = libid.split(":")
-        d = os.path.join(HW, "analogue_board.pretty") if lib == "analogue_board" else os.path.join(P.KICAD_FP, lib + ".pretty")
+        d = P.PRETTY if lib == "analogue_board" else os.path.join(P.KICAD_FP, lib + ".pretty")
         with open(os.path.join(d, name + ".kicad_mod"), encoding="utf-8") as f:
             _cache[libid] = parse(f.read())
     return _cache[libid]
@@ -229,15 +236,17 @@ def instance(ref, comp, at, rot, net_ids, pin_net, face="F"):
 # ------------------------------------------------------------------ fixed parts
 def fixed_positions(comps):
     """ref -> ((x, y) of the footprint origin on the board, rotation, face)."""
-    lay = P.layout("A")
+    lay = P.board_layout()
     pos = {}
-    for ref, key, fp in (("A101", "pico", "Pico2_Socket"), ("A102", "teensy", "Teensy41_Socket")):
-        p1 = [p for p in lay[key]["pads"] if p[0] == "1"][0]   # footprint origin is pad 1
+    for ref, kind in MODULES.items():
+        p1 = [p for p in lay[kind]["pads"] if p[0] == "1"][0]   # footprint origin is pad 1
         pos[ref] = ((p1[1], p1[2]), 180, "F")
     pos["J901"] = ((P.STRIPS["left"]["outer"], P.strip_y(1)), 0, "F")
     pos["J902"] = ((P.STRIPS["right"]["outer"], P.strip_y(1)), 0, "F")
     pos["J201"] = (P.HEADER_PIN1, 0, "F")
     for ref, (x, y, rot, face) in P.anchor_positions().items():
+        if ref not in comps:              # a part this board's feature set leaves out (variant.py)
+            continue
         if ref in P.HOLE_GROUPS:          # wiring holes: the origin is hole 1
             pos[ref] = ((x, y), rot, face)
             continue
@@ -279,24 +288,35 @@ def park(comps, fixed):
 
 
 # ------------------------------------------------------------------ board file
-def stackup():
+def stackup(copper=4):
     def cu(name):
         return S("layer", name, S("type", "copper"), S("thickness", 0.035 if name in ("F.Cu", "B.Cu") else 0.0152))
 
     def diel(n, kind, t, mat):
         return S("layer", f"dielectric {n}", S("type", kind), S("thickness", t), S("material", mat),
                  S("epsilon_r", 4.4), S("loss_tangent", 0.02))
+    if copper == 4:
+        layers = [cu("F.Cu"), diel(1, "prepreg", 0.2104, "7628"), cu("In1.Cu"), diel(2, "core", 1.065, "FR4"), cu("In2.Cu"),
+                  diel(3, "prepreg", 0.2104, "7628"), cu("B.Cu")]
+    else:   # 6 layers, 1.6 mm, approximate (for trials; a real order takes JLC's own 6-layer stack-up)
+        layers = [cu("F.Cu"), diel(1, "prepreg", 0.2, "2116"), cu("In1.Cu"), diel(2, "core", 0.45, "FR4"), cu("In2.Cu"),
+                  diel(3, "prepreg", 0.2, "2116"), cu("In3.Cu"), diel(4, "core", 0.45, "FR4"), cu("In4.Cu"),
+                  diel(5, "prepreg", 0.2, "2116"), cu("B.Cu")]
     return S("stackup",
              S("layer", "F.SilkS", S("type", "Top Silk Screen")), S("layer", "F.Paste", S("type", "Top Solder Paste")),
              S("layer", "F.Mask", S("type", "Top Solder Mask"), S("color", "Green"), S("thickness", 0.01)),
-             cu("F.Cu"), diel(1, "prepreg", 0.2104, "7628"), cu("In1.Cu"), diel(2, "core", 1.065, "FR4"), cu("In2.Cu"),
-             diel(3, "prepreg", 0.2104, "7628"), cu("B.Cu"),
+             *layers,
              S("layer", "B.Mask", S("type", "Bottom Solder Mask"), S("color", "Green"), S("thickness", 0.01)),
              S("layer", "B.Paste", S("type", "Bottom Solder Paste")), S("layer", "B.SilkS", S("type", "Bottom Silk Screen")),
              S("copper_finish", "HAL lead-free"), S("dielectric_constraints", Sym("no")))
 
 
-LAYERS = [(0, "F.Cu", "signal"), (4, "In1.Cu", "signal"), (6, "In2.Cu", "signal"), (2, "B.Cu", "signal"),
+# In1 is the ground plane, named GND so layout tools (Quilter) recognise it; with 6 layers In4 is
+# the power layer (rail pours), named PWR
+COPPER = {4: [(0, "F.Cu", "signal"), (4, "In1.Cu", "power", "GND"), (6, "In2.Cu", "signal"), (2, "B.Cu", "signal")],
+          6: [(0, "F.Cu", "signal"), (4, "In1.Cu", "power", "GND"), (6, "In2.Cu", "signal"), (8, "In3.Cu", "signal"),
+              (10, "In4.Cu", "power", "PWR"), (2, "B.Cu", "signal")]}
+LAYERS = COPPER[4] + [
           (9, "F.Adhes", "user", "F.Adhesive"), (11, "B.Adhes", "user", "B.Adhesive"), (13, "F.Paste", "user"),
           (15, "B.Paste", "user"), (5, "F.SilkS", "user", "F.Silkscreen"), (7, "B.SilkS", "user", "B.Silkscreen"),
           (1, "F.Mask", "user"), (3, "B.Mask", "user"), (17, "Dwgs.User", "user", "User.Drawings"),
@@ -321,9 +341,10 @@ def gr_rect(a, b, layer, w=0.1, tag="r"):
 # by their various pages, so 0.127 mm is the floor here on every layer. Signals at 0.15 mm put two
 # tracks through each gap between module header pins (0.84 mm between 1.7 mm pads).
 NET_CLASSES = [
-    # name, track, clearance, via diameter, via drill, priority (lower wins)
-    ("Default", 0.15, 0.15, 0.45, 0.2, 2147483647),
-    ("Power", 0.3, 0.15, 0.6, 0.3, 0),
+    # name, track, clearance, via diameter, via drill, priority (lower wins); the core experiment
+    # (variant.py) routes signals at 0.127 mm track and space, as Quilter did
+    ("Default", variant.TRACK, variant.TRACK, 0.45, 0.2, 2147483647),
+    ("Power", 0.3, variant.TRACK, 0.6, 0.3, 0),
 ]
 POWER_PATTERNS = ["GND", "+12V", "-12V", "+5VD", "+5VA", "+3V3D", "+3V3A", "MOD_5V", "/Power/*"]
 RULES = {"min_clearance": 0.127, "min_track_width": 0.127, "min_via_diameter": 0.45, "min_through_hole_diameter": 0.2,
@@ -336,7 +357,7 @@ RULES = {"min_clearance": 0.127, "min_track_width": 0.127, "min_via_diameter": 0
 
 def write_project_rules():
     """Merge the net classes and board minimums into the KiCad project file (build.py owns the rest)."""
-    pro = os.path.join(HW, "analogue_board.kicad_pro")
+    pro = os.path.join(HW, f"{variant.NAME}.kicad_pro")
     with open(pro, encoding="utf-8") as f:
         data = json.load(f)
     classes = [{"name": n, "track_width": t, "clearance": c, "via_diameter": vd, "via_drill": vh,
@@ -379,13 +400,20 @@ def build():
         faces[f] += 1
     print(f"Placed {len(placed)} of {len(comps)} parts (outward face {faces['F']}, deck face {faces['B']}); "
           f"not placed: {len(unplaced)} {' '.join(sorted(unplaced)[:20])}")
+    write_board(comps, pin_net, names, pos, labels, OUT)
+    return comps, placed
+
+
+def write_board(comps, pin_net, names, pos, labels, path, copper=4):
+    net_ids = {n: i + 1 for i, n in enumerate(names)}
+    layers = COPPER[copper] + LAYERS[len(COPPER[4]):]
     board = [Sym("kicad_pcb"), S("version", 20241229), S("generator", "analogue_board_pcb"), S("generator_version", "9.0"),
              S("general", S("thickness", 1.6), S("legacy_teardrops", Sym("no"))), S("paper", "A3"),
-             S("title_block", S("title", "Analogue board Rev A"), S("rev", "A"), S("company", "Eight4aWish"),
-               S("comment", 1, "Generated by tools/analogue_board/pcb.py from the schematic netlist"),
+             S("title_block", S("title", f"Analogue board Rev A for {variant.TITLE}"), S("rev", "A"), S("company", "Eight4aWish"),
+               S("comment", 1, f"Generated by tools/analogue_board/pcb.py {variant.BOARD} from the schematic netlist"),
                S("comment", 2, "Checkpoint 3 (placement): parts beside the board are not yet placed")),
-             [Sym("layers")] + [[l[0], l[1], Sym(l[2]), *l[3:]] for l in LAYERS],
-             S("setup", stackup(), S("pad_to_mask_clearance", 0), S("allow_soldermask_bridges_in_footprints", Sym("no")),
+             [Sym("layers")] + [[l[0], l[1], Sym(l[2]), *l[3:]] for l in layers],
+             S("setup", stackup(copper), S("pad_to_mask_clearance", 0), S("allow_soldermask_bridges_in_footprints", Sym("no")),
                S("tenting", Sym("front"), Sym("back")), S("aux_axis_origin", BX, BY), S("grid_origin", BX, BY)),
              S("net", 0, "")]
     board += [S("net", net_ids[n], n) for n in names]
@@ -395,16 +423,50 @@ def build():
     board.append(gr_rect((BX, BY), (BX + P.BOARD_W, BY + P.BOARD_H), "Edge.Cuts", 0.1, "outline"))
     board.append(ground_plane(net_ids))
     # USB plug keep-outs and the parking-area labels, for the reviewer
-    for key, m in P.layout("A").items():
+    for key, m in P.board_layout().items():
         k = m["keepout"]
         board.append(gr_rect((BX + k[0], BY + k[1]), (BX + k[2], BY + k[3]), "Cmts.User", 0.1, "keepout-" + key))
     board.append(gr_text("USB plug keep-outs: nothing taller than ~8 mm", BX, BY + P.BOARD_H + 3, size=1.2, tag="ko"))
     for name, x, y in labels:
         board.append(gr_text(f"not yet placed: {name}", x, y, size=2.0, tag="park"))
     board.append(S("embedded_fonts", Sym("no")))
-    with open(OUT, "w", encoding="utf-8") as f:
+    with open(path, "w", encoding="utf-8") as f:
         f.write(dumps(board) + "\n")
-    return comps, placed
+
+
+# Quilter (quilter.ai) places and routes every part left outside the board outline and keeps
+# every part inside it where it is. For a "place and route" trial the connectors, the wiring
+# field and the parts too tall to go under the module stay put; the rest is parked off the board.
+QUILTER_KEEP = {"U201", "L201", "U202", "U1002", "J702", "FID901", "FID902", "FID903"}
+
+
+def quilter(placed, copper=6):
+    """Two upload sets in output/quilter/: route_only/ (this board's placement, every part locked)
+    and place_and_route/ (only the fixed parts placed). Each holds the board, project and every
+    schematic sheet as loose files, as Quilter asks. The boards get `copper` layers: Quilter wants
+    a power layer for rail pours, and on 4 layers that would leave only the outer two for signals."""
+    import shutil
+    comps, pin_net, names = read()
+    fixed = fixed_positions(comps)
+    keep = {r: p for r, p in fixed.items()
+            if r in MODULES or r in ("J901", "J902", "J201") or r in P.HOLE_GROUPS or r in QUILTER_KEEP}
+    parked, labels = park(comps, keep)
+    sheets = [f for f in os.listdir(HW) if f.endswith(".kicad_sch")]
+    outs = []
+    for kind in ("route_only", "place_and_route"):
+        d = os.path.join(HW, "output", "quilter", kind)
+        os.makedirs(d, exist_ok=True)
+        if kind == "route_only":
+            rest, rest_labels = park(comps, placed)
+            write_board(comps, pin_net, names, {**rest, **placed}, rest_labels, os.path.join(d, os.path.basename(OUT)), copper)
+        else:
+            write_board(comps, pin_net, names, {**parked, **keep}, labels, os.path.join(d, os.path.basename(OUT)), copper)
+        for f in sheets + [f"{variant.NAME}.kicad_pro"]:
+            shutil.copy(os.path.join(HW, f), os.path.join(d, f))
+        outs.append(d)
+    print(f"Quilter upload sets, {copper} layers ({len(keep)} parts fixed for place-and-route, {len(parked)} parked):",
+          *outs, sep="\n  ")
+    return outs
 
 
 def area_budget(comps):
@@ -418,8 +480,8 @@ def area_budget(comps):
         n, a = rows.get(kind, (0, 0.0))
         rows[kind] = (n + 1, a + (x1 - x0) * (y1 - y0))
     # the module sockets occupy only their header rows (their courtyards)
-    rows["module header rows"] = (4, sum((r[2] - r[0]) * (r[3] - r[1]) for ref in ("A101", "A102")
-                                         for r in courtyard_rects(library_footprint(comps[ref]["fp"]))))
+    rows["module header rows"] = (2 * len(MODULES), sum((r[2] - r[0]) * (r[3] - r[1]) for ref in MODULES
+                                                        for r in courtyard_rects(library_footprint(comps[ref]["fp"]))))
     # board area outside the edge strips' courtyards and the 0.65 mm edge slivers beside them
     usable = P.BOARD_W * P.BOARD_H - 2 * 0.65 * P.BOARD_H - sum(
         (r[2] - r[0]) * (r[3] - r[1]) for ref in ("J901", "J902") for r in courtyard_rects(library_footprint(comps[ref]["fp"])))
@@ -440,9 +502,8 @@ def drc():
         return None
     with open(rpt, encoding="utf-8") as f:
         d = json.load(f)
-    # project footprints leave out holes nothing uses (the Teensy's far-end pins, the right strip's
-    # positions 11-15 and 26-30; checks.py confirms they are unconnected): KiCad reports each as a
-    # pin with no pad, which is the intent
+    # project footprints leave out holes nothing uses (the right strip's positions 11-15 and 26-30;
+    # checks.py confirms they are unconnected): KiCad reports each as a pin with no pad, which is the intent
     comps = read()[0]
     intended = set()
     for ref, c in comps.items():
@@ -486,15 +547,15 @@ def height(fp):
 
 
 def height_check(comps, placed):
-    """Outward-face parts under a module body (the P4's envelope included) must be <= 2.5 mm;
+    """Outward-face parts under the module body (on the Pico board, the ESP32-P4's envelope too) must be <= 2.5 mm;
     parts in a USB plug keep-out <= 8 mm. Uses each part's courtyard centre."""
-    lay = P.layout("A")
-    bodies = [lay[k]["body"] for k in ("p4", "pico", "teensy")]
-    keepouts = [lay[k]["keepout"] for k in ("p4", "pico", "teensy")]
+    lay = P.board_layout()
+    bodies = [m["body"] for m in lay.values()]
+    keepouts = [m["keepout"] for m in lay.values()]
     inside = lambda pt, r: r[0] <= pt[0] <= r[2] and r[1] <= pt[1] <= r[3]  # noqa: E731
     bad = []
     for ref, ((x, y), rot, face) in placed.items():
-        if face != "F" or ref in ("A101", "A102"):
+        if face != "F" or ref in MODULES:
             continue
         x0, y0, x1, y1 = courtyard_box(library_footprint(comps[ref]["fp"]))
         c = to_world(((x0 + x1) / 2, (y0 + y1) / 2), (x, y), rot, face)
@@ -519,6 +580,28 @@ def render():
     return outs
 
 
+def placement_pdfs():
+    """Placement drawings, one PDF per face: every part's outline, pads and reference designator,
+    from the fab layers (vector, so they zoom). Plotted from a copy of the board on a page cut to
+    the board plus BX/BY all round. The deck face is mirrored, so it reads as seen from the deck side."""
+    with open(OUT, encoding="utf-8") as f:
+        text = f.read()
+    plot = os.path.join(HW, "output", "placement_plot.kicad_pcb")
+    with open(plot, "w", encoding="utf-8") as f:
+        f.write(text.replace('(paper "A3")', f'(paper "User" {P.BOARD_W + 2 * BX} {P.BOARD_H + 2 * BY})', 1))
+    outs = []
+    for name, layers, mirror in (("placement_outward_face.pdf", "F.Fab,Edge.Cuts,Cmts.User", False),
+                                 ("placement_deck_face.pdf", "B.Fab,Edge.Cuts", True)):
+        path = os.path.join(HW, "output", name)
+        args = [KICAD_CLI, "pcb", "export", "pdf", "--mode-single", "--layers", layers, "--sketch-pads-on-fab-layers",
+                "--exclude-value", "-o", path] + (["--mirror"] if mirror else [])
+        subprocess.run(args + [plot], capture_output=True, text=True)
+        outs.append(path)
+    os.remove(plot)
+    print("Placement drawings:", *outs, sep="\n  ")
+    return outs
+
+
 if __name__ == "__main__":
     write_project_rules()
     comps, placed = build()
@@ -527,3 +610,6 @@ if __name__ == "__main__":
     drc()
     height_check(comps, placed)
     render()
+    placement_pdfs()
+    if "--quilter" in sys.argv:
+        quilter(placed)

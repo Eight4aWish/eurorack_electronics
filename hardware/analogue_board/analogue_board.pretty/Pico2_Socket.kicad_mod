@@ -3,7 +3,7 @@
 	(generator "analogue_board_make_library")
 	(generator_version "9.0")
 	(layer "F.Cu")
-	(descr "Raspberry Pi Pico 2 on 2x20 female headers, 17.78 mm rows. Overlay with the Teensy footprint is settled at checkpoint 2.")
+	(descr "Raspberry Pi Pico 2, or an ESP32-P4 module in its pinout, on 2x20 female headers, 17.78 mm rows")
 	(property "Reference" "REF**"
 		(at -1.61 -2.87 0)
 		(layer "F.SilkS")

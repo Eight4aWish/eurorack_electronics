@@ -8,11 +8,13 @@ Pin names and numbers come from the datasheets; check_pins.py compares them agai
 import os
 import sys
 
-from placement import STRIP_OMIT, STRIP_OMIT_INNER
-from sexpr import Sym, dumps, find
+from parts import wiring_holes_name
+from placement import KICAD_FP, STRIP_OMIT, STRIP_OMIT_INNER
+from sexpr import Sym, dumps, find, parse
+from variant import SHARED
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.normpath(os.path.join(HERE, "..", "..", "hardware", "analogue_board"))
+OUT = SHARED   # one library for both boards
 LIB = "analogue_board"
 
 
@@ -165,17 +167,33 @@ def teensy41():
                       left=left, right=right, width=30.48, in_bom=False)
 
 
-def edge_strip():
-    right = [(str(n), str(n), "passive") for n in range(1, 41)]
-    return box_symbol("EdgeStrip_40", "J", "EdgeStrip_40", f"{LIB}:EdgeStrip_40_Left",
-                      "docs/n8synth_platform.md",
-                      "n8synth-style edge strip: 40 positions, each an outer hole (deck header) joined to an inner wiring hole",
-                      right=right, width=7.62, in_bom=False)
+def edge_strip(side, omit=(), omit_inner=()):
+    """One pin per hole, so pins and pads match one for one (layout tools such as Quilter count them):
+    pin n (D, deck) is position n's outer hole, pin n + 40 (W, wiring) its inner hole. Deck pins on
+    the left, wiring pins on the right, one row per position; a position with no hole has no pin.
+    The schematic joins each position's two pins with a net."""
+    left = [None if n in omit else (str(n), f"D{n}", "passive") for n in range(1, 41)]
+    right = [None if (n in omit or n in omit_inner) else (str(n + 40), f"W{n}", "passive") for n in range(1, 41)]
+    name = f"EdgeStrip_{side}"
+    return box_symbol(name, "J", name, f"{LIB}:EdgeStrip_40_{side}", "docs/n8synth_platform.md",
+                      f"n8synth edge strip, {side.lower()}: pin n is position n's deck-header hole, pin n+40 its wiring hole",
+                      left=left, right=right, width=12.7, in_bom=False)
+
+
+def qwiic():
+    """JST SH 4-way vertical (Qwiic): pins 1-4, and each mounting tab its own pin (5, 6), so pins and
+    pads match one for one."""
+    return box_symbol("Qwiic_JST_SH4_Vertical", "J", "Qwiic", f"{LIB}:{QWIIC_FP}",
+                      "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_JST-BM04B-SRSS-TB-LF-SN_C160390.pdf",
+                      "JST SH 1.0 mm 4-way vertical socket (Qwiic), mounting tabs as pins 5 and 6",
+                      left=[(str(n), f"Pin_{n}", "passive") for n in range(1, 5)],
+                      bottom=[("5", "MP", "passive"), ("6", "MP", "passive")], width=7.62)
 
 
 def write_symbols():
     lib = [Sym("kicad_symbol_lib"), S("version", 20241209), S("generator", "analogue_board_make_library"),
-           S("generator_version", "9.0"), dac8568(), pico2(), teensy41(), edge_strip()]
+           S("generator_version", "9.0"), dac8568(), pico2(), teensy41(), edge_strip("Left"),
+           edge_strip("Right", STRIP_OMIT["right"], STRIP_OMIT_INNER["right"]), qwiic()]
     path = os.path.join(OUT, f"{LIB}.kicad_sym")
     with open(path, "w", encoding="utf-8") as f:
         f.write(dumps(lib) + "\n")
@@ -242,10 +260,11 @@ def module_socket(name, descr, rows, row_spacing, outline_wh, first_pad_offset, 
 
 
 def edge_strip_fp(name, inner_dx, omit=(), omit_inner=(), descr=""):
-    """40 doublets: outer hole (deck header) and inner wiring hole per position, same pad number.
-    `omit`: positions with no holes at all, where no deck header ever sits. `omit_inner`: positions
-    that keep only the outer hole (a header pin no deck cell uses). Each column's courtyard covers
-    only the holes it keeps, so the board where holes are left out is free for parts."""
+    """40 doublets: outer hole (deck header, pad n) and inner wiring hole (pad n + 40) per position;
+    the schematic joins the two with a net. `omit`: positions with no holes at all, where no deck
+    header ever sits. `omit_inner`: positions that keep only the outer hole (a header pin no deck
+    cell uses). Each column's courtyard covers only the holes it keeps, so the board where holes
+    are left out is free for parts."""
     pads = []
     for n in range(1, 41):
         if n in omit:
@@ -253,7 +272,7 @@ def edge_strip_fp(name, inner_dx, omit=(), omit_inner=(), descr=""):
         y = (n - 1) * 2.54
         pads.append(pad(n, 0, y, "rect" if n == 1 else "circle"))
         if n not in omit_inner:
-            pads.append(pad(n, inner_dx, y))
+            pads.append(pad(n + 40, inner_dx, y))
 
     # one courtyard rectangle per run of positions in the same state (both holes, outer only),
     # 0.005 mm apart where runs meet: KiCad rejects courtyard shapes that touch
@@ -276,28 +295,81 @@ def edge_strip_fp(name, inner_dx, omit=(), omit_inner=(), descr=""):
         boxes.append(((x0, top), (x1, bottom)))
         n = m + 1
     outline = ((xs[0] - 1.27, -1.27), (xs[1] + 1.27, 39 * 2.54 + 1.27))
-    return footprint(name, descr or "n8synth edge strip: outer hole (deck header) and inner wiring hole per position, "
-                     "same pad number", pads, outline, boxes)
+    return footprint(name, descr or "n8synth edge strip: outer hole (deck header, pad n) and inner wiring hole "
+                     "(pad n+40) per position", pads, outline, boxes)
 
 
-def wiring_holes_fp(n):
+# KiCad stock footprints adapted so pins and pads match one for one
+QWIIC_FP = "JST_SH_BM04B-SRSS-TB_1x04-2MP_P1.00mm_Vertical"
+DPAK_FP = "TO-252-2_PasteShapes"
+
+
+def derived_footprints():
+    """- TO-252-2 (U202): KiCad's tab paste openings are four unnumbered paste-only pads; here they are
+      filled F.Paste shapes, the same stencil without extra pads.
+    - JST SH vertical (Qwiic): the two mounting tabs, both pad "MP" in KiCad's, become pads 5 and 6."""
+    out = []
+    with open(os.path.join(KICAD_FP, "Package_TO_SOT_SMD.pretty", "TO-252-2.kicad_mod"), encoding="utf-8") as f:
+        fp = parse(f.read())
+    fp[1] = DPAK_FP
+    body = []
+    for node in fp:
+        if isinstance(node, list) and node and str(node[0]) == "pad" and str(node[1]) == "" \
+                and [str(x) for x in find(node, "layers")[1:]] == ["F.Paste"]:
+            (x, y), (w, h) = [float(v) for v in find(node, "at")[1:3]], [float(v) for v in find(node, "size")[1:3]]
+            body.append(S("fp_rect", S("start", round(x - w / 2, 4), round(y - h / 2, 4)),
+                          S("end", round(x + w / 2, 4), round(y + h / 2, 4)),
+                          S("stroke", S("width", 0), S("type", Sym("solid"))), S("fill", Sym("yes")), S("layer", "F.Paste")))
+        else:
+            body.append(node)
+    out.append(body)
+    with open(os.path.join(KICAD_FP, "Connector_JST.pretty", "JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical.kicad_mod"),
+              encoding="utf-8") as f:
+        fp = parse(f.read())
+    fp[1] = QWIIC_FP
+    n = 5
+    for node in fp:
+        if isinstance(node, list) and node and str(node[0]) == "pad" and str(node[1]) == "MP":
+            node[1] = str(n)
+            n += 1
+    out.append(fp)
+    return out
+
+
+def wiring_holes_fp(n, grounds=()):
     """A column of n bare plated holes on 2.54 mm, courtyard exactly one pitch wide, so columns can sit
-    side by side and beside the edge strips (the wiring field)."""
-    pads = [pad(i + 1, 0, i * 2.54, "rect" if i == 0 else "circle") for i in range(n)]
+    side by side and beside the edge strips (the wiring field). All round except the ground holes
+    (`grounds`, pad numbers), which are square: on this board square means ground, not pin 1."""
+    pads = [pad(i + 1, 0, i * 2.54, "rect" if i + 1 in grounds else "circle") for i in range(n)]
     box = ((-1.27, -1.27), (1.27, (n - 1) * 2.54 + 1.27))
-    return footprint(f"WiringHoles_1x{n:02d}", f"Wiring field: {n} bare plated holes, 2.54 mm pitch, pad 1 square",
+    which = f", pad {', '.join(map(str, grounds))} ground (square)" if grounds else ", all signal (round)"
+    return footprint(wiring_holes_name(n, grounds), f"Wiring field: {n} bare plated holes, 2.54 mm pitch{which}",
                      pads, box, [box])
+
+
+def write_wiring_footprints(used):
+    """The ground-marked hole footprints the schematic used, (n, grounds) pairs from
+    parts.WIRING_FOOTPRINTS. The library is shared by both boards, so nothing is removed here."""
+    d = os.path.join(OUT, f"{LIB}.pretty")
+    want = {wiring_holes_name(n, g) + ".kicad_mod": wiring_holes_fp(n, g) for n, g in used if g}
+    for f, fp in want.items():
+        with open(os.path.join(d, f), "w", encoding="utf-8") as fh:
+            fh.write(dumps(fp) + "\n")
 
 
 def write_footprints():
     d = os.path.join(OUT, f"{LIB}.pretty")
     os.makedirs(d, exist_ok=True)
     fps = [
-        module_socket("Pico2_Socket", "Raspberry Pi Pico 2 on 2x20 female headers, 17.78 mm rows. Overlay with the Teensy footprint is settled at checkpoint 2.",
+        module_socket("Pico2_Socket", "Raspberry Pi Pico 2, or an ESP32-P4 module in its pinout, on 2x20 female headers, 17.78 mm rows",
                       20, 17.78, (21.0, 51.0), (51.0 - 19 * 2.54) / 2),
-        module_socket("Teensy41_Socket", "Teensy 4.1 on 1x19 + 1x20 female headers from the USB end, 15.24 mm rows. "
-                      "No holes for pins 20-28 (D28-D36, never used on this board): fit the Teensy with headers "
-                      "on pins 1-19 and 29-48 only.",
+        module_socket("Teensy41_Socket", "Teensy 4.1 on 2x24 female headers, 15.24 mm rows: every pin has its hole, "
+                      "so standard full-length headers fit (the Teensy board, David 2026-10-16)",
+                      24, 15.24, (17.78, 60.96), (60.96 - 23 * 2.54) / 2),
+        # the shared board (both modules interleaved): no holes for pins 20-28 (D28-D36, unused), so
+        # the Teensy takes 1x19 + 1x20 headers from the USB end and the corners under it are free
+        module_socket("Teensy41_Socket_Short", "Teensy 4.1 on 1x19 + 1x20 female headers from the USB end, 15.24 mm "
+                      "rows; no holes for pins 20-28 (the shared board)",
                       24, 15.24, (17.78, 60.96), (60.96 - 23 * 2.54) / 2, omit=range(20, 29)),
         edge_strip_fp("EdgeStrip_40_Left", 2.54),
         # the right strip serves only the 10HP deck, whose headers sit at 1-10, 16-25 and 31-40:
@@ -306,7 +378,7 @@ def write_footprints():
         edge_strip_fp("EdgeStrip_40_Right", -2.54, omit=STRIP_OMIT["right"], omit_inner=STRIP_OMIT_INNER["right"],
                       descr="n8synth edge strip, right (10HP only): doublets at positions 1-9, 17-25 and 32-40; "
                             "outer hole only at 10, 16 and 31; none at 11-15 and 26-30"),
-    ] + [wiring_holes_fp(n) for n in range(1, 15)]
+    ] + [wiring_holes_fp(n) for n in range(1, 15)] + derived_footprints()
     for fp in fps:
         with open(os.path.join(d, fp[1] + ".kicad_mod"), "w", encoding="utf-8") as f:
             f.write(dumps(fp) + "\n")
