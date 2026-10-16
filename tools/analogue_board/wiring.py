@@ -17,7 +17,8 @@ come from the same schematic sheet becomes one footprint.
 
 import variant
 
-COLUMNS = {"LO": 7.0, "LI": 9.54, "R": 42.6}     # x, board coordinates
+COLUMNS = {"LO": 7.0, "LI": 9.54, "R": 42.6,     # x, board coordinates
+           "RS": 47.68}   # the right strip's outer column, in its empty positions 11-15 and 26-30
 BANK_NAMES = {"TL": "left top", "BL": "left bottom", "TR": "right top", "BR": "right middle"}
 REF_BASE = {"cv": 410, "codec": 310, "pots": 610, "expander": 710, "gatein": 810}
 
@@ -59,7 +60,8 @@ UTILITY = {
     "J101": ("LO", 13),   # spare GPIO, MIDI links, and RUN on the Pico board (6; 5 on the Teensy board)
     "J303": ("LI", 13),   # codec reset (2)
     "J1001": ("LO", 30),  # TRS MIDI (6)
-    "J703": ("LI", 30),   # I2C for a wired display (4)
+    "J703": ("RS", 26),   # I2C for a wired display (4): in the right strip's empty positions 26-29, which
+                          # no deck header uses, clearing the left inner column (David, 2026-10-16)
     "J704": ("LO", 36),   # WS2812 chain (5)
     "J603": ("LI", 35),   # gate expansion (6)
 }
@@ -71,6 +73,14 @@ if not variant.has("fixed_cv"):
 DROPPED_NETS |= {f"POT{i}" for i in range(variant.POTS + 1, 9)}
 PLAN = [e for e in PLAN if e[4] not in DROPPED_NETS
         and not (e[4] == "POT_REF" and e[2] == "BR" and variant.POTS <= 6)]   # pots 7-8 were the right-middle bank's
+# One board's own moves, (column, slot) -> (column, slot). On the Teensy board the right column's
+# holes level with the right-lane chips (U502, U501, U801) go to the right strip's empty positions
+# 11-15, so those chips slide right, clear of the module's header row (David, 2026-10-16; the
+# Pico board keeps the table as it is)
+MOVES = {"teensy_core_midi": {("R", 10): ("RS", 11), ("R", 11): ("RS", 12),      # SW7, GND (right top)
+                              ("R", 17): ("RS", 13), ("R", 19): ("RS", 14),      # CV6, AOUT2 (right middle)
+                              ("R", 20): ("RS", 15)}}                            # GIN4 (right middle)
+PLAN = [(*MOVES.get(variant.BOARD, {}).get((c, s), (c, s)), bank, sheet, net) for c, s, bank, sheet, net in PLAN]
 if not variant.has("midi"):
     del UTILITY["J1001"]
 J101_SIZE = (4 if variant.has("midi") else 2) + (1 if variant.HAS_PICO else 0) + 1   # spares (+ MIDI links), RUN, GND
@@ -79,7 +89,7 @@ J101_SIZE = (4 if variant.has("midi") else 2) + (1 if variant.HAS_PICO else 0) +
 def groups():
     """Hole footprints made from PLAN: [{ref, sheet, bank, column, slot, nets}], in a fixed order."""
     out, seq = [], {}
-    for col in ("LO", "LI", "R"):
+    for col in ("LO", "LI", "R", "RS"):
         entries = sorted((e for e in PLAN if e[0] == col), key=lambda e: e[1])
         run = []
         for e in entries + [None]:
@@ -107,6 +117,9 @@ def check():
             assert (col, s) not in seen, f"{ref} overlaps slot {col}{s}"
             seen[(col, s)] = 1
     assert all(s <= 30 for c, s in seen if c == "R"), "right column ends at slot 30"
+    # RS holes share the right strip's outer column: only where the strip has no holes
+    assert all(s in set(range(11, 16)) | set(range(26, 31)) for c, s in seen if c == "RS"), \
+        "RS holes only in the right strip's empty positions 11-15 and 26-30"
     assert all(1 <= s <= 40 for c, s in seen), "slot out of range"
     nets = [e[4] for e in PLAN if e[4] not in ("GND", "POT_REF")]
     want = ([f"CV{i}" for i in range(1, 7)] + ["CVI7", "CVI8", "CVO7", "CVO8", "AIN1", "AIN2", "AOUT1", "AOUT2"]

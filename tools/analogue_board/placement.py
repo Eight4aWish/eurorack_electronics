@@ -174,6 +174,62 @@ ANCHORS_BOARD = {
         "U702": (22.26, 53.3, 0, "B"),      # M24C64 (I2C), under the TCA9555
     },
 }
+# The single board with the core set (shared_core): the auto-placer packs everything toward the
+# module rows, leaving the lower third below the modules almost empty on both faces while the
+# channel between the rows is too crowded for the fine-pitch chips' ground vias (David's
+# observation, 2026-10-16). The slow chips move down there: the I2C expander and its EEPROM,
+# and the gate-input comparators. Their tracks grow by ~20 mm, harmless for I2C, gates and
+# buttons. The converters and the codec stay level with their bus pins. The 595 stays central to
+# its four gate-out holes. Parts there sit in the modules' USB plug zone, well under its 8 mm limit.
+# The two DG412s sat under the ADC with their pad columns exactly opposite its own (x 18.19 and
+# 23.91 on both faces), so every via from either chip fought for the same two strips: 9 of the
+# last 14 connections were there. Each now turns 90 degrees, its pad rows across the body of the
+# chip above it, so its vias land in the body's shadow, clear of that chip's pins; and U402
+# (CV1-4) moves under the CV1-4 op-amp U502, the space U503 left (2026-10-16).
+ANCHORS_BOARD["shared_core"] = {**ANCHORS_BOARD["shared"],
+                                "U403": (21.0, 9.6, 90, "B"),   # DG412 CV5-6 + spares, across the ADC's body
+                                "U402": (35.5, 8.6, 90, "B"),   # DG412 CV1-4, across U502's body
+                                "U701": (19.0, 75.0, 0, "F"),   # TCA9555 (I2C)
+                                "U702": (19.0, 75.0, 0, "B"),   # M24C64 (I2C), under it
+                                "U801": (28.0, 74.5, 0, "F"),   # LM393 gates 1-2
+                                "U802": (28.0, 74.5, 0, "B")}   # LM393 gates 3-4, under it
+# The Pico board with the core set and MIDI: the Pico floorplan, with shared_core's fix for the
+# DG412s, which sat under the ADC with their pad columns opposite its own (U503 is not fitted in
+# the core set, so U402 takes its place under U502)
+# U602 moves out of the lane beside the Pico's right header row into the empty pocket to its
+# right, where the right column has no holes (slots 12-16) and the right strip none (11-15),
+# leaving the lane to the module's tracks (David, 2026-10-16)
+# The chips placed level with their bus pins move down with the module (variant MODULE_DROP);
+# the converters and op-amps above it stay, and get the room
+_LEVEL_WITH_PINS = ("U601", "U301", "U701", "U801", "U302", "U702", "U802")
+ANCHORS_BOARD["pico_core_midi"] = {**ANCHORS_BOARD["pico"],
+                                   **{r: (x, y + variant.MODULE_DROP, rot, f) for r, (x, y, rot, f)
+                                      in ANCHORS_BOARD["pico"].items() if r in _LEVEL_WITH_PINS},
+                                   "U403": (16.0, 9.0, 90, "B"),   # DG412 CV5-6 + spares, across the ADC's body
+                                   "U402": (33.5, 9.0, 90, "B"),   # DG412 CV1-4, across U502's body
+                                   "U602": (43.5, 33.5, 0, "F"),   # 74HCT595, in the pocket right of the lane
+                                   # LM393 gates 1-2: right and down into the right column's gap at slots
+                                   # 21-23 (pots 7-8 and fixed CV dropped), 7.5 mm tall, its own height:
+                                   # the parts above it get room (David, 2026-10-16)
+                                   "U801": (39.4, 55.4, 90, "F")}
+# The Teensy board with the core set and MIDI: the Teensy floorplan as it stands (its DG412s sit
+# above the ADC, not under it), for review by eye before routing
+ANCHORS_BOARD["teensy_core_midi"] = {
+    # every Teensy-floorplan chip sits level with its bus pins, so all move down with the module
+    **{r: (x, y + variant.MODULE_DROP, rot, f) for r, (x, y, rot, f) in ANCHORS_BOARD["teensy"].items()},
+    # David's review (2026-10-16): the LDO and its capacitors left and down, out from under the
+    # module's lower end; the 595 out of the crowded right lane into the void left of the left
+    # header row, where the inner wiring column has no holes (slots 15-20). By straight-line track
+    # to its pins the 595 is no worse there (216 mm against 220); every other chip measured best
+    # where it was
+    "U204": (13.0, 77.0, 0, "F"),     # XC6206 3.3 V LDO
+    "U602": (12.6, 40.6, 90, "F"),    # 74HCT595, sideways in the left void
+    # with the right column's holes from slot 10 to 23 moved into the strip (wiring.MOVES), the
+    # right-lane chips slide right, leaving a lane beside the module's right header row
+    "U502": (41.5, 30.0, 0, "F"),     # TL074 CV1-4
+    "U501": (40.5, 39.0, 90, "F"),    # DAC8568, sideways
+    "U801": (40.5, 52.0, 90, "F"),    # LM393 gates 1-2
+    "U802": (40.5, 52.0, 90, "B")}    # LM393 gates 3-4, under it
 ANCHORS = {**ANCHORS_COMMON, **ANCHORS_BOARD.get(variant.FLOORPLAN, {})}
 
 
@@ -267,7 +323,8 @@ def board_layout():
     variant.require()
     if len(variant.REF) == 2:
         return layout("A")
-    return _modules(BOARD_MODULES, tuple(variant.REF))
+    where = {k: {**v, "far": v["far"] + variant.MODULE_DROP} for k, v in BOARD_MODULES.items()}
+    return _modules(where, tuple(variant.REF))
 
 
 def shared_holes(lay, tol=0.01):

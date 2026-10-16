@@ -1054,6 +1054,51 @@ repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No p
         widths and pours.
      4. Put the hole labels on the silkscreen, one channel name per hole, from `wiring.py`.
      5. Confirm the 6-layer price on a live JLC quote, then order.
+   - **The first complete route: `teensy_core_midi` (2026-10-16).**
+     - **Method, all scripted:**
+       1. Before routing, every surface-mount ground pad gets its own via to the plane,
+          straight out along the pin for a chip (`--ground-vias`). Left to itself, Freerouting
+          joined ground pads to each other: 207 pads shared 38 vias, through 567 mm of track.
+       2. Before routing, each decoupling capacitor is wired to the pin it serves
+          (`--decoupling`). Left to itself, the router left half the IC power pins more than
+          4 mm of track from any capacitor.
+       3. Freerouting runs stages 1 and 2. Stage 3 made 2 connections in 25–35 minutes on
+          every board, so it was dropped.
+       4. `finish.py` closes what is left: copper faults taken up; leftovers routed on a
+          0.05 mm grid; then rip-up and reroute; dead ends removed.
+     - **Placement fixes found along the way:**
+       - On every floorplan, the DG412s sat under the ADC with their pad columns opposite its
+         own, so their vias fought for the same strips. Each now turns 90°.
+       - The auto-placer charges 3 mm for each module header row between a part and its pins.
+       - FB301 sits beside the codec pin it feeds, not 28 mm away.
+     - **What each board reached:**
+
+       | Board | After stage 1 | After stage 2 | After `finish.py` |
+       |---|---|---|---|
+       | `shared_core`, four placements | 24–26 | 7–16 | 2 every time, a different 2 |
+       | `shared_core`, 0.1 mm rules | 57 | stopped (11 min a pass) | — |
+       | `pico_core_midi` | 48 | 21 | (running) |
+       | `teensy_core_midi` | 13 | 9 | **0** |
+
+     - **David's review by eye made the difference on the Teensy board:**
+       - The 595 moved into the void left of the left header row, where the inner wiring
+         column has no holes.
+       - The LDO moved out from under the module's lower end.
+       - Five right-column holes (SW7, GND, CV6, AOUT2, GIN4) moved into the right strip's
+         empty positions 11–15, so U502, U501 and U801 slide right and leave a lane beside the
+         header row. That move is on the Teensy board only, so its wiring field differs from
+         the Pico board's.
+       - Bringing the module 10 mm lower was tried and undone: no chip measured better in the
+         freed band, and it brought the codec and comparators nearer the buck.
+     - **Result:** KiCad's DRC finds 0 unconnected items and 0 copper faults. What it still
+       lists is 102 silkscreen overlaps and 39 library notices from the trial folder.
+     - **Kept in:** `hardware/analogue_board/teensy_core_midi/routed_trial/`.
+     - **Left to an order:**
+       1. Four power pins more than 4 mm of track from a capacitor: U501 pin 9 at 10 mm,
+          U402 pin 4 at 7.7 mm, U602 pin 10 at 7.4 mm, U302 pin 4 at 4.1 mm.
+       2. The hole labels.
+       3. The SMA diodes' footprint against KiCad's library.
+       4. `fab.py`, JLC's DFM check and a live quote.
 4. **Routed board**, clean against the design rules, with test points on every rail and
    bus and 0 Ω links in each supply so a faulty rail can be isolated.
 5. **JLCPCB quote and preview**, rotations checked, "Confirm Parts Placement" ($0.45)

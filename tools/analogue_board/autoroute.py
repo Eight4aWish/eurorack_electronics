@@ -22,6 +22,18 @@ never touched) and reports what is left unrouted, with the plane filled. Ground 
 (a power layer, so Freerouting keeps other nets off it); every other net, the rails included,
 is routed as tracks on the other copper layers, which is harder than the final board.
 
+--unlock (ours) unlocks every track and via but ground's first (a board from the staged route
+has them all locked), so a last pass may rip up and reroute them to make the last few
+connections; the ground vias to the plane stay put.
+
+--ground-vias (ours) first gives every surface-mount ground pad its own via to the plane
+(finish.fan_out_ground), locked, so the router routes around them instead of joining ground
+pads to each other with tracks. With --staged it applies to stage 1.
+
+--decoupling (ours) then wires each decoupling capacitor to the pin it serves with a short
+locked track (finish.fan_in_decoupling), so every power pin has its own capacitor beside it
+in copper, not only in placement. With --staged it applies to stage 1.
+
 With 6, the copy gets a 6-layer stack for the trial: In1 the ground plane, In2-In4 signal. Any
 other .kicad_pcb (an earlier board from git, say) is routed into an autoroute/ folder beside it.
 """
@@ -93,6 +105,28 @@ def main(arg, passes, layers, label="", settings=()):
     os.makedirs(outdir, exist_ok=True)
     board = pcbnew.LoadBoard(path)
     stack(board, layers)
+    if "--ground-vias" in settings or "--decoupling" in settings:
+        import finish
+        finish.load_rules(path[:-len(".kicad_pcb")] + ".kicad_pro")   # the board's own track and clearance
+    if "--ground-vias" in settings:
+        settings = [s for s in settings if s != "--ground-vias"]
+        import finish
+        placed, failed = finish.fan_out_ground(board)
+        for t in board.GetTracks():
+            t.SetLocked(True)
+        print(f"Ground vias placed before routing: {placed}; no room beside {len(failed)} pads: {failed}", flush=True)
+    if "--decoupling" in settings:
+        settings = [s for s in settings if s != "--decoupling"]
+        import finish
+        made, failed = finish.fan_in_decoupling(board)
+        for t in board.GetTracks():
+            t.SetLocked(True)
+        print(f"Decoupling capacitors wired to their pins before routing: {made}; no short path: {failed}", flush=True)
+    if "--unlock" in settings:
+        settings = [s for s in settings if s != "--unlock"]
+        for t in board.GetTracks():
+            t.SetLocked(t.GetNetname() == "GND")
+        print("Every track and via but ground's unlocked: the router may rip them up", flush=True)
     if "--lock-existing" in settings:
         settings = [s for s in settings if s != "--lock-existing"]
         locked = 0
@@ -134,17 +168,22 @@ def main(arg, passes, layers, label="", settings=()):
 # The staged route (spec §14, 2026-10-16): signals first with Freerouting's fan-out off (on a dense
 # board its via beside every SMD pin blocks the tracks), then ground and rails with those tracks
 # locked and fan-out on, then a last pass with cheap plane vias and a high rip-up cost
-COMMON = ["--router.automatic_neckdown=false", "--router.hole_clearance_um=250"]
+COMMON = ["--router.automatic_neckdown=false", "--router.hole_clearance_um=250", "--router.copper_to_edge_clearance_um=500"]
 STAGES = [("s1", ["--router.fanout.enabled=false", "--router.scoring.via_costs=20", "--router.scoring.plane_via_costs=2"]),
           ("s2", ["--lock-existing"]),
           ("s3", ["--lock-existing", "--router.scoring.plane_via_costs=1", "--router.scoring.start_ripup_costs=400"])]
 
 
-def staged(arg, passes, layers):
+def staged(arg, passes, layers, prefix="", first=(), upto=len(STAGES)):
+    """The stages in turn, each starting from the last one's board. `prefix` keeps one staged
+    run's files apart from another's on the same board; `first` adds settings to stage 1
+    (--ground-vias, say); `upto` stops early (stage 3 has made 2 connections in 25-35 min on
+    every board since the ground vias went in first: finish.py does that work faster)."""
     board = arg
-    for label, settings in STAGES:
+    for label, settings in STAGES[:upto]:
         print(f"\n== stage {label}", flush=True)
-        board = main(board, passes, layers, label, COMMON + settings)
+        board = main(board, passes, layers, f"{prefix}_{label}" if prefix and label == "s1" else label,
+                     COMMON + settings + (list(first) if label == "s1" else []))
     return board
 
 
@@ -153,6 +192,8 @@ if __name__ == "__main__":
     flags = [a for a in sys.argv[1:] if a.startswith("--")]
     passes, layers = int(pos[1]) if len(pos) > 1 else 20, int(pos[2]) if len(pos) > 2 else 4
     if "--staged" in flags:
-        staged(pos[0], passes, layers)
+        upto = [int(f.split("=")[1]) for f in flags if f.startswith("--stages=")]
+        staged(pos[0], passes, layers, pos[3] if len(pos) > 3 else "",
+               [f for f in flags if f != "--staged" and not f.startswith("--stages=")], *(upto[:1] or []))
     else:
         main(pos[0], passes, layers, pos[3] if len(pos) > 3 else "", flags)

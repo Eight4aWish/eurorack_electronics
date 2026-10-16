@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "analogue_board")(type "KiCad")(uri "${KIPRJMOD}/../analogue_board.pretty")(options "")(descr "Analogue board project footprints"))
+)

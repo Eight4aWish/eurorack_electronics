@@ -224,6 +224,11 @@ def instance(ref, comp, at, rot, net_ids, pin_net, face="F"):
                 counter[0] += 1
                 c.append(S("uuid", uid(ref, "pad", c[1], counter[0])))
         body.append(c)
+    # which pin a capacitor decouples, carried onto the board (hidden) for finish.fan_in_decoupling
+    if comp["props"].get("Decouples"):
+        body.append(S("property", "Decouples", comp["props"]["Decouples"], S("at", 0, 0, 0), S("unlocked", Sym("yes")),
+                      S("layer", "B.Fab" if flip else "F.Fab"), S("hide", Sym("yes")), S("uuid", uid(ref, "prop", "Decouples")),
+                      S("effects", S("font", S("size", 1, 1), S("thickness", 0.15)))))
     # KiCad's order: descr, tags, properties, then the schematic link, then the rest
     if comp["attrs"] and not any(str(c[0]) == "attr" for c in body):
         body.append(S("attr", *[Sym(a) for a in comp["attrs"]]))
@@ -337,9 +342,10 @@ def gr_rect(a, b, layer, w=0.1, tag="r"):
              S("uuid", uid("rect", tag, layer, a, b)))
 
 
-# Routing rules. JLC's multilayer limits: via 0.2 mm drill / 0.45 mm pad; track and space 0.09-0.127 mm
-# by their various pages, so 0.127 mm is the floor here on every layer. Signals at 0.15 mm put two
-# tracks through each gap between module header pins (0.84 mm between 1.7 mm pads).
+# Routing rules. JLC's multilayer limits: via 0.2 mm drill / 0.45 mm pad; track and space 0.09 mm on
+# 4 and 6 layers. The floor here is 0.127 mm, or the board's own track (variant.py) where that is
+# finer: shared_core routes at 0.1 mm. Signals at 0.15 mm put two tracks through each gap between
+# module header pins (0.84 mm between 1.7 mm pads).
 NET_CLASSES = [
     # name, track, clearance, via diameter, via drill, priority (lower wins); the core experiment
     # (variant.py) routes signals at 0.127 mm track and space, as Quilter did
@@ -347,7 +353,8 @@ NET_CLASSES = [
     ("Power", 0.3, variant.TRACK, 0.6, 0.3, 0),
 ]
 POWER_PATTERNS = ["GND", "+12V", "-12V", "+5VD", "+5VA", "+3V3D", "+3V3A", "MOD_5V", "/Power/*"]
-RULES = {"min_clearance": 0.127, "min_track_width": 0.127, "min_via_diameter": 0.45, "min_through_hole_diameter": 0.2,
+FLOOR = min(0.127, variant.TRACK)
+RULES = {"min_clearance": FLOOR, "min_track_width": FLOOR, "min_via_diameter": 0.45, "min_through_hole_diameter": 0.2,
          "min_via_annular_width": 0.1, "min_hole_clearance": 0.25, "min_hole_to_hole": 0.25,
          "min_copper_edge_clearance": 0.5, "min_connection": 0.0, "min_microvia_diameter": 0.2,
          "min_microvia_drill": 0.1, "min_resolved_spokes": 2, "min_silk_clearance": 0.0, "min_text_height": 0.8,
@@ -370,7 +377,7 @@ def write_project_rules():
                             "netclass_patterns": [{"netclass": "Power", "pattern": p} for p in POWER_PATTERNS]}
     ds = data.setdefault("board", {}).setdefault("design_settings", {})
     ds.setdefault("rules", {}).update(RULES)
-    ds["track_widths"] = [0.0, 0.127, 0.15, 0.2, 0.3, 0.5]
+    ds["track_widths"] = [0.0, *sorted({FLOOR, 0.127, 0.15, 0.2, 0.3, 0.5})]
     ds["via_dimensions"] = [{"diameter": 0.0, "drill": 0.0}, {"diameter": 0.45, "drill": 0.2}, {"diameter": 0.6, "drill": 0.3}]
     with open(pro, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
@@ -384,6 +391,20 @@ def ground_plane(net_ids):
              S("hatch", Sym("edge"), 0.5), S("connect_pads", S("clearance", 0.2)), S("min_thickness", 0.2),
              S("filled_areas_thickness", Sym("no")), S("fill", S("thermal_gap", 0.3), S("thermal_bridge_width", 0.3)),
              S("polygon", S("pts", *[S("xy", round(x, 4), round(y, 4)) for x, y in pts])))
+
+
+def fiducial_keepout(ref, centre, half=1.7):
+    """A rule area round a fiducial on the outward face: no tracks or vias within its 0.6 mm
+    clearance (the copper dot is 1 mm, its mask opening 2 mm), so autorouters keep clear."""
+    x, y = centre
+    pts = [(x - half, y - half), (x + half, y - half), (x + half, y + half), (x - half, y + half)]
+    return S("zone", S("net", 0), S("net_name", ""), S("layer", "F.Cu"), S("uuid", uid("keepout", ref)),
+             S("name", f"{ref} keep-out"), S("hatch", Sym("edge"), 0.5), S("connect_pads", S("clearance", 0)),
+             S("min_thickness", 0.25), S("filled_areas_thickness", Sym("no")),
+             S("keepout", S("tracks", Sym("not_allowed")), S("vias", Sym("not_allowed")), S("pads", Sym("allowed")),
+               S("copperpour", Sym("not_allowed")), S("footprints", Sym("allowed"))),
+             S("fill", S("thermal_gap", 0.5), S("thermal_bridge_width", 0.5)),
+             S("polygon", S("pts", *[S("xy", round(px, 4), round(py, 4)) for px, py in pts])))
 
 
 def build():
@@ -422,6 +443,10 @@ def write_board(comps, pin_net, names, pos, labels, path, copper=4):
         board.append(instance(ref, comp, (BX + x, BY + y), rot, net_ids, pin_net, face))
     board.append(gr_rect((BX, BY), (BX + P.BOARD_W, BY + P.BOARD_H), "Edge.Cuts", 0.1, "outline"))
     board.append(ground_plane(net_ids))
+    for ref in comps:
+        if ref.startswith("FID") and pos[ref][0][1] < P.BOARD_H + 1:   # placed fiducials only
+            (x, y), _rot, _face = pos[ref]
+            board.append(fiducial_keepout(ref, (BX + x, BY + y)))
     # USB plug keep-outs and the parking-area labels, for the reviewer
     for key, m in P.board_layout().items():
         k = m["keepout"]

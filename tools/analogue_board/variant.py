@@ -33,10 +33,29 @@ BOARDS = {
                   "drop": {"fixed_cv", "midi", "qwiic"}, "pots": 6, "spacing": 0.4, "track": 0.127},
     # the single board again (both modules), with the core set plus TRS MIDI: six switchable CV
     # jacks, no fixed-direction CV, six pots, a display on the I2C holes only, and the Teensy on
-    # full-length headers (David, 2026-10-16)
+    # full-length headers (David, 2026-10-16). Track and space 0.127 mm: 0.1 mm everywhere was
+    # tried when four routes in a row ended 2 connections short, and routed worse (57 left after
+    # stage 1 against 24, stage 2 crawling at 11 minutes a pass), 2026-10-16
     "shared_core": {"title": "Pico 2 / ESP32-P4 or Teensy 4.1, core set with MIDI",
-                    "modules": {"A101": "pico", "A102": "teensy"}, "floorplan": "shared",
+                    "modules": {"A101": "pico", "A102": "teensy"}, "floorplan": "shared_core",
                     "drop": {"fixed_cv", "qwiic"}, "pots": 6, "spacing": 0.4, "track": 0.127, "teensy_full": True},
+    # the shared_core feature set on a Pico 2 / ESP32-P4 board alone: two header rows instead of
+    # four, and a 15.2 mm channel between them instead of 9.7 mm, where shared_core's last open
+    # connections always were (David, 2026-10-16)
+    # The module sits 8 mm lower than checkpoint 2 put it, giving the converters above it room
+    # (David, 2026-10-16); the ESP32-P4's USB end still clears the buck at y 80.8.
+    "pico_core_midi": {"title": "Pico 2 / ESP32-P4, core set with MIDI", "modules": {"A101": "pico"},
+                       "floorplan": "pico_core_midi", "drop": {"fixed_cv", "qwiic"}, "pots": 6, "spacing": 0.4,
+                       "track": 0.127, "module_drop": 8.0},
+    # and on a Teensy 4.1 alone, on full-length headers (David, 2026-10-16: placement reviewed
+    # by eye before it is routed)
+    # The module stays where checkpoint 2 put it: 10 mm lower was tried, and no chip measured
+    # better in the band it freed at the top (every Teensy-floorplan chip sits level with its bus
+    # pins, so they moved down too), while it brought the codec, comparators and I2C chips 10 mm
+    # nearer the buck (David, 2026-10-16)
+    "teensy_core_midi": {"title": "Teensy 4.1, core set with MIDI", "modules": {"A101": "teensy"},
+                         "floorplan": "teensy_core_midi", "drop": {"fixed_cv", "qwiic"}, "pots": 6, "spacing": 0.4,
+                         "track": 0.127},
 }
 DEFAULT = ("pico", "teensy")   # what build.py and pcb.py build with no argument
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -59,6 +78,7 @@ SPACING = _B.get("spacing", 0.1)      # courtyard-to-courtyard gap the auto-plac
 TRACK = _B.get("track", 0.15)         # default track width and clearance, mm
 POTS = _B.get("pots", 8)              # pot channels on the MCP3208
 TEENSY_FULL = _B.get("teensy_full", len(REF) == 1)   # every Teensy pin has a hole (else 20-28 left out)
+MODULE_DROP = _B.get("module_drop", 0.0)   # a one-module board's module this much lower than checkpoint 2's, mm
 
 
 def has(feature):

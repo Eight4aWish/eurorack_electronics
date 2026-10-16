@@ -1,0 +1,185 @@
+{
+  "meta": {
+    "filename": "analogue_board_pico_core_midi.kicad_pro",
+    "version": 3
+  },
+  "sheets": [
+    [
+      "113c23cb-ce4a-56a0-a2a5-4d18198ead93",
+      "Root"
+    ],
+    [
+      "4cef8fc8-3b32-5d08-b124-a233d2d44e0a",
+      "Power"
+    ],
+    [
+      "47430451-5b2e-5bac-802f-17f0b1d5ba28",
+      "Codec & audio"
+    ],
+    [
+      "f50c8b2e-4172-5d1d-9028-6413c8b46ec0",
+      "CV jacks & ADC"
+    ],
+    [
+      "2774d978-be01-5b5c-a5c0-07bf73cc5d50",
+      "CV DAC"
+    ],
+    [
+      "dc311854-cb37-507b-8413-f8212c2c022c",
+      "Pots & gate outs"
+    ],
+    [
+      "7274a643-4869-5b98-9bfa-b631cd627243",
+      "Expander, I2C & LEDs"
+    ],
+    [
+      "d6661fdd-24ed-5770-a13b-db5d78a736eb",
+      "Gate ins"
+    ],
+    [
+      "040e7b24-7d27-5978-9200-b15a621f45ee",
+      "Edge strips"
+    ],
+    [
+      "ed07e321-f38a-541e-a882-770fdceb04e7",
+      "TRS MIDI"
+    ]
+  ],
+  "schematic": {
+    "drawing": {
+      "default_line_thickness": 6.0
+    }
+  },
+  "erc": {
+    "rule_severities": {}
+  },
+  "net_settings": {
+    "classes": [
+      {
+        "name": "Default",
+        "track_width": 0.127,
+        "clearance": 0.127,
+        "via_diameter": 0.45,
+        "via_drill": 0.2,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "diff_pair_gap": 0.2,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "bus_width": 12,
+        "wire_width": 6,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 2147483647
+      },
+      {
+        "name": "Power",
+        "track_width": 0.3,
+        "clearance": 0.127,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "diff_pair_gap": 0.2,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "bus_width": 12,
+        "wire_width": 6,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 0
+      }
+    ],
+    "meta": {
+      "version": 4
+    },
+    "net_colors": null,
+    "netclass_assignments": null,
+    "netclass_patterns": [
+      {
+        "netclass": "Power",
+        "pattern": "GND"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+12V"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "-12V"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+5VD"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+5VA"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+3V3D"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+3V3A"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "MOD_5V"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "/Power/*"
+      }
+    ]
+  },
+  "board": {
+    "design_settings": {
+      "rules": {
+        "min_clearance": 0.127,
+        "min_track_width": 0.127,
+        "min_via_diameter": 0.45,
+        "min_through_hole_diameter": 0.2,
+        "min_via_annular_width": 0.1,
+        "min_hole_clearance": 0.25,
+        "min_hole_to_hole": 0.25,
+        "min_copper_edge_clearance": 0.5,
+        "min_connection": 0.0,
+        "min_microvia_diameter": 0.2,
+        "min_microvia_drill": 0.1,
+        "min_resolved_spokes": 2,
+        "min_silk_clearance": 0.0,
+        "min_text_height": 0.8,
+        "min_text_thickness": 0.08,
+        "max_error": 0.005,
+        "solder_mask_to_copper_clearance": 0.0,
+        "use_height_for_length_calcs": true
+      },
+      "track_widths": [
+        0.0,
+        0.127,
+        0.15,
+        0.2,
+        0.3,
+        0.5
+      ],
+      "via_dimensions": [
+        {
+          "diameter": 0.0,
+          "drill": 0.0
+        },
+        {
+          "diameter": 0.45,
+          "drill": 0.2
+        },
+        {
+          "diameter": 0.6,
+          "drill": 0.3
+        }
+      ]
+    }
+  }
+}

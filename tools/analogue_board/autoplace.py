@@ -26,6 +26,10 @@ EDGE = 0.3           # courtyard to board edge, mm
 MAX_R = 22.0         # search radius, mm
 FAR_R = 110.0        # the last resort: anywhere on the board
 OTHER_FACE = 1.5     # cost of using the face the target part is not on, mm
+ROW_CROSS = 3.0      # cost of each module header row between a part and a pin it connects to, mm:
+                     # every track across a row squeezes between its pins, and the channel between
+                     # the rows is the board's tightest (2026-10-16: the last connections the
+                     # router could not make were all parts placed across a row from their op-amp)
 BIG_NET = 13         # nets with more pins (ground, rails) say nothing about where a part belongs
 THT_PREFIXES = ("analogue_board:EdgeStrip", "analogue_board:WiringHoles", "analogue_board:Pico2",
                 "analogue_board:Teensy41", "Connector_IDC:")
@@ -33,6 +37,9 @@ THT_PREFIXES = ("analogue_board:EdgeStrip", "analogue_board:WiringHoles", "analo
 # Decouples fields that name a role rather than a pin: the part they sit beside
 ROLE_TARGETS = {"rail entry +12V": "FB201", "rail entry -12V": "FB202", "buck output": "L201",
                 "+5VD distribution": "U204", "module supply": "D203"}
+# parts that belong beside one pin though their schematic field says nothing: a filter's output
+# side is the short side (FB301 sat by the ADC, 28 mm of CODEC_VCC from the codec, 2026-10-16)
+PIN_TARGETS = {"FB301": ("U301", "24")}
 # capacitors serving these stay on the same face unless nothing fits within this many mm: the
 # buck's input and output loops carry 350 kHz switching current and must not run through vias
 SAME_FACE = {"U201": 12.0, "L201": 12.0}
@@ -92,6 +99,25 @@ class Placer:
         for ref, p in fixed.items():
             self.put(ref, *p)
         self.offsets = _offsets()
+        # the module header rows: (x, top, bottom) of each column of module pins
+        self.rows = []
+        for ref in variant.MODULES:
+            if ref in self.pos:
+                cols = {}
+                for x, y in self.pads(ref).values():
+                    cols.setdefault(round(x, 1), []).append(y)
+                self.rows += [(x, min(ys), max(ys)) for x, ys in cols.items() if len(ys) > 4]
+
+    def row_cost(self, x, y, pins):
+        """ROW_CROSS for every header row between (x, y) and each pin."""
+        n = 0
+        for px, py in pins:
+            for rx, top, bottom in self.rows:
+                if (x - rx) * (px - rx) < 0:
+                    yc = y + (py - y) * (rx - x) / (px - x)
+                    if top - 1.27 <= yc <= bottom + 1.27:
+                        n += 1
+        return ROW_CROSS * n
 
     # ---------------------------------------------------------------- geometry
     def rects(self, ref, origin, rot, face):
@@ -134,6 +160,8 @@ class Placer:
 
     # ---------------------------------------------------------------- targets
     def decouples(self, ref):
+        if ref in PIN_TARGETS and PIN_TARGETS[ref][0] in self.comps:
+            return PIN_TARGETS[ref]
         d = self.comps[ref]["props"].get("Decouples", "")
         if not d:
             return None
@@ -144,7 +172,8 @@ class Placer:
         return (m.group(1), m.group(2)) if m else None
 
     def target(self, ref):
-        """(x, y, preferred face or None, strength) or None while nothing it connects to is placed."""
+        """(x, y, preferred face or None, strength, the pins it connects to) or None while nothing
+        it connects to is placed."""
         dec = self.decouples(ref)
         if dec:
             tref, pin = dec
@@ -154,9 +183,10 @@ class Placer:
             self.face_penalty[ref] = SAME_FACE.get(tref, OTHER_FACE)
             if pin:
                 x, y = self.pads(tref)[pin]
-                return (x, y, None if self.is_tht(tref) else face, 3.0)
+                return (x, y, None if self.is_tht(tref) else face, 3.0, [(x, y)])
             r = self.rects(tref, *self.pos[tref])[0]
-            return ((r[0] + r[2]) / 2, (r[1] + r[3]) / 2, None if self.is_tht(tref) else face, 2.0)
+            c = ((r[0] + r[2]) / 2, (r[1] + r[3]) / 2)
+            return (c[0], c[1], None if self.is_tht(tref) else face, 2.0, [c])
         pts, faces = [], {}
         for (r2, pin), net in self.pin_net.items():
             if r2 != ref:
@@ -176,10 +206,12 @@ class Placer:
         if not pts:
             return None
         face = max(faces, key=faces.get) if faces else None
-        return (sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts), face, float(len(pts)))
+        return (sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts), face, float(len(pts)), pts)
 
     # ---------------------------------------------------------------- search
-    def find(self, ref, tx, ty, face_pref, m=MARGIN, offsets=None):
+    def find(self, ref, tx, ty, face_pref, m=MARGIN, offsets=None, pins=()):
+        """The nearest free spot to (tx, ty): distance, plus the other-face penalty, plus
+        ROW_CROSS for each header row between the spot and each of `pins`."""
         lib = self.lib(self.comps[ref]["fp"])
         boxes = self.crt(lib)
         bx0 = min(b[0] for b in boxes); by0 = min(b[1] for b in boxes)
@@ -195,14 +227,17 @@ class Placer:
                 hx, hy = (cx1 - cx0) / 2, (cy1 - cy0) / 2
                 ccx, ccy = (cx0 + cx1) / 2, (cy0 + cy1) / 2   # courtyard centre relative to origin
                 for dx, dy in offsets or self.offsets:
-                    d = math.hypot(dx, dy) + penalty
-                    if best and d >= best[0]:
+                    base = math.hypot(dx, dy) + penalty
+                    if best and base >= best[0]:
                         break
                     x, y = tx + dx, ty + dy
                     r = grow((x - hx, y - hy, x + hx, y + hy), m)
                     if self.grid.free(face, r):
-                        best = (d, (x - ccx, y - ccy), rot, face)
-                        break
+                        d = base + (self.row_cost(x, y, pins) if pins else 0.0)
+                        if not best or d < best[0]:
+                            best = (d, (x - ccx, y - ccy), rot, face)
+                        if d == base:      # nothing between it and its pins: no farther spot beats it
+                            break
         return best
 
     def run(self, todo):
@@ -223,7 +258,7 @@ class Placer:
                     if mates:
                         rs = [self.rects(r, *self.pos[r])[0] for r in mates]
                         ready.append((2, 0.0, ref, (sum((r[0] + r[2]) / 2 for r in rs) / len(rs),
-                                                    sum((r[1] + r[3]) / 2 for r in rs) / len(rs), None, 0.0)))
+                                                    sum((r[1] + r[3]) / 2 for r in rs) / len(rs), None, 0.0, [])))
             if not ready:
                 unplaced += pending
                 break
@@ -231,15 +266,15 @@ class Placer:
             # place the decoupling capacitors and the best-connected half, then recompute targets;
             # a part placed by the fallback goes alone, so whatever hangs off it gets a real target
             n = 1 if ready[0][0] == 2 else max(1, len(ready) // 2)
-            for _, _, ref, (tx, ty, face, _) in ready[:n]:
-                hit, m = self.find(ref, tx, ty, face), MARGIN
+            for _, _, ref, (tx, ty, face, _, pins) in ready[:n]:
+                hit, m = self.find(ref, tx, ty, face, pins=pins), MARGIN
                 if not hit and MARGIN > TIGHT:
                     # no room at the board's spacing: this part alone at the tight spacing
-                    hit, m = self.find(ref, tx, ty, face, TIGHT), TIGHT
+                    hit, m = self.find(ref, tx, ty, face, TIGHT, pins=pins), TIGHT
                 if not hit:
                     # nothing free nearby: the nearest free spot anywhere on the board
                     self.offsets_far = getattr(self, "offsets_far", None) or _offsets(FAR_R)
-                    hit = self.find(ref, tx, ty, face, m, self.offsets_far)
+                    hit = self.find(ref, tx, ty, face, m, self.offsets_far, pins=pins)
                 if hit:
                     _, origin, rot, f = hit
                     self.put(ref, origin, rot, f, m)
