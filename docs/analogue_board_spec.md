@@ -1093,12 +1093,31 @@ repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No p
      - **Result:** KiCad's DRC finds 0 unconnected items and 0 copper faults. What it still
        lists is 102 silkscreen overlaps and 39 library notices from the trial folder.
      - **Kept in:** `hardware/analogue_board/teensy_core_midi/routed_trial/`.
-     - **Left to an order:**
-       1. Four power pins more than 4 mm of track from a capacitor: U501 pin 9 at 10 mm,
-          U402 pin 4 at 7.7 mm, U602 pin 10 at 7.4 mm, U302 pin 4 at 4.1 mm.
-       2. The hole labels.
-       3. The SMA diodes' footprint against KiCad's library.
-       4. `fab.py`, JLC's DFM check and a live quote.
+     - **To the order, done the same day:**
+       1. **Decoupling, by routed track from capacitor to pin:**
+          - Two of the flagged pins are not supply pins: U501 pin 9 is the DAC's CLR and
+            U602 pin 10 the 595's MR, both tied high.
+          - Four are over 4 mm: C408 to U401 pin 5 (REFIO) at 9.2 mm, C416 to U402 pin 4
+            (−12 V) at 5.8 mm, C604 to U601 pin 15 at 4.7 mm, C217 to U202 pin 3 at 4.3 mm.
+          - `finish.py` now adds a direct track where one fits, crossing other nets if need
+            be, but no shorter path fits here: the vias of the chip on the other face stand
+            between C416 and its pin, and REFIO's only short path crosses REFCAP's.
+          - Accepted for Rev A (David): all are DC references or a low-current, slow-switching
+            supply.
+          - For the Pico board: no vias between a capacitor and its pin.
+       2. **Labels:** `labels.py` puts block numbers beside the wiring blocks (David's choice
+          over signal names, which do not fit between holes on a 2.54 mm pitch) and names
+          beside the test points. Eight of nine blocks and 15 of 27 test points have room. W8,
+          the five holes in the right strip's gap, is unmistakable without one.
+          `output/wiring_map.md` lists everything.
+       3. **SMA diodes:** their pads match KiCad's library exactly. The mismatch notice comes
+          from their sitting on the deck face.
+       4. **`fab.py`:** 300 placements (159 outward, 141 deck), 59 part types (43 Basic, 16
+          Extended). The Teensy headers and J201 are hand-soldered. Files in
+          `teensy_core_midi/fab/`.
+     - **Test points, for the Pico board:** 18 of the 27 are on bus lines, every one of which
+       can be probed at the module socket's solder joints. Dropping them frees about 79 mm²
+       and 18 branches in the busiest area.
 4. **Routed board**, clean against the design rules, with test points on every rail and
    bus and 0 Ω links in each supply so a faulty rail can be isolated.
 5. **JLCPCB quote and preview**, rotations checked, "Confirm Parts Placement" ($0.45)

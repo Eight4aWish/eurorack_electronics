@@ -25,10 +25,10 @@ Two more builds from the same generator are routing trials, not boards to order:
 
 **Status: checkpoint 4, 2026-10-16.** `teensy_core_midi` routes completely: KiCad's DRC finds
 no unconnected item and no copper fault, every surface-mount ground pad has its own via to the
-plane, and 54 decoupling capacitors are wired straight to their pins. Left before an order: four
-power pins more than 4 mm of track from a capacitor (the DAC's pin 9 at 10 mm the one to fix),
-the hole labels, the SMA diodes' footprint against KiCad's library, then the fabrication files
-(`fab.py`) and JLC's check. The spec's §14 has every trial.
+plane, and 54 decoupling capacitors are wired straight to their pins. Its wiring blocks and test
+points are labelled, the wiring map is in `teensy_core_midi/output/wiring_map.md`, and the JLCPCB
+files are in [`teensy_core_midi/fab/`](teensy_core_midi/fab/): the board is being ordered. The
+spec's §14 has every trial.
 - **Schematic history:** it passed checkpoint 1 as a single board with both module footprints.
   The split changed only the root sheet (one module) and the power sheet, where the ESP32-P4
   bypass (Q201, JP201) stays on the Pico board.
@@ -80,7 +80,8 @@ fails. It needs KiCad 9 at `/Applications/KiCad` and Python 3, nothing else.
 | `autoplace.py` | First-pass placement of every part `placement.py` does not anchor, as close as it fits to the pins it connects to |
 | `autoroute.py` | Autoroute with Freerouting. Runs under KiCad's Python and writes a separate trial board in `<board>/output/autoroute/` (not committed). Takes 4 or 6 layers, a run label and any Freerouting setting. `--staged` runs the stages (`--stages=2` stops after the second); `--ground-vias` gives every surface-mount ground pad its own via first, `--decoupling` wires each decoupling capacitor to its pin first; `--lock-existing` and `--unlock` set what the router may rip up. Freerouting's analytics are switched off |
 | `finish.py` | Finishes a routed board: via drills, narrow tracks, copper faults taken up, the leftover connections routed by its own grid router and then by rip-up and reroute, dead ends removed, ground pads stitched. Also holds the pre-route steps `autoroute.py` calls |
-| `fab.py` | JLCPCB files from a finished board: Gerbers and drill zipped, BOM and placement (CPL) in JLC's format |
+| `labels.py` | Silkscreen on a routed board: block numbers W1, W2 ... beside the wiring blocks, short names beside the test points; writes `output/wiring_map.md` (every block's holes and signals, every test point) and 1:1 PDFs of each face to print |
+| `fab.py` | JLCPCB files from a finished board: Gerbers and drill zipped, BOM and placement (CPL) in JLC's format, into `<board>/fab/` |
 | `printout.py` | Writes `boards_printout.pdf` |
 
 The netlist check works from intent. Every connection the generator draws is also recorded as

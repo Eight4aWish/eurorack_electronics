@@ -840,7 +840,7 @@ def crossed(board, net, segs, vias, width, keep=()):
     return out
 
 
-def rip_up(board, tmp, failed, steps=40, memory=6, tries=3, slack=1):
+def rip_up(board, tmp, failed, steps=40, memory=6, tries=3, slack=1, protect=()):
     """The connections route_leftovers could not make, once more, as a chain of swaps. A net
     takes the cheapest path that may cross other nets' tracks and vias (never pads or ground),
     the tracks it crosses are taken up, and route_leftovers routes this net and the nets taken
@@ -864,7 +864,7 @@ def rip_up(board, tmp, failed, steps=40, memory=6, tries=3, slack=1):
             continue
         turns[name] = turns.get(name, 0) + 1
         copper = Copper(board)
-        copper.hard_nets = {board.FindNet(n).GetNetCode() for n in recent}
+        copper.hard_nets = {board.FindNet(n).GetNetCode() for n in list(recent) + list(protect)}
         layers = [l for l in copper.layers if l != pcbnew.In1_Cu]
         src, dst = groups[0], [it for g in groups[1:] for it in g]
         got = None
@@ -909,6 +909,23 @@ def rip_up(board, tmp, failed, steps=40, memory=6, tries=3, slack=1):
     os.remove(best_path)
     still = sorted(n for n in set(turns) | set(queue) if len(clusters(net_items(board, board.FindNet(n).GetNetCode()))) > 1)
     return board, kept, still
+
+
+def remove_orphan_ground_vias(board):
+    """Ground vias joined to nothing but the plane: no track, no pad. Freerouting's fan-out
+    leaves them; they carry nothing and stand in the way (two sat between C416 and U402 pin 4,
+    2026-10-16). Returns how many were removed."""
+    gnd = board.FindNet("GND").GetNetCode()
+    items = net_items(board, gnd)
+    gone = []
+    for it in items:
+        if it[0] != "circle":
+            continue
+        if not any(o is not it and o[0] != "circle" and touch(it, o) for o in items):
+            gone.append(it[4])
+    for v in gone:
+        board.Delete(v)
+    return len(gone)
 
 
 def remove_dangling(board, skip=("GND",)):
@@ -1018,6 +1035,158 @@ def fan_in_decoupling(board, max_len=6.0):
     return made, failed
 
 
+def decoupling_pairs(board):
+    """(capacitor ref, its pad on the decoupled net, IC ref, the IC pad) for every Decouples
+    field that names a part on the capacitor's net (a field naming no pin: the part's nearest pin
+    on that net)."""
+    import re
+    fps = {fp.GetReference(): fp for fp in board.GetFootprints()}
+    out = []
+    for ref, fp in sorted(fps.items()):
+        if not fp.HasFieldByName("Decouples"):
+            continue
+        m = re.search(r"\b([UA]\d+)\b(?:.*?\bpin (\d+))?", fp.GetFieldText("Decouples"))
+        cap = [p for p in fp.Pads() if p.GetNetname() and p.GetNetname() != "GND"]
+        if not m or m.group(1) not in fps or len(cap) != 1:
+            continue
+        ic = [p for p in fps[m.group(1)].Pads() if p.GetNetCode() == cap[0].GetNetCode()
+              and (m.group(2) is None or p.GetNumber() == m.group(2))]
+        if ic:
+            ic = min(ic, key=lambda p: math.dist(mm(p.GetPosition()), mm(cap[0].GetPosition())))
+            out.append((ref, cap[0], m.group(1), ic))
+    return out
+
+
+def copper_distance(items, a, b):
+    """Length of track along the net's copper from item a to item b (indices into items),
+    or None if they do not connect: Dijkstra over items that touch, a track costing its length."""
+    import heapq
+    boxes = [bbox(it[0], it[2], it[3]) for it in items]
+    adj = {i: [] for i in range(len(items))}
+    for i in range(len(items)):
+        for j in range(i + 1, len(items)):
+            bi, bj = boxes[i], boxes[j]
+            if bi[2] < bj[0] or bj[2] < bi[0] or bi[3] < bj[1] or bj[3] < bi[1]:
+                continue
+            if touch(items[i], items[j]):
+                adj[i].append(j)
+                adj[j].append(i)
+    cost = [math.dist(*it[2]) if it[0] == "seg" else 0.0 for it in items]
+    dist, heap = {a: 0.0}, [(0.0, a)]
+    while heap:
+        d, i = heapq.heappop(heap)
+        if i == b:
+            return d
+        if d > dist.get(i, 1e18):
+            continue
+        for j in adj[i]:
+            if d + cost[j] < dist.get(j, 1e18):
+                dist[j] = d + cost[j]
+                heapq.heappush(heap, (d + cost[j], j))
+    return None
+
+
+def shorten_decoupling(board, limit=4.0, max_len=6.0, tmp=None):
+    """After routing: where a decoupling capacitor ends up more than `limit` mm of track from the
+    pin it serves (the rip-up step can take up its pre-wired track and route it the long way),
+    a direct track of at most `max_len` mm is added beside the routed one. With `tmp` (a scratch
+    board path), when no direct track fits, other nets' tracks in its way are taken up and
+    routed again, kept only if the board ends with no more connections open than before.
+    Returns (board, shortened [(cap, pin, before, after)], still long [(cap, pin, length)])."""
+    layers = None
+    done, left = [], []
+    for ref, cap, ic_ref, ic in decoupling_pairs(board):
+        copper = Copper(board)
+        layers = [l for l in copper.layers if l != pcbnew.In1_Cu]
+        net = cap.GetNetCode()
+        items = net_items(board, net)
+        key = {it[4].m_Uuid.AsString(): i for i, it in enumerate(items) if it[0] == "box"}
+        a, b = key.get(cap.m_Uuid.AsString()), key.get(ic.m_Uuid.AsString())
+        if a is None or b is None:
+            continue
+        before = copper_distance(items, a, b)
+        if before is not None and before <= limit:
+            continue
+        name = cap.GetNetname()
+        widths = POWER_WIDTHS if name.startswith(("+", "-")) else (0.2, MIN_TRACK)
+        same = [l for l in layers if cap.IsOnLayer(l) and ic.IsOnLayer(l)]
+        pin = f"{ic_ref}.{ic.GetNumber()}"
+        ok_len = lambda g: path_length(g[0]) <= max_len and (before is None or path_length(g[0]) < before - 1.0)
+
+        def direct(cu, its):
+            for use in ([same[:1]] if same else []) + [layers]:
+                for wd in widths:
+                    g = route_gap(cu, net, [its[a]], [its[b]], wd, use, margin=2.0)
+                    if g and ok_len(g):
+                        return g, wd
+            return None, None
+        got, w = direct(copper, items)
+        if not got and tmp:
+            # take up what is in the way: the cheapest path across other nets (never pads,
+            # ground, or another capacitor's reference or VCOM net, which would trade one
+            # decoupling path for another), those tracks taken up, the direct track laid, and
+            # the rest routed again, by the rip-up chain if need be
+            keep = {c.GetNetCode() for _r, c, _i, _p in decoupling_pairs(board)
+                    if not c.GetNetname().startswith(("+", "-")) and c.GetNetCode() != net}
+            copper.hard_nets = keep
+            soft = route_gap(copper, net, [items[a]], [items[b]], MIN_TRACK, layers, 2.0, soft=SOFT)
+            if soft and ok_len(soft):
+                open_before = unconnected(board)
+                pcbnew.SaveBoard(tmp, board)
+                taken = crossed(board, net, *soft, max(widths[-1], MIN_TRACK), keep=keep)
+                ripped = {t.GetNetCode() for t in taken}
+                for t in taken:
+                    board.Delete(t)
+                copper = Copper(board)
+                items = net_items(board, net)
+                key = {it[4].m_Uuid.AsString(): i for i, it in enumerate(items) if it[0] == "box"}
+                a, b = key[cap.m_Uuid.AsString()], key[ic.m_Uuid.AsString()]
+                got, w = direct(copper, items)
+                if got:
+                    lay_route(board, copper, net, got, w)
+                    _j, fails = route_leftovers(board, nets=ripped)
+                    remove_dangling(board)
+                    if fails:
+                        board, _kept, _still = rip_up(board, tmp[:-len(".kicad_pcb")] + "_chain.kicad_pcb", fails,
+                                                      steps=15, protect=[name])
+                if got and unconnected(board) <= open_before:
+                    done.append((ref, pin, round(before, 1) if before is not None else None,
+                                 round(path_length(got[0]), 1), f"took up {len(taken)} pieces"))
+                else:
+                    board = pcbnew.LoadBoard(tmp)
+                    left.append((ref, pin, round(before, 1) if before is not None else None))
+                continue
+        if not got:
+            left.append((ref, pin, round(before, 1) if before is not None else None))
+            continue
+        lay_route(board, copper, net, got, w)
+        done.append((ref, pin, round(before, 1) if before is not None else None, round(path_length(got[0]), 1)))
+    return board, done, left
+
+
+def lay_route(board, copper, net, got, w):
+    """Put a route_gap path on the board as tracks and vias, and into `copper`."""
+    segs, vias = got
+    for v in vias:
+        via = pcbnew.PCB_VIA(board)
+        via.SetPosition(pcbnew.VECTOR2I(int(v[0] * MM), int(v[1] * MM)))
+        via.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
+        set_via(via, VIA_D, VIA_HOLE)
+        via.SetNetCode(net)
+        board.Add(via)
+        copper.add_via(net, v, VIA_D / 2, VIA_HOLE / 2)
+    for layer, pts in segs:
+        for p, q in zip(pts, pts[1:]):
+            trk = pcbnew.PCB_TRACK(board)
+            trk.SetStart(pcbnew.VECTOR2I(int(p[0] * MM), int(p[1] * MM)))
+            trk.SetEnd(pcbnew.VECTOR2I(int(q[0] * MM), int(q[1] * MM)))
+            trk.SetWidth(int(w * MM))
+            trk.SetLayer(layer)
+            trk.SetNetCode(net)
+            board.Add(trk)
+            copper.add_seg(net, layer, p, q, w / 2)
+
+
 def main(src, out=None):
     src = os.path.abspath(src)
     pro = src[:-len(".kicad_pcb")] + ".kicad_pro"
@@ -1027,6 +1196,7 @@ def main(src, out=None):
     board = pcbnew.LoadBoard(src)
     print(f"Vias with their drill reset to keep a {MIN_RING} mm ring: {fix_vias(board)}")
     print(f"Tracks widened to {MIN_TRACK} mm: {widen_tracks(board)}")
+    print(f"Ground vias joined to nothing but the plane, removed: {remove_orphan_ground_vias(board)}")
     # a working copy, with the project's rules beside it (DRC without them runs KiCad's defaults)
     tmp = out[:-len(".kicad_pcb")] + "_partial.kicad_pcb"
     tmp_pro = tmp[:-len(".kicad_pcb")] + ".kicad_pro"
@@ -1049,6 +1219,8 @@ def main(src, out=None):
         targets = unconnected_ground_pads(tmp, pro)
         placed, failed = stitch_ground(board, targets)
         print(f"Ground pads unconnected: {len({(r, n) for r, n, _ in targets})}; vias placed: {placed}; no room: {failed}")
+    board, done, left = shorten_decoupling(board, tmp=tmp)
+    print(f"Decoupling paths shortened (cap, pin, mm before, mm added): {done}; still over 4 mm: {left}")
     for f in (tmp, tmp_pro):
         if os.path.exists(f):
             os.remove(f)
