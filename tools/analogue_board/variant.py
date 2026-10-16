@@ -31,6 +31,12 @@ BOARDS = {
     # 0.127 mm rules, as Quilter did
     "pico_core": {"title": "Pico 2 / ESP32-P4, core set", "modules": {"A101": "pico"}, "floorplan": "pico",
                   "drop": {"fixed_cv", "midi", "qwiic"}, "pots": 6, "spacing": 0.4, "track": 0.127},
+    # the single board again (both modules), with the core set plus TRS MIDI: six switchable CV
+    # jacks, no fixed-direction CV, six pots, a display on the I2C holes only, and the Teensy on
+    # full-length headers (David, 2026-10-16)
+    "shared_core": {"title": "Pico 2 / ESP32-P4 or Teensy 4.1, core set with MIDI",
+                    "modules": {"A101": "pico", "A102": "teensy"}, "floorplan": "shared",
+                    "drop": {"fixed_cv", "qwiic"}, "pots": 6, "spacing": 0.4, "track": 0.127, "teensy_full": True},
 }
 DEFAULT = ("pico", "teensy")   # what build.py and pcb.py build with no argument
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -52,6 +58,7 @@ FLOORPLAN = _B.get("floorplan", BOARD)   # whose placement anchors this board us
 SPACING = _B.get("spacing", 0.1)      # courtyard-to-courtyard gap the auto-placer keeps, mm
 TRACK = _B.get("track", 0.15)         # default track width and clearance, mm
 POTS = _B.get("pots", 8)              # pot channels on the MCP3208
+TEENSY_FULL = _B.get("teensy_full", len(REF) == 1)   # every Teensy pin has a hole (else 20-28 left out)
 
 
 def has(feature):

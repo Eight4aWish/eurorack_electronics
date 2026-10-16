@@ -985,6 +985,46 @@ repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No p
      - **Freerouting's own settings:** its usage analytics were on by default; `autoroute.py`
        now switches them off on every run. The v1.9 algorithm named in its settings is not in
        the 2.5 build, which falls back to the current one.
+   - **One board again: `shared_core` routes (2026-10-16).** David's choice for the order: one
+     board for both module formats.
+     - **Contents:** the Pico 2 / ESP32-P4 and Teensy 4.1 sockets interleaved as at checkpoint 2,
+       the Teensy on full-length headers (it arrives with them fitted), TRS MIDI, a display on the
+       I2C holes only, six switchable CV jacks, six pots, four gates each way.
+     - **Size:** 372 parts, 85% of one face.
+     - **Placement:** 0.4 mm part spacing, 0.127 mm signal rules. Two auto-placer fallbacks:
+       - a part with no room at that spacing tries tight spacing;
+       - a part with no room within 22 mm takes the nearest free spot anywhere (C308 and D601
+         needed it, at the crowded top left).
+     - **Routing:** `autoroute.py shared_core 20 6 --staged` runs the three stages:
+
+       | After stage | Signals | Rails | Ground | Unrouted of 852 |
+       |---|---|---|---|---|
+       | 1: fan-out off, cheap vias | 2 | 25 | 207 | 234 |
+       | 2: fan-out on, stage 1 locked | 0 | 7 (+5VD) | 30 | 37 |
+       | 3: plane vias 1, rip-up 400 | 0 | 7 | 29 | 36 |
+
+     - **The rails** are at the Power class's 0.3 mm throughout, and the ±12 V entry runs about
+       6 mm from J201.
+     - **Heights:** no problems.
+     - **DRC, excluding silkscreen:**
+       - 14 copper-to-edge
+       - 12 hole clearance
+       - 8 vias imported at 0.45/0.3 mm
+       - 4 clearance
+       - 2 mask bridges
+     - **Kept in:** `hardware/analogue_board/shared_core/routed_trial/`.
+     - **Why the interleaved rows no longer matter:** every earlier comparison had fan-out on,
+       and the shared board's interleaved header rows left its pre-placed vias the least room.
+     - **Remaining to an order:**
+       1. Script a ground via beside each of the 29 pads.
+       2. Reset every via to its net class's size.
+       3. Route the 7 +5VD connections.
+       4. Give Freerouting the 0.5 mm edge clearance and fix the remaining DRC findings.
+       5. Review the analogue and ground layout by eye.
+       6. Put the silkscreen labels on.
+       7. Generate the fabrication and assembly files (Gerbers, drill, BOM, positions with JLC
+          rotations).
+       8. Run JLC's DFM check and get a live 6-layer double-sided quote.
      - **Next:** Quilter (quilter.ai, place and route) as an independent check of whether
        better placement routes. `pcb.py <board> --quilter` writes the upload sets to
        `<board>/output/quilter/`, on 6 layers. In1 is GND and In4 is PWR, the power layer for
@@ -1003,7 +1043,9 @@ repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No p
      USB plug passes over anything shorter than about 8 mm. Only J201 with its ribbon plug,
      and a Qwiic cable, are tall enough to matter, and both sit outside the zone. The
      auto-placer ignores the zone; `pcb.py` only flags parts over 8 mm inside it.
-   - **Next (paused 2026-10-16):**
+   - **Next:** finish `shared_core`, the board for the order. Its list is above. The split
+     boards and the full feature set were not taken further. The earlier plan, kept for
+     reference:
      1. Run the full Pico board, and then the Teensy board, through the two-stage route with
         0.4 mm spacing and 0.127 mm rules, to see whether the full feature set routes as the
         core set did.

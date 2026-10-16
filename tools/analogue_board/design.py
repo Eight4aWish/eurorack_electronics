@@ -85,9 +85,10 @@ def J101_NETS():
     return spares + (["RUN"] if PICO else []) + ["GND"]
 
 
-# On the shared board the two sockets interleave (checkpoint 2's arrangement A), and the Teensy's
-# far-end pins 20-28, unused, have no holes, so it takes shortened headers (pins 1-19 and 29-48)
-TEENSY_FP = f"analogue_board:{'Teensy41_Socket_Short' if PICO else 'Teensy41_Socket'}"
+# On the shared board the two sockets interleave (checkpoint 2's arrangement A). There the Teensy's
+# far-end pins 20-28, unused, have no holes and it takes shortened headers (pins 1-19 and 29-48),
+# unless the board asks for full-length ones (variant.TEENSY_FULL)
+TEENSY_FP = f"analogue_board:{'Teensy41_Socket' if variant.TEENSY_FULL else 'Teensy41_Socket_Short'}"
 
 
 def sheet_root(pr):
@@ -113,7 +114,8 @@ def sheet_root(pr):
         ic(sh, "PICO2", (75, 110), nets, ref=variant.REF["pico"], stubs={30: 12.7})  # RUN label clear of BCK
     if TEENSY:
         lines += ["Teensy 4.1 (not 5 V tolerant): cut the VIN–VUSB pads before fitting; VIN takes MOD_5V.",
-                  "Shortened headers on pins 1-19 and 29-48: pins 20-28 have no holes on this board." if both else
+                  "Shortened headers on pins 1-19 and 29-48: pins 20-28 have no holes on this board."
+                  if not variant.TEENSY_FULL else
                   "Every pin has its hole, so standard full-length headers fit; the ones this board does not use are left open."]
         tpins = teensy41_pins()
         by_label = {lab: n for n, lab in tpins.items() if lab.isdigit()}

@@ -21,8 +21,10 @@ import variant
 
 RES = 0.1            # occupancy grid, mm
 MARGIN = variant.SPACING / 2   # courtyard growth on each side, mm (courtyards already hold 0.25 mm around the pads)
+TIGHT = 0.05                   # the fallback for a part that finds no room at the board's spacing
 EDGE = 0.3           # courtyard to board edge, mm
 MAX_R = 22.0         # search radius, mm
+FAR_R = 110.0        # the last resort: anywhere on the board
 OTHER_FACE = 1.5     # cost of using the face the target part is not on, mm
 BIG_NET = 13         # nets with more pins (ground, rails) say nothing about where a part belongs
 THT_PREFIXES = ("analogue_board:EdgeStrip", "analogue_board:WiringHoles", "analogue_board:Pico2",
@@ -70,8 +72,8 @@ def grow(r, m=MARGIN):
     return (r[0] - m, r[1] - m, r[2] + m, r[3] + m)
 
 
-def _offsets():
-    n = int(MAX_R / RES)
+def _offsets(radius=MAX_R):
+    n = int(radius / RES)
     pts = [(i * RES, j * RES) for i in range(-n, n + 1) for j in range(-n, n + 1) if i * i + j * j <= n * n]
     pts.sort(key=lambda p: p[0] * p[0] + p[1] * p[1])
     return pts
@@ -113,7 +115,7 @@ class Placer:
     def is_tht(self, ref):
         return self.comps[ref]["fp"].startswith(THT_PREFIXES)
 
-    def put(self, ref, origin, rot, face):
+    def put(self, ref, origin, rot, face, m=MARGIN):
         self.pos[ref] = (origin, rot, face)
         if self.is_tht(ref):
             # through-hole parts block both faces; a shrouded header's body only the outward face
@@ -128,7 +130,7 @@ class Placer:
                     self.grid.mark("B" if face == "F" else "F", grow(r, 0.0))
         else:
             for r in self.rects(ref, origin, rot, face):
-                self.grid.mark(face, grow(r))
+                self.grid.mark(face, grow(r, m))
 
     # ---------------------------------------------------------------- targets
     def decouples(self, ref):
@@ -177,7 +179,7 @@ class Placer:
         return (sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts), face, float(len(pts)))
 
     # ---------------------------------------------------------------- search
-    def find(self, ref, tx, ty, face_pref):
+    def find(self, ref, tx, ty, face_pref, m=MARGIN, offsets=None):
         lib = self.lib(self.comps[ref]["fp"])
         boxes = self.crt(lib)
         bx0 = min(b[0] for b in boxes); by0 = min(b[1] for b in boxes)
@@ -192,12 +194,12 @@ class Placer:
                 cx1, cy1 = max(c[0] for c in corners), max(c[1] for c in corners)
                 hx, hy = (cx1 - cx0) / 2, (cy1 - cy0) / 2
                 ccx, ccy = (cx0 + cx1) / 2, (cy0 + cy1) / 2   # courtyard centre relative to origin
-                for dx, dy in self.offsets:
+                for dx, dy in offsets or self.offsets:
                     d = math.hypot(dx, dy) + penalty
                     if best and d >= best[0]:
                         break
                     x, y = tx + dx, ty + dy
-                    r = grow((x - hx, y - hy, x + hx, y + hy))
+                    r = grow((x - hx, y - hy, x + hx, y + hy), m)
                     if self.grid.free(face, r):
                         best = (d, (x - ccx, y - ccy), rot, face)
                         break
@@ -230,10 +232,17 @@ class Placer:
             # a part placed by the fallback goes alone, so whatever hangs off it gets a real target
             n = 1 if ready[0][0] == 2 else max(1, len(ready) // 2)
             for _, _, ref, (tx, ty, face, _) in ready[:n]:
-                hit = self.find(ref, tx, ty, face)
+                hit, m = self.find(ref, tx, ty, face), MARGIN
+                if not hit and MARGIN > TIGHT:
+                    # no room at the board's spacing: this part alone at the tight spacing
+                    hit, m = self.find(ref, tx, ty, face, TIGHT), TIGHT
+                if not hit:
+                    # nothing free nearby: the nearest free spot anywhere on the board
+                    self.offsets_far = getattr(self, "offsets_far", None) or _offsets(FAR_R)
+                    hit = self.find(ref, tx, ty, face, m, self.offsets_far)
                 if hit:
                     _, origin, rot, f = hit
-                    self.put(ref, origin, rot, f)
+                    self.put(ref, origin, rot, f, m)
                 else:
                     unplaced.append(ref)
             done = {r for _, _, r, _ in ready[:n]}

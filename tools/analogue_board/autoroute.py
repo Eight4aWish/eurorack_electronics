@@ -27,6 +27,7 @@ other .kicad_pcb (an earlier board from git, say) is routed into an autoroute/ f
 """
 
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -49,7 +50,11 @@ def target(arg):
         # without it KiCad routes to its own defaults (0.2 mm tracks, 0.6 mm vias)
         if not os.path.exists(path[:-len(".kicad_pcb")] + ".kicad_pro"):
             raise SystemExit(f"No .kicad_pro beside {path}: copy the board's project file there under the same name")
-        return path, os.path.join(os.path.dirname(path), "autoroute"), os.path.splitext(os.path.basename(path))[0]
+        here = os.path.dirname(path)
+        # a trial board routes again into its own folder, under its own name
+        outdir = here if os.path.basename(here) == "autoroute" else os.path.join(here, "autoroute")
+        name = os.path.splitext(os.path.basename(path))[0]
+        return path, outdir, name[:-len("_autoroute_trial")] if name.endswith("_autoroute_trial") else name
     variant.require()
     return (os.path.join(variant.DIR, f"{variant.NAME}.kicad_pcb"), os.path.join(variant.DIR, "output", "autoroute"),
             variant.NAME)
@@ -84,7 +89,7 @@ NO_ANALYTICS = ["--usage_and_diagnostic_data.disable_analytics=true", "--profile
 
 def main(arg, passes, layers, label="", settings=()):
     path, outdir, name = target(arg)
-    tag = f"{name}{'_6L' if layers == 6 else ''}{'_' + label if label else ''}"
+    tag = f"{name}{'_6L' if layers == 6 and '_6L' not in name else ''}{'_' + label if label else ''}"
     os.makedirs(outdir, exist_ok=True)
     board = pcbnew.LoadBoard(path)
     stack(board, layers)
@@ -118,13 +123,36 @@ def main(arg, passes, layers, label="", settings=()):
     tracks, vias, length, after = stats(board)
     trial = os.path.join(outdir, f"{tag}_autoroute_trial.kicad_pcb")
     pcbnew.SaveBoard(trial, board)
+    shutil.copy(path[:-len(".kicad_pcb")] + ".kicad_pro", trial[:-len(".kicad_pcb")] + ".kicad_pro")   # rules travel with it
     print(f"Freerouting on {layers} layers, {passes} passes max, {minutes:.1f} min")
     print(f"Connections to make: {before}; left unrouted: {after} ({100 * (before - after) / max(before, 1):.1f}% routed)")
     print(f"Tracks: {tracks} segments, {length:.0f} mm; vias: {vias}")
-    print(f"Trial board: {trial}")
+    print(f"Trial board: {trial}", flush=True)
+    return trial
+
+
+# The staged route (spec §14, 2026-10-16): signals first with Freerouting's fan-out off (on a dense
+# board its via beside every SMD pin blocks the tracks), then ground and rails with those tracks
+# locked and fan-out on, then a last pass with cheap plane vias and a high rip-up cost
+COMMON = ["--router.automatic_neckdown=false", "--router.hole_clearance_um=250"]
+STAGES = [("s1", ["--router.fanout.enabled=false", "--router.scoring.via_costs=20", "--router.scoring.plane_via_costs=2"]),
+          ("s2", ["--lock-existing"]),
+          ("s3", ["--lock-existing", "--router.scoring.plane_via_costs=1", "--router.scoring.start_ripup_costs=400"])]
+
+
+def staged(arg, passes, layers):
+    board = arg
+    for label, settings in STAGES:
+        print(f"\n== stage {label}", flush=True)
+        board = main(board, passes, layers, label, COMMON + settings)
+    return board
 
 
 if __name__ == "__main__":
     pos = [a for a in sys.argv[1:] if not a.startswith("--")]
-    main(pos[0], int(pos[1]) if len(pos) > 1 else 20, int(pos[2]) if len(pos) > 2 else 4,
-         pos[3] if len(pos) > 3 else "", [a for a in sys.argv[1:] if a.startswith("--")])
+    flags = [a for a in sys.argv[1:] if a.startswith("--")]
+    passes, layers = int(pos[1]) if len(pos) > 1 else 20, int(pos[2]) if len(pos) > 2 else 4
+    if "--staged" in flags:
+        staged(pos[0], passes, layers)
+    else:
+        main(pos[0], passes, layers, pos[3] if len(pos) > 3 else "", flags)

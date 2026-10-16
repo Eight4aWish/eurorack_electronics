@@ -18,14 +18,13 @@ Two more builds from the same generator are routing trials, not boards to order:
 | Trial | What it is | Folder |
 |---|---|---|
 | Shared board | Both module footprints interleaved on one board, as checkpoint 2 had it; the Teensy on shortened headers | [`shared/`](shared/) |
-| Core board | The Pico board without the fixed-direction CV channels, TRS MIDI or the Qwiic socket, with six pots; parts 0.4 mm apart, 0.127 mm signal rules. The one that routed (spec §14); its routed board is in [`pico_core/routed_trial/`](pico_core/routed_trial/) | [`pico_core/`](pico_core/) |
+| Core board | The Pico board without the fixed-direction CV channels, TRS MIDI or the Qwiic socket, with six pots; parts 0.4 mm apart, 0.127 mm signal rules. The first to route (spec §14); its routed board is in [`pico_core/routed_trial/`](pico_core/routed_trial/) | [`pico_core/`](pico_core/) |
+| **Shared core board** | **The board being taken to an order:** both module sockets (the Teensy on full headers), TRS MIDI, the display on I2C holes, six switchable CV jacks, six pots, four gates each way. Every signal routes (spec §14); its routed board is in [`shared_core/routed_trial/`](shared_core/routed_trial/) | [`shared_core/`](shared_core/) |
 
-**Status: paused at checkpoint 3 (placement), 2026-10-16.** Both boards are placed, but
-neither routes with the tools that can be run from a script.
-- **The core board routed** with a two-stage Freerouting method, leaving a few dozen ground and
-  rail connections and no signals.
-- **The full boards were never tried that way.** The spec's §14 has every trial and what it
-  would take to finish.
+**Status: checkpoint 3 to 4, 2026-10-16.** The single board for both modules, `shared_core`,
+routes every signal with a staged Freerouting method. 29 ground vias and 7 +5VD connections
+are left, plus a short list of DRC fixes, before the fabrication files. The spec's §14 has every
+trial and the list to an order.
 - **Schematic history:** it passed checkpoint 1 as a single board with both module footprints.
   The split changed only the root sheet (one module) and the power sheet, where the ESP32-P4
   bypass (Q201, JP201) stays on the Pico board.
@@ -64,7 +63,7 @@ fails. It needs KiCad 9 at `/Applications/KiCad` and Python 3, nothing else.
 
 | Generator file | Holds |
 |---|---|
-| `variant.py` | Which board a run builds (`pico`, `teensy`, and the trials `shared` and `pico_core`): folders, module sockets, feature set, placement spacing and track rules |
+| `variant.py` | Which board a run builds (`pico`, `teensy`, and the trials `shared`, `pico_core` and `shared_core`): folders, module sockets, feature set, placement spacing and track rules |
 | `design.py` | Pin map, root sheet (this board's module), power sheet |
 | `design_analog.py` | Codec and audio, CV jacks and ADC, CV DAC |
 | `design_digital.py` | Pots and gate outs, expander/I2C/LEDs, gate ins and jack detect, edge strips, TRS MIDI |
@@ -75,7 +74,7 @@ fails. It needs KiCad 9 at `/Applications/KiCad` and Python 3, nothing else.
 | `wiring.py` | The wiring field: every channel hole, its bank (four mixed banks, one per quarter of the board) and its slot. The schematic and the placement both read it |
 | `pcb.py` | Writes each board from its netlist and `placement.py`. It prints the area budget, runs DRC with the schematic-parity check, checks part heights and renders both faces |
 | `autoplace.py` | First-pass placement of every part `placement.py` does not anchor, as close as it fits to the pins it connects to |
-| `autoroute.py` | Trial autoroute with Freerouting, to measure routability. Runs under KiCad's Python and writes a separate trial board in `<board>/output/autoroute/` (not committed). Takes 4 or 6 layers, a run label and any Freerouting setting. `--lock-existing` starts from a routed board for a second stage. Freerouting's analytics are switched off |
+| `autoroute.py` | Trial autoroute with Freerouting, to measure routability. Runs under KiCad's Python and writes a separate trial board in `<board>/output/autoroute/` (not committed). Takes 4 or 6 layers, a run label and any Freerouting setting. `--lock-existing` starts from a routed board for a second stage, and `--staged` runs all three stages. Freerouting's analytics are switched off |
 | `printout.py` | Writes `boards_printout.pdf` |
 
 The netlist check works from intent. Every connection the generator draws is also recorded as
