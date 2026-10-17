@@ -250,9 +250,11 @@ The scripts did the routing; every big step in placement came from David looking
   of every run, with KiCad's repetitive debug lines removed.
 - **The commits:** `git log -- hardware/analogue_board tools/analogue_board` runs from the spec
   (c684b47, 14 Oct) to the order files (0a107b9, 16 Oct).
-- **The trial boards:** `hardware/analogue_board/*/output/autoroute/`. About 50 boards, not
-  committed (ignored as measurements). Copy them somewhere safe before any clean-up if the video
-  needs more renders.
+- **The trial boards:** every routing trial's boards, DSN and session files and Freerouting
+  logs (311 files), archived on 2026-10-17 to
+  `~/Documents/eurorack_archive/analogue_board_trial_routes_2026-10-17.tar.gz` on David's
+  machine (39 MB) and removed from the working copy. They are not committed. Unpack the archive
+  in the repo root to render more of them.
 - **The conversation:** the full transcript, with every message and decision, is on David's
   machine at `~/.claude/projects/-Users-dbaghurst-GitHub-eurorack-electronics/` (about 110 MB of
   JSON lines). It is not in the repo.
