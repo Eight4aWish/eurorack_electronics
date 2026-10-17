@@ -1,0 +1,17 @@
+Vias with their drill reset to keep a 0.125 mm ring: 1
+Tracks widened to 0.127 mm: 0
+Dead-end tracks and vias removed: 17
+Leftover connections routed: 12; no route found: [('+5VA', (60.9, 46.2)), ('+5VA', (66.8, 46.0)), ('+5VA', (50.6, 39.5)), ('/Codec & audio/VINR', (55.1, 69.4)), ('/Codec & audio/VINR', (60.7, 68.6))]
+  rip-up /Codec & audio/VINR: took up 4 pieces of ['Net-(C310-Pad2)', 'SW_EN4']; open 4 -> 4, kept
+  rip-up Net-(C310-Pad2): took up 14 pieces of ['+5VA', '-12V', '/Expander, I2C & LEDs/SW6', '/Pots & gate outs/POT_IN6', 'Net-(C313-Pad2)', 'Net-(C315-Pad1)', 'Net-(C316-Pad2)', 'Net-(U302C--)', 'SPIA_MOSI']; open 4 -> 8, undone
+  rip-up +5VA: took up 1 pieces of ['SW_EN4']; open 4 -> 2, kept
+  rip-up Net-(C310-Pad2): took up 13 pieces of ['-12V', '/Expander, I2C & LEDs/SW6', '/Pots & gate outs/POT_IN6', 'Net-(C313-Pad2)', 'Net-(C315-Pad1)', 'Net-(C316-Pad2)', 'Net-(U302C--)', 'SPIA_MOSI']; open 2 -> 6, undone
+  rip-up Net-(C310-Pad2): took up 13 pieces of ['-12V', '/Expander, I2C & LEDs/SW6', '/Pots & gate outs/POT_IN6', 'Net-(C313-Pad2)', 'Net-(C315-Pad1)', 'Net-(C316-Pad2)', 'Net-(U302C--)', 'SPIA_MOSI']; open 2 -> 6, undone
+Rip-up and reroute: 2 tries kept; nets still open: ['Net-(C310-Pad2)']
+Dead-end tracks and vias removed: 0
+  of which bent stubs (grid search): 1
+Ground pads unconnected: 1; vias placed: 1; no room: []
+Unconnected after finishing: 1
+Finished board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/shared_core/output/autoroute/analogue_board_shared_core_6L_gv2_s1_s2_autoroute_trial_finished.kicad_pcb
+
+[exited with code 0]

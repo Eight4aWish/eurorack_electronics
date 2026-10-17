@@ -1,0 +1,9 @@
+Every track and via but ground's unlocked: the router may rip them up
+Routing with: (via "Via[0-5]_450:200_um" "Via[0-5]_600:300_um" "Via[0-5]_450:300_um") (width 127) (clearance 127)
+Freerouting settings: --router.fanout.enabled=false --router.automatic_neckdown=false --router.hole_clearance_um=250 --router.copper_to_edge_clearance_um=500
+Freerouting on 6 layers, 20 passes max, 16.2 min
+Connections to make: 48; left unrouted: 48 (0.0% routed)
+Tracks: 4512 segments, 7000 mm; vias: 573
+Trial board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/shared_core/output/autoroute/analogue_board_shared_core_6L_low_s1_s2_s3_s4_autoroute_trial.kicad_pcb
+
+[exited with code 0]

@@ -1,0 +1,9 @@
+== stage s1
+Connections to make: 527; left unrouted: 28 (94.7% routed)
+== stage s2
+Connections to make: 28; left unrouted: 18 (35.7% routed)
+Leftover connections routed: 17; no route found: [('/CV jacks & ADC/ADC_RST', (45.5, 33.0)), ('/CV jacks & ADC/ADC_RST', (44.3, 35.0))]
+Rip-up and reroute: 0 swaps kept; nets still open: ['/CV jacks & ADC/ADC_RST']
+Unconnected after finishing: 1
+
+[killed]

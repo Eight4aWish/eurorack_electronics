@@ -1,0 +1,28 @@
+==> /private/tmp/claude-501/-Users-dbaghurst-GitHub-eurorack-electronics/d7fdbee2-0c08-4c40-b23f-944d2e1b9124/scratchpad/pB_finish.log <==
+==> /private/tmp/claude-501/-Users-dbaghurst-GitHub-eurorack-electronics/d7fdbee2-0c08-4c40-b23f-944d2e1b9124/scratchpad/pA_finish.log <==
+==> /private/tmp/claude-501/-Users-dbaghurst-GitHub-eurorack-electronics/d7fdbee2-0c08-4c40-b23f-944d2e1b9124/scratchpad/pB_finish.log <==
+Leftover connections routed: 8; no route found: [('/CV jacks & ADC/ADC_RST', (50.1, 31.6)), ('/CV jacks & ADC/ADC_RST', (44.3, 35.0))]
+Rip-up and reroute: 0 swaps kept; nets still open: ['/CV jacks & ADC/ADC_RST']
+==> /private/tmp/claude-501/-Users-dbaghurst-GitHub-eurorack-electronics/d7fdbee2-0c08-4c40-b23f-944d2e1b9124/scratchpad/pA_finish.log <==
+Leftover connections routed: 14; no route found: [('+5VA', (46.7, 33.0)), ('+5VA', (51.8, 40.1)), ('+5VD', (68.9, 58.9)), ('+5VD', (46.8, 36.7)), ('/CV jacks & ADC/ADC_RST', (50.1, 31.6)), ('/CV jacks & ADC/ADC_RST', (44.3, 35.0))]
+==> /private/tmp/claude-501/-Users-dbaghurst-GitHub-eurorack-electronics/d7fdbee2-0c08-4c40-b23f-944d2e1b9124/scratchpad/pB_finish.log <==
+Leftover connections routed: 0; no route found: [('/CV jacks & ADC/ADC_RST', (50.1, 31.6)), ('/CV jacks & ADC/ADC_RST', (44.3, 35.0))]
+==> /private/tmp/claude-501/-Users-dbaghurst-GitHub-eurorack-electronics/d7fdbee2-0c08-4c40-b23f-944d2e1b9124/scratchpad/pA_finish.log <==
+==> /private/tmp/claude-501/-Users-dbaghurst-GitHub-eurorack-electronics/d7fdbee2-0c08-4c40-b23f-944d2e1b9124/scratchpad/pB_finish.log <==
+Rip-up and reroute: 0 swaps kept; nets still open: ['/CV jacks & ADC/ADC_RST']
+Leftover connections routed: 0; no route found: [('/CV jacks & ADC/ADC_RST', (50.1, 31.6)), ('/CV jacks & ADC/ADC_RST', (44.3, 35.0))]
+==> /private/tmp/claude-501/-Users-dbaghurst-GitHub-eurorack-electronics/d7fdbee2-0c08-4c40-b23f-944d2e1b9124/scratchpad/pA_finish.log <==
+  rip-up +5VD: took up 1 pieces of ['+3V3D']; open 4 -> 4, kept
+==> /private/tmp/claude-501/-Users-dbaghurst-GitHub-eurorack-electronics/d7fdbee2-0c08-4c40-b23f-944d2e1b9124/scratchpad/pB_finish.log <==
+Rip-up and reroute: 0 swaps kept; nets still open: ['/CV jacks & ADC/ADC_RST']
+==> /private/tmp/claude-501/-Users-dbaghurst-GitHub-eurorack-electronics/d7fdbee2-0c08-4c40-b23f-944d2e1b9124/scratchpad/pA_finish.log <==
+  rip-up +5VA: took up 2 pieces of ['/CV jacks & ADC/ADC_IN5']; open 4 -> 3, kept
+Rip-up and reroute: 2 swaps kept; nets still open: ['/CV jacks & ADC/ADC_RST']
+==> /private/tmp/claude-501/-Users-dbaghurst-GitHub-eurorack-electronics/d7fdbee2-0c08-4c40-b23f-944d2e1b9124/scratchpad/pB_finish.log <==
+==> /private/tmp/claude-501/-Users-dbaghurst-GitHub-eurorack-electronics/d7fdbee2-0c08-4c40-b23f-944d2e1b9124/scratchpad/pA_finish.log <==
+==> /private/tmp/claude-501/-Users-dbaghurst-GitHub-eurorack-electronics/d7fdbee2-0c08-4c40-b23f-944d2e1b9124/scratchpad/pB_finish.log <==
+Unconnected after finishing: 1
+==> /private/tmp/claude-501/-Users-dbaghurst-GitHub-eurorack-electronics/d7fdbee2-0c08-4c40-b23f-944d2e1b9124/scratchpad/pA_finish.log <==
+Unconnected after finishing: 2
+
+[killed]

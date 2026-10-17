@@ -1,0 +1,9 @@
+Locked 3887 existing tracks and vias
+Routing with: (via "Via[0-5]_450:200_um" "Via[0-5]_600:300_um" "Via[0-5]_450:300_um") (width 127) (clearance 127)
+Freerouting settings: --router.automatic_neckdown=false --router.hole_clearance_um=250 --router.scoring.plane_via_costs=1 --router.scoring.start_ripup_costs=400
+Freerouting on 6 layers, 20 passes max, 10.9 min
+Connections to make: 49; left unrouted: 37 (24.5% routed)
+Tracks: 3508 segments, 5568 mm; vias: 452
+Trial board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/pico_core/output/autoroute/autoroute/autoroute/analogue_board_pico_core_6L_nofanoutcheap_autoroute_trial_6L_stage2_autoroute_trial_6L_stage3_autoroute_trial.kicad_pcb
+
+[exited with code 0]

@@ -1,0 +1,6 @@
+Freerouting, 20 passes max, 43.0 min
+Connections to make: 992; left unrouted: 196 (80.2% routed)
+Tracks: 4633 segments, 6266 mm; vias: 401
+Trial board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/output/autoroute/analogue_board_autoroute_trial.kicad_pcb
+
+[exited with code 0]

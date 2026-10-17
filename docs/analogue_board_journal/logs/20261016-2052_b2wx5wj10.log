@@ -1,0 +1,25 @@
+Rules from the project: track 0.127 mm, clearance 0.127 mm
+Vias with their drill reset to keep a 0.125 mm ring: 0
+Tracks widened to 0.127 mm: 0
+Round 1: tracks and vias taken up from copper faults: 4
+Dead-end tracks and vias removed: 17
+Leftover connections routed: 4; no route found: []
+Dead-end tracks and vias removed: 0
+  of which bent stubs (grid search): 0
+Ground pads unconnected: 0; vias placed: 0; no room: []
+Round 2: tracks and vias taken up from copper faults: 1
+Dead-end tracks and vias removed: 2
+Leftover connections routed: 0; no route found: []
+Dead-end tracks and vias removed: 0
+  of which bent stubs (grid search): 0
+Ground pads unconnected: 0; vias placed: 0; no room: []
+Round 3: tracks and vias taken up from copper faults: 1
+Dead-end tracks and vias removed: 0
+Leftover connections routed: 0; no route found: []
+Dead-end tracks and vias removed: 0
+  of which bent stubs (grid search): 0
+Ground pads unconnected: 0; vias placed: 0; no room: []
+Unconnected after finishing: 0
+Finished board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/teensy_core_midi/output/autoroute/analogue_board_teensy_core_midi_6L_tm_s1_s2_autoroute_trial_finished2.kicad_pcb
+
+[exited with code 0]

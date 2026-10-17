@@ -1,0 +1,19 @@
+Rules from the project: track 0.127 mm, clearance 0.127 mm
+Vias with their drill reset to keep a 0.125 mm ring: 3
+Tracks widened to 0.127 mm: 0
+Ground vias joined to nothing but the plane, removed: 0
+Decoupling paths protected from rip-up: 54
+Round 1: tracks and vias taken up from copper faults: 1
+Dead-end tracks and vias removed: 1
+Leftover connections routed: 14; no route found: [('+5VA', (46.7, 33.0)), ('+5VA', (51.8, 40.1)), ('+5VD', (68.9, 58.9)), ('+5VD', (46.8, 36.7)), ('/CV jacks & ADC/ADC_RST', (50.1, 31.6)), ('/CV jacks & ADC/ADC_RST', (44.3, 35.0))]
+  rip-up /CV jacks & ADC/ADC_RST: no path even across other nets
+  rip-up +5VD: took up 1 pieces of ['+3V3D']; open 4 -> 4, kept
+  rip-up +5VA: took up 2 pieces of ['/CV jacks & ADC/ADC_IN5']; open 4 -> 3, kept
+Rip-up and reroute: 2 swaps kept; nets still open: ['/CV jacks & ADC/ADC_RST']
+Dead-end tracks and vias removed: 0
+  of which bent stubs (grid search): 1
+GND pads unconnected: 1; vias placed: 1; no room: []
+Round 2: tracks and vias taken up from copper faults: 0
+Decoupling paths shortened (cap, pin, mm before, mm added): []; still over 4 mm: [('C217', 'U202.3', 4.3), ('C222', 'A101.39', 5.6), ('C407', 'U401.7', 4.3), ('C408', 'U401.5', 9.0)]
+Unconnected after finishing: 2
+Finished board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/pico_core_midi/output/autoroute/analogue_board_pico_core_midi_6L_pA_s1_s2_autoroute_trial_finished.kicad_pcb

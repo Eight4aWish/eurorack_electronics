@@ -1,0 +1,10 @@
+Leftover connections routed: 13; no route found: [('+3V3D', (52.9, 33.0)), ('+3V3D', (55.8, 36.7)), ('+3V3D', (41.2, 70.0)), ('+3V3D', (53.9, 37.1)), ('+3V3D', (62.2, 61.0)), ('+3V3D', (54.1, 92.7)), ('+5VD', (55.8, 34.0)), ('+5VD', (53.9, 35.7)), ('+5VD', (53.9, 42.7)), ('+5VD', (73.2, 59.1)), ('-12V', (48.1, 43.3)), ('-12V', (45.4, 38.5)), ('/CV jacks & ADC/ADC_IN5', (53.9, 41.6)), ('/CV jacks & ADC/ADC_IN5', (61.0, 32.5)), ('Net-(R414-Pad1)', (53.9, 41.4)), ('Net-(R414-Pad1)', (39.2, 58.7)), ('Net-(R422-Pad1)', (38.2, 55.0)), ('Net-(R422-Pad1)', (48.1, 37.6)), ('Net-(U302C--)', (54.7, 59.3)), ('Net-(U302C--)', (64.8, 61.9))]
+  rip-up Net-(R422-Pad1): took up 6 pieces of ['SPIA_MISO', 'SW_EN5']; open 13 -> 13, kept
+  rip-up -12V: took up 4 pieces of ['/CV jacks & ADC/ADC_IN1', '/CV jacks & ADC/ADC_IN2', 'CVDRV1']; open 13 -> 13, kept
+  rip-up +3V3D: took up 1 pieces of ['SPIA_MOSI']; open 13 -> 13, kept
+  rip-up +3V3D: took up 3 pieces of ['/Codec & audio/CODEC_RST', '/RUN', 'SW_EN5']; open 13 -> 12, kept
+  rip-up +3V3D: took up 8 pieces of ['/CV jacks & ADC/ADC_IN1', 'Net-(R410-Pad1)', 'Net-(R426-Pad1)', 'SPIA_MISO']; open 12 -> 12, kept
+Rip-up and reroute: 5 tries kept; nets still open: []
+Unconnected after finishing: 12
+
+[killed]

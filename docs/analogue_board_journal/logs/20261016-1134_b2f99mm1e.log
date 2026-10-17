@@ -1,0 +1,8 @@
+Routing with: (via "Via[0-5]_450:200_um" "Via[0-5]_600:300_um") (width 127) (clearance 127)
+Freerouting settings: --router.automatic_neckdown=false --router.hole_clearance_um=250 --router.scoring.via_costs=20 --router.scoring.plane_via_costs=2
+Freerouting on 6 layers, 20 passes max, 14.2 min
+Connections to make: 793; left unrouted: 83 (89.5% routed)
+Tracks: 2912 segments, 4633 mm; vias: 421
+Trial board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/pico_core/output/autoroute/analogue_board_pico_core_6L_cheapvia_autoroute_trial.kicad_pcb
+
+[exited with code 0]

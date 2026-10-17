@@ -1,0 +1,7 @@
+Routing with: (via "Via[0-5]_450:200_um" "Via[0-5]_600:300_um") (width 150) (clearance 150)
+Freerouting on 6 layers, 20 passes max, 48.4 min
+Connections to make: 885; left unrouted: 164 (81.5% routed)
+Tracks: 3260 segments, 4966 mm; vias: 327
+Trial board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/pico/output/autoroute/analogue_board_pico_6L_autoroute_trial.kicad_pcb
+
+[exited with code 0]

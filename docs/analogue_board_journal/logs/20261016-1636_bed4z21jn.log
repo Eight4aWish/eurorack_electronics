@@ -1,0 +1,22 @@
+Vias with their drill reset to keep a 0.125 mm ring: 1
+Tracks widened to 0.127 mm: 0
+Round 1: tracks and vias taken up from copper faults: 2
+Dead-end tracks and vias removed: 47
+Leftover connections routed: 14; no route found: [('+5VA', (60.9, 46.2)), ('+5VA', (66.8, 46.0)), ('+5VA', (50.6, 39.5)), ('/Codec & audio/VINR', (55.1, 69.4)), ('/Codec & audio/VINR', (60.7, 68.6)), ('Net-(U302D-+)', (56.5, 67.0)), ('Net-(U302D-+)', (62.1, 70.3))]
+  rip-up Net-(U302D-+): took up 4 pieces of ['Net-(C313-Pad2)', 'Net-(U302C--)']; open 5 -> 6, undone
+  rip-up /Codec & audio/VINR: took up 4 pieces of ['Net-(C310-Pad2)', 'SW_EN4']; open 5 -> 5, kept
+  rip-up Net-(C310-Pad2): took up 19 pieces of ['+5VA', '-12V', '/Pots & gate outs/POT_IN6', 'Net-(C313-Pad2)', 'Net-(C315-Pad1)', 'Net-(C316-Pad2)', 'Net-(U302C--)', 'Net-(U302D-+)', 'SPIA_MOSI', 'SPIB_SCK']; open 5 -> 8, undone
+  rip-up +5VA: took up 1 pieces of ['SW_EN4']; open 5 -> 3, kept
+  rip-up Net-(U302D-+): took up 4 pieces of ['Net-(C313-Pad2)', 'Net-(U302C--)']; open 3 -> 4, undone
+  rip-up Net-(C310-Pad2): took up 18 pieces of ['-12V', '/Codec & audio/VINL', '/Pots & gate outs/POT_IN6', '/Power/5VA_REG', 'Net-(C307-Pad2)', 'Net-(C316-Pad2)', 'SPIB_SCK', 'SW_EN1', 'SW_EN3']; open 3 -> 7, undone
+  rip-up Net-(U302D-+): took up 4 pieces of ['Net-(C313-Pad2)', 'Net-(U302C--)']; open 3 -> 4, undone
+  rip-up Net-(C310-Pad2): took up 18 pieces of ['-12V', '/Codec & audio/VINL', '/Pots & gate outs/POT_IN6', '/Power/5VA_REG', 'Net-(C307-Pad2)', 'Net-(C316-Pad2)', 'SPIB_SCK', 'SW_EN1', 'SW_EN3']; open 3 -> 7, undone
+Rip-up and reroute: 2 swaps kept; nets still open: ['Net-(C310-Pad2)', 'Net-(U302D-+)']
+Dead-end tracks and vias removed: 0
+  of which bent stubs (grid search): 1
+Ground pads unconnected: 1; vias placed: 1; no room: []
+Round 2: tracks and vias taken up from copper faults: 0
+Unconnected after finishing: 2
+Finished board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/shared_core/output/autoroute/analogue_board_shared_core_6L_gv2_s1_s2_autoroute_trial_finished.kicad_pcb
+
+[exited with code 0]

@@ -1,0 +1,7 @@
+Routing with: (via "Via[0-5]_450:200_um" "Via[0-5]_600:300_um") (width 150) (clearance 150)
+Freerouting on 6 layers, 20 passes max, 70.5 min
+Connections to make: 876; left unrouted: 167 (80.9% routed)
+Tracks: 3334 segments, 4782 mm; vias: 348
+Trial board: /private/tmp/claude-501/-Users-dbaghurst-GitHub-eurorack-electronics/d7fdbee2-0c08-4c40-b23f-944d2e1b9124/scratchpad/trimmed/autoroute/teensy_trimmed_6L_autoroute_trial.kicad_pcb
+
+[exited with code 0]

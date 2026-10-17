@@ -1,0 +1,22 @@
+
+== stage s1
+  of which bent stubs (grid search): 0
+Ground vias placed before routing: 206; no room beside 1 pads: ['U401.24']
+Decoupling capacitors wired to their pins before routing: 49; no short path: ['C222->A101.39', 'C312->U302.5', 'C319->U302.4', 'C503->U501.8', 'C601->U601.16', 'C604->U601.15']
+Routing with: (via "Via[0-5]_450:200_um" "Via[0-5]_600:300_um") (width 127) (clearance 127)
+Freerouting settings: --router.automatic_neckdown=false --router.hole_clearance_um=250 --router.copper_to_edge_clearance_um=500 --router.fanout.enabled=false --router.scoring.via_costs=20 --router.scoring.plane_via_costs=2
+Freerouting on 6 layers, 20 passes max, 18.3 min
+Connections to make: 597; left unrouted: 26 (95.6% routed)
+Tracks: 4317 segments, 6684 mm; vias: 722
+Trial board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/shared_core/output/autoroute/analogue_board_shared_core_6L_dec_s1_autoroute_trial.kicad_pcb
+
+== stage s2
+Locked 5039 existing tracks and vias
+Routing with: (via "Via[0-5]_450:200_um" "Via[0-5]_600:300_um") (width 127) (clearance 127)
+Freerouting settings: --router.automatic_neckdown=false --router.hole_clearance_um=250 --router.copper_to_edge_clearance_um=500
+Freerouting on 6 layers, 20 passes max, 9.6 min
+Connections to make: 26; left unrouted: 9 (65.4% routed)
+Tracks: 4440 segments, 6886 mm; vias: 731
+Trial board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/shared_core/output/autoroute/analogue_board_shared_core_6L_dec_s1_s2_autoroute_trial.kicad_pcb
+
+[exited with code 0]

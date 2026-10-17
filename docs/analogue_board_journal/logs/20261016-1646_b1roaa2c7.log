@@ -1,0 +1,7 @@
+Leftover connections routed: 12; no route found: [('+5VA', (60.9, 46.2)), ('+5VA', (66.8, 46.0)), ('+5VA', (50.6, 39.5)), ('/Codec & audio/VINR', (55.1, 69.4)), ('/Codec & audio/VINR', (60.7, 68.6))]
+  rip-up /Codec & audio/VINR: took up 4 pieces of ['Net-(C310-Pad2)', 'SW_EN4']; open 4 -> 4, kept
+  rip-up +5VA: took up 1 pieces of ['SW_EN4']; open 4 -> 2, kept
+Rip-up and reroute: 2 tries kept; nets still open: ['Net-(C310-Pad2)']
+Unconnected after finishing: 1
+
+[killed]

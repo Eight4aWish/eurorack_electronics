@@ -1,0 +1,6 @@
+Freerouting, 20 passes max, 55.2 min
+Connections to make: 929; left unrouted: 251 (73.0% routed)
+Tracks: 3089 segments, 3894 mm; vias: 327
+Trial board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/teensy/output/autoroute/analogue_board_teensy_autoroute_trial.kicad_pcb
+
+[exited with code 0]
