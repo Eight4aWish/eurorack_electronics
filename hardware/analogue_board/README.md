@@ -20,15 +20,17 @@ Two more builds from the same generator are routing trials, not boards to order:
 | Shared board | Both module footprints interleaved on one board, as checkpoint 2 had it; the Teensy on shortened headers | [`shared/`](shared/) |
 | Core board | The Pico board without the fixed-direction CV channels, TRS MIDI or the Qwiic socket, with six pots; parts 0.4 mm apart, 0.127 mm signal rules. The first to route (spec §14); its routed board is in [`pico_core/routed_trial/`](pico_core/routed_trial/) | [`pico_core/`](pico_core/) |
 | Shared core board | Both module sockets (the Teensy on full headers), TRS MIDI, the display on I2C holes, six switchable CV jacks, six pots, four gates each way. Four routes in a row ended 2 connections short, a different 2 each time; its first routed board is in [`shared_core/routed_trial/`](shared_core/routed_trial/) | [`shared_core/`](shared_core/) |
-| Pico core board with MIDI | The shared core board's feature set on a Pico 2 / ESP32-P4 board alone, the module 8 mm lower | [`pico_core_midi/`](pico_core_midi/) |
+| **Pico core board with MIDI** | The same feature set on a Pico 2 / ESP32-P4 board alone: module 8 mm lower, no bus test points, +5VD plane on In4, top of the board re-laid by David with no chip over another. **Fully routed** (0 unconnected, 0 copper faults); routed board in [`pico_core_midi/routed_trial/`](pico_core_midi/routed_trial/), order files in [`pico_core_midi/fab/`](pico_core_midi/fab/), held until the Teensy board is brought up | [`pico_core_midi/`](pico_core_midi/) |
 | **Teensy core board with MIDI** | **The first board to route completely:** the same feature set on a Teensy 4.1 board alone, placement revised by eye. 0 unconnected, 0 copper faults; its routed board is in [`teensy_core_midi/routed_trial/`](teensy_core_midi/routed_trial/) | [`teensy_core_midi/`](teensy_core_midi/) |
 
 **Status: checkpoint 4, 2026-10-16.** `teensy_core_midi` routes completely: KiCad's DRC finds
 no unconnected item and no copper fault, every surface-mount ground pad has its own via to the
 plane, and 54 decoupling capacitors are wired straight to their pins. Its wiring blocks and test
 points are labelled, the wiring map is in `teensy_core_midi/output/wiring_map.md`, and the JLCPCB
-files are in [`teensy_core_midi/fab/`](teensy_core_midi/fab/): the board is being ordered. The
-spec's §14 has every trial.
+files are in [`teensy_core_midi/fab/`](teensy_core_midi/fab/): **ordered 2026-10-16** (5 boards,
+2 assembled). `pico_core_midi` routes completely too (2026-10-17); its order waits on the Teensy
+board's bring-up, so any Rev A lessons go into it first. The spec's §14 has every trial; the
+story is in [`docs/analogue_board_journal.md`](../../docs/analogue_board_journal.md).
 - **Schematic history:** it passed checkpoint 1 as a single board with both module footprints.
   The split changed only the root sheet (one module) and the power sheet, where the ESP32-P4
   bypass (Q201, JP201) stays on the Pico board.

@@ -114,7 +114,13 @@ def holes(sh, at, nets, title, ref=None, rot=0, mirror=None, stubs=None):
 
 
 def tp(sh, at, net, ref=None, label=None):
-    """Test pad. Positive rails: pad below, pin up to the rail symbol. Everything else: pin down."""
+    """Test pad. Positive rails: pad below, pin up to the rail symbol. Everything else: pin down.
+    A board that drops "bus_tps" (variant.py) gets them on the rails and ground only: every bus
+    line can be probed at the module socket's pins, and each bus pad is one more branch to route
+    through the busiest part of the board (David, 2026-10-16)."""
+    import variant
+    if not variant.has("bus_tps") and net not in sh.project.power_nets:
+        return None
     p = dict(ICS["TP"], value=label or net)
     up = net in sh.project.power_nets and net not in sh.project.ground_nets
     t = part(sh, "TP", at, p=p, ref=ref, rot=180 if up else 0, hide_value=True)

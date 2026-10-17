@@ -40,6 +40,10 @@ ROLE_TARGETS = {"rail entry +12V": "FB201", "rail entry -12V": "FB202", "buck ou
 # parts that belong beside one pin though their schematic field says nothing: a filter's output
 # side is the short side (FB301 sat by the ADC, 28 mm of CODEC_VCC from the codec, 2026-10-16)
 PIN_TARGETS = {"FB301": ("U301", "24")}
+# and one board's own (the generator still reproduces the boards already ordered): on the Pico
+# board R401, ADC_RST's 10k pull-up, sat at the top edge where the +3V3D pins it averaged put it,
+# and ADC_RST could not climb round the ADC's corner past a fiducial's keep-out (2026-10-17)
+PIN_TARGETS_BOARD = {"pico_core_midi": {"R401": ("U401", "2")}}
 # capacitors serving these stay on the same face unless nothing fits within this many mm: the
 # buck's input and output loops carry 350 kHz switching current and must not run through vias
 SAME_FACE = {"U201": 12.0, "L201": 12.0}
@@ -160,8 +164,9 @@ class Placer:
 
     # ---------------------------------------------------------------- targets
     def decouples(self, ref):
-        if ref in PIN_TARGETS and PIN_TARGETS[ref][0] in self.comps:
-            return PIN_TARGETS[ref]
+        targets = {**PIN_TARGETS, **PIN_TARGETS_BOARD.get(variant.FLOORPLAN, {})}
+        if ref in targets and targets[ref][0] in self.comps:
+            return targets[ref]
         d = self.comps[ref]["props"].get("Decouples", "")
         if not d:
             return None

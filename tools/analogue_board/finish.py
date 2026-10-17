@@ -143,11 +143,16 @@ class Copper:
         self.hole_grid = {}
         self.vias = set()
         self.hard_nets = set()   # rip_up: nets just routed, which may not be taken up yet
+        self.protected = set()   # ids of the items of PROTECTED tracks and vias
         for t in board.GetTracks():
             if t.Type() == pcbnew.PCB_VIA_T:
                 self.add_via(t.GetNetCode(), mm(t.GetPosition()), via_width(t) / 2, t.GetDrillValue() / MM / 2)
+                if t.m_Uuid.AsString() in PROTECTED:
+                    self.protected |= {id(self.items[l][-1]) for l in self.layers}
             else:
                 self.add_seg(t.GetNetCode(), t.GetLayer(), mm(t.GetStart()), mm(t.GetEnd()), t.GetWidth() / MM / 2)
+                if t.m_Uuid.AsString() in PROTECTED:
+                    self.protected.add(id(self.items[t.GetLayer()][-1]))
         for fp in board.GetFootprints():
             for p in fp.Pads():
                 bb = p.GetBoundingBox()
@@ -163,21 +168,25 @@ class Copper:
         self.edge = (e.GetLeft() / MM + line / 2, e.GetTop() / MM + line / 2,
                      e.GetRight() / MM - line / 2, e.GetBottom() / MM - line / 2)
         self.no_via = []
-        self.plane = []   # the ground plane's filled copper: a new via must land in it
+        self.planes = {}  # net code -> its planes' filled copper: a new via of that net must land in it
         for z in board.Zones():
             if z.GetIsRuleArea() and z.GetDoNotAllowVias():
                 bb = z.GetBoundingBox()
                 self.no_via.append((bb.GetLeft() / MM, bb.GetTop() / MM, bb.GetRight() / MM, bb.GetBottom() / MM))
-            elif not z.GetIsRuleArea() and z.GetNetname() == "GND" and z.IsOnLayer(pcbnew.In1_Cu):
-                self.plane.append(z.GetFilledPolysList(pcbnew.In1_Cu))
+            elif not z.GetIsRuleArea() and z.GetNetCode() > 0:
+                for layer in z.GetLayerSet().CuStack():
+                    self.planes.setdefault(z.GetNetCode(), []).append(z.GetFilledPolysList(layer))
+        self.plane_nets = set(self.planes) | {self.gnd}   # nets joined through a plane: never taken up
 
-    def in_plane(self, c):
-        """True if the filled ground plane covers the via's whole pad, so it connects."""
-        if not self.plane:
+    def in_plane(self, c, net=None):
+        """True if the net's filled plane covers the via's whole pad, so it connects (ground's
+        plane when no net is given; True for a net with no plane)."""
+        polys = self.planes.get(self.gnd if net is None else net)
+        if not polys:
             return True
         r = VIA_D / 2
         pts = [c] + [(c[0] + r * math.cos(a), c[1] + r * math.sin(a)) for a in (0, 1.57, 3.14, 4.71)]
-        return all(any(poly.Contains(pcbnew.VECTOR2I(int(p[0] * MM), int(p[1] * MM))) for poly in self.plane) for p in pts)
+        return all(any(poly.Contains(pcbnew.VECTOR2I(int(p[0] * MM), int(p[1] * MM))) for poly in polys) for p in pts)
 
     def add(self, layer, item):
         self.items[layer].append(item)
@@ -215,8 +224,10 @@ class Copper:
         """Least distance from point p to other-net copper on a layer (NEAR if none is closer).
         `hard_only`: only what rip_up may not take up (pads, and ground's tracks and vias)."""
         best = NEAR
-        for n, kind, g, half in self.near(self.grid[layer], (p[0] - NEAR, p[1] - NEAR, p[0] + NEAR, p[1] + NEAR)):
-            if n == net or hard_only and kind != "box" and n != self.gnd and n not in self.hard_nets:
+        for it in self.near(self.grid[layer], (p[0] - NEAR, p[1] - NEAR, p[0] + NEAR, p[1] + NEAR)):
+            n, kind, g, half = it
+            if n == net or hard_only and kind != "box" and n not in self.plane_nets and n not in self.hard_nets \
+                    and id(it) not in self.protected:
                 continue
             d = (math.dist(p, g) - half if kind == "circle" else seg_point(g[0], g[1], p) - half if kind == "seg"
                  else box_point(g, p))
@@ -242,11 +253,11 @@ class Copper:
             return False
         if any(math.dist(c, hc) - hr - hole < HOLE_CLEAR
                for hc, hr, n in self.near(self.hole_grid, (c[0] - NEAR, c[1] - NEAR, c[0] + NEAR, c[1] + NEAR))
-               if not (hard_only and n not in (net, self.gnd) and self.via_hole(hc))):
+               if not (hard_only and n != net and n not in self.plane_nets and self.via_hole(hc))):
             return False
         if not all(self.gap_point(l, net, c, hard_only) - r >= max(CLEAR, HOLE_CLEAR + hole - r) for l in self.layers):
             return False
-        return net != self.gnd or self.in_plane(c)   # a ground via must reach the plane
+        return self.in_plane(c, net)   # a via of a net with a plane must reach it
 
     def stub_width(self, net, layer, a, b):
         """The widest stub from a to b that clears other nets on the layer, or None."""
@@ -360,6 +371,7 @@ def take_up_faults(board, tmp):
         d = json.load(f)
     os.remove(rpt)
     tracks = {t.m_Uuid.AsString(): t for t in board.GetTracks()}
+    planes = plane_net_names(board)
     doomed = {}
     for v in d.get("violations", []):
         if v["type"] in ("track_dangling", "via_dangling"):
@@ -372,7 +384,7 @@ def take_up_faults(board, tmp):
         if v["type"] not in COPPER_FAULTS:
             continue
         ours = [tracks[i["uuid"]] for i in v["items"] if i.get("uuid") in tracks]
-        pick = [t for t in ours if t.GetNetname() != "GND"] or ours
+        pick = [t for t in ours if t.GetNetname() not in planes] or ours
         for t in pick:
             doomed[t.m_Uuid.AsString()] = t
     for t in doomed.values():
@@ -380,8 +392,9 @@ def take_up_faults(board, tmp):
     return len(doomed)
 
 
-def unconnected_ground_pads(board_path, pro_path):
-    """Ground pads in KiCad's unconnected-items list, from a DRC run against the project's rules."""
+def unconnected_ground_pads(board_path, pro_path, net="GND"):
+    """A plane net's pads (ground's by default) in KiCad's unconnected-items list, from a DRC run
+    against the project's rules."""
     rpt = board_path + ".drc.json"
     subprocess.run([KICAD_CLI, "pcb", "drc", "--format", "json", "--severity-all", "-o", rpt, board_path],
                    capture_output=True, text=True)
@@ -392,19 +405,21 @@ def unconnected_ground_pads(board_path, pro_path):
     for u in d.get("unconnected_items", []):
         for it in u["items"]:
             desc = it["description"]
-            if "[GND]" in desc and desc.startswith("Pad"):
+            if f"[{net}]" in desc and desc.startswith("Pad"):
                 parts = desc.split(" of ")
                 ref = parts[1].split()[0] if len(parts) > 1 else None
                 out.append((ref, desc.split()[1], (it["pos"]["x"], it["pos"]["y"])))
     return out
 
 
-def stitch_ground(board, targets, reach=REACH, share=REACH, maze=True, outward=False):
-    """A via and stub beside each ground pad in `targets`; returns (placed, failed refs).
-    `share`: how far an existing ground via may be to serve the pad instead of a new one.
-    `outward`: try the via on the side of the pad away from its part's middle first (before
-    routing, so the vias stand clear of the part's other pins)."""
-    gnd = board.FindNet("GND")
+def stitch_ground(board, targets, reach=REACH, share=REACH, maze=True, outward=False, net_name="GND",
+                  keep_clear=()):
+    """A via and stub beside each pad in `targets` down to its plane (ground's by default,
+    `net_name`'s otherwise); returns (placed, failed refs). `share`: how far an existing via of
+    the net may be to serve the pad instead of a new one. `outward`: try the via on the side of
+    the pad away from its part's middle first (before routing, so the vias stand clear of the
+    part's other pins)."""
+    gnd = board.FindNet(net_name)
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())   # so the plane's real copper is known
     copper = Copper(board)
     pads = {}
@@ -460,7 +475,7 @@ def stitch_ground(board, targets, reach=REACH, share=REACH, maze=True, outward=F
             while r <= limit and not best:         # rings from just outside the pad outwards
                 for a in front:
                     v = (c[0] + r * math.cos(a), c[1] + r * math.sin(a))
-                    if copper.via_fits(net, v):
+                    if copper.via_fits(net, v) and not any(box_point(z, v) < VIA_D / 2 for z in keep_clear):
                         w = copper.stub_width(net, layer, c, v)
                         if w:
                             best = (v, w, True)
@@ -525,14 +540,43 @@ def stitch_ground(board, targets, reach=REACH, share=REACH, maze=True, outward=F
     return placed, failed
 
 
-def fan_out_ground(board, reach=1.6, share=0.9):
-    """Before routing: a via to the plane beside every surface-mount ground pad, on its outer
-    side, so each part's ground goes straight down to In1 rather than along tracks to some other
-    part's ground (the autorouter, left to itself, joins ground pads to each other). A pad with
-    another ground via within `share` mm uses that one. Returns (placed, failed refs)."""
+def escape_zones(board, reach=0.8):
+    """The way out of every signal pin of a surface-mount chip: a strip along the pin's centre
+    line, off each end of the pad, `reach` mm long and wide enough for one track and its
+    clearance either side (no wider: a neighbouring ground pin's own via, straight out along its
+    pin, must still fit), on whichever face. A via goes through both faces, so a pre-placed plane
+    via standing in one blocks the pin. On the Pico board six ground vias (the ADC's, its
+    reference capacitors', and the DG412's under it) fenced in ADC pin 2 on every layer
+    (2026-10-17)."""
+    planes = plane_net_names(board)
+    out = []
+    for fp in board.GetFootprints():
+        pads = list(fp.Pads())
+        if len(pads) < 8 or any(p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH for p in pads):
+            continue
+        for p in pads:
+            if not p.GetNetname() or p.GetNetname() in planes:
+                continue
+            bb = p.GetBoundingBox()
+            x0, y0, x1, y1 = bb.GetLeft() / MM, bb.GetTop() / MM, bb.GetRight() / MM, bb.GetBottom() / MM
+            cx, cy, w = (x0 + x1) / 2, (y0 + y1) / 2, MIN_TRACK / 2 + CLEAR
+            if x1 - x0 >= y1 - y0:
+                out.append((x0 - reach, cy - w, x1 + reach, cy + w))
+            else:
+                out.append((cx - w, y0 - reach, cx + w, y1 + reach))
+    return out
+
+
+def fan_out_ground(board, reach=1.6, share=0.9, net_name="GND"):
+    """Before routing: a via to the plane beside every surface-mount pad of a plane net (ground's
+    by default), on its outer side, so each part's pin goes straight down to its plane rather
+    than along tracks to some other part's (the autorouter, left to itself, joins ground pads to
+    each other). A pad with another via of the net within `share` mm uses that one. Returns
+    (placed, failed refs)."""
     targets = sorted((fp.GetReference(), p.GetNumber(), None) for fp in board.GetFootprints() for p in fp.Pads()
-                     if p.GetNetname() == "GND" and p.GetAttribute() == pcbnew.PAD_ATTRIB_SMD)
-    return stitch_ground(board, targets, reach=reach, share=share, maze=False, outward=True)
+                     if p.GetNetname() == net_name and p.GetAttribute() == pcbnew.PAD_ATTRIB_SMD)
+    return stitch_ground(board, targets, reach=reach, share=share, maze=False, outward=True, net_name=net_name,
+                         keep_clear=escape_zones(board))
 
 
 # ------------------------------------------------------------------ the leftover connections
@@ -621,46 +665,86 @@ def route_gap(copper, net, src, dst, width, layers, margin, soft=0):
     half = width / 2
     window = (x0 - 1, y0 - 1, x1 + 1, y1 + 1)
     ex0, ey0, ex1, ey1 = copper.edge
+
+    # Marking works a row at a time: a circle, a box grown round its corners and a track's band
+    # (a capsule) each cut a grid row in one stretch, filled with one slice. Cell by cell, in
+    # Python, a long connection's window took hours (2026-10-17).
+    def rows(ya, yb):
+        return range(max(0, math.ceil((ya - y0) / GRID - 1e-9)), min(ny - 1, math.floor((yb - y0) / GRID + 1e-9)) + 1)
+
+    def fill(arr, j, xa, xb):
+        ia, ib = max(0, math.ceil((xa - x0) / GRID - 1e-9)), min(nx - 1, math.floor((xb - x0) / GRID + 1e-9))
+        if ia <= ib:
+            arr[j * nx + ia: j * nx + ib + 1] = b"\x01" * (ib - ia + 1)
+
+    def circle(arr, c, R):
+        for j in rows(c[1] - R, c[1] + R):
+            dy = y0 + j * GRID - c[1]
+            if dy * dy <= R * R:
+                w = math.sqrt(R * R - dy * dy)
+                fill(arr, j, c[0] - w, c[0] + w)
+
+    def box(arr, k, R):
+        for j in rows(k[1] - R, k[3] + R):
+            py = y0 + j * GRID
+            dy = k[1] - py if py < k[1] else py - k[3] if py > k[3] else 0.0
+            if dy * dy <= R * R:
+                w = math.sqrt(R * R - dy * dy)
+                fill(arr, j, k[0] - w, k[2] + w)
+
+    def capsule(arr, a, b, R):
+        dx, dy = b[0] - a[0], b[1] - a[1]
+        length = math.hypot(dx, dy)
+        nxu, nyu = (-dy / length, dx / length) if length else (0.0, 0.0)
+        for j in rows(min(a[1], b[1]) - R, max(a[1], b[1]) + R):
+            py = y0 + j * GRID
+            xs = []
+            for c in (a, b):
+                e = py - c[1]
+                if e * e <= R * R:
+                    w = math.sqrt(R * R - e * e)
+                    xs += [c[0] - w, c[0] + w]
+            if length and dy:
+                for sgn in (-1, 1):                  # the band's two long sides
+                    t = (py - a[1] - sgn * R * nyu) / dy
+                    if 0.0 <= t <= 1.0:
+                        xs.append(a[0] + sgn * R * nxu + t * dx)
+            if xs:                                   # convex: one stretch, from the least to the most
+                fill(arr, j, min(xs), max(xs))
+
     edge = bytearray(N)
+    m = EDGE + half
     for j in range(ny):
         py = y0 + j * GRID
-        for i in range(nx):
-            px = x0 + i * GRID
-            if min(px - ex0, ex1 - px, py - ey0, ey1 - py) < EDGE + half:
-                edge[j * nx + i] = 1
+        if py - ey0 < m or ey1 - py < m:
+            edge[j * nx: (j + 1) * nx] = b"\x01" * nx
+        else:
+            fill(edge, j, x0 - 1.0, ex0 + m - 1e-6)
+            fill(edge, j, ex1 - m + 1e-6, x1 + 1.0)
     blocked, softs = [], []
     for layer in layers:
         b, s = bytearray(edge), bytearray(N)
-
-        def mark(box, dist, grow, arr=None):
-            arr = b if arr is None else arr
-            i0, i1 = max(0, int((box[0] - grow - x0) / GRID)), min(nx - 1, int((box[2] + grow - x0) / GRID) + 1)
-            j0, j1 = max(0, int((box[1] - grow - y0) / GRID)), min(ny - 1, int((box[3] + grow - y0) / GRID) + 1)
-            for j in range(j0, j1 + 1):
-                py, row = y0 + j * GRID, j * nx
-                for i in range(i0, i1 + 1):
-                    if not arr[row + i] and dist((x0 + i * GRID, py)) < grow:
-                        arr[row + i] = 1
         grow = CLEAR + half + GRID * 0.75          # the grid's own error, on the safe side
-        for n, kind, g, h in copper.near(copper.grid[layer], window):
+        for it in copper.near(copper.grid[layer], window):
+            n, kind, g, h = it
             if n == net:
                 continue
             # with `soft`, other nets' tracks and vias may be crossed at a cost (rip_up takes them
-            # up); pads and ground never
-            arr = s if soft and kind != "box" and n != copper.gnd and n not in copper.hard_nets else None
+            # up); pads, plane nets and the decoupling capacitors' own tracks never
+            arr = s if soft and kind != "box" and n not in copper.plane_nets and n not in copper.hard_nets \
+                and id(it) not in copper.protected else b
             if kind == "circle":
-                mark(bbox(kind, g, h), lambda pt, g=g, h=h: math.dist(pt, g) - h, grow, arr)
+                circle(arr, g, h + grow)
             elif kind == "seg":
-                mark(bbox(kind, g, h), lambda pt, g=g, h=h: seg_point(g[0], g[1], pt) - h, grow, arr)
+                capsule(arr, g[0], g[1], h + grow)
             else:
-                mark(g, lambda pt, g=g: box_point(g, pt), grow, arr)
+                box(arr, g, grow)
         for c, r, n in copper.near(copper.hole_grid, window):
             if n != net:
-                mark((c[0] - r, c[1] - r, c[0] + r, c[1] + r), lambda pt, c=c, r=r: math.dist(pt, c) - r,
-                     HOLE_CLEAR + half + GRID * 0.75)
+                circle(b, c, r + HOLE_CLEAR + half + GRID * 0.75)
         if layer == pcbnew.F_Cu:
             for k in copper.no_via:                # the fiducial keep-outs forbid tracks too
-                mark(k, lambda pt, k=k: box_point(k, pt), half + GRID)
+                box(b, k, half + GRID)
         blocked.append(b)
         softs.append(s)
     lidx = {l: k for k, l in enumerate(layers)}
@@ -680,19 +764,30 @@ def route_gap(copper, net, src, dst, width, layers, margin, soft=0):
     start, goal = cells_of(src), cells_of(dst)
     if not start or not goal:
         return None
-    dist, prev, heap = {}, {}, []
+    # A*: the straight-line distance (in cells) to the goal's cells is a lower bound on what is
+    # left, so the search heads for the goal instead of flooding the window
+    gis = [(g % N) % nx for g in goal]
+    gjs = [(g % N) // nx for g in goal]
+    gi0, gi1, gj0, gj1 = min(gis), max(gis), min(gjs), max(gjs)
+
+    def h_of(i, j):
+        return math.hypot(max(gi0 - i, 0, i - gi1), max(gj0 - j, 0, j - gj1))
+    dist, prev, heap, closed = {}, {}, [], set()
     for s in start:
         dist[s], prev[s] = 0.0, None
-        heap.append((0.0, s))
+        rem = s % N
+        heap.append((h_of(rem % nx, rem // nx), s))
     heapq.heapify(heap)
     via_ok = {}
     d2 = math.sqrt(2)
     moves = ((1, 0, 1.0), (-1, 0, 1.0), (0, 1, 1.0), (0, -1, 1.0), (1, 1, d2), (1, -1, d2), (-1, 1, d2), (-1, -1, d2))
     hit = None
     while heap:
-        d, s = heapq.heappop(heap)
-        if d > dist.get(s, 1e18):
+        _f, s = heapq.heappop(heap)
+        if s in closed:
             continue
+        closed.add(s)
+        d = dist[s]
         if s in goal:
             hit = s
             break
@@ -705,7 +800,7 @@ def route_gap(copper, net, src, dst, width, layers, margin, soft=0):
                 t, nd = k * N + c * nx + a, d + cost + (soft if sk[c * nx + a] else 0)
                 if nd < dist.get(t, 1e18):
                     dist[t], prev[t] = nd, s
-                    heapq.heappush(heap, (nd, t))
+                    heapq.heappush(heap, (nd + h_of(a, c), t))
         if i % 2 == 0 and j % 2 == 0:              # vias on a 0.1 mm lattice
             ok = via_ok.get(rem)
             if ok is None:
@@ -717,7 +812,7 @@ def route_gap(copper, net, src, dst, width, layers, margin, soft=0):
                     t, nd = k2 * N + rem, d + vcost
                     if k2 != k and not blocked[k2][rem] and nd < dist.get(t, 1e18):
                         dist[t], prev[t] = nd, s
-                        heapq.heappush(heap, (nd, t))
+                        heapq.heappush(heap, (nd + h_of(i, j), t))
     if hit is None:
         return None
     path, s = [], hit
@@ -727,6 +822,17 @@ def route_gap(copper, net, src, dst, width, layers, margin, soft=0):
         path.append((k, (x0 + i * GRID, y0 + j * GRID)))
         s = prev[s]
     path.reverse()
+    if len(path) < 2:
+        # the two groups' copper already overlaps here, without an end of either inside the
+        # other, which is what KiCad counts as joined: bridge to the goal item's anchor (a pad's
+        # centre, a track's end, a via's centre). An empty route here once looped for hours.
+        k, pt = path[0]
+        for it in dst:
+            if (it[1] is None or it[1] == layers[k]) and inside(it, pt):
+                end = min(anchors(it), key=lambda e: math.dist(e, pt))
+                if math.dist(end, pt) > 1e-6 and (soft or copper.gap_seg(layers[k], net, pt, end) - half >= CLEAR - 1e-3):
+                    return [(layers[k], [pt, end])], []
+        return None
     runs, vias = [], []
     for k, pt in path:
         if runs and runs[-1][0] == k:
@@ -753,10 +859,12 @@ def route_gap(copper, net, src, dst, width, layers, margin, soft=0):
     return out, vias
 
 
-def route_leftovers(board, skip=("GND",), nets=None):
+def route_leftovers(board, skip=None, nets=None):
     """Join each net's separate groups of copper (the connections the autorouter left), smallest
-    group first, to the rest of its net; `nets` (net codes) limits it to those. Returns (joined,
-    failed [(net name, near point)])."""
+    group first, to the rest of its net; `nets` (net codes) limits it to those. Plane nets are
+    skipped (stitch_ground joins their pads to the plane). Returns (joined, failed [(net name,
+    near point)])."""
+    skip = plane_net_names(board) if skip is None else skip
     copper = Copper(board)
     layers = [l for l in copper.layers if l != pcbnew.In1_Cu]
     names = {p.GetNetCode(): p.GetNetname() for fp in board.GetFootprints() for p in fp.Pads() if p.GetNetCode() > 0}
@@ -806,6 +914,13 @@ def route_leftovers(board, skip=("GND",), nets=None):
                     trk.SetNetCode(net)
                     board.Add(trk)
                     copper.add_seg(net, layer, a, b, w / 2)
+            # no progress, no repeat: if the route did not join the group to the rest, give the
+            # group up rather than route it again (an empty route once looped for hours)
+            if len(clusters(net_items(board, net))) >= len(groups):
+                given_up |= {it[4].m_Uuid.AsString() for it in src}
+                failed.append((name, anchors(src[0])[0]))
+                print(f"  leftover {name}: a route was laid but did not join; given up", flush=True)
+                continue
             joined += 1
     return joined, failed
 
@@ -820,12 +935,14 @@ def unconnected(board):
 
 
 def crossed(board, net, segs, vias, width, keep=()):
-    """Other nets' tracks and vias (never ground's, nor `keep`'s) too close to a planned path."""
-    gnd = board.FindNet("GND").GetNetCode()
+    """Other nets' tracks and vias (never a plane net's, nor `keep`'s, nor a decoupling path's)
+    too close to a planned path."""
+    planes = {board.FindNet(n).GetNetCode() for n in plane_net_names(board)}
     half, out = width / 2, []
     pieces = [(l, a, b) for l, pts in segs for a, b in zip(pts, pts[1:])]
     for t in board.GetTracks():
-        if t.GetNetCode() in (net, gnd) or t.GetNetCode() in keep:
+        if t.GetNetCode() == net or t.GetNetCode() in planes or t.GetNetCode() in keep \
+                or t.m_Uuid.AsString() in PROTECTED:
             continue
         if t.Type() == pcbnew.PCB_VIA_T:
             c, r = mm(t.GetPosition()), via_width(t) / 2
@@ -928,9 +1045,17 @@ def remove_orphan_ground_vias(board):
     return len(gone)
 
 
-def remove_dangling(board, skip=("GND",)):
+def plane_net_names(board):
+    """Ground and every net with a copper zone (a plane): joined through the plane, so none of
+    the steps that judge connection by tracks alone may touch them."""
+    return {"GND"} | {z.GetNetname() for z in board.Zones() if not z.GetIsRuleArea() and z.GetNetCode() > 0}
+
+
+def remove_dangling(board, skip=None):
     """Vias and tracks that lead nowhere (the autorouter's dead ends), removed until none is left:
-    a via joined on fewer than two layers, a track with an end that touches nothing."""
+    a via joined on fewer than two layers, a track with an end that touches nothing. Plane nets
+    are left alone: their vias join the plane, which this does not see."""
+    skip = plane_net_names(board) if skip is None else skip
     removed = 0
     nets = {t.GetNetCode() for t in board.GetTracks()} - {board.FindNet(n).GetNetCode() for n in skip}
     while True:
@@ -1057,9 +1182,10 @@ def decoupling_pairs(board):
     return out
 
 
-def copper_distance(items, a, b):
+def copper_distance(items, a, b, path=False):
     """Length of track along the net's copper from item a to item b (indices into items),
-    or None if they do not connect: Dijkstra over items that touch, a track costing its length."""
+    or None if they do not connect: Dijkstra over items that touch, a track costing its length.
+    With `path`, (length, [item indices along the way])."""
     import heapq
     boxes = [bbox(it[0], it[2], it[3]) for it in items]
     adj = {i: [] for i in range(len(items))}
@@ -1072,18 +1198,47 @@ def copper_distance(items, a, b):
                 adj[i].append(j)
                 adj[j].append(i)
     cost = [math.dist(*it[2]) if it[0] == "seg" else 0.0 for it in items]
-    dist, heap = {a: 0.0}, [(0.0, a)]
+    dist, prev, heap = {a: 0.0}, {a: None}, [(0.0, a)]
     while heap:
         d, i = heapq.heappop(heap)
         if i == b:
-            return d
+            if not path:
+                return d
+            way, k = [], b
+            while k is not None:
+                way.append(k)
+                k = prev[k]
+            return d, way[::-1]
         if d > dist.get(i, 1e18):
             continue
         for j in adj[i]:
             if d + cost[j] < dist.get(j, 1e18):
-                dist[j] = d + cost[j]
+                dist[j], prev[j] = d + cost[j], i
                 heapq.heappush(heap, (d + cost[j], j))
-    return None
+    return (None, []) if path else None
+
+
+PROTECTED = set()   # uuids of the tracks and vias joining each decoupling capacitor to its pin
+
+
+def protect_decoupling(board, max_len=6.0):
+    """The tracks and vias on each decoupling capacitor's path to its pin, where that path is
+    short (`max_len` mm): rip-up and the decoupling step may not take them up. On the Teensy
+    board the rip-up step took up C416's pre-wired track and routed it the long way
+    (2026-10-16). Returns how many paths are protected."""
+    PROTECTED.clear()
+    n = 0
+    for _ref, cap, _ic_ref, ic in decoupling_pairs(board):
+        items = net_items(board, cap.GetNetCode())
+        key = {it[4].m_Uuid.AsString(): i for i, it in enumerate(items) if it[0] == "box"}
+        a, b = key.get(cap.m_Uuid.AsString()), key.get(ic.m_Uuid.AsString())
+        if a is None or b is None:
+            continue
+        d, way = copper_distance(items, a, b, path=True)
+        if d is not None and d <= max_len:
+            PROTECTED.update(items[i][4].m_Uuid.AsString() for i in way if items[i][0] != "box")
+            n += 1
+    return n
 
 
 def shorten_decoupling(board, limit=4.0, max_len=6.0, tmp=None):
@@ -1095,7 +1250,10 @@ def shorten_decoupling(board, limit=4.0, max_len=6.0, tmp=None):
     Returns (board, shortened [(cap, pin, before, after)], still long [(cap, pin, length)])."""
     layers = None
     done, left = [], []
+    planes = plane_net_names(board)
     for ref, cap, ic_ref, ic in decoupling_pairs(board):
+        if cap.GetNetname() in planes:     # joined through its plane, by its own vias
+            continue
         copper = Copper(board)
         layers = [l for l in copper.layers if l != pcbnew.In1_Cu]
         net = cap.GetNetCode()
@@ -1197,6 +1355,7 @@ def main(src, out=None):
     print(f"Vias with their drill reset to keep a {MIN_RING} mm ring: {fix_vias(board)}")
     print(f"Tracks widened to {MIN_TRACK} mm: {widen_tracks(board)}")
     print(f"Ground vias joined to nothing but the plane, removed: {remove_orphan_ground_vias(board)}")
+    print(f"Decoupling paths protected from rip-up: {protect_decoupling(board)}")
     # a working copy, with the project's rules beside it (DRC without them runs KiCad's defaults)
     tmp = out[:-len(".kicad_pcb")] + "_partial.kicad_pcb"
     tmp_pro = tmp[:-len(".kicad_pcb")] + ".kicad_pro"
@@ -1215,10 +1374,12 @@ def main(src, out=None):
             board, kept, still = rip_up(board, tmp, failed)
             print(f"Rip-up and reroute: {kept} swaps kept; nets still open: {still}")
         print(f"Dead-end tracks and vias removed: {remove_dangling(board)}")
-        pcbnew.SaveBoard(tmp, board)
-        targets = unconnected_ground_pads(tmp, pro)
-        placed, failed = stitch_ground(board, targets)
-        print(f"Ground pads unconnected: {len({(r, n) for r, n, _ in targets})}; vias placed: {placed}; no room: {failed}")
+        for plane in sorted(plane_net_names(board)):    # ground, and any other net with a plane
+            pcbnew.SaveBoard(tmp, board)
+            targets = unconnected_ground_pads(tmp, pro, plane)
+            placed, failed = stitch_ground(board, targets, net_name=plane)
+            print(f"{plane} pads unconnected: {len({(r, n) for r, n, _ in targets})}; vias placed: {placed}; "
+                  f"no room: {failed}")
     board, done, left = shorten_decoupling(board, tmp=tmp)
     print(f"Decoupling paths shortened (cap, pin, mm before, mm added): {done}; still over 4 mm: {left}")
     for f in (tmp, tmp_pro):

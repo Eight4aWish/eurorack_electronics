@@ -5265,7 +5265,7 @@
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Value" "Holes, right top"
+		(property "Value" "Holes, right middle"
 			(at 330.2 76.2 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -5311,7 +5311,7 @@
 			)
 		)
 	)
-	(label "GIN3"
+	(label "GIN4"
 		(at 322.58 73.66 180)
 		(effects
 			(font (size 1.27 1.27))
@@ -5334,7 +5334,7 @@
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Value" "Holes, right middle"
+		(property "Value" "Holes, right top"
 			(at 330.2 86.36 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -5380,7 +5380,7 @@
 			)
 		)
 	)
-	(label "GIN4"
+	(label "GIN3"
 		(at 322.58 83.82 180)
 		(effects
 			(font (size 1.27 1.27))

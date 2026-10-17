@@ -44,9 +44,11 @@ BOARDS = {
     # connections always were (David, 2026-10-16)
     # The module sits 8 mm lower than checkpoint 2 put it, giving the converters above it room
     # (David, 2026-10-16); the ESP32-P4's USB end still clears the buck at y 80.8.
+    # After the Teensy board's route (David, 2026-10-16): no bus test points (every bus line can be
+    # probed at the module socket), the rails' and ground's kept.
     "pico_core_midi": {"title": "Pico 2 / ESP32-P4, core set with MIDI", "modules": {"A101": "pico"},
-                       "floorplan": "pico_core_midi", "drop": {"fixed_cv", "qwiic"}, "pots": 6, "spacing": 0.4,
-                       "track": 0.127, "module_drop": 8.0},
+                       "floorplan": "pico_core_midi", "drop": {"fixed_cv", "qwiic", "bus_tps"}, "pots": 6,
+                       "spacing": 0.4, "track": 0.127, "module_drop": 8.0},
     # and on a Teensy 4.1 alone, on full-length headers (David, 2026-10-16: placement reviewed
     # by eye before it is routed)
     # The module stays where checkpoint 2 put it: 10 mm lower was tried, and no chip measured
@@ -72,7 +74,7 @@ MODULES = BOARDS[BOARD]["modules"] if BOARD else {}        # ref -> "pico" | "te
 REF = {kind: ref for ref, kind in MODULES.items()}         # "pico" | "teensy" -> ref
 HAS_PICO, HAS_TEENSY = "pico" in REF, "teensy" in REF
 _B = BOARDS.get(BOARD, {})
-DROP = _B.get("drop", set())          # features left out: "fixed_cv", "midi", "qwiic"
+DROP = _B.get("drop", set())          # features left out: "fixed_cv", "midi", "qwiic", "bus_tps"
 FLOORPLAN = _B.get("floorplan", BOARD)   # whose placement anchors this board uses
 SPACING = _B.get("spacing", 0.1)      # courtyard-to-courtyard gap the auto-placer keeps, mm
 TRACK = _B.get("track", 0.15)         # default track width and clearance, mm

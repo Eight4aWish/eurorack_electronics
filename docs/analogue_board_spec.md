@@ -1118,6 +1118,33 @@ repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No p
      - **Test points, for the Pico board:** 18 of the 27 are on bus lines, every one of which
        can be probed at the module socket's solder joints. Dropping them frees about 79 mm²
        and 18 branches in the busiest area.
+     - **Ordered (David, 2026-10-16):** JLCPCB, 5 boards and 2 assembled on both faces, OSP
+       finish, £268 with the shipping coupons, before import VAT.
+   - **The Pico board routes too: `pico_core_midi` (2026-10-17).**
+     - **The pattern behind the failures**, from six routes and 102 leftover connections:
+       - 71 were rails;
+       - over half sat at the ADC, DAC, a DG412 or the analogue regulator;
+       - the jams came from chips stacked on opposite faces, whose vias fence in each other's
+         pins.
+     - **What changed:**
+       - **A +5VD plane on In4** (`autoroute.py --plane=+5VD`). It took stage 1 from 35 left
+         to 14.
+       - **Escape lanes.** ADC pin 2 was fenced in by six ground vias, each legitimate for
+         its own pad. The pre-route ground vias now keep a lane clear off the end of every
+         chip's signal pin.
+       - **David's re-laid top:** no chip over another on the opposite face. The ADC is
+         lowered; the DAC and CV op-amp are turned and stacked; the DG412s and U504 sit where
+         nothing is above them; the analogue LDO is moved out of the band.
+     - **Result:** 7 left after stage 1 and 4 after stage 2, the best of any board. Then
+       **0 unconnected and 0 copper faults** after `finish.py`, and every IC supply pin within
+       4 mm of its capacitor.
+     - **Also fixed in `finish.py`:**
+       - an empty route that looped for five hours overnight;
+       - a grid marked one cell at a time, so long connections took hours;
+       - a dead-end clean-up that ignored planes.
+     - **Kept in:** `pico_core_midi/routed_trial/`; order files in `pico_core_midi/fab/`.
+     - **Held (David):** the order waits on the Teensy board's bring-up.
+     - **The story of both boards:** [`analogue_board_journal.md`](analogue_board_journal.md).
 4. **Routed board**, clean against the design rules, with test points on every rail and
    bus and 0 Ω links in each supply so a faulty rail can be isolated.
 5. **JLCPCB quote and preview**, rotations checked, "Confirm Parts Placement" ($0.45)

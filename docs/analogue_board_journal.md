@@ -26,7 +26,7 @@ the story between them.
 
 | | Starting point (14 Oct 2026) | Landed (17 Oct 2026) |
 |---|---|---|
-| **Goal** | A general-purpose Eurorack I/O board under an n8synth deck, for a Pico 2 or a Teensy 4.1 | Two boards from one generator. The **Teensy board is ordered** from JLCPCB, fully routed and two of five assembled; the **Pico 2 / ESP32-P4 board** is routing |
+| **Goal** | A general-purpose Eurorack I/O board under an n8synth deck, for a Pico 2 or a Teensy 4.1 | Two boards from one generator, both fully routed. The **Teensy board is ordered** from JLCPCB, two of five assembled; the **Pico 2 / ESP32-P4 board** has its order files ready |
 | **Tooling** | KiCad, Freerouting, scripts | A Python generator that writes the schematics and boards, checks them against datasheets and the netlist, places, pre-wires, routes in stages, finishes, labels and writes the JLC files |
 | **Layers** | 4, one face of parts | 6, both faces of parts; ground plane on In1, +5VD plane on In4 for the Pico board |
 | **Feature set** | Fixed CV in and out, switchable jacks, eight pots, gates, MIDI, Qwiic, display | Six switchable CV jacks, six pots, four gates each way, TRS MIDI, display on I2C holes. The "core set": anything less is a patch.Init |
@@ -191,8 +191,10 @@ board"*. He re-laid the top himself:
 - the deck-face chips put where nothing sits above them;
 - the 3.3 V analogue regulator moved out of the way.
 
-**That layout left 7 after stage 1, the best of any board.** At the time of writing it is
-still routing.
+**That layout left 7 after stage 1, the best of any board.** Stage 2 took it to 4, and
+`finish.py` closed the rest: **0 unconnected, 0 copper faults, at the first attempt on the
+re-laid top.** The decoupling is better than the Teensy board's: every IC supply pin has a
+capacitor within 4 mm of track. The two pins flagged were logic pins tied to a rail. Image 17.
 
 ---
 
@@ -257,7 +259,7 @@ The scripts did the routing; every big step in placement came from David looking
 
 ## Still open
 
-- The Pico board's route on David's top layout.
+- Whether to order the Pico board now or after the Teensy board is brought up.
 - The Teensy board's arrival: bring-up, first power-on, and what Rev A needs bodging.
 - Whether the Pico board's wiring field should match the Teensy board's (the right-hand holes
   moved differently on each).

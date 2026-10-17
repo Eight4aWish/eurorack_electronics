@@ -205,9 +205,28 @@ _LEVEL_WITH_PINS = ("U601", "U301", "U701", "U801", "U302", "U702", "U802")
 ANCHORS_BOARD["pico_core_midi"] = {**ANCHORS_BOARD["pico"],
                                    **{r: (x, y + variant.MODULE_DROP, rot, f) for r, (x, y, rot, f)
                                       in ANCHORS_BOARD["pico"].items() if r in _LEVEL_WITH_PINS},
-                                   "U403": (16.0, 9.0, 90, "B"),   # DG412 CV5-6 + spares, across the ADC's body
-                                   "U402": (33.5, 9.0, 90, "B"),   # DG412 CV1-4, across U502's body
-                                   "U602": (43.5, 33.5, 0, "F"),   # 74HCT595, in the pocket right of the lane
+                                   # The top of the board with no chip over another on the opposite face
+                                   # (David, 2026-10-17): every failure on this board came back to chips over
+                                   # chips there, their vias fencing each other's pins in. Outward face: the
+                                   # ADC on the left, lowered clear of the top edge and the fiducial
+                                   # keep-out; the DAC and U502 turned and one above the other on the right,
+                                   # in the width the right-top bank's move freed (wiring.MOVES). Deck face:
+                                   # the DG412s and U504 where the outward face has no chip, the middle of
+                                   # the band and below the ADC
+                                   "U401": (17.2, 11.0, 0, "F"),   # ADS8688
+                                   "U502": (35.5, 7.3, 90, "F"),   # TL074 CV1-4
+                                   "U501": (35.5, 16.8, 90, "F"),  # DAC8568, nearer the module's SPI pins
+                                   "U402": (27.0, 8.5, 0, "B"),    # DG412 CV1-4
+                                   "U504": (27.0, 20.5, 0, "B"),   # TL074 offset buffer + spares
+                                   "U403": (17.2, 21.5, 0, "B"),   # DG412 CV5-6 + spares
+                                   # the +3V3A LDO out of the top band's middle, still central to the DAC,
+                                   # the ADC and the pot ADC it feeds (David, 2026-10-17)
+                                   "U203": (24.5, 24.0, 0, "F"),   # XC6206 3.3 V analogue LDO
+                                   # the strip's gap now holds wiring holes: the 595 moves left into the lane
+                                   # beside the module, upright, ~3.3 mm clear of its header row
+                                   "U602": (40.5, 33.5, 90, "F"),  # 74HCT595
+                                   # the LDO out from under the module's lower end, as on the Teensy board
+                                   "U204": (17.5, 82.0, 0, "F"),   # XC6206 3.3 V LDO, below JP201
                                    # LM393 gates 1-2: right and down into the right column's gap at slots
                                    # 21-23 (pots 7-8 and fixed CV dropped), 7.5 mm tall, its own height:
                                    # the parts above it get room (David, 2026-10-16)

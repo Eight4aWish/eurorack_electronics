@@ -60,15 +60,16 @@ def blocks(hs):
     """The holes in blocks: on each side, columns grouped (LO with LI on the left; R, and the
     right strip's empty positions, on the right), rows run together where no row is empty."""
     sides = {"left": [h for h in hs if h[0] in LEFT], "R": [h for h in hs if h[0] == "R"],
-             "RS": [h for h in hs if h[0] == "RS"]}
+             "RS": [h for h in hs if h[0] in ("RSI", "RS")]}
     out = []
     for side, members in sides.items():
         rows = sorted({s for _c, s, _n in members})
         run = []
         for r in rows + [None]:
             if run and (r is None or r != run[-1] + 1):
+                order = {"LO": 0, "LI": 1, "RSI": 0, "RS": 1}
                 cells = sorted((h for h in members if run[0] <= h[1] <= run[-1]),
-                               key=lambda h: (h[1], LEFT.index(h[0]) if h[0] in LEFT else 0))
+                               key=lambda h: (h[1], order.get(h[0], 0)))
                 out.append({"side": side, "rows": (run[0], run[-1]), "holes": cells})
                 run = []
             if r is not None:

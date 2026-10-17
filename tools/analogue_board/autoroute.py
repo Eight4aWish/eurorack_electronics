@@ -30,6 +30,9 @@ connections; the ground vias to the plane stay put.
 (finish.fan_out_ground), locked, so the router routes around them instead of joining ground
 pads to each other with tracks. With --staged it applies to stage 1.
 
+--plane=<net> (ours) adds a plane for that net on In4 (6 layers only), with the ground plane's
+outline and settings; with --ground-vias its surface-mount pads get their own vias to it too.
+
 --decoupling (ours) then wires each decoupling capacitor to the pin it serves with a short
 locked track (finish.fan_in_decoupling), so every power pin has its own capacitor beside it
 in copper, not only in placement. With --staged it applies to stage 1.
@@ -73,12 +76,40 @@ def target(arg):
 
 
 def stack(board, layers):
-    """In1 is the ground plane; with 6 layers, In2-In4 carry signals."""
+    """In1 is the ground plane; with 6 layers, In2-In4 carry signals, except a layer holding
+    another plane (--plane), which stays a power layer."""
     if layers == 6:
         board.SetCopperLayerCount(6)
         for layer in (pcbnew.In2_Cu, pcbnew.In3_Cu, pcbnew.In4_Cu):
             board.SetLayerType(layer, pcbnew.LT_SIGNAL)
     board.SetLayerType(pcbnew.In1_Cu, pcbnew.LT_POWER)
+    for z in board.Zones():
+        if not z.GetIsRuleArea() and z.GetNetCode() > 0:
+            for layer in z.GetLayerSet().CuStack():
+                board.SetLayerType(layer, pcbnew.LT_POWER)
+
+
+def add_plane(board, name, layer=pcbnew.In4_Cu):
+    """A plane for net `name` on `layer` over the whole board, with the ground plane's outline and
+    settings: its pins then join it by a via, as ground's do (2026-10-16: rails were 71 of 102
+    connections left over across six routes, +5VD the most)."""
+    g = next(z for z in board.Zones() if not z.GetIsRuleArea() and z.GetNetname() == "GND")
+    z = pcbnew.ZONE(board)
+    z.SetLayer(layer)
+    z.SetNetCode(board.FindNet(name).GetNetCode())
+    z.SetZoneName(f"{name} plane")
+    z.SetLocalClearance(g.GetLocalClearance())
+    z.SetMinThickness(g.GetMinThickness())
+    z.SetPadConnection(g.GetPadConnection())
+    z.SetThermalReliefGap(g.GetThermalReliefGap())
+    z.SetThermalReliefSpokeWidth(g.GetThermalReliefSpokeWidth())
+    z.SetIslandRemovalMode(g.GetIslandRemovalMode())
+    src = g.Outline().COutline(0)
+    for i in range(src.PointCount()):
+        z.AppendCorner(src.CPoint(i), -1)
+    board.Add(z)
+    board.SetLayerType(layer, pcbnew.LT_POWER)
+    return z
 
 
 def stats(board):
@@ -104,17 +135,29 @@ def main(arg, passes, layers, label="", settings=()):
     tag = f"{name}{'_6L' if layers == 6 and '_6L' not in name else ''}{'_' + label if label else ''}"
     os.makedirs(outdir, exist_ok=True)
     board = pcbnew.LoadBoard(path)
+    planes = [s.split("=", 1)[1] for s in settings if s.startswith("--plane=")]
+    settings = [s for s in settings if not s.startswith("--plane=")]
+    if planes and layers != 6:
+        raise SystemExit("--plane needs 6 layers: it takes In4")
+    for name in planes:
+        add_plane(board, name)
+        print(f"Plane for {name} on In4", flush=True)
     stack(board, layers)
     if "--ground-vias" in settings or "--decoupling" in settings:
         import finish
         finish.load_rules(path[:-len(".kicad_pcb")] + ".kicad_pro")   # the board's own track and clearance
+        if planes:
+            pcbnew.ZONE_FILLER(board).Fill(board.Zones())   # so the new plane's copper is known
     if "--ground-vias" in settings:
         settings = [s for s in settings if s != "--ground-vias"]
         import finish
         placed, failed = finish.fan_out_ground(board)
+        print(f"Ground vias placed before routing: {placed}; no room beside {len(failed)} pads: {failed}", flush=True)
+        for name in planes:
+            placed, failed = finish.fan_out_ground(board, net_name=name)
+            print(f"{name} vias placed before routing: {placed}; no room beside {len(failed)} pads: {failed}", flush=True)
         for t in board.GetTracks():
             t.SetLocked(True)
-        print(f"Ground vias placed before routing: {placed}; no room beside {len(failed)} pads: {failed}", flush=True)
     if "--decoupling" in settings:
         settings = [s for s in settings if s != "--decoupling"]
         import finish
