@@ -4,7 +4,7 @@ Started 2026-10-23, while the Teensy board (Rev A, ordered 2026-10-16) is being 
 changes for Rev B, and for the Pico board, which has not been ordered yet, so its changes can go
 in before its first order. Nothing here is decided unless it says so.
 
-## 1. ESP32-P4: separate I2C buses [leaning, David 2026-10-23]
+## 1. ESP32-P4: separate I2C buses [decided, option C, 2026-10-25; carried out by the pin map in section 3]
 
 **The problem.** On the Waveshare ESP32-P4-WIFI6, GPIO8 (SCL) and GPIO7 (SDA) are the board's
 own I2C bus. They reach the header at pins 16 and 17. That bus configures:
@@ -31,59 +31,184 @@ use no header pins, so they are unaffected. Source: Waveshare schematic
 - **C. Separate buses (David's preference).** Leave pins 16/17 to the P4 alone:
   - CS_595 moves to pin 20 (GP15; GPIO25 on the P4). Pin 20 has been free since jack detect
     was dropped (2026-10-16).
-  - The pots ADC (MCP3208) joins the converter bus (SPIA) with its own CS_POT, so SPIB_MISO
-    goes. SPIB then carries only the 595 chain. The 595 then never shifts in pot traffic.
-  - Pins 16/17 go to two wiring holes: spare GPIO (GP12, GP13) on a Pico, a tap onto the P4's
-    own I2C on a P4.
-  - Nothing is lost. The P4 runs the two buses on its two hardware I2C controllers at once.
+  - SPIB_MISO (pots ADC data) moves to pin 11, freed by dropping EXP_INT (section 3).
+  - Pins 16/17 go to two wiring holes, P4_SCL and P4_SDA. They are reserved for the P4's own I2C
+    on every board, whichever module is fitted, and never used for anything else. They let an
+    extra I2C part join that bus.
+  - The P4 runs the two buses on its two hardware I2C controllers at once.
+- **Not an option: the pots ADC on the converter bus.** Claude proposed this on 2026-10-23 and
+  withdrew it on 2026-10-25. The spec (§6.1) gives the converter bus to the CV ADC and DAC alone,
+  so that six CV channels each way run at about 41 kHz, audio-rate CV. The MCP3208 manages at most
+  1 MHz at 3.3 V, so each pot read would block the converters for about 24 µs, a whole CV sample
+  period, hundreds of times a second.
 
-**To check before choosing C.**
-- **MCP3208 clock.** The MCP3208 tops out around 1-2 MHz against about 17 MHz for the
-  converters, so each driver sets the clock per device. Each pot read holds the converter bus for
-  about 25 µs.
-- **Shared data line.** The ADS8688 must release SDO while it is deselected, as the MCP3208
-  does.
-- **P4 pin 20 at boot.** On the P4, pin 20 has the USB pull-up until firmware claims it, so the
-  595 latch sits high at boot. The gate outputs stay off, because GATE_OE_N powers up high from
-  the TCA9555.
-- **Converter supply.** On the P4, SPIA is on the programmable supply (VDD_IO_5, hard problem 1
-  in the P4 doc), so the pots depend on the same firmware fix.
-- **Ribbons.** Can the camera and display ribbons leave the module once it is in its socket?
-  Which camera and screen?
-- **Fallback.** If the pots must stay on SPIB, SPIB_MISO can go to pin 11 (GP8, the Pico's other
-  SPI1 data-in pin), at the cost of gate input 3.
+**P4 pin 20 at boot.** On the P4, pin 20 has the USB pull-up until firmware claims it, so the 595
+latch sits high at boot. The gate outputs stay off, because GATE_OE_N powers up high from the
+TCA9555.
 
-**Scope.** This is a pin map change (`design.py` PINMAP), so firmware stays the same on both
-boards. On the Teensy, the pots move to SPI and pin 39 (MISO1) frees up.
+**Scope.** The Pico 2 / ESP32-P4 board's pin map (section 3). The Teensy board stays at Rev A.
 
-## 2. Wiring field: one standard bank [open]
+## 2. Panel first: panel, then wiring holes, then chips [approach agreed, David 2026-10-25]
 
-Rev A packed the four banks to suit routing. The mix, shape, ground slot and position all differ
-between banks, and between the two boards. Deck cells 13-18 (positions 32-40) have no channel
-holes beside them. The colour-coded map of every hole against the deck cells is a private page
-in David's claude.ai gallery ("Analogue Board Wiring Map", 2026-10-23).
+Rev A packed the wiring banks to suit routing. The mix, shape, ground slot and position all
+differ between banks, and between the two boards, and deck cells 13-18 (positions 32-40) have no
+channel holes beside them. Rev B starts from the panel instead. Two private pages in David's
+claude.ai gallery hold the detail: "Analogue Board Wiring Map" (Rev A, every hole against the deck
+cells) and "Rev B Panel Plan" (the mock-up below).
 
-Draft rules, for discussion:
-- **One template.** Use one order everywhere: CV, CV, audio, gate in, pot, pot, pot reference,
-  ground, gate out, switch, switch, switch. Missing channels leave their slot empty.
-- **Level with the deck.** Line each bank up with a band of three deck cells (1-9, 17-25 or
-  32-40).
-- **Right side.** Mirror the left on the right, outer column nearest the strip. Two right
-  columns cost 2.54 mm of the U501/U502/U801 lane; one right column in the same order is cheaper.
-- **Both boards alike.** The same field on both boards: fix the field first, then place chips
-  around it, with no per-board moves (`wiring.MOVES`).
-- **Numbering.** Number channels bank by bank.
-- **Utility holes.** Put utility holes in the gap rows 10-16 and 26-31, where the deck has no
-  pads.
+**David's rules (2026-10-25):**
+- (a) 10HP only. 6HP need not be considered, which frees space.
+- (b) Pots, buttons and screen connections mostly in the top half.
+- (c) Jacks next.
+- (d) Audio near the bottom: ins on the PCB's right, so they appear on the panel's left edge, and
+  outs the other way.
+- (e) About the same number of connections on each side.
+- (f) Other things, such as MIDI, slot into the gaps.
 
-## 3. Silkscreen [to do]
+**Deck orientation.** The deck is double-sided and David has fitted it both ways round; either is
+fine as long as pots are available on both sides. Fitted the n8synth way (JPS1 top left on the
+front), the deck's left strip (JPS1, 2, 4, 7, 8, 10, 13, 14, 16) meets the PCB's right-hand strip
+(J902) as seen from the module side. The n8synth file's rear view of the deck shows it. Rev A's
+net names are the other way round (DECK_L is J901), which is harmless electrically.
+
+**The mock-up** (patch.Init()-style; patch.Init() itself has 20 panel parts, 2 too many for 18
+cells):
+
+| Rows | Panel left | Middle | Panel right |
+|---|---|---|---|
+| 1 | POT 1 | button | POT 2 |
+| 2 | POT 3 | toggle | POT 4 |
+| 3 | CV in 1 | CV in 2 | CV out 1 |
+| 4 | gate in 1 | CV out 2 | gate out 1 |
+| 5 | audio in L | gate in 2 | audio out L |
+| 6 | audio in R | gate out 2 | audio out R |
+
+The middle column alternates strips row by row: rows 1, 3 and 5 reach the panel-left strip,
+rows 2, 4 and 6 the right. So every input reaches the panel-left strip and every output the
+right, with 9 cells and 11 signal wires on each side.
+
+**What it implies:**
+- **Holes level with the pads.** One channel hole level with each signal pad: each cell's A pad
+  (positions 1, 4, 7, 17, 20, 23, 32, 35, 38), and B for a pot's wiper. Every panel wire becomes
+  a short sideways hop. Pots and switches go on both sides of the top band, so either deck
+  orientation works.
+- **Chip zones follow the bands.** Pots ADC, pot reference and switch expander at the top. CV
+  channels in the middle, two per side (they are switchable, so each side holds whole channels).
+  Gate inputs on the PCB right; gate outputs and the 595 on the PCB left. Codec at the bottom
+  centre, inputs right, outputs left.
+- **The power header must move.** On Rev A it sits at positions 33-37 beside the PCB's right
+  strip, where the audio-in holes need to go.
+- **Utility holes in the gap rows** 10-16 and 26-31: screen I2C and LEDs in the top gap, MIDI
+  and gate expansion in the lower one.
+- **MIDI variant.** Swap the middle CV pair: MIDI in for CV in 2, MIDI out for CV out 2.
+- **Trim?** The board offers up to 35 panel parts, about twice what 18 cells can show. The
+  mock-up uses 4 of 6 pots, 2 of 9 switch inputs, 2 of 4 gates each way and 4 of 6 CV channels.
+  Trimming towards one deck's worth would free board space and module pins. Open question.
+
+**Channel set [proposal, 2026-10-25].** Start from patch.Init() and add only what a spare channel
+on a chip already in that block's zone can give. Each addition is then a few passives and a short
+local trace.
+
+| Block (cells) | From patch.Init() | Added | Chip in the zone |
+|---|---|---|---|
+| Top, panel left (JPS1, 2, 4) | 2 pots, button | 1 pot; a switch hole beside every cell | MCP3208 (6 of 8), TCA9555 |
+| Top, panel right (JPS3, 5, 6) | 2 pots, toggle | 1 pot; a switch hole beside every cell | same chips |
+| Middle, panel left (JPS7, 8, 10) | 3 CV in, 1 gate in | the 3 CV jacks become two-way (CV1-3); 2 gate in | ADS8688 and DAC8568, a DG412, two LM393 |
+| Middle, panel right (JPS9, 11, 12) | 1 CV out, 1 gate out | 2 more CV, all three two-way (CV4-6); 2 gate out | DAC8568 and ADS8688, a DG412, one quad op-amp, 74HCT595 (4 of 8) |
+| Bottom, panel left (JPS13, 14, 16) | audio in L/R, 1 CV in, 1 gate in | MIDI in; the CV in is fixed (CVI7) | codec inputs, ADS8688 (7 of 8), MIDI receiver |
+| Bottom, panel right (JPS15, 17, 18) | audio out L/R, 1 gate out | 1 fixed CV out (CVO7), MIDI out | codec outputs, DAC8568 (7 of 8), MIDI driver |
+
+Totals: 6 pots and 6 switch inputs; 6 two-way CV plus one fixed CV each way; 4 gate in and 4
+gate out; stereo audio in and out; TRS MIDI in and out. That is 34 panel channels against Rev A's
+35.
+
+How the holes are laid out:
+- **Two columns each side.** Each side has two hole columns, the one next to the strip and the
+  one further in, mirrored left to right.
+- **Top cells.** Every top cell gets POT_REF and a switch hole on its A row and the pot wiper on
+  its B row, so it can be a pot or a switch. A part in cell JPS*n* uses POT*n* or SW*n*.
+- **Middle and bottom cells.** Every middle cell gets a CV hole and a gate hole on its A row.
+- **Ground.** Each block has a ground hole on its last row.
+
+**Two-way CV kept [David, 2026-10-25].** The six channels stay as on Rev A. Put one DG412 in each
+middle block so each side's three switches sit beside its holes. Their SW_EN lines come from the
+expander at the top, about 30 mm away; a second 595 beside the switches would make them local.
+
+**Switch inputs, 9 to 6.** The expander keeps three spare lines.
+
+**Limits and headroom.** Gate inputs stay at 4: each costs a module pin, and the Rev B map has
+none to spare (section 3). Headroom with no new chips: +1 CV in and +1 CV out (the converters'
+eighth channels), +2 pots, +4 gate outs, +3 switches.
+
+**Screen [David, 2026-10-25].** It mounts in the front panel, and a panel with one leaves the
+cells it covers empty. Its I2C holes go in the top gap rows.
+
+## 3. Module, pins and power [decided 2026-10-25]
+
+Rev B is the Pico 2 / ESP32-P4 board; the Teensy board stays at Rev A. The module sits in the
+middle of the board.
+
+**USB end down.**
+- **Antenna.** The P4's antenna end reaches 16.9 mm past the Pico footprint (Waveshare drawing).
+  It points up, over the low-profile top zone and towards the top edge, away from the audio at the
+  bottom.
+- **Pins meet their circuits.** Power, I2S and MIDI pins sit at the bottom, by the power header,
+  codec and MIDI circuits. Both SPI buses' pins sit at the top, by the converters and the pots ADC.
+  The gate-input pins face the panel-left side, where the gate inputs are. Only I2C (pins 4, 5)
+  has to run up to the expander.
+- **The USB plug** runs down over the bottom zone, so parts there stay low.
+- **Camera and display ribbons.** The P4's two FPC connectors are mid-module on its top face, and
+  the ribbons route over the board as needed (David, 2026-10-25). They don't constrain the
+  orientation.
+
+**Pin map** (Rev A → Rev B; Pico 2 GPIO / P4 GPIO):
+
+| Pin | Pico 2 | P4 | Rev A | Rev B |
+|---|---|---|---|---|
+| 6 | GP4 | GPIO29 | EXP_INT | GATE_IN3 |
+| 11 | GP8 | GPIO5 | GATE_IN3 | SPIB_MISO (the Pico's other SPI1 data-in pin) |
+| 16, 17 | GP12, GP13 | GPIO8, 7 (P4 board I2C) | SPIB_MISO, CS_595 | two holes, P4_SCL and P4_SDA: reserved for the P4's I2C |
+| 20 | GP15 | GPIO25 | unused | CS_595 |
+| 21 | GP16 | GPIO48 (VDD_IO_5) | SPIA_MISO | CS_DAC |
+| 26 | GP20 | GPIO32 | CS_DAC | SPIA_MISO (Pico SPI0 RX) |
+
+Everything else stays as on Rev A, including both SPI buses (§6.1): MIDI on pins 1 and 2 by link,
+I2C on 4 and 5, LED_DATA, GATE_IN1, 2 and 4, SPIB SCK and MOSI on 14 and 15, CS_POT, CS_ADC,
+SPIA SCK and MOSI, and I2S.
+
+What the map changes:
+- **EXP_INT is dropped [agreed, David 2026-10-25].** Pins 16 and 17 go to the P4, pin 20 takes CS_595,
+  and that leaves one function short. The firmware would poll the TCA9555 for button changes
+  instead. The spec already treats polling as the backstop, and with a screen on the same I2C bus,
+  a read can wait 23 ms either way. Polling at 200 Hz uses about 4 % of the bus. The other ways
+  to find a pin cost more: give up gate input 3, or put the pots ADC on the converter bus (see
+  section 1).
+- **Gate inputs move.** Gate inputs are now on GP4, 6, 7 and 9, no longer four consecutive pins.
+  Edge interrupts don't mind; a PIO capture reads the window GP4-9.
+- **The P4's programmable bank.** Pins 21, 22 and 24 now carry only signals the module drives, so
+  a bank left off or at 1.8 V can no longer have 3.3 V forced into it. The converters still need
+  the one-line LDO fix before they work. The pots ADC and the 595 stay on 3.3 V banks.
+- **No pins are left free.**
+
+**Power header in the lower gap** (David's suggestion):
+- **Placement.** It goes on the PCB's left, the outputs side, next to the module's power pins (36,
+  39, 40) and away from the audio inputs.
+- **Fit.** A keyed 2×5 shroud is 20 mm long, longer than the six gap rows. It stands just inside
+  the strip (pins at x 9.0 and 11.54 mm) and covers that side's hole columns from position 25 to 32.
+  - That side's middle ground hole moves to position 24.
+  - Its first bottom cell's holes move to position 34.
+  - Wires to the strip's inner holes at 25, 31 and 32 there run on the deck face.
+  - The module sits 1 mm right of centre to clear it.
+- **P4 supply.** The Q201 bypass and the module's 5 V feed (at least 4.5 V at up to 0.7 A) sit
+  between the header and pin 39.
+## 4. Silkscreen [to do]
 
 - Label every wiring block. On Rev A, W8 on the Teensy board and W6 and W8 on the Pico board have
   no label, because there was no room.
 - `labels.py` writes "label on the no face" in `wiring_map.md` for an unlabelled block: fix the
   wording.
 
-## 4. Footprints [to do]
+## 5. Footprints [to do]
 
 - **U1002 (H11L1).** `parts.py` has `SMDIP-6_W7.62mm`, but LCSC C20082 is the 9.53 mm body:
   change it to `SMDIP-6_W9.53mm`. It must be fixed before the Pico board is ordered, and it needs a
@@ -91,7 +216,7 @@ Draft rules, for discussion:
 - **Idea:** an automatic check of every footprint against LCSC's own (EasyEDA) footprint,
   through easyeda2kicad.
 
-## 5. Carried over from the P4 review
+## 6. Carried over from the P4 review
 
 - **MOD_5V margin.** MOD_5V is about 4.6 V after the Schottky, against the MP1658's 4.5 V
   minimum. Raise +5VD to about 5.2 V or use a lower-drop diode.
@@ -99,6 +224,6 @@ Draft rules, for discussion:
   unconnected) and does not mention the camera and display I2C. Update it when item 1 is
   decided.
 
-## 6. Lessons from the Teensy bring-up
+## 7. Lessons from the Teensy bring-up
 
 To fill in when the board arrives.
