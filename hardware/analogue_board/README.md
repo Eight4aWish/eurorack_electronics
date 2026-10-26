@@ -22,6 +22,7 @@ Two more builds from the same generator are routing trials, not boards to order:
 | Shared core board | Both module sockets (the Teensy on full headers), TRS MIDI, the display on I2C holes, six switchable CV jacks, six pots, four gates each way. Four routes in a row ended 2 connections short, a different 2 each time; its first routed board is in [`shared_core/routed_trial/`](shared_core/routed_trial/) | [`shared_core/`](shared_core/) |
 | **Pico core board with MIDI** | The same feature set on a Pico 2 / ESP32-P4 board alone: module 8 mm lower, no bus test points, +5VD plane on In4, top of the board re-laid by David with no chip over another. **Fully routed** (0 unconnected, 0 copper faults); routed board in [`pico_core_midi/routed_trial/`](pico_core_midi/routed_trial/), order files in [`pico_core_midi/fab/`](pico_core_midi/fab/), held until the Teensy board is brought up | [`pico_core_midi/`](pico_core_midi/) |
 | **Teensy core board with MIDI** | **The first board to route completely:** the same feature set on a Teensy 4.1 board alone, placement revised by eye. 0 unconnected, 0 copper faults; its routed board is in [`teensy_core_midi/routed_trial/`](teensy_core_midi/routed_trial/) | [`teensy_core_midi/`](teensy_core_midi/) |
+| **Rev B, Pico 2 / ESP32-P4** | Laid out panel first ([`docs/analogue_board_revb.md`](../../docs/analogue_board_revb.md)): one wiring template level with the deck's cells, the ESP32-P4's own I2C reserved, 10HP only, the power header in the lower gap. **Fully routed** (0 unconnected, 0 copper faults, every IC supply pin within 4 mm of a capacitor); routed board in [`pico_revb/routed_trial/`](pico_revb/routed_trial/). Order after the Teensy board's bring-up | [`pico_revb/`](pico_revb/) |
 
 **Status: checkpoint 4, 2026-10-16.** `teensy_core_midi` routes completely: KiCad's DRC finds
 no unconnected item and no copper fault, every surface-mount ground pad has its own via to the
@@ -69,7 +70,7 @@ fails. It needs KiCad 9 at `/Applications/KiCad` and Python 3, nothing else.
 
 | Generator file | Holds |
 |---|---|
-| `variant.py` | Which board a run builds (`pico`, `teensy`, and the trials `shared`, `pico_core`, `shared_core`, `pico_core_midi` and `teensy_core_midi`): folders, module sockets, feature set, placement spacing, track rules and how far the module sits lower |
+| `variant.py` | Which board a run builds (`pico`, `teensy`, the trials `shared`, `pico_core`, `shared_core`, `pico_core_midi` and `teensy_core_midi`, and Rev B's `pico_revb`): folders, module sockets, feature set, placement spacing, track rules, the module's position and the power header's |
 | `design.py` | Pin map, root sheet (this board's module), power sheet |
 | `design_analog.py` | Codec and audio, CV jacks and ADC, CV DAC |
 | `design_digital.py` | Pots and gate outs, expander/I2C/LEDs, gate ins and jack detect, edge strips, TRS MIDI |

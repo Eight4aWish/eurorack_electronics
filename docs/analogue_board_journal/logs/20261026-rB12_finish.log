@@ -1,0 +1,23 @@
+Rules from the project: track 0.127 mm, clearance 0.127 mm
+Vias with their drill reset to keep a 0.125 mm ring: 0
+Tracks widened to 0.127 mm: 0
+Ground vias joined to nothing but the plane, removed: 0
+Decoupling paths protected from rip-up: 55
+Round 1: tracks and vias taken up from copper faults: 2
+Dead-end tracks and vias removed: 0
+Leftover connections routed: 10; no route found: [('+3V3D', (61.0, 89.7)), ('+3V3D', (56.2, 83.2)), ('Net-(U502C--)', (62.0, 66.2)), ('Net-(U502C--)', (59.8, 66.2))]
+  rip-up Net-(U502C--): took up 1 pieces of ['CVDRV3']; open 3 -> 3, kept
+  rip-up CVDRV3: took up 4 pieces of ['/CV DAC/DAC7', 'GATE_OE_N', 'Net-(D802-COM)', 'SW_EN2']; open 3 -> 5, undone
+  rip-up +3V3D: took up 3 pieces of ['GATE_IN3', 'Net-(D803-COM)']; open 3 -> 4, kept
+  rip-up CVDRV3: took up 4 pieces of ['/CV DAC/DAC7', 'GATE_OE_N', 'Net-(D802-COM)', 'SW_EN2']; open 4 -> 6, undone
+  rip-up CVDRV3: took up 4 pieces of ['/CV DAC/DAC7', 'GATE_OE_N', 'Net-(D802-COM)', 'SW_EN2']; open 4 -> 6, undone
+Rip-up and reroute: 2 swaps kept; nets still open: ['+3V3D', 'Net-(U502C--)']
+Dead-end tracks and vias removed: 0
+  of which bent stubs (grid search): 0
++5VD pads unconnected: 0; vias placed: 0; no room: []
+  of which bent stubs (grid search): 0
+GND pads unconnected: 1; vias placed: 1; no room: []
+Round 2: tracks and vias taken up from copper faults: 0
+Decoupling paths shortened (cap, pin, mm before, mm added): []; still over 4 mm: []
+Unconnected after finishing: 2
+Finished board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/pico_revb/output/autoroute/analogue_board_pico_revb_6L_rB12_s1_s2_autoroute_trial_finished.kicad_pcb

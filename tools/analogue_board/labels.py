@@ -50,24 +50,23 @@ def holes():
     """(column, slot, net) for every wiring hole this board has: the channel holes and the
     utility groups, their nets from the board's own pads."""
     out = [(c, s, n) for c, s, _b, _sh, n in wiring.PLAN]
-    sizes = {"J101": wiring.J101_SIZE, "J303": 2, "J1001": 6, "J703": 4, "J704": 5, "J603": 6}
     for ref, (col, first) in wiring.UTILITY.items():
-        out += [(col, first + i, f"{ref}.{i + 1}") for i in range(sizes[ref])]
+        out += [(col, first + i, f"{ref}.{i + 1}") for i in range(wiring.UTILITY_SIZE[ref] or wiring.J101_SIZE)]
     return out
 
 
 def blocks(hs):
     """The holes in blocks: on each side, columns grouped (LO with LI on the left; R, and the
     right strip's empty positions, on the right), rows run together where no row is empty."""
-    sides = {"left": [h for h in hs if h[0] in LEFT], "R": [h for h in hs if h[0] == "R"],
-             "RS": [h for h in hs if h[0] in ("RSI", "RS")]}
+    sides = {"left": [h for h in hs if h[0] in LEFT], "LS": [h for h in hs if h[0] in ("LS", "LSI")],
+             "R": [h for h in hs if h[0] in ("R", "RI")], "RS": [h for h in hs if h[0] in ("RSI", "RS")]}
     out = []
     for side, members in sides.items():
         rows = sorted({s for _c, s, _n in members})
         run = []
         for r in rows + [None]:
             if run and (r is None or r != run[-1] + 1):
-                order = {"LO": 0, "LI": 1, "RSI": 0, "RS": 1}
+                order = {"LS": 0, "LSI": 1, "LO": 0, "LI": 1, "RI": 0, "R": 1, "RSI": 0, "RS": 1}   # reading order, left to right
                 cells = sorted((h for h in members if run[0] <= h[1] <= run[-1]),
                                key=lambda h: (h[1], order.get(h[0], 0)))
                 out.append({"side": side, "rows": (run[0], run[-1]), "holes": cells})
@@ -75,7 +74,7 @@ def blocks(hs):
             if r is not None:
                 run.append(r)
     # top left first, down the left side, then the right
-    out.sort(key=lambda b: ({"left": 0, "R": 1, "RS": 2}[b["side"]], b["rows"][0]))
+    out.sort(key=lambda b: ({"left": 0, "LS": 1, "R": 2, "RS": 3}[b["side"]], b["rows"][0]))
     for i, b in enumerate(out):
         b["name"] = f"W{i + 1}"
     return out
@@ -156,8 +155,11 @@ def block_spots(b, occupied, origin):
         spots += [(max(xs) + 2.4, P.strip_y(r)) for r in range(r0, r1 + 1)] + [(max(xs) + 2.4, ym)]
     elif b["side"] == "R":
         spots += [(min(xs) - 2.4, P.strip_y(r)) for r in range(r0, r1 + 1)] + [(min(xs) - 2.4, ym)]
-    else:                                    # the right strip's empty positions: its inner column
-        spots += [(COL_X["SI"], P.strip_y(r)) for r in range(r0, r1 + 1)] + [(COL_X["SI"], ym)]
+    else:                                    # a strip's empty positions: its inner column, then the field
+        si = COL_X["SI"] if b["side"] == "RS" else COL_X["LSI"]   # column beside it, empty in the gap rows
+        field = "R" if b["side"] == "RS" else "LO"
+        spots += [(si, P.strip_y(r)) for r in range(r0, r1 + 1)] + [(si, ym)]
+        spots += [(COL_X[field], P.strip_y(r)) for r in range(r0, r1 + 1) if (field, r) not in occupied]
     return [(x + ox, y + oy) for x, y in spots]
 
 
@@ -198,8 +200,10 @@ def main(path):
         else:
             missed.append(b["name"])
         r0, r1 = b["rows"]
-        lines += [f"## {b['name']}: rows {r0}-{r1}, {'left' if b['side'] == 'left' else 'right'} side"
-                  f" (label on the {' and '.join(faces) or 'no'} face{'s' if len(faces) > 1 else ''})", "",
+        where = (f"label on the {' and '.join(faces)} face{'s' if len(faces) > 1 else ''}" if faces
+                 else "no room for a label")
+        side = {"left": "left side", "LS": "left strip", "R": "right side", "RS": "right strip"}[b["side"]]
+        lines += [f"## {b['name']}: rows {r0}-{r1}, {side} ({where})", "",
                   "| Hole | Column | Row | Signal |", "|---|---|---|---|"]
         for i, (c, s, n) in enumerate(b["holes"]):
             lines.append(f"| {i + 1} | {c} | {s} | {n} |")

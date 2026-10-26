@@ -64,3 +64,43 @@ when,kind,board,stage,layers,settings,rules,pre_route,connections,left,minutes,b
 2026-10-17 06:10,route,pico_core_midi,s1,6,--router.automatic_neckdown=false --router.hole_clearance_um=250 --router.copper_to_edge_clearance_um=500 --router.fanout.enabled=false --router.scoring.via_costs=20 --router.scoring.plane_via_costs=2,"(via ""Via[0-5]_450:200_um"" ""Via[0-5]_600:300_um"") (width 127) (clearance 127)","Plane for +5VD on In4: Plane for +5VD on In4; Ground vias placed before routing: 205; no room beside 2 pads: ['C801.2', 'U401.22']; +5VD vias placed before routing: 25; no room beside 0 pads: []; Decoupling capacitors wired to their pins before routing: 54; no short path: ['C408->U401.5']",527,28,11.9,analogue_board_pico_core_midi_6L_pB2_s1_autoroute_trial.kicad_pcb,pB2_route.log
 2026-10-17 06:10,route,pico_core_midi,s2,6,--router.automatic_neckdown=false --router.hole_clearance_um=250 --router.copper_to_edge_clearance_um=500,"(via ""Via[0-5]_450:200_um"" ""Via[0-5]_600:300_um"") (width 127) (clearance 127)",,28,18,11.1,analogue_board_pico_core_midi_6L_pB2_s1_s2_autoroute_trial.kicad_pcb,pB2_route.log
 2026-10-17 06:11,finish,pico_core_midi,finish,,,,,,1,,analogue_board_pico_core_midi_6L_pB2_s1_s2_autoroute_trial_finished.kicad_pcb,pB2_finish.log
+2026-10-26,route,pico_revb,s1,6,20 passes; --staged --stages=2 --ground-vias --decoupling --plane=+5VD,(width 127) (clearance 127),"ground vias 201, decoupling wired 52",517,9,,rB1_s1,20261026-rB1_route.log
+2026-10-26,route,pico_revb,s2,6,,(width 127) (clearance 127),,9,7,,rB1_s1_s2,20261026-rB1_route.log
+2026-10-26,finish,pico_revb,finish,,,,,,2,,rB1_finished,20261026-rB1_finish.log
+2026-10-26,route,pico_revb,s1,6,20 passes; --staged --stages=2 --ground-vias --decoupling --plane=+5VD,(width 127) (clearance 127),"ground vias 200, decoupling wired 53",517,20,,rB4_s1,20261026-rB4_route.log
+2026-10-26,route,pico_revb,s2,6,,(width 127) (clearance 127),,20,15,,rB4_s1_s2,20261026-rB4_route.log
+2026-10-26,route,pico_revb,s1,6,20 passes; --staged --stages=2 --ground-vias --decoupling --plane=+5VD,(width 127) (clearance 127),"ground vias 202, decoupling wired 52",515,24,,rB5_s1,20261026-rB5_route.log
+2026-10-26,route,pico_revb,s2,6,,(width 127) (clearance 127),,24,16,,rB5_s1_s2,20261026-rB5_route.log
+2026-10-26,route,pico_revb,s1,6,20 passes; --staged --stages=2 --ground-vias --decoupling --plane=+5VD,(width 127) (clearance 127),"ground vias 202, decoupling wired 51",517,9,,rB6_s1,20261026-rB6_route.log
+2026-10-26,route,pico_revb,s2,6,,(width 127) (clearance 127),,9,6,,rB6_s1_s2,20261026-rB6_route.log
+2026-10-26,finish,pico_revb,finish,,,,,,0,,rB6_finished,20261026-rB6_finish.log
+2026-10-26,route,pico_revb,s1,6,20 passes; --staged --stages=2 --ground-vias --decoupling --plane=+5VD,(width 127) (clearance 127),"ground vias 203, decoupling wired 49",518,7,,rB7_s1,20261026-rB7_route.log
+2026-10-26,route,pico_revb,s2,6,,(width 127) (clearance 127),,7,6,,rB7_s1_s2,20261026-rB7_route.log
+2026-10-26,finish,pico_revb,finish,,,,,,3,,rB7_finished,20261026-rB7_finish.log
+2026-10-26,route,pico_revb,s1,6,20 passes; --staged --stages=2 --ground-vias --decoupling --plane=+5VD,(width 127) (clearance 127),"ground vias 200, decoupling wired 54",518,7,,rB8_s1,20261026-rB8_route.log
+2026-10-26,route,pico_revb,s2,6,,(width 127) (clearance 127),,7,4,,rB8_s1_s2,20261026-rB8_route.log
+2026-10-26,finish,pico_revb,finish,,,,,,1,,rB8_finished,20261026-rB8_finish.log
+2026-10-26,route,pico_revb,s1,6,20 passes; --staged --stages=2 --ground-vias --decoupling --plane=+5VD,(width 127) (clearance 127),"ground vias 199, decoupling wired 55",518,6,,rB9_s1,20261026-rB9_route.log
+2026-10-26,route,pico_revb,s2,6,,(width 127) (clearance 127),,6,2,,rB9_s1_s2,20261026-rB9_route.log
+2026-10-26,finish,pico_revb,finish,,,,,,1,,rB9_finished,20261026-rB9_finish.log
+2026-10-26,route,pico_revb,s1,6,20 passes; --staged --stages=2 --ground-vias --decoupling --plane=+5VD,(width 127) (clearance 127),"ground vias 200, decoupling wired 55",517,26,,rB10_s1,20261026-rB10_route.log
+2026-10-26,route,pico_revb,s2,6,,(width 127) (clearance 127),,26,16,,rB10_s1_s2,20261026-rB10_route.log
+2026-10-26,finish,pico_revb,finish,,,,,,2,,rB10_finished,20261026-rB10_finish.log
+2026-10-26,route,pico_revb,s1,6,25 passes; --staged --stages=2 --ground-vias --decoupling --plane=+5VD,(width 127) (clearance 127),"ground vias 200, decoupling wired 55",517,26,,rB11_s1,20261026-rB11_route.log
+2026-10-26,route,pico_revb,s2,6,,(width 127) (clearance 127),,26,13,,rB11_s1_s2,20261026-rB11_route.log
+2026-10-26,finish,pico_revb,finish,,,,,,2,,rB11_finished,20261026-rB11_finish.log
+2026-10-26,route,pico_revb,s1,6,30 passes; --staged --stages=2 --ground-vias --decoupling --plane=+5VD,(width 127) (clearance 127),"ground vias 200, decoupling wired 55",517,26,,rB12_s1,20261026-rB12_route.log
+2026-10-26,route,pico_revb,s2,6,,(width 127) (clearance 127),,26,13,,rB12_s1_s2,20261026-rB12_route.log
+2026-10-26,finish,pico_revb,finish,,,,,,2,,rB12_finished,20261026-rB12_finish.log
+2026-10-26,route,pico_revb,s1,6,20 passes; --staged --stages=2 --ground-vias --decoupling --plane=+5VD,(width 127) (clearance 127),"ground vias 199, decoupling wired 55",518,44,,rB13_s1,20261026-rB13_route.log
+2026-10-26,route,pico_revb,s2,6,,(width 127) (clearance 127),,44,19,,rB13_s1_s2,20261026-rB13_route.log
+2026-10-26,finish,pico_revb,finish,,,,,,4,,rB13_finished,20261026-rB13_finish.log
+2026-10-26,route,pico_revb,s1,6,20 passes; --staged --stages=2 --ground-vias --decoupling --plane=+5VD,(width 127) (clearance 127),"ground vias 201, decoupling wired 54",517,1,,vA_s1,20261026-vA_route.log
+2026-10-26,route,pico_revb,s2,6,,(width 127) (clearance 127),,1,1,,vA_s1_s2,20261026-vA_route.log
+2026-10-26,finish,pico_revb,finish,,,,,,0,,vA_finished,20261026-vA_finish.log
+2026-10-26,route,pico_revb,s1,6,20 passes; --staged --stages=2 --ground-vias --decoupling --plane=+5VD,(width 127) (clearance 127),"ground vias 200, decoupling wired 55",517,5,,vB_s1,20261026-vB_route.log
+2026-10-26,route,pico_revb,s2,6,,(width 127) (clearance 127),,5,2,,vB_s1_s2,20261026-vB_route.log
+2026-10-26,finish,pico_revb,finish,,,,,,0,,vB_finished,20261026-vB_finish.log
+2026-10-26,route,pico_revb,s1,6,20 passes; --staged --stages=2 --ground-vias --decoupling --plane=+5VD,(width 127) (clearance 127),"ground vias 200, decoupling wired 55",517,28,,vC_s1,20261026-vC_route.log
+2026-10-26,route,pico_revb,s2,6,,(width 127) (clearance 127),,28,15,,vC_s1_s2,20261026-vC_route.log
+2026-10-26,finish,pico_revb,finish,,,,,,0,,vC_finished,20261026-vC_finish.log

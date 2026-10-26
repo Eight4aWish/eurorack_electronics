@@ -72,7 +72,12 @@ ICS = {
                    mpn="", ds="docs/n8synth_platform.md", jlc="bare holes", prefix="J"),
     "EDGE_R": dict(lib=f"{LIB}:EdgeStrip_Right", value="Edge strip, right", fp=f"{LIB}:EdgeStrip_40_Right", lcsc="",
                    mpn="", ds="docs/n8synth_platform.md", jlc="bare holes", prefix="J"),
-    "H11L1": dict(lib="Isolator:H11L1", value="H11L1SR2M", fp="Package_DIP:SMDIP-6_W7.62mm", lcsc="C20082",
+    # Rev B, 10HP only: the left strip loses the same holes as the right (variant.TEN_HP_ONLY)
+    "EDGE_L10": dict(lib=f"{LIB}:EdgeStrip_Left_10HP", value="Edge strip, left (10HP)", fp=f"{LIB}:EdgeStrip_40_Left_10HP",
+                     lcsc="", mpn="", ds="docs/n8synth_platform.md", jlc="bare holes", prefix="J"),
+    # SR2M is the wide-lead (0.4 in) surface-mount form: SMDIP-6_W9.53mm. JLCPCB found the 7.62 mm
+    # footprint Rev A had wrong for C20082 and left U1002 off the Teensy board (2026-10-17)
+    "H11L1": dict(lib="Isolator:H11L1", value="H11L1SR2M", fp="Package_DIP:SMDIP-6_W9.53mm", lcsc="C20082",
                   mpn="H11L1SR2M", ds="https://www.onsemi.com/pdf/datasheet/h11l1m-d.pdf", jlc="Extended"),
     "AO3401A": dict(lib="Transistor_FET:AO3401A", value="AO3401A", fp="Package_TO_SOT_SMD:SOT-23", lcsc="C15127",
                     mpn="AO3401A", ds="https://www.aosmd.com/res/datasheets/AO3401A.pdf", jlc="Basic", prefix="Q"),

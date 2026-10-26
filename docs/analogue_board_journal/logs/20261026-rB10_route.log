@@ -1,0 +1,23 @@
+
+== stage s1
+Plane for +5VD on In4
+  of which bent stubs (grid search): 0
+Ground vias placed before routing: 200; no room beside 5 pads: ['C309.2', 'C608.2', 'C802.2', 'R415.2', 'U401.8']
+  of which bent stubs (grid search): 0
++5VD vias placed before routing: 25; no room beside 0 pads: []
+Decoupling capacitors wired to their pins before routing: 55; no short path: []
+Routing with: (via "Via[0-5]_450:200_um" "Via[0-5]_600:300_um") (width 127) (clearance 127)
+Freerouting settings: --router.automatic_neckdown=false --router.hole_clearance_um=250 --router.copper_to_edge_clearance_um=500 --router.fanout.enabled=false --router.scoring.via_costs=20 --router.scoring.plane_via_costs=2
+Freerouting on 6 layers, 20 passes max, 8.9 min
+Connections to make: 517; left unrouted: 26 (95.0% routed)
+Tracks: 3161 segments, 5114 mm; vias: 623
+Trial board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/pico_revb/output/autoroute/analogue_board_pico_revb_6L_rB10_s1_autoroute_trial.kicad_pcb
+
+== stage s2
+Locked 3784 existing tracks and vias
+Routing with: (via "Via[0-5]_450:200_um" "Via[0-5]_600:300_um") (width 127) (clearance 127)
+Freerouting settings: --router.automatic_neckdown=false --router.hole_clearance_um=250 --router.copper_to_edge_clearance_um=500
+Freerouting on 6 layers, 20 passes max, 10.8 min
+Connections to make: 26; left unrouted: 16 (38.5% routed)
+Tracks: 3291 segments, 5209 mm; vias: 626
+Trial board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/pico_revb/output/autoroute/analogue_board_pico_revb_6L_rB10_s1_s2_autoroute_trial.kicad_pcb

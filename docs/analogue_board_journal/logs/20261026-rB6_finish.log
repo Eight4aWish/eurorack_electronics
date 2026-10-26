@@ -1,0 +1,35 @@
+Rules from the project: track 0.127 mm, clearance 0.127 mm
+Vias with their drill reset to keep a 0.125 mm ring: 0
+Tracks widened to 0.127 mm: 0
+Ground vias joined to nothing but the plane, removed: 0
+Decoupling paths protected from rip-up: 52
+Round 1: tracks and vias taken up from copper faults: 0
+Dead-end tracks and vias removed: 0
+Leftover connections routed: 4; no route found: [('CVDRV6', (54.9, 79.0)), ('CVDRV6', (57.5, 74.9)), ('Net-(R426-Pad1)', (54.9, 78.4)), ('Net-(R426-Pad1)', (49.5, 91.6))]
+  rip-up Net-(R426-Pad1): took up 4 pieces of ['/CV jacks & ADC/CV5', '/Codec & audio/CODEC_RST', 'SW_EN5']; open 2 -> 2, kept
+  rip-up CVDRV6: took up 0 pieces of []; open 2 -> 1, kept
+Rip-up and reroute: 2 swaps kept; nets still open: []
+Dead-end tracks and vias removed: 0
+  of which bent stubs (grid search): 0
++5VD pads unconnected: 0; vias placed: 0; no room: []
+  of which bent stubs (grid search): 0
+GND pads unconnected: 0; vias placed: 0; no room: []
+Round 2: tracks and vias taken up from copper faults: 1
+Dead-end tracks and vias removed: 1
+Leftover connections routed: 1; no route found: []
+Dead-end tracks and vias removed: 0
+  of which bent stubs (grid search): 0
++5VD pads unconnected: 0; vias placed: 0; no room: []
+  of which bent stubs (grid search): 0
+GND pads unconnected: 0; vias placed: 0; no room: []
+Round 3: tracks and vias taken up from copper faults: 1
+Dead-end tracks and vias removed: 1
+Leftover connections routed: 0; no route found: []
+Dead-end tracks and vias removed: 0
+  of which bent stubs (grid search): 0
++5VD pads unconnected: 0; vias placed: 0; no room: []
+  of which bent stubs (grid search): 0
+GND pads unconnected: 0; vias placed: 0; no room: []
+Decoupling paths shortened (cap, pin, mm before, mm added): []; still over 4 mm: [('C205', 'U201.3', 4.1), ('C206', 'U201.3', 5.1), ('C222', 'A101.39', 9.2), ('C408', 'U401.5', 10.5), ('C417', 'U402.4', 4.5), ('C420', 'U403.4', 4.7)]
+Unconnected after finishing: 0
+Finished board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/pico_revb/output/autoroute/analogue_board_pico_revb_6L_rB6_s1_s2_autoroute_trial_finished.kicad_pcb

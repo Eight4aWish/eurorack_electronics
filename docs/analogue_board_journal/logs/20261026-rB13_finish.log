@@ -1,0 +1,56 @@
+Rules from the project: track 0.127 mm, clearance 0.127 mm
+Vias with their drill reset to keep a 0.125 mm ring: 0
+Tracks widened to 0.127 mm: 4
+Ground vias joined to nothing but the plane, removed: 0
+Decoupling paths protected from rip-up: 55
+Round 1: tracks and vias taken up from copper faults: 2
+Dead-end tracks and vias removed: 4
+Leftover connections routed: 11; no route found: [('+3V3D', (50.5, 65.3)), ('+3V3D', (66.5, 77.3)), ('/Pots & gate outs/POT_IN5', (54.8, 38.8)), ('/Pots & gate outs/POT_IN5', (57.6, 40.5)), ('GATE_IN1', (60.3, 60.4)), ('GATE_IN1', (66.3, 63.6)), ('Net-(R414-Pad1)', (59.5, 68.6)), ('Net-(R414-Pad1)', (52.7, 88.5)), ('Net-(U502B--)', (52.0, 64.0)), ('Net-(U502B--)', (55.6, 67.4)), ('Net-(U504B--)', (53.5, 74.5)), ('Net-(U504B--)', (50.0, 71.9)), ('SPIA_MISO', (47.1, 61.5)), ('SPIA_MISO', (58.9, 80.5))]
+  rip-up SPIA_MISO: took up 2 pieces of ['+3V3D', 'CVO7']; open 8 -> 9, kept
+  rip-up CVO7: took up 1 pieces of ['+3V3D']; open 9 -> 7, kept
+  rip-up +3V3D: took up 7 pieces of ['/Pots & gate outs/GATE_SER_OUT', '/Pots & gate outs/GQ4', 'GATE_OE_N', 'Net-(U502A--)', 'Net-(U502B--)', 'Net-(U502C--)']; open 7 -> 8, kept
+  rip-up Net-(U502B--): took up 1 pieces of ['/CV DAC/DAC3']; open 8 -> 8, kept
+  rip-up Net-(U502B--): took up 5 pieces of ['+12V', '/CV DAC/DAC5', 'CS_595', 'Net-(U502A--)', 'SPIB_SCK']; open 8 -> 9, undone
+  rip-up /CV DAC/DAC3: took up 6 pieces of ['/CV DAC/DAC5', 'CVDRV1', 'SW_EN1']; open 8 -> 7, kept
+  rip-up /Pots & gate outs/GATE_SER_OUT: took up 3 pieces of ['/Pots & gate outs/GQ4', 'SCL', 'SW_EN3']; open 7 -> 7, kept
+  rip-up Net-(U504B--): took up 4 pieces of ['-12V', 'CVDRV4', 'CVDRV6', 'MCLK']; open 7 -> 6, kept
+  rip-up Net-(R414-Pad1): took up 19 pieces of ['-12V', '/CV DAC/DAC6', '/CV jacks & ADC/ADC_IN2', '/CV jacks & ADC/ADC_IN6', '/CV jacks & ADC/ADC_IN7', '/CV jacks & ADC/ADC_RST', '/CV jacks & ADC/CV3', 'LED_DATA', 'Net-(C511-Pad2)', 'Net-(U502C--)', 'SW_EN1', 'SW_EN3']; open 6 -> 9, undone
+  rip-up GATE_IN1: took up 7 pieces of ['/CV DAC/DAC6', '/Gate ins/GIN1', 'Net-(D801-COM)', 'SPIB_MOSI', 'SW_EN1', 'SW_EN3']; open 6 -> 7, kept
+  rip-up SW_EN3: took up 4 pieces of ['/CV DAC/DAC4', 'Net-(C511-Pad2)', 'Net-(D801-COM)', 'SPIA_SCK']; open 7 -> 7, kept
+  rip-up /Gate ins/GIN1: took up 4 pieces of ['+3V3D', 'Net-(D802-COM)']; open 7 -> 7, kept
+  rip-up Net-(D802-COM): took up 7 pieces of ['+3V3D', 'SPIA_SCK', 'SPIB_MOSI']; open 7 -> 9, undone
+  rip-up /Pots & gate outs/POT_IN5: took up 6 pieces of ['/Expander, I2C & LEDs/BTN4', '/Expander, I2C & LEDs/BTN6']; open 7 -> 7, kept
+  rip-up /Expander, I2C & LEDs/BTN6: took up 0 pieces of []; open 7 -> 6, kept
+  rip-up Net-(U502B--): took up 18 pieces of ['+12V', '+3V3D', '/CV DAC/DAC5', 'CS_595', 'CVDRV2', 'GATE_OE_N', 'Net-(U502A--)', 'Net-(U502C--)', 'SPIA_MOSI', 'SPIB_SCK']; open 6 -> 9, undone
+  rip-up Net-(R414-Pad1): took up 13 pieces of ['/CV DAC/OFFSET_REF', '/CV jacks & ADC/ADC_IN2', '/CV jacks & ADC/ADC_IN6', '/CV jacks & ADC/ADC_IN7', '/CV jacks & ADC/CV3', 'CVDRV2', 'CVDRV3', 'SPIA_SCK']; open 6 -> 8, undone
+  rip-up Net-(D802-COM): took up 7 pieces of ['+3V3D', 'SPIA_SCK', 'SPIB_MOSI']; open 6 -> 8, undone
+  rip-up Net-(R414-Pad1): took up 13 pieces of ['/CV DAC/OFFSET_REF', '/CV jacks & ADC/ADC_IN2', '/CV jacks & ADC/ADC_IN6', '/CV jacks & ADC/ADC_IN7', '/CV jacks & ADC/CV3', 'CVDRV2', 'CVDRV3', 'SPIA_SCK']; open 6 -> 8, undone
+  rip-up Net-(D802-COM): took up 7 pieces of ['+3V3D', 'SPIA_SCK', 'SPIB_MOSI']; open 6 -> 8, undone
+Rip-up and reroute: 12 swaps kept; nets still open: ['Net-(D802-COM)', 'Net-(R414-Pad1)', 'Net-(U502B--)']
+Dead-end tracks and vias removed: 0
+  of which bent stubs (grid search): 0
++5VD pads unconnected: 0; vias placed: 0; no room: []
+  of which bent stubs (grid search): 0
+GND pads unconnected: 1; vias placed: 1; no room: []
+Round 2: tracks and vias taken up from copper faults: 2
+Dead-end tracks and vias removed: 13
+Leftover connections routed: 1; no route found: [('Net-(D802-COM)', (62.5, 76.5)), ('Net-(D802-COM)', (59.6, 57.8)), ('Net-(R414-Pad1)', (59.5, 68.6)), ('Net-(R414-Pad1)', (52.7, 88.5)), ('Net-(U502B--)', (55.6, 67.4)), ('Net-(U502B--)', (51.6, 64.1))]
+  rip-up Net-(U502B--): took up 18 pieces of ['+12V', '+3V3D', '/CV DAC/DAC5', 'CS_595', 'CVDRV2', 'GATE_OE_N', 'Net-(U502A--)', 'Net-(U502C--)', 'SPIA_MOSI', 'SPIB_SCK']; open 4 -> 7, undone
+  rip-up Net-(R414-Pad1): took up 13 pieces of ['/CV DAC/OFFSET_REF', '/CV jacks & ADC/ADC_IN2', '/CV jacks & ADC/ADC_IN6', '/CV jacks & ADC/ADC_IN7', '/CV jacks & ADC/CV3', 'CVDRV2', 'CVDRV3', 'SPIA_SCK']; open 4 -> 6, undone
+  rip-up Net-(D802-COM): took up 6 pieces of ['+3V3D', '/Gate ins/GIN1', 'SPIB_MOSI']; open 4 -> 6, undone
+  rip-up Net-(U502B--): took up 18 pieces of ['+12V', '+3V3D', '/CV DAC/DAC5', 'CS_595', 'CVDRV2', 'GATE_OE_N', 'Net-(U502A--)', 'Net-(U502C--)', 'SPIA_MOSI', 'SPIB_SCK']; open 4 -> 7, undone
+  rip-up Net-(R414-Pad1): took up 13 pieces of ['/CV DAC/OFFSET_REF', '/CV jacks & ADC/ADC_IN2', '/CV jacks & ADC/ADC_IN6', '/CV jacks & ADC/ADC_IN7', '/CV jacks & ADC/CV3', 'CVDRV2', 'CVDRV3', 'SPIA_SCK']; open 4 -> 6, undone
+  rip-up Net-(D802-COM): took up 6 pieces of ['+3V3D', '/Gate ins/GIN1', 'SPIB_MOSI']; open 4 -> 6, undone
+  rip-up Net-(U502B--): took up 18 pieces of ['+12V', '+3V3D', '/CV DAC/DAC5', 'CS_595', 'CVDRV2', 'GATE_OE_N', 'Net-(U502A--)', 'Net-(U502C--)', 'SPIA_MOSI', 'SPIB_SCK']; open 4 -> 7, undone
+  rip-up Net-(R414-Pad1): took up 13 pieces of ['/CV DAC/OFFSET_REF', '/CV jacks & ADC/ADC_IN2', '/CV jacks & ADC/ADC_IN6', '/CV jacks & ADC/ADC_IN7', '/CV jacks & ADC/CV3', 'CVDRV2', 'CVDRV3', 'SPIA_SCK']; open 4 -> 6, undone
+  rip-up Net-(D802-COM): took up 6 pieces of ['+3V3D', '/Gate ins/GIN1', 'SPIB_MOSI']; open 4 -> 6, undone
+Rip-up and reroute: 0 swaps kept; nets still open: ['Net-(D802-COM)', 'Net-(R414-Pad1)', 'Net-(U502B--)']
+Dead-end tracks and vias removed: 0
+  of which bent stubs (grid search): 0
++5VD pads unconnected: 0; vias placed: 0; no room: []
+  of which bent stubs (grid search): 0
+GND pads unconnected: 0; vias placed: 0; no room: []
+Round 3: tracks and vias taken up from copper faults: 0
+Decoupling paths shortened (cap, pin, mm before, mm added): []; still over 4 mm: []
+Unconnected after finishing: 4
+Finished board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/pico_revb/output/autoroute/analogue_board_pico_revb_6L_rB13_s1_s2_autoroute_trial_finished.kicad_pcb

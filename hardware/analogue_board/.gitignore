@@ -4,3 +4,4 @@
 */output/quilter/
 # fab.py's loose Gerbers: the zip beside them holds the same files, and is what JLC takes
 */fab/gerbers/
+*/output/variants/

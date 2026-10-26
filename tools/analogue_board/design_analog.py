@@ -189,11 +189,17 @@ def sheet_codec(sh):
 
 # =====================================================================================  4  CV in
 CV_JACK = {1: "CV1", 2: "CV2", 3: "CV3", 4: "CV4", 5: "CV5", 6: "CV6", 7: "CVI7", 8: "CVI8"}
-FIXED_CV = variant.has("fixed_cv")   # CVI7-8 (in only) and CVO7-8 (out only); the core board has the six switchable jacks only
-CV_CHANNELS = range(1, 9) if FIXED_CV else range(1, 7)
+N_FIXED = variant.FIXED_CV   # fixed-direction CV channels each way: CVI7-8 (in only), CVO7-8 (out only)
+FIXED_CV = N_FIXED == 2      # both; the core boards have the six switchable jacks only, Rev B one of each
+CV_CHANNELS = range(1, 7 + N_FIXED)
 # CV1-6 bidirectional through DG412 switches; (chip ref, unit, jack-side pin, op-amp-side pin, IN pin)
 SWITCHES = {1: ("U402", 1, "2", "3", "1"), 2: ("U402", 4, "15", "14", "16"), 3: ("U402", 3, "10", "11", "9"),
             4: ("U402", 2, "6", "7", "8"), 5: ("U403", 1, "2", "3", "1"), 6: ("U403", 4, "15", "14", "16")}
+SPARE_SWITCHES = [("U403", 3, ("10", "11", "9")), ("U403", 2, ("6", "7", "8"))]
+if variant.REV == "B":   # one DG412 a side, beside its three jacks: CV1-3 on the PCB's right, CV4-6 on its left
+    SWITCHES = {1: ("U402", 1, "2", "3", "1"), 2: ("U402", 4, "15", "14", "16"), 3: ("U402", 3, "10", "11", "9"),
+                4: ("U403", 1, "2", "3", "1"), 5: ("U403", 4, "15", "14", "16"), 6: ("U403", 3, "10", "11", "9")}
+    SPARE_SWITCHES = [("U402", 2, ("6", "7", "8")), ("U403", 2, ("6", "7", "8"))]
 
 
 def sheet_cv_in(sh):
@@ -205,7 +211,7 @@ def sheet_cv_in(sh):
             "reads the jack itself. 4.7 kΩ pull-downs beat the TCA9555's internal pull-ups: every jack starts as an input.",
             (20, 23), size=1.5)
     adc_nets = {16: "ADC_IN1", 18: "ADC_IN2", 21: "ADC_IN3", 23: "ADC_IN4", 25: "ADC_IN5", 27: "ADC_IN6",
-                12: "ADC_IN7" if FIXED_CV else "GND", 14: "ADC_IN8" if FIXED_CV else "GND",
+                12: "ADC_IN7" if N_FIXED >= 1 else "GND", 14: "ADC_IN8" if N_FIXED >= 2 else "GND",
                 17: "GND", 19: "GND", 20: "GND", 22: "GND", 24: "GND", 26: "GND",
                 13: "GND", 15: "GND", 10: "GND", 11: "GND",
                 36: "SPIA_MISO", 1: "SPIA_MOSI", 37: "SPIA_SCK", 38: "CS_ADC", 3: "GND", 2: "ADC_RST", 4: "GND",
@@ -280,6 +286,9 @@ def sheet_cv_in(sh):
     if FIXED_CV:
         sh.text("CVO7, CVO8 (out only): their 1 kΩ sits inside the DAC stage's\nfeedback loop on the CV DAC sheet, so the jack holds its voltage\n"
                 "under load. Calibrate them with a cable to CVI7 / CVI8.", (x_sw - 10, y0 + 8 * pitch + 2), size=1.27)
+    elif N_FIXED == 1:
+        sh.text("CVO7 (out only): its 1 kΩ sits inside the DAC stage's feedback loop on the\nCV DAC sheet. Calibrate it with a "
+                "cable to CVI7. ADC channel 8 is unused: input grounded.", (x_sw - 10, y0 + 7 * pitch + 2), size=1.27)
     else:
         sh.text("ADC channels 7 and 8 are unused on this board: inputs grounded.", (x_sw - 10, y0 + 6 * pitch + 2), size=1.27)
 
@@ -291,9 +300,10 @@ def sheet_cv_in(sh):
         decap(sh, (x + 25.4, 55.88), "100n", "0603", "+12V", f"{ref} V+ pin 13")
         decap(sh, (x + 25.4, 78.74), "100n", "0603", "-12V", f"{ref} V- pin 4")
         decap(sh, (x + 38.1, 55.88), "100n", "0402", "+5VD", f"{ref} VL pin 12")
-    sh.text("Spare switches (U403 SW3, SW4): off, both sides grounded", (265, 100), size=1.27)
-    for j, (unit, pins) in enumerate([(3, ("10", "11", "9")), (2, ("6", "7", "8"))]):
-        ic(sh, "DG412", (280 + j * 50.8, 116.84), {pins[0]: "GND", pins[1]: "GND", pins[2]: "GND"}, unit=unit, ref="U403",
+    sh.text("Spare switches (" + ", ".join(f"{ref} SW{unit}" for ref, unit, _ in SPARE_SWITCHES) + "): off, both sides grounded",
+            (265, 100), size=1.27)
+    for j, (ref, unit, pins) in enumerate(SPARE_SWITCHES):
+        ic(sh, "DG412", (280 + j * 50.8, 116.84), {pins[0]: "GND", pins[1]: "GND", pins[2]: "GND"}, unit=unit, ref=ref,
            hide_value=True)
 
     wiring.place(sh, holes, "cv", (350.52, 139.7), max_y=245)   # CV jack holes, spread over the four banks
@@ -315,7 +325,7 @@ def sheet_cv_dac(sh):
             (20, 23), size=1.5)
     dac = {2: "CS_DAC", 16: "SPIA_SCK", 15: "SPIA_MOSI", 1: "GND", 9: "+3V3A", 8: "DAC_VREF",
            4: "DAC1", 13: "DAC2", 5: "DAC3", 12: "DAC4", 6: "DAC5", 11: "DAC6",
-           7: "DAC7" if FIXED_CV else NC, 10: "DAC8" if FIXED_CV else NC,
+           7: "DAC7" if N_FIXED >= 1 else NC, 10: "DAC8" if N_FIXED >= 2 else NC,
            3: "+3V3A", 14: "GND"}
     ic(sh, "DAC8568", (66.04, 88.9), dac, ref="U501")
     sh.text("LDAC low: each write updates its output.\nCLR high: clear pin unused.", (40, 116), size=1.27)
@@ -357,8 +367,8 @@ def sheet_cv_dac(sh):
     # buffer's spare sections (U504 B, C) and U503 goes
     if FIXED_CV:
         stages = [(n, "U502" if n <= 4 else "U503", (n - 1) % 4 + 1) for n in range(1, 9)]
-    else:
-        stages = [(n, "U502", n) for n in range(1, 5)] + [(5, "U504", 2), (6, "U504", 3)]
+    else:   # Rev B's one fixed output, CVO7, takes U504's last section
+        stages = [(n, "U502", n) for n in range(1, 5)] + [(5, "U504", 2), (6, "U504", 3)] + ([(7, "U504", 4)] if N_FIXED else [])
     pins = {1: ("2", "3", "1"), 2: ("6", "5", "7"), 3: ("9", "10", "8"), 4: ("13", "12", "14")}
     for n, ref, unit in stages:
         col, row = (n - 1) // 4, (n - 1) % 4
@@ -396,10 +406,12 @@ def sheet_cv_dac(sh):
         sh.tie(f"CVDAC{n}_N", (op, inv), (rf, "1"), (cfb, "1"), (rg, "2"))
         sh.tie(f"DAC{n}", (op, non))
     sh.text("CVDRV1-6 go to the DG412 switches (sheet CV jacks & ADC)." + (" CVO7-8 go straight to their holes." if FIXED_CV
+            else " CV5-6 run on U504 B and C, CVO7 on U504 D, straight to its hole." if N_FIXED
             else " CV5-6 run on U504 B and C."), (190, 180), size=1.27)
 
     # spare sections of U504 as grounded followers, and the op-amp supplies
-    spares = [(2, ("6", "5", "7")), (3, ("9", "10", "8")), (4, ("13", "12", "14"))] if FIXED_CV else [(4, ("13", "12", "14"))]
+    spares = ([(2, ("6", "5", "7")), (3, ("9", "10", "8")), (4, ("13", "12", "14"))] if FIXED_CV
+              else [] if N_FIXED else [(4, ("13", "12", "14"))])
     for k, (unit, (inv, non, out)) in enumerate(spares):
         ox, oy = 147.32, 195.58 + k * 20.32
         op = part(sh, "TL074H", (ox, oy), unit=unit, ref="U504", hide_value=True)

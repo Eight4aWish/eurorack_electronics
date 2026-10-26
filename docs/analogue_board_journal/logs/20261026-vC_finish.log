@@ -1,0 +1,35 @@
+Rules from the project: track 0.127 mm, clearance 0.127 mm
+Vias with their drill reset to keep a 0.125 mm ring: 1
+Tracks widened to 0.127 mm: 0
+Ground vias joined to nothing but the plane, removed: 0
+Decoupling paths protected from rip-up: 55
+Round 1: tracks and vias taken up from copper faults: 2
+Dead-end tracks and vias removed: 1
+Leftover connections routed: 11; no route found: [('+3V3D', (61.0, 89.7)), ('+3V3D', (58.8, 95.3)), ('CS_ADC', (47.1, 51.3)), ('CS_ADC', (51.5, 65.3)), ('CS_ADC', (58.9, 79.5))]
+  rip-up CS_ADC: took up 4 pieces of ['/CV DAC/OFFSET_REF', '/Pots & gate outs/GQ2', 'Net-(U502B--)']; open 4 -> 2, kept
+  rip-up +3V3D: took up 4 pieces of ['/CV jacks & ADC/ADC_IN2', 'GATE_IN3']; open 2 -> 1, kept
+Rip-up and reroute: 2 swaps kept; nets still open: []
+Dead-end tracks and vias removed: 0
+  of which bent stubs (grid search): 0
++5VD pads unconnected: 0; vias placed: 0; no room: []
+  of which bent stubs (grid search): 0
+GND pads unconnected: 1; vias placed: 1; no room: []
+Round 2: tracks and vias taken up from copper faults: 2
+Dead-end tracks and vias removed: 3
+Leftover connections routed: 0; no route found: []
+Dead-end tracks and vias removed: 0
+  of which bent stubs (grid search): 0
++5VD pads unconnected: 0; vias placed: 0; no room: []
+  of which bent stubs (grid search): 0
+GND pads unconnected: 0; vias placed: 0; no room: []
+Round 3: tracks and vias taken up from copper faults: 1
+Dead-end tracks and vias removed: 0
+Leftover connections routed: 0; no route found: []
+Dead-end tracks and vias removed: 0
+  of which bent stubs (grid search): 0
++5VD pads unconnected: 0; vias placed: 0; no room: []
+  of which bent stubs (grid search): 0
+GND pads unconnected: 1; vias placed: 1; no room: []
+Decoupling paths shortened (cap, pin, mm before, mm added): []; still over 4 mm: []
+Unconnected after finishing: 0
+Finished board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/pico_revb/output/variants/autoroute/vC_6L_s1_s2_autoroute_trial_finished.kicad_pcb

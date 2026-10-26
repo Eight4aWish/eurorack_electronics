@@ -4,6 +4,17 @@ Started 2026-10-23, while the Teensy board (Rev A, ordered 2026-10-16) is being 
 changes for Rev B, and for the Pico board, which has not been ordered yet, so its changes can go
 in before its first order. Nothing here is decided unless it says so.
 
+**Status, 2026-10-26: generated and fully routed.** The generator builds Rev B as its own board,
+`pico_revb` (`python3 tools/analogue_board/build.py pico_revb`, then `pcb.py pico_revb`); the
+Rev A boards build unchanged. The routed board is
+`hardware/analogue_board/pico_revb/routed_trial/`. It has:
+- 0 unconnected and 0 copper faults;
+- every IC supply pin within 4 mm of a capacitor by track;
+- the silkscreen block labels.
+
+How it got there is in `docs/analogue_board_journal.md`, chapter 14. Order files wait for the
+Teensy board's bring-up (§7).
+
 ## 1. ESP32-P4: separate I2C buses [decided, option C, 2026-10-25; carried out by the pin map in section 3]
 
 **The problem.** On the Waveshare ESP32-P4-WIFI6, GPIO8 (SCL) and GPIO7 (SDA) are the board's
@@ -122,13 +133,16 @@ Totals: 6 pots and 6 switch inputs; 6 two-way CV plus one fixed CV each way; 4 g
 gate out; stereo audio in and out; TRS MIDI in and out. That is 34 panel channels against Rev A's
 35.
 
-How the holes are laid out:
-- **Two columns each side.** Each side has two hole columns, the one next to the strip and the
-  one further in, mirrored left to right.
-- **Top cells.** Every top cell gets POT_REF and a switch hole on its A row and the pot wiper on
-  its B row, so it can be a pot or a switch. A part in cell JPS*n* uses POT*n* or SW*n*.
-- **Middle and bottom cells.** Every middle cell gets a CV hole and a gate hole on its A row.
-- **Ground.** Each block has a ground hole on its last row.
+How the holes are laid out (as built, 2026-10-26; `wiring.PLAN_REVB`):
+- **One column each side,** next to the strip, mirrored left to right. A cell spans three strip
+  positions, so its holes take those three rows. David, 2026-10-26: a second column (the first
+  pass) only crowded the module's lanes.
+- **Top cells.** POT_REF on the A row, the pot wiper on the B row, a switch on the C row, so
+  each cell can be a pot or a switch. A part in cell JPS*n* uses POT*n* or SW*n*. Ground at
+  position 10.
+- **Middle cells.** A CV hole on the A row and a gate hole on the B row.
+- **Utility holes in the strips' empty positions:** WS2812, codec reset and the MIDI links on
+  the left strip; the P4's I2C, the display's I2C and the gate expansion on the right strip.
 
 **Two-way CV kept [David, 2026-10-25].** The six channels stay as on Rev A. Put one DG412 in each
 middle block so each side's three switches sit beside its holes. Their SW_EN lines come from the
@@ -201,18 +215,18 @@ What the map changes:
   - The module sits 1 mm right of centre to clear it.
 - **P4 supply.** The Q201 bypass and the module's 5 V feed (at least 4.5 V at up to 0.7 A) sit
   between the header and pin 39.
-## 4. Silkscreen [to do]
+## 4. Silkscreen [done for Rev B, 2026-10-26]
 
-- Label every wiring block. On Rev A, W8 on the Teensy board and W6 and W8 on the Pico board have
-  no label, because there was no room.
-- `labels.py` writes "label on the no face" in `wiring_map.md` for an unlabelled block: fix the
-  wording.
+- **Block labels.** Every wiring block on the routed Rev B board has a label but W12, a lone ground
+  hole (square, so it reads as ground anyway). On Rev A, W8 on the Teensy board and W6 and W8 on
+  the Pico board have none.
+- **Wiring map wording.** `wiring_map.md` now says "no room for a label" and names the strips.
+- **Test points.** 3 of 9 test points have a name beside them; the rest have no room.
 
-## 5. Footprints [to do]
+## 5. Footprints
 
-- **U1002 (H11L1).** `parts.py` has `SMDIP-6_W7.62mm`, but LCSC C20082 is the 9.53 mm body:
-  change it to `SMDIP-6_W9.53mm`. It must be fixed before the Pico board is ordered, and it needs a
-  re-route there. On the Teensy board, JLC left it off and a through-hole H11L1 goes in by hand.
+- **U1002 (H11L1) [done, 2026-10-26].** `parts.py` now has `SMDIP-6_W9.53mm`, matching LCSC
+  C20082. On the Teensy board, JLC left it off and a through-hole H11L1 goes in by hand.
 - **Idea:** an automatic check of every footprint against LCSC's own (EasyEDA) footprint,
   through easyeda2kicad.
 

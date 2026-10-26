@@ -108,14 +108,19 @@ def sheet_expander(sh):
            4: "SW_EN1", 5: "SW_EN2", 6: "SW_EN3", 7: "SW_EN4", 8: "SW_EN5", 9: "SW_EN6", 10: "GATE_OE_N", 11: "BTN9",
            13: "BTN1", 14: "BTN2", 15: "BTN3", 16: "BTN4", 17: "BTN5", 18: "BTN6", 19: "BTN7", 20: "BTN8",
            24: "+3V3D", 12: "GND"}
+    # a board with fewer switch inputs (variant.SWITCHES) leaves the rest open: inputs, pulled up inside
+    exp.update({pin: NC for pin, net in exp.items() if net.startswith("BTN") and int(net[3:]) > variant.SWITCHES})
+    if not variant.has("exp_int"):   # Rev B: the firmware polls the expander; INT (open drain) is left open
+        exp[1] = NC
     ic(sh, "TCA9555", (68.58, 101.6), exp, ref="U701", stubs={11: 17.78})  # BTN9 label past the GATE_OE_N label
     decap(sh, (45.72, 139.7), "100n", "0402", "+3V3D", "U701 VCC pin 24")
-    r = R(sh, "10k", (30.48, 76.2), fields={"Note": "INT is open-drain"})
-    sh.connect(r, 1, "+3V3D", stub=0)
-    sh.connect(r, 2, "EXP_INT")
+    if variant.has("exp_int"):
+        r = R(sh, "10k", (30.48, 76.2), fields={"Note": "INT is open-drain"})
+        sh.connect(r, 1, "+3V3D", stub=0)
+        sh.connect(r, 2, "EXP_INT")
 
     x0, y0 = 147.32, 50.8
-    for n in range(1, 10):
+    for n in range(1, variant.SWITCHES + 1):
         y = y0 + (n - 1) * 16.51
         r = R(sh, "1k", (x0 + 5.08, y), rot=90)
         node = (x0 + 12.7, y)
@@ -236,7 +241,8 @@ def sheet_edge(sh):
             "holes at 11-15 and 26-30, and only the deck hole at 10, 16 and 31.\n"
             "10HP: the board sits parallel behind the deck and both strips are used. 6HP: the board sits at 90° and\n"
             "only the left strip meets the deck's right-angle header.", (20, 23), size=1.5)
-    for ref, key, x, side, omit, omit_inner in (("J901", "EDGE_L", 80, "L", set(), set()),
+    left = ("EDGE_L10", STRIP_OMIT["right"], STRIP_OMIT_INNER["right"]) if variant.TEN_HP_ONLY else ("EDGE_L", set(), set())
+    for ref, key, x, side, omit, omit_inner in (("J901", left[0], 80, "L", left[1], left[2]),
                                                  ("J902", "EDGE_R", 200, "R", STRIP_OMIT["right"], STRIP_OMIT_INNER["right"])):
         nets = {}
         for n in range(1, 41):
@@ -343,7 +349,11 @@ def sheet_midi(sh):
     sh.connect(cs, 1, "MI_S")
     sh.connect(cs, 2, "GND", stub=0)
 
-    holes(sh, (200.66, 101.6), ["MO_T", "MO_R", "MI_T", "MI_R", "MI_S", "GND"], "TRS MIDI holes", ref="J1001")
+    if variant.REV == "B":   # out on the panel's right, in on its left (wiring.UTILITY_REVB); grounds on the field
+        holes(sh, (200.66, 101.6), ["MO_T", "MO_R"], "TRS MIDI out holes", ref="J1001")
+        holes(sh, (200.66, 88.9), ["MI_T", "MI_R", "MI_S"], "TRS MIDI in holes", ref="J1002")
+    else:
+        holes(sh, (200.66, 101.6), ["MO_T", "MO_R", "MI_T", "MI_R", "MI_S", "GND"], "TRS MIDI holes", ref="J1001")
     sh.text("WIRING (two stereo jacks in deck cells):\n"
             "OUT: tip → MO_T, ring → MO_R, sleeve → the deck's D (ground) pad.\n"
             "IN:  tip → MI_T, ring → MI_R, sleeve → MI_S or open: NOT to D.\n"

@@ -58,6 +58,16 @@ BOARDS = {
     "teensy_core_midi": {"title": "Teensy 4.1, core set with MIDI", "modules": {"A101": "teensy"},
                          "floorplan": "teensy_core_midi", "drop": {"fixed_cv", "qwiic"}, "pots": 6, "spacing": 0.4,
                          "track": 0.127},
+    # Rev B (David, 2026-10-25; docs/analogue_board_revb.md): the Pico 2 / ESP32-P4 board laid out
+    # panel first, 10HP only. The wiring field is one template, a hole level with every deck pad
+    # (wiring.py); six switch inputs; the six two-way CV channels plus one fixed CV each way; the
+    # ESP32-P4's own I2C on pins 16 and 17, so EXP_INT goes and the panel bus keeps its own pins
+    # (design.PINMAP_REVB); the module 1.2 mm right of centre, clear of the power header in the
+    # lower gap on the PCB's left (placement.py)
+    "pico_revb": {"title": "Pico 2 / ESP32-P4", "modules": {"A101": "pico"}, "floorplan": "pico_revb",
+                  "drop": {"qwiic", "bus_tps", "exp_int"}, "fixed_cv": 1, "pots": 6, "switches": 6,
+                  "spacing": 0.4, "track": 0.127, "rev": "B", "ten_hp_only": True,
+                  "module_cx": 26.0, "header_pin1": (9.52, 66.82)},   # courtyard 5.84-15.84: clear of J901 and A101
 }
 DEFAULT = ("pico", "teensy")   # what build.py and pcb.py build with no argument
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -74,13 +84,19 @@ MODULES = BOARDS[BOARD]["modules"] if BOARD else {}        # ref -> "pico" | "te
 REF = {kind: ref for ref, kind in MODULES.items()}         # "pico" | "teensy" -> ref
 HAS_PICO, HAS_TEENSY = "pico" in REF, "teensy" in REF
 _B = BOARDS.get(BOARD, {})
-DROP = _B.get("drop", set())          # features left out: "fixed_cv", "midi", "qwiic", "bus_tps"
+DROP = _B.get("drop", set())          # features left out: "fixed_cv", "midi", "qwiic", "bus_tps", "exp_int"
 FLOORPLAN = _B.get("floorplan", BOARD)   # whose placement anchors this board uses
 SPACING = _B.get("spacing", 0.1)      # courtyard-to-courtyard gap the auto-placer keeps, mm
 TRACK = _B.get("track", 0.15)         # default track width and clearance, mm
 POTS = _B.get("pots", 8)              # pot channels on the MCP3208
 TEENSY_FULL = _B.get("teensy_full", len(REF) == 1)   # every Teensy pin has a hole (else 20-28 left out)
 MODULE_DROP = _B.get("module_drop", 0.0)   # a one-module board's module this much lower than checkpoint 2's, mm
+REV = _B.get("rev", "A")
+FIXED_CV = _B.get("fixed_cv", 0 if "fixed_cv" in DROP else 2)   # fixed-direction CV channels each way
+SWITCHES = _B.get("switches", 9)      # switch inputs on the TCA9555
+TEN_HP_ONLY = _B.get("ten_hp_only", False)   # both strips 10HP only: no 6HP deck on the left strip
+MODULE_CX = _B.get("module_cx")       # the module's centre line x, mm; None for the board's centre
+HEADER_PIN1 = _B.get("header_pin1")   # the power header's pin 1, mm; None for Rev A's bottom-right spot
 
 
 def has(feature):

@@ -27,6 +27,8 @@ STRIP_OMIT = {"left": set(), "right": set(range(11, 16)) | set(range(26, 31))}
 # Positions 10, 16 and 31 sit inside the 10HP deck's 10-pin headers but no cell uses them: they
 # keep the outer hole (the header pin) and lose the inner wiring hole (David, 2026-10-15).
 STRIP_OMIT_INNER = {"left": set(), "right": {10, 16, 31}}
+if variant.TEN_HP_ONLY:   # Rev B is 10HP only (David, 2026-10-25): the left strip loses the same holes
+    STRIP_OMIT["left"], STRIP_OMIT_INNER["left"] = set(STRIP_OMIT["right"]), set(STRIP_OMIT_INNER["right"])
 BREADBOARD_HEADER = {"x": [15.91 + 2.54 * i for i in range(8)], "y": [98.82, 101.36]}  # the breadboard's 2x8, dropped
 
 
@@ -68,6 +70,9 @@ ARRANGEMENTS = {
 # (two columns, pin 1 top-left, key notch on the left). Bottom right: clear of every USB
 # keep-out, beside the right strip, which is the rear edge in 6HP.
 HEADER_PIN1 = (36.83, 83.35)   # shroud 1.7 mm from the strip's wiring holes, 1.35 mm from the keep-outs
+# Rev B: in the lower gap on the PCB's left (David, 2026-10-25), pins centred on positions 26-31,
+# the shroud just inside the strip's inner holes and clear of the module's header row
+HEADER_PIN1 = variant.HEADER_PIN1 or HEADER_PIN1
 
 
 # ------------------------------------------------------------------ checkpoint 3: floorplan
@@ -249,7 +254,75 @@ ANCHORS_BOARD["teensy_core_midi"] = {
     "U501": (40.5, 39.0, 90, "F"),    # DAC8568, sideways
     "U801": (40.5, 52.0, 90, "F"),    # LM393 gates 1-2
     "U802": (40.5, 52.0, 90, "B")}    # LM393 gates 3-4, under it
+# Rev B, panel first (docs/analogue_board_revb.md §2-3): the module in the middle at x 26.0, its rows
+# at 17.11 and 34.89 from y 18.8 to 67.0; the converter bus on the left row's far end (pins 21-26,
+# y 19-32), I2S below it (y 34-52), the panel bus, gate inputs and I2C on the right row. The wiring
+# field's two columns a side leave x 10.6-39.0 for parts; the module covers 15.5-36.5 by 17.4-68.4
+# (the ESP32-P4 from y 0.5 to 71.6), parts under it up to 2.5 mm. First pass, 2026-10-26:
+# - top band, under the ESP32-P4's antenna end, between the pot and switch holes: the pots ADC and
+#   the switch expander (its EEPROM under it);
+# - under the module, outward face, in signal order from the converter bus pins: the DAC, the ADC,
+#   the two CV op-amps; deck face: the 595 and a DG412 on the left (the output side), the gate
+#   comparators and the other DG412 on the right (the input side), each beside its holes;
+# - bottom, below the module's USB end (low parts under the plug): the codec and the audio op-amp
+#   in the middle, the MIDI opto on the right (MIDI in), power beside the header on the left.
+ANCHORS_BOARD["pico_revb"] = {
+    # top band
+    "U701": (20.0, 9.0, 0, "F"),        # TCA9555
+    "U702": (20.0, 9.0, 0, "B"),        # M24C64
+    "U601": (31.5, 9.0, 0, "F"),        # MCP3208 (panel bus)
+    "FID902": (37.0, 1.8, 0, "F"),      # clear of the right switch holes
+    # under the module, outward face: the DAC straight into its op-amps (first tried with the ADC
+    # between them: every DAC line had to pass the long TSSOP-38, and the routes failed there,
+    # 2026-10-26), the ADC last, level with the CV holes its inputs come from
+    "U501": (26.0, 22.0, 0, "F"),       # DAC8568, level with the converter bus pins
+    "U502": (25.4, 31.5, 0, "F"),       # TL074 CV1-4, 0.6 mm left: room for U801's ground via (below)
+    "U504": (26.0, 42.0, 0, "F"),       # TL074 offset buffer, CV5-6, CVO7
+    "U401": (26.0, 54.0, 0, "F"),       # ADS8688
+    # under the module, deck face: nothing under the ADC or the DAC, so their many decoupling and
+    # reference capacitors have room on both faces (first tried with the DG412s under the ADC: its
+    # REFIO capacitor ended 6 mm from the pin, 2026-10-26). The DG412s sit under the op-amps that
+    # drive them, the 595 and the gates 1-2 comparator under U502, gates 3-4 below the ADC
+    # turned like the DG412s below, the middle of the face free for their vias (side by side upright,
+    # the 595's MR pin found no room for its +5VD via and stayed the one open connection, 2026-10-26)
+    "U602": (20.9, 30.5, 90, "B"),      # 74HCT595 (gate outs, left)
+    "U801": (31.1, 30.5, 90, "B"),      # LM393 gates 1-2 (right). Its ground pin sat under U502's pads with
+                                        # no room for its via (route rB9's last open pad); U502 moved 0.6 mm
+                                        # left to clear it. Of three ways to open that gap, routed side by
+                                        # side (variants vA-vC, 2026-10-26), this one closed with every IC
+                                        # supply pin within 4 mm of a capacitor
+    "U403": (20.9, 41.5, 90, "B"),      # DG412 CV4-6 (left), turned: its capacitors above and below it,
+    "U402": (31.1, 41.5, 90, "B"),      # DG412 CV1-3 (right)   U504's in the gap between the two
+    "U802": (30.0, 62.5, 0, "B"),       # LM393 gates 3-4 (right), clear of the ADC above
+    "C222": (19.6, 63.6, 90, "F"),      # MOD_5V 10 uF, beside module pin 39 (J201 takes the left)
+    # bottom
+    # turned sideways and nudged right (David, 2026-10-26): about 3 mm shorter each, room for the
+    # power parts below and beside J201
+    "U301": (32.5, 76.0, 90, "F"),      # PCM3060, its courtyard ~3.7 mm short of the right holes' (x 41.3):
+    "U302": (32.5, 84.8, 90, "F"),      # TL074 audio   a lane for the audio inputs' tracks
+    "U1002": (34.5, 96.0, 90, "F"),     # H11L1, beside the MIDI in holes
+    "U1001": (14.5, 80.0, 0, "B"),      # AHCT1G125 MIDI out, by the MIDI link holes (J101), clear of the buck
+    "FID903": (16.5, 101.9, 0, "F"),
+    "L201": (13.8, 87.5, 0, "F"),       # buck inductor, below the power header
+    "U201": (13.85, 92.7, 0, "F"),      # TPS54308 beside it, VIN (pin 3) at its bottom left
+    # its input capacitors at VIN: the 100 nF beside it, the two 10 uF upright side by side straight
+    # below (the DPAK, first put there, pushed them 3.5-5 mm away, 2026-10-26)
+    "C207": (10.0, 93.0, 90, "F"),      # 100 nF
+    "C205": (11.2, 97.6, 270, "F"),     # 10 uF, VIN pad at the top
+    "C206": (13.8, 97.6, 270, "F"),     # 10 uF
+    "U202": (24.4, 97.6, 0, "F"),       # L78M05 DPAK, bottom centre, nearer the ADC and codec it feeds
+    # the +3V3D regulator on the deck face, its input capacitor at its +5VD pin
+    "U204": (22.4, 87.7, 0, "B"),       # XC6206 3.3 V digital LDO
+    "C220": (25.5, 88.3, 90, "B"),      # 1 uF on its pin 3
+}
 ANCHORS = {**ANCHORS_COMMON, **ANCHORS_BOARD.get(variant.FLOORPLAN, {})}
+# Areas the auto-placer leaves empty: (face, (x0, y0, x1, y1)), board coordinates. Rev B's lanes
+# beside the module, between its header rows and the wiring columns: the one-column field widened
+# them (David, 2026-10-26), and the placer then filled them with passives, taking away the channel
+# the rails and the CV lines used (routes rB4 and rB5 left 15-16 open against rB1's 7). Kept clear,
+# route rB6 left 6 and finish.py closed them all (2026-10-26)
+KEEP_CLEAR = {"pico_revb": [(face, box) for face in ("F", "B")
+                            for box in ((36.4, 17.4, 41.2, 68.4), (8.4, 17.4, 15.7, 61.0))]}.get(variant.FLOORPLAN, [])
 
 
 def anchor_positions():
@@ -342,7 +415,8 @@ def board_layout():
     variant.require()
     if len(variant.REF) == 2:
         return layout("A")
-    where = {k: {**v, "far": v["far"] + variant.MODULE_DROP} for k, v in BOARD_MODULES.items()}
+    where = {k: {**v, "far": v["far"] + variant.MODULE_DROP, "cx": variant.MODULE_CX or v["cx"]}
+             for k, v in BOARD_MODULES.items()}
     return _modules(where, tuple(variant.REF))
 
 

@@ -102,6 +102,8 @@ class Placer:
             self.net_pins.setdefault(net, []).append((ref, pin))
         for ref, p in fixed.items():
             self.put(ref, *p)
+        for face, box in P.KEEP_CLEAR:   # routing channels this floorplan keeps free of parts
+            self.grid.mark(face, box)
         self.offsets = _offsets()
         # the module header rows: (x, top, bottom) of each column of module pins
         self.rows = []

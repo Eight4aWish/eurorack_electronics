@@ -193,7 +193,8 @@ def qwiic():
 def write_symbols():
     lib = [Sym("kicad_symbol_lib"), S("version", 20241209), S("generator", "analogue_board_make_library"),
            S("generator_version", "9.0"), dac8568(), pico2(), teensy41(), edge_strip("Left"),
-           edge_strip("Right", STRIP_OMIT["right"], STRIP_OMIT_INNER["right"]), qwiic()]
+           edge_strip("Right", STRIP_OMIT["right"], STRIP_OMIT_INNER["right"]),
+           edge_strip("Left_10HP", STRIP_OMIT["right"], STRIP_OMIT_INNER["right"]), qwiic()]
     path = os.path.join(OUT, f"{LIB}.kicad_sym")
     with open(path, "w", encoding="utf-8") as f:
         f.write(dumps(lib) + "\n")
@@ -377,6 +378,10 @@ def write_footprints():
         # (header pins no cell uses) keep only the outer hole (placement.STRIP_OMIT, STRIP_OMIT_INNER)
         edge_strip_fp("EdgeStrip_40_Right", -2.54, omit=STRIP_OMIT["right"], omit_inner=STRIP_OMIT_INNER["right"],
                       descr="n8synth edge strip, right (10HP only): doublets at positions 1-9, 17-25 and 32-40; "
+                            "outer hole only at 10, 16 and 31; none at 11-15 and 26-30"),
+        # Rev B is 10HP only (David, 2026-10-25), so the left strip drops the same holes
+        edge_strip_fp("EdgeStrip_40_Left_10HP", 2.54, omit=STRIP_OMIT["right"], omit_inner=STRIP_OMIT_INNER["right"],
+                      descr="n8synth edge strip, left (10HP only): doublets at positions 1-9, 17-25 and 32-40; "
                             "outer hole only at 10, 16 and 31; none at 11-15 and 26-30"),
     ] + [wiring_holes_fp(n) for n in range(1, 15)] + derived_footprints()
     for fp in fps:

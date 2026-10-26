@@ -1,0 +1,24 @@
+Rules from the project: track 0.127 mm, clearance 0.127 mm
+Vias with their drill reset to keep a 0.125 mm ring: 0
+Tracks widened to 0.127 mm: 0
+Ground vias joined to nothing but the plane, removed: 0
+Decoupling paths protected from rip-up: 50
+Round 1: tracks and vias taken up from copper faults: 1
+Dead-end tracks and vias removed: 0
+Leftover connections routed: 3; no route found: [('CVDRV6', (54.9, 79.0)), ('CVDRV6', (57.8, 75.1)), ('Net-(U502C--)', (62.0, 69.7)), ('Net-(U502C--)', (58.5, 64.0)), ('SPIA_SCK', (58.9, 80.0)), ('SPIA_SCK', (56.2, 49.7))]
+  rip-up SPIA_SCK: took up 3 pieces of ['/Power/3V3A_REG', 'CVDRV2', 'Net-(U502C--)']; open 3 -> 4, undone
+  rip-up Net-(U502C--): took up 1 pieces of ['+3V3D']; open 3 -> 3, kept
+  rip-up +3V3D: took up 4 pieces of ['-12V', '/CV DAC/DAC7', 'CVDRV3']; open 3 -> 4, kept
+  rip-up CVDRV6: took up 4 pieces of ['Net-(R426-Pad1)', 'SPIA_MISO']; open 4 -> 4, kept
+  rip-up SPIA_MISO: took up 5 pieces of ['-12V', '/CV jacks & ADC/ADC_IN1', 'SW_EN5']; open 4 -> 3, kept
+  rip-up SPIA_SCK: took up 10 pieces of ['+12V', '-12V', '/CV jacks & ADC/ADC_IN1', '/Gate ins/GATE_TH', 'CS_ADC', 'CVDRV2', 'Net-(R406-Pad1)', 'Net-(U504C--)']; open 3 -> 4, kept
+Rip-up and reroute: 5 swaps kept; nets still open: ['CVDRV6', 'Net-(U502C--)', 'SPIA_SCK']
+Dead-end tracks and vias removed: 0
+  of which bent stubs (grid search): 0
++5VD pads unconnected: 0; vias placed: 0; no room: []
+  of which bent stubs (grid search): 0
+GND pads unconnected: 0; vias placed: 0; no room: []
+Round 2: tracks and vias taken up from copper faults: 0
+Decoupling paths shortened (cap, pin, mm before, mm added): []; still over 4 mm: [('C205', 'U201.3', 4.1), ('C206', 'U201.3', 5.1), ('C218', 'U203.3', 4.1), ('C219', 'U203.2', 11.0), ('C221', 'U204.2', 25.3), ('C222', 'A101.39', 9.7), ('C408', 'U401.5', 16.0), ('C417', 'U402.4', 4.5), ('C420', 'U403.4', 4.8)]
+Unconnected after finishing: 3
+Finished board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/pico_revb/output/autoroute/analogue_board_pico_revb_6L_rB7_s1_s2_autoroute_trial_finished.kicad_pcb
