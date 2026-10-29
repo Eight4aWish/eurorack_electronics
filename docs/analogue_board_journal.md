@@ -196,6 +196,57 @@ board"*. He re-laid the top himself:
 re-laid top.** The decoupling is better than the Teensy board's: every IC supply pin has a
 capacitor within 4 mm of track. The two pins flagged were logic pins tied to a rail. Image 17.
 
+**14. Rev B, panel first (23 to 26 Oct).** While the Teensy board was being made, David asked
+three questions:
+- could the ESP32-P4's camera or screen be blocked by our pins?
+- are the strips' outer and inner holes joined?
+- what does the wiring field look like against the deck's cells?
+
+The answers became a plan:
+- **The pins.** Pins 16 and 17 carried the P4's own I2C. They now go to two reserved holes, and
+  CS_595 takes the pin jack detect had left free.
+- **The deck.** A colour-coded map of the field showed four banks with no common pattern.
+  David: *"I really should have thought it through. Plenty of room for improvements!"*
+
+He set six rules: 10HP only, controls at the top, jacks next, audio at the bottom (ins on the
+panel's left), even sides, extras in the gaps. A patch.Init()-style panel mocked up on the
+deck's 18 cells gave the channel set: patch.Init() plus whatever spare channels on chips already
+in each zone give, keeping the two-way CV.
+
+One correction mattered: Claude had moved the pots ADC onto the converter bus to free a pin, and
+marked it decided. David: *"I thought there were timing and sequencing issues."* The spec (§6.1)
+keeps that bus to itself for audio-rate CV. The pin came from EXP_INT instead.
+
+The generator got a Rev B board (`pico_revb`), and placement went in turns:
+- **First pass,** two hole columns a side.
+- **David's field:** one column a side, utility holes in the strips' empty positions, the codec
+  and audio op-amp turned and moved right.
+- **The routes got worse,** not better. The widened lanes beside the module had filled with
+  passives. Kept clear, the board routed completely (rB6), but six capacitors sat 4-10 mm from
+  their pins.
+- **Decoupling fixed by design:**
+  - nothing on the deck face under the ADC or DAC;
+  - the DG412s, 595 and comparators turned, in pairs, with the middle of the face free for vias;
+  - the buck's input capacitors at its VIN pin;
+  - the DPAK to the bottom centre.
+
+| Route | What changed | Stage 1 | Stage 2 | After `finish.py` |
+|---|---|---|---|---|
+| rB1 | first pass | 9 | 7 | 2 |
+| rB5 | David's field, CV column reordered | 24 | 16 | — |
+| rB6 | lanes beside the module kept clear | 9 | 6 | 0, 6 capacitors over 4 mm |
+| rB8 | decoupling by design | 7 | 4 | 1 (a +5VD pin with no room for its via) |
+| rB9 | the 595 and comparator turned | 6 | 2 | 1 (a ground pin under an op-amp's pads) |
+| rB10 | that comparator turned again | 26 | 16 | 2 |
+| vA, vB, vC | three ways to clear that ground pin, side by side | 1, 5, 28 | 1, 2, 15 | 0, **0**, 0 |
+
+Freerouting turned out deterministic but chaotic: a 0.5 mm move swung stage 1 from 6 to 44
+open. So the last step routed three minimal variants at once and kept the best.
+
+**vB: 0 unconnected, 0 copper faults, every IC supply pin within 4 mm of a capacitor** (the two
+pins flagged are the DAC's CLR and the 595's MR, logic pins tied to a rail). 13 of its 14
+wiring blocks carry a silkscreen label. Image 18.
+
 ---
 
 ## Errors caught, and the pattern behind them
@@ -264,4 +315,6 @@ The scripts did the routing; every big step in placement came from David looking
 - Whether to order the Pico board now or after the Teensy board is brought up.
 - The Teensy board's arrival: bring-up, first power-on, and what Rev A needs bodging.
 - Whether the Pico board's wiring field should match the Teensy board's (the right-hand holes
-  moved differently on each).
+  moved differently on each). Superseded by Rev B, whose field is one template.
+- Rev B's order: after the Teensy board's bring-up, whose lessons go in first
+  (`docs/analogue_board_revb.md` §7).

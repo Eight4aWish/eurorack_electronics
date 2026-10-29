@@ -108,6 +108,34 @@ the ESP32-P4 datasheet v0.7, Table 2-1.
 | 39 | VCC_5V (buck in, ORed with USB) | — | MOD_5V | OK, thin margin |
 | 36, 37, 40 | 3V3 out, regulator enable, USB VBUS | — | unconnected | OK |
 
+## Bench tests
+
+David's board, on its own (not on the analogue board), 2026-10-27 to 29. It is chip revision v3.2
+with 32 MB flash. The firmware is ESP-IDF 5.5.4, outside this repo.
+
+- **Camera.** A Waveshare RPi Camera (B) rev 2.0 (OV5647) on CAMERA (J1). Both MIPI sockets are
+  22-pin 0.5 mm, Raspberry Pi 5 style. The sensor answered on the board's I2C (GPIO8 SCL, GPIO7
+  SDA), and Waveshare's `17_simple_video_server` streamed it over Wi-Fi.
+- **HDMI.** DISPLAY (J2) feeds Olimex's MIPI-HDMI (LT8912B) through a Raspberry Pi display adapter
+  cable (22 to 15 pin; the camera version is wired differently). The board's I2C finds the bridge
+  at 0x48 to 0x4A and the sink's EDID at 0x50, through Olimex's DDC. Standard 1280×720p60 (CEA
+  VIC 4) locked first time on a USB capture card. Its 74.25 MHz pixel clock comes from the APLL,
+  with the DSI host's own colour bars.
+- **Camera to HDMI, live.** The sensor's 1280×960 mode is cropped to 1280×720 in the PPA and shown
+  at about 22 frames/s. Lines sometimes jump sideways. The likely cause is the display DMA running
+  short of PSRAM bandwidth, with camera, crop and display all in PSRAM. The colour bars, which use
+  no PSRAM, were steady. Not chased; the real target is 720×720.
+
+What it means for the module:
+
+- **Pins 16 and 17 (GPIO8 and GPIO7) carry the camera's and the bridge's I2C.** That confirms
+  reserving them on Rev B.
+- **The APLL can't do both jobs.** The planned I2S MCLK (12.288 MHz) and an exact video pixel clock
+  both want it. Firmware has to choose: a video timing from the fixed PLLs (Espressif's 80 MHz
+  1280×720 comes from 240 MHz ÷ 3), or the MCLK from elsewhere. Open.
+- **The display it is for is the TLQ-SCREEN** (round 720×720, DVI, Tiliqua's 720×720p60 timing).
+  It is awaited; that mode is the next step.
+
 ## Sources
 
 - Waveshare product page and docs: https://www.waveshare.com/esp32-p4-wifi6.htm,
