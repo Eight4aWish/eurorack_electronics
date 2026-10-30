@@ -240,5 +240,16 @@ What the map changes:
 
 ## 7. Lessons from the Teensy bring-up
 
-The boards arrived 2026-10-30. To fill in from the log in
-[analogue_board_bringup.md](analogue_board_bringup.md), the plan for it.
+The boards arrived 2026-10-30. The log in [analogue_board_bringup.md](analogue_board_bringup.md)
+is the source; what it has said so far:
+
+- **Test point names must be readable.** Rev A's are 0.8 mm text, under JLC's 1.0 mm / 0.15 mm,
+  and 12 of 27 had no room at all: none can be read on the boards. Rev B's labels need 1.0 mm or
+  more, or a number beside each pad with a table on the board's own drawing.
+- **No test point under the module.** TP206 (+5VA), TP401 and TP601 sit inside the Teensy's
+  socket; TP605 and TP702 at its ends.
+- **Finish.** OSP was chosen over ENIG on cost, and solders well. It leaves the wiring holes
+  bare copper with a shelf life of months. HASL tins them, if JLC offers it for the board.
+- **The power and the core blocks worked first time.** Every rail in range; I2C, EEPROM,
+  expander, ADC, and DAC through all six switches pass, the DAC within 34 mV of the design
+  uncalibrated. No bodges yet.

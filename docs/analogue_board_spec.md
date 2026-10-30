@@ -210,8 +210,10 @@ x = 24.8): those are for stacking a second board, and nothing stacks on this one
   position each cell occupies. **Superseded 2026-10-15 (§14, checkpoint 3):** the holes now
   sit in four mixed banks, one per quarter of the board, each with some of every channel
   type, so a panel part anywhere on the deck has its channel close by (`wiring.py`).
-- **Pads tinned on both faces** (HASL finish), so wires can run on either face: across the
-  outward face, or underneath in the stand-off gap on the deck face.
+- **Pads plated on both faces**, so wires can run on either face: across the
+  outward face, or underneath in the stand-off gap on the deck face. A HASL finish arrives
+  tinned; Rev A was ordered OSP (2026-10-16), bare copper under a clear coat, so each hole is
+  tinned as it is wired.
 - **Deck ground bus (D pads):** one wire from any D pad to an AGND hole (pot and jack
   grounds are on D).
 
@@ -749,7 +751,7 @@ repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No p
        parts take 2 mm at most, so the deck face has about 9 mm free, room for ~1.75 mm parts
        plus wires. In 6HP there is clearance to the neighbouring modules, helped by most modules
        being shallower.
-     - *Wiring field.* The holes are tinned on both faces (HASL, §4.2), so wires route neatly on
+     - *Wiring field.* The holes are plated on both faces (§4.2), so wires route neatly on
        either face, including from the right-hand column across to the left strip in 6HP.
        The hole columns stand as proposed.
    - ~~**Shorter Teensy headers**~~ **Superseded 2026-10-16:** the Teensy has its own board, with
@@ -1267,7 +1269,10 @@ The hardware assumes these. Each is cheap in code and costly to rediscover on th
 2. **ESP32-P4:** first, set LDO channel 4 to 3.3 V (`esp_ldo_acquire_channel`). Pins 21, 22
    and 24 (SPI-A) are dead until then. Bridge JP201.
 3. **DAC8568 start-up**, in order ([cv_out.md](analogue_board_review/cv_out.md) B1):
-   1. TCA9555 port 0 to 0, then outputs, so every jack switch is off.
+   1. TCA9555 port 0: the jack-switch bits (P00–P05) to 0 and GATE_OE_N (P06) to 1, then
+      P00–P06 to outputs, so every jack switch is off and the gate outputs stay disabled
+      (requirement 4). P07 is button SW9 and stays an input. Corrected 2026-10-30: "port 0 to 0"
+      would also enable the gate outputs.
    2. Write the 0 V code (≈32544) to all eight channels.
    3. Enable the internal reference as flexible and always on (0x090A0000).
    4. Wait about 10 ms (to confirm on the bench).
