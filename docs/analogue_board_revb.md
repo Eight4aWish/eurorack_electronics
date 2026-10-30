@@ -240,4 +240,5 @@ What the map changes:
 
 ## 7. Lessons from the Teensy bring-up
 
-To fill in when the board arrives.
+The boards arrived 2026-10-30. To fill in from the log in
+[analogue_board_bringup.md](analogue_board_bringup.md), the plan for it.
