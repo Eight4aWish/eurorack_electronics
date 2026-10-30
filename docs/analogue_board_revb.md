@@ -221,7 +221,10 @@ What the map changes:
   hole (square, so it reads as ground anyway). On Rev A, W8 on the Teensy board and W6 and W8 on
   the Pico board have none.
 - **Wiring map wording.** `wiring_map.md` now says "no room for a label" and names the strips.
-- **Test points.** 3 of 9 test points have a name beside them; the rest have no room.
+- **Test points.** 3 of 9 test points have a name beside them; the rest have no room. Rev A showed
+  that is not enough (§7): every one needs its name, at 1.0 mm or more. **Open.**
+- **Board marking [open, from Rev A, 2026-10-30].** A silkscreen line with the board name and
+  revision, "Eight4aWish" and "CC BY-SA 4.0", at 1.0 mm or more. Rev A has none of it.
 
 ## 5. Footprints
 
@@ -243,9 +246,13 @@ What the map changes:
 The boards arrived 2026-10-30. The log in [analogue_board_bringup.md](analogue_board_bringup.md)
 is the source; what it has said so far:
 
-- **Test point names must be readable.** Rev A's are 0.8 mm text, under JLC's 1.0 mm / 0.15 mm,
-  and 12 of 27 had no room at all: none can be read on the boards. Rev B's labels need 1.0 mm or
-  more, or a number beside each pad with a table on the board's own drawing.
+- **Test points need one name, on the board and in the docs.** Rev A prints a short net name
+  ("5V MOD") beside 15 of its 27 test points, at 0.8 mm, under JLC's 1.0 mm / 0.15 mm; 12 had no
+  room. The bring-up plan calls them TP201 to TP703, numbers the board never shows, so they could
+  not be found. Rev B: a name beside every test point at 1.0 mm or more, and the plan uses it.
+- **No maker's mark.** Rev A's silkscreen has no Eight4aWish name and no CC BY-SA 4.0 notice; both
+  are only in the KiCad title blocks. Rev B gets a line with the board name, revision, Eight4aWish
+  and the licence (see §4).
 - **No test point under the module.** TP206 (+5VA), TP401 and TP601 sit inside the Teensy's
   socket; TP605 and TP702 at its ends.
 - **Finish.** OSP was chosen over ENIG on cost, and solders well. It leaves the wiring holes

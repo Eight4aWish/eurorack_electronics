@@ -175,7 +175,8 @@ encoder from block 12 until a restart.
 |---|---|---|---|---|
 | 2026-10-30 | 1–2 | Looked over; J201 and A101 soldered; VIN–VUSB cut and checked with the meter | | |
 | 2026-10-30 | 1 | Pads copper-coloured: the OSP finish ordered. Solders fine, but the wiring holes are not tinned (the spec assumed HASL) | | Pick HASL or ENIG if boards will wait or be rewired often |
-| 2026-10-30 | 3–4 | No test point names to read on the boards. The Gerbers have them for 15 of the 27, at 0.8 mm (JLC asks for 1.0 mm); 12 had no room | the pictures above | Name test points at 1.0 mm / 0.15 mm or more |
+| 2026-10-30 | 3–4 | The silkscreen printed as designed, but the plan names test points by number (TP209) and the board does not: it prints a short net name ("5V MOD") beside 15 of the 27, at 0.8 mm (JLC asks for 1.0 mm); 12 had no room | the pictures above | One name for each test point, printed beside every one at 1.0 mm / 0.15 mm or more, and used by the plan |
+| 2026-10-30 | 1 | No Eight4aWish name or licence notice on the silkscreen: both are only in the KiCad title blocks | | A board line: name, revision, Eight4aWish, CC BY-SA 4.0 |
 | 2026-10-30 | 4 | +12V, −12V, +5VD and +3V3D in range | | |
 | 2026-10-30 | 5 | Teensy in: factory blink, enumerated. MOD_5V 4.72 V, +3V3A 3.29 V, +5VA 4.98 V | | TP206 (+5VA), TP401, TP601 lie under the module; TP605 and TP702 at its ends |
 | 2026-10-30 | 5 | PlatformIO's Teensy compiler and teensy_loader_cli are x86_64 only, and this Mac has no Rosetta | `arm64_toolchain.py` (PlatformIO's arm64 GCC) and the Teensy Loader app (`teensy-gui`) | |
