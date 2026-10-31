@@ -531,6 +531,7 @@ static void block_pots() {
 static void block_audio() {
   Serial.println("Block 10, audio: a 440 Hz sine on AOUT1 and AOUT2 at about 10 Vpp, half the 20 Vpp full scale");
   audio_start();
+  wave->offset(0);  // a held DC level (a V) off
   wave->begin(0.5f, 440, WAVEFORM_SINE);
   Serial.println("  On AC volts AOUT1 and AOUT2 read about 3.5 V. Listen through the rack, or record it on the ES-10.");
   if (!wait_enter("For the inputs, wire AOUT1 to AIN1 and AOUT2 to AIN2, then")) return;
@@ -674,8 +675,25 @@ static void hold_cv(const char *args) {
   Serial.printf("  The ADC reads %+.3f V at the jack. 0 releases every jack.\n", jack_from_adc(adc_read(ch, 32)));
 }
 
+// a V: hold both audio outs at V volts DC, for a meter on DC volts: the outputs are DC-coupled, full scale +-10 V
+static void hold_audio(const char *args) {
+  char *end;
+  float v = strtof(args, &end);
+  if (end == args || fabsf(v) > 9.5f) {
+    Serial.println("  What voltage? a 5 holds both audio outs at +5 V, a -5 at -5 V; up to 9.5 V either way.");
+    return;
+  }
+  audio_start();
+  wave->begin(1.0f / 32768, 440, WAVEFORM_SINE);  // the library sends nothing, offset included, at amplitude 0
+  wave->offset(v / 10);
+  Serial.printf("Holding AOUT1 and AOUT2 at %+.2f V DC: meter the AOUT holes or the jacks on DC volts. 0 stops it.\n", v);
+}
+
 static void safe() {
-  if (audio_ready) wave->amplitude(0);
+  if (audio_ready) {
+    wave->amplitude(0);
+    wave->offset(0);
+  }
   if (leds_ready) {
     for (int j = 0; j < NUM_LEDS; j++) leds.setPixel(j, 0);
     leds.show();
@@ -714,6 +732,7 @@ static void help() {
   Serial.println("  12   encoder, live               A on GIN3, B on GIN1, common to POT_REF; push through JPS2 to SW6");
   Serial.println("  13   MIDI                        after stage 7; a TRS cable from OUT to IN, or notes from a MIDI source");
   Serial.println("  c N V  hold CV N at V volts      e.g. c 4 2.5; meter on its jack's tip; 0 releases it");
+  Serial.println("  a V    hold the audio outs at V  e.g. a 5; DC volts on AOUT1-2 or their jacks; 0 stops it");
   Serial.println("  0    safe: switches off, gate outs off, DAC at 0 V, audio and LEDs off");
   Serial.println("  s    status        h  this list");
 }
@@ -728,6 +747,7 @@ static void run(char *cmd) {
   }
   if (strchr(cmd, 't') && n == 8) return block_gate_threshold(atoi(strchr(cmd, 't') + 1));
   if (cmd[0] == 'c') return hold_cv(cmd + 1);
+  if (cmd[0] == 'a') return hold_audio(cmd + 1);
   switch (n) {
     case 0: return safe();
     case 1: return block_i2c();
