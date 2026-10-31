@@ -650,9 +650,10 @@ static void block_midi() {
 
 // c N V: hold CV N (1-6) at V volts with its switch closed, for a meter on the jack or a module; 0 releases it
 static void hold_cv(const char *args) {
-  int ch = atoi(args) - 1;
-  const char *sp = strchr(args, ' ');
-  float v = sp ? atof(sp + 1) : NAN;
+  char *end, *vend;
+  int ch = strtol(args, &end, 10) - 1;  // the jack, then the volts after it: "c 4 2.5" and "c4 2.5" alike
+  float v = strtof(end, &vend);
+  if (vend == end) v = NAN;  // no voltage given
   const float lo = cv_out_volts(0), hi = cv_out_volts(65535);
   if (ch < 0 || ch > 5 || isnan(v)) {
     Serial.println("  Which jack and what voltage? c 1 2.5 holds CV1 at +2.5 V, c 1 -1 at -1 V.");
