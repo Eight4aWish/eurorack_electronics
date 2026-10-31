@@ -253,7 +253,7 @@ hole beeps to a GND hole (SW6 beeps only while the encoder is pressed).
 |---|---|---|
 | 0. Deck ground | JPS2 C → GND below SW7 | continuity, any jack sleeve to the board's GND (done 2026-10-31) |
 | 1. Encoder | JPS3 A → GIN3, B → REF, C → GIN1; JPS2 B → SW6 | block 8: turning slowly steps GIN1 and GIN3 in turn. Then flash the current program and run block 12 (passed 2026-10-31) |
-| 2. Gate outs | JPS6 → GOUT1, JPS9 → GOUT3, JPS12 → GOUT2, JPS14 → GOUT4 | block 7, meter on each jack's tip pad |
+| 2. Gate outs | JPS6 → GOUT1, JPS9 → GOUT3, JPS12 → GOUT2, JPS14 → GOUT4 | block 7, meter on each jack's tip pad (passed 2026-10-31) |
 | 3. CV outs | JPS4 → CV4, JPS5 → CV5, JPS7 → CV6, JPS8 → CV2, JPS10 → CV1, JPS11 → CV3 | block 5 (nothing patched), then `c N V` holds jack N's voltage for the meter |
 | 4. Audio | JPS13 → AIN2, JPS16 → AIN1, JPS15 → AOUT1, JPS18 → AOUT2 | block 10: sine out, then patch the outs into the ins |
 | 5. MIDI in | JPS17 A → MI_T, B → MI_R | block 13: its loop test fails (no MIDI out on Boy2); play notes in and watch the bytes |
@@ -296,3 +296,4 @@ pads, hence the link to JPS2.
 | 2026-10-31 | 8 | Fit agreed: n8synth deck, board upright (24 wires, 800 mm, 6 across; the other upright fit 889 mm, 10 across). Encoder on GIN3 + GIN1, the holes nearest its cell, with its common on POT_REF; block 12 changed to match. The screen's cells lend their pads, so nothing runs between the boards outside the strips: JPS1 for the screen, JPS2 for the encoder's push and the deck ground | | Put each panel zone's channel holes level with it (Rev B's template does); give the encoder a 3.3 V hole beside its cell; plan the deck's ground link and any extra part pins into the strips from the start |
 | 2026-10-31 | 8 | Front-panel parts wired to the deck, all but the screen; the encoder's second push pin straight to JPS2's D pad. Wiring then goes in batches, each tested before the next (the table in stage 8; the wiring map shows each batch). Batch 0, the deck ground: continuity from the deck to the board's GND | | |
 | 2026-10-31 | 8 | Batch 1, the encoder, passes. Meter, unpowered: GIN3, GIN1, REF and SW6 don't beep to GND, SW6 only while pressed. Block 8: GIN1 and GIN3 each go high and low on their own and rest low between clicks; GIN2 and GIN4 stay low. GIN3 counted about two rises a click, GIN1 one: contact bounce on the encoder's A. Block 12, with the program flashed first: 5 clicks clockwise count 0 to 20 (5 detents), 5 back return to exactly 0, so the input filter takes the bounce; clockwise counts up; both presses read SW6 | | |
+| 2026-10-31 | 8 | Batch 2, the gate outs, passes: block 7 metered at each jack's tip, clk (GOUT1), drum1 (GOUT3), drum3 (GOUT2) and rst (GOUT4), each 5 V and 0 V in turn in both patterns | | |
