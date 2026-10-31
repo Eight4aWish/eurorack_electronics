@@ -150,15 +150,17 @@ matters most.
 | 9 | Pots | deck | MCP3208, SPI-B at 1 MHz or less | each pot sweeps 0 to full scale |
 | 10 | Audio | deck jacks | sine out; audio in looped back or into the ES-10 | clean sine; the input reads inverted (spec: negate it) |
 | 11 | LEDs | deck | short WS2812 chain, capped current | colours as sent |
-| 12 | Encoder | deck | A and B on gate inputs 3–4 (QuadEncoder), its common to +3V3D (J703 hole 3); push across a button hole and GND | counts both ways, push registers |
+| 12 | Encoder | deck | A on GIN3, B on GIN1 (QuadEncoder), its common to POT_REF; push through JPS2 to SW6, its other pin to D (stage 8) | counts both ways, push registers |
 | 13 | MIDI | after stage 7 | Serial1 at 31 250 baud; loop OUT to IN with a TRS cable, or play notes in | bytes in = bytes out |
 
 This board has six CV jacks, CV1–6, all switchable. The fixed-direction CV7–8 were left out of
 its core set (`teensy_core_midi` in `tools/analogue_board/variant.py`), so there is no CV7–8 test.
 
-The encoder needs no parts: with its common on +3V3D, a closed contact puts 3.3 V on the gate
-input and an open one is pulled to 0 V by the input's own 100 kΩ. Gate inputs 3–4 belong to the
-encoder from block 12 until a restart.
+The encoder needs no parts: with its common on 3.3 V, a closed contact puts 3.3 V on the gate
+input and an open one is pulled to 0 V by the input's own 100 kΩ. Gate inputs 1 and 3 belong to
+the encoder from block 12 until a restart.
+
+Blocks 9–13 need the control deck wired: stage 8.
 
 ## Stage 7: MIDI in
 
@@ -168,6 +170,84 @@ encoder from block 12 until a restart.
 2. Wire the J101 links: SPARE1 to MIDI_TX, SPARE2 to MIDI_RX. Without them, Teensy pins 1 and 0
    stay plain spare GPIO.
 3. Run block 13.
+
+## Stage 8: the control deck
+
+The first build is the Boy panel with a push encoder and TRS MIDI in. Agreed 2026-10-31: the deck
+is built the n8synth way (JPS1 top left on the front panel) and the board sits upright behind it.
+Of the four ways the two boards can meet, this one needs the least hand wire: 24 wires, 800 mm in
+all, 6 across the board (the other upright fit needs 889 mm and 10 across). Every wire leaves the
+deck through a strip, so nothing runs between the boards outside the headers. Every wire below is
+also drawn on the [wiring map](https://claude.ai/artifact/RptmC4zktQrcPzZHXxPau4) (its "Show wires"
+layer).
+
+**The panel**, as the front reads (cells JPS1–18, left to right, top to bottom):
+
+| Row | Left | Middle | Right |
+|---|---|---|---|
+| 1 | screen (JPS1) | screen; pads borrowed (JPS2) | encoder (JPS3) |
+| 2 | gate1 (JPS4) | pitch1 (JPS5) | clk (JPS6) |
+| 3 | gate2 (JPS7) | pitch2 (JPS8) | drum1 (JPS9) |
+| 4 | gate3 (JPS10) | pitch3 (JPS11) | drum3 (JPS12) |
+| 5 | audio in L (JPS13) | rst (JPS14) | audio out L (JPS15) |
+| 6 | audio in R (JPS16) | MIDI in (JPS17) | audio out R (JPS18) |
+
+Gates and pitches use CV outputs; drum1, drum3, rst and clk are the four gate outputs. No gate
+input is used, so the encoder takes two. The screen sits in the panel over JPS1 and JPS2, so their
+six pads are free: JPS1 carries the screen's signals, JPS2 the encoder's push and the deck's ground.
+
+**Wires from the strips**, each from the strip's inner hole level with the pad to the hole named
+(net name as in the [wiring holes picture](analogue_board_bringup/holes_outward.png), then its
+column and row on the map). A jack's tip is on its cell's pad A.
+
+| Cell | Part | Pad | Hole | Length |
+|---|---|---|---|---|
+| JPS1 | screen SDA | A | SDA, right edge (RS 26) | 64 mm |
+| JPS1 | screen SCL | B | SCL, right edge (RS 27) | 64 mm |
+| JPS1 | screen 3V3 | C | 3V3D, right edge (RS 28) | 64 mm |
+| JPS2 | (spare) | A | | |
+| JPS2 | encoder push | B | SW6 (R 9) | 10 mm |
+| JPS2 | deck ground | C | GND below SW7, right edge (RS 12), square | 15 mm |
+| JPS3 | encoder A | A | GIN3 (R 4) | 39 mm, across |
+| JPS3 | encoder common | B | REF, the top-left one beside POT1 (LO 5) | 8 mm |
+| JPS3 | encoder B | C | GIN1 (LI 3) | 5 mm |
+| JPS4 | gate1 | A | CV4 (R 1) | 15 mm |
+| JPS5 | pitch1 | A | CV5 (LO 2) | 6 mm |
+| JPS6 | clk | A | GOUT1 (LO 6) | 4 mm |
+| JPS7 | gate2 | A | CV6 (RS 13) | 10 mm |
+| JPS8 | pitch2 | A | CV2 (LI 1) | 60 mm, across |
+| JPS9 | drum1 | A | GOUT3 (R 8) | 44 mm, across |
+| JPS10 | gate3 | A | CV1 (LO 1) | 68 mm, across |
+| JPS11 | pitch3 | A | CV3 (LO 21) | 4 mm |
+| JPS12 | drum3 | A | GOUT2 (LO 25) | 6 mm |
+| JPS13 | audio in L | A | AIN2 (R 3) | 74 mm |
+| JPS14 | rst | A | GOUT4 (R 24) | 28 mm |
+| JPS15 | audio out L | A | AOUT1 (LO 22) | 26 mm |
+| JPS16 | audio in R | A | AIN1 (LO 3) | 97 mm, across |
+| JPS17 | MIDI in tip | A | MI_T (LO 32) | 8 mm |
+| JPS17 | MIDI in ring | B | MI_R (LO 33) | 8 mm |
+| JPS18 | audio out R | A | AOUT2 (RS 14) | 75 mm, across |
+
+Channel names are only firmware labels, so CV4 being gate1 is fine. The six long wires come from
+Rev A putting the audio holes at the top of the board and the panel putting audio at the bottom.
+
+**Links on the deck itself.** Every D pad is on one deck-wide ground bus.
+- Each mono jack's sleeve to its cell's D: JPS4–16 and JPS18, 14 jacks.
+- The encoder (JPS3): pins A, C, B onto pads A, B, C. Of its two push pins, one goes by a short link
+  to JPS2's pad B, the other to D.
+- The screen: SDA, SCL and 3V3 to JPS1's pads A, B, C; its GND to D.
+- **JPS2's pad C bridged to D.** That pad's wire to GND (RS 12) is the deck's only ground
+  connection to the board.
+- **MIDI in (JPS17): the sleeve stays off D.** Leave it open or wire it to MI_S (LO 34); a sleeve on
+  D makes a ground loop through the MIDI cable.
+
+**The encoder** (Bourns PEC11R-4215F-S0024): its row of three pins is A, C, B, and it lines up with
+the cell's pads A, B, C. So pad B carries the common. The common must go to 3.3 V, never to D: the
+gate inputs detect voltage. It takes **POT_REF** (labelled REF in the pictures), a 3.3 V supply
+meant for pot tops, because this panel has no pots and the top-left REF is 8 mm away against 79 mm
+to +3V3D. If pots are added later, move the common to +3V3D (RS 28), or the encoder's switching will
+reach the pot readings. The push switch's two pins sit on the far side of the body, off the cell's
+pads, hence the link to JPS2.
 
 ## Log
 
@@ -182,3 +262,4 @@ encoder from block 12 until a restart.
 | 2026-10-30 | 5 | PlatformIO's Teensy compiler and teensy_loader_cli are x86_64 only, and this Mac has no Rosetta | `arm64_toolchain.py` (PlatformIO's arm64 GCC) and the Teensy Loader app (`teensy-gui`) | |
 | 2026-10-30 | 6 | Blocks 1–5 pass. Open CV inputs +0.206 to +0.209 V (+0.205 predicted). DAC to ADC, uncalibrated: −5.18 to −5.24 V at code 0, +5.28 to +5.30 V at 65535 (−5.22 and +5.30 predicted through the 2 kΩ path), the 0 V code within 13 mV of 0, worst error 34 mV; every switch isolates | | |
 | 2026-10-30 | 7 | H11L1 fitted at U1002, dot on pin 1 | | |
+| 2026-10-31 | 8 | Fit agreed: n8synth deck, board upright (24 wires, 800 mm, 6 across; the other upright fit 889 mm, 10 across). Encoder on GIN3 + GIN1, the holes nearest its cell, with its common on POT_REF; block 12 changed to match. The screen's cells lend their pads, so nothing runs between the boards outside the strips: JPS1 for the screen, JPS2 for the encoder's push and the deck ground | | Put each panel zone's channel holes level with it (Rev B's template does); give the encoder a 3.3 V hole beside its cell; plan the deck's ground link and any extra part pins into the strips from the start |

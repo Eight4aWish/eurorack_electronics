@@ -467,7 +467,7 @@ static void rise3() { gate_rises[3]++; }
 
 static void block_gate_ins() {
   Serial.println("Block 8, gate ins: live state and rising edges, Enter to stop");
-  if (enc_ready) Serial.println("  The encoder (block 12) holds gate ins 3-4 until a restart.");
+  if (enc_ready) Serial.println("  The encoder (block 12) holds gate ins 1 and 3 until a restart.");
   void (*isr[4])() = {rise0, rise1, rise2, rise3};
   for (int i = 0; i < 4; i++) {
     gate_rises[i] = 0;
@@ -582,15 +582,16 @@ static void block_leds() {
 }
 
 static void block_encoder() {
-  Serial.println("Block 12, encoder: A on GIN3, B on GIN4 (QuadEncoder), common to +3V3D; push on a button hole");
+  Serial.println("Block 12, encoder: A on GIN3, B on GIN1 (QuadEncoder), common to POT_REF; push through JPS2 to SW6");
   if (!enc_ready) {
-    enc = new QuadEncoder(1, PIN_GATE_IN[2], PIN_GATE_IN[3], 0);  // no internal pull-ups: the LM393s have theirs
+    // GIN3 and GIN1, the holes nearest the encoder's cell on the agreed fit (2026-10-31); any gate-in pin works on a Teensy 4.1
+    enc = new QuadEncoder(1, PIN_GATE_IN[2], PIN_GATE_IN[0], 0);  // no internal pull-ups: the LM393s have theirs
     enc->setInitConfig();
     enc->EncConfig.filterCount = 7;  // the longest input filter, against contact bounce
     enc->EncConfig.filterSamplePeriod = 255;
     enc->init();
     enc_ready = true;
-    Serial.println("  Gate ins 3-4 now belong to the encoder until a restart.");
+    Serial.println("  Gate ins 1 and 3 now belong to the encoder until a restart.");
   }
   if (!expander_start()) return;
   Serial.println("  Turn it both ways and press it. Enter to stop");
@@ -684,7 +685,7 @@ static void help() {
   Serial.println("  9    pots, live                  deck, or a wire from POT_REF to a pot hole");
   Serial.println("  10   audio                       sine out; AOUT1-2 wired to AIN1-2 for the input checks");
   Serial.println("  11   LEDs                        a WS2812 chain on the LED holes");
-  Serial.println("  12   encoder, live               A, B on GIN3-4, common to +3V3D; push on a button hole");
+  Serial.println("  12   encoder, live               A on GIN3, B on GIN1, common to POT_REF; push through JPS2 to SW6");
   Serial.println("  13   MIDI                        after stage 7; a TRS cable from OUT to IN");
   Serial.println("  0    safe: switches off, gate outs off, DAC at 0 V, audio and LEDs off");
   Serial.println("  s    status        h  this list");
