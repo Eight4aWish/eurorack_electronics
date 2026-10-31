@@ -648,6 +648,31 @@ static void block_midi() {
   Serial.println();
 }
 
+// c N V: hold CV N (1-6) at V volts with its switch closed, for a meter on the jack or a module; 0 releases it
+static void hold_cv(const char *args) {
+  int ch = atoi(args) - 1;
+  const char *sp = strchr(args, ' ');
+  float v = sp ? atof(sp + 1) : NAN;
+  const float lo = cv_out_volts(0), hi = cv_out_volts(65535);
+  if (ch < 0 || ch > 5 || isnan(v)) {
+    Serial.println("  Which jack and what voltage? c 1 2.5 holds CV1 at +2.5 V, c 1 -1 at -1 V.");
+    return;
+  }
+  if (v < lo || v > hi) {
+    Serial.printf("  %+.2f V is outside the DAC's range, %+.2f to %+.2f V.\n", v, lo, hi);
+    return;
+  }
+  if (!adc_start() || !dac_start()) return;
+  uint16_t code = constrain(lroundf((v - lo) * 65536 / (4.3f * 2.5f)), 0, 65535);
+  dac_write(ch, code);  // the channel holds its value before its switch closes (requirement 3.6)
+  delay(3);
+  set_port0(port0 | (1 << ch));
+  delay(5);
+  Serial.printf("Holding CV%d at %+.3f V (code %u), switch closed: meter its jack's tip, or patch it.\n", ch + 1,
+                cv_out_volts(code), code);
+  Serial.printf("  The ADC reads %+.3f V at the jack. 0 releases every jack.\n", jack_from_adc(adc_read(ch, 32)));
+}
+
 static void safe() {
   if (audio_ready) wave->amplitude(0);
   if (leds_ready) {
@@ -686,7 +711,8 @@ static void help() {
   Serial.println("  10   audio                       sine out; AOUT1-2 wired to AIN1-2 for the input checks");
   Serial.println("  11   LEDs                        a WS2812 chain on the LED holes");
   Serial.println("  12   encoder, live               A on GIN3, B on GIN1, common to POT_REF; push through JPS2 to SW6");
-  Serial.println("  13   MIDI                        after stage 7; a TRS cable from OUT to IN");
+  Serial.println("  13   MIDI                        after stage 7; a TRS cable from OUT to IN, or notes from a MIDI source");
+  Serial.println("  c N V  hold CV N at V volts      e.g. c 4 2.5; meter on its jack's tip; 0 releases it");
   Serial.println("  0    safe: switches off, gate outs off, DAC at 0 V, audio and LEDs off");
   Serial.println("  s    status        h  this list");
 }
@@ -700,6 +726,7 @@ static void run(char *cmd) {
     return;
   }
   if (strchr(cmd, 't') && n == 8) return block_gate_threshold(atoi(strchr(cmd, 't') + 1));
+  if (cmd[0] == 'c') return hold_cv(cmd + 1);
   switch (n) {
     case 0: return safe();
     case 1: return block_i2c();

@@ -245,6 +245,20 @@ column and row on the map). A jack's tip is on its cell's pad A.
 Channel names are only firmware labels, so CV4 being gate1 is fine. The six long wires come from
 Rev A putting the audio holes at the top of the board and the panel putting audio at the bottom.
 
+**Wire it in batches, and test each before the next** (David, 2026-10-31: wiring mistakes creep in
+after about an hour). Before powering after each batch, check with the meter that no newly wired
+hole beeps to a GND hole (SW6 beeps only while the encoder is pressed).
+
+| Batch | Wires | Test |
+|---|---|---|
+| 0. Deck ground | JPS2 C → GND below SW7 | continuity, any jack sleeve to the board's GND (done 2026-10-31) |
+| 1. Encoder | JPS3 A → GIN3, B → REF, C → GIN1; JPS2 B → SW6 | block 8: turning slowly steps GIN1 and GIN3 in turn. Then flash the current program and run block 12 (passed 2026-10-31) |
+| 2. Gate outs | JPS6 → GOUT1, JPS9 → GOUT3, JPS12 → GOUT2, JPS14 → GOUT4 | block 7, meter on each jack's tip pad |
+| 3. CV outs | JPS4 → CV4, JPS5 → CV5, JPS7 → CV6, JPS8 → CV2, JPS10 → CV1, JPS11 → CV3 | block 5 (nothing patched), then `c N V` holds jack N's voltage for the meter |
+| 4. Audio | JPS13 → AIN2, JPS16 → AIN1, JPS15 → AOUT1, JPS18 → AOUT2 | block 10: sine out, then patch the outs into the ins |
+| 5. MIDI in | JPS17 A → MI_T, B → MI_R | block 13: its loop test fails (no MIDI out on Boy2); play notes in and watch the bytes |
+| 6. Screen | JPS1 A → SDA, B → SCL, C → 3V3D | block 1: the screen's address joins 0x20 and 0x50 |
+
 **Links on the deck itself.** Every D pad is on one deck-wide ground bus.
 - Each mono jack's sleeve to its cell's D: JPS4–16 and JPS18, 14 jacks.
 - The encoder (JPS3): pins A, C, B onto pads A, B, C. Of its two push pins, one goes by a short link
@@ -278,4 +292,7 @@ pads, hence the link to JPS2.
 | 2026-10-30 | 7 | H11L1 fitted at U1002, dot on pin 1 | | |
 | 2026-10-31 | 6 | Block 6 passes: the codec returns samples (AIN1 −198 to 0, AIN2 +72 to +138 codes, inputs open), so MCLK, BCK, LRCK and the data lines all work. DC averages 1.34 V (MCLK), 1.51 V (BCK), 1.64 V (LRCK): all switching; the faster clocks read lower, as edge times take a bigger share of each cycle | | |
 | 2026-10-31 | 6 | Block 7 passes: GOUT1–4 read 5.02–5.05 V high and 0.00 V low, each in both patterns | | |
+| 2026-10-31 | 7 | J101 link fitted: SPARE2 to MIDI_RX only (Boy2 receives MIDI; SPARE1 left free) | | See §7's MIDI-link note |
 | 2026-10-31 | 8 | Fit agreed: n8synth deck, board upright (24 wires, 800 mm, 6 across; the other upright fit 889 mm, 10 across). Encoder on GIN3 + GIN1, the holes nearest its cell, with its common on POT_REF; block 12 changed to match. The screen's cells lend their pads, so nothing runs between the boards outside the strips: JPS1 for the screen, JPS2 for the encoder's push and the deck ground | | Put each panel zone's channel holes level with it (Rev B's template does); give the encoder a 3.3 V hole beside its cell; plan the deck's ground link and any extra part pins into the strips from the start |
+| 2026-10-31 | 8 | Front-panel parts wired to the deck, all but the screen; the encoder's second push pin straight to JPS2's D pad. Wiring then goes in batches, each tested before the next (the table in stage 8; the wiring map shows each batch). Batch 0, the deck ground: continuity from the deck to the board's GND | | |
+| 2026-10-31 | 8 | Batch 1, the encoder, passes. Meter, unpowered: GIN3, GIN1, REF and SW6 don't beep to GND, SW6 only while pressed. Block 8: GIN1 and GIN3 each go high and low on their own and rest low between clicks; GIN2 and GIN4 stay low. GIN3 counted about two rises a click, GIN1 one: contact bounce on the encoder's A. Block 12, with the program flashed first: 5 clicks clockwise count 0 to 20 (5 detents), 5 back return to exactly 0, so the input filter takes the bounce; clockwise counts up; both presses read SW6 | | |
