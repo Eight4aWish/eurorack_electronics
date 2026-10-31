@@ -162,14 +162,28 @@ the encoder from block 12 until a restart.
 
 Blocks 9–13 need the control deck wired: stage 8.
 
+**For the Boy2 build** (the first, stage 8; David, 2026-10-31): test only what Boy2 uses, and attach
+no temporary wires.
+- **Before the deck:** blocks 6 and 7, with the meter only.
+- **Skipped:** blocks 9 and 11 (no pots or LEDs), block 8t (thresholds need a wire from CV1), and
+  MIDI out.
+- **After the deck, in this order:**
+  1. block 1 again: the screen's address should join 0x20 and 0x50;
+  2. block 8: turn the encoder slowly; GIN1 and GIN3 should step between HIGH and low, one after
+     the other. Run it before block 12, which holds those pins until a restart;
+  3. block 10, through the jacks;
+  4. block 12;
+  5. block 13, with notes from a real MIDI source.
+
 ## Stage 7: MIDI in
 
 1. Rack off. Fit the through-hole H11L1 at U1002: trim the legs short and bend each to sit flat
    on its SMD pad. Pin 1, the dot, goes on the top-left pad with the outward face up and J201
    at the bottom right.
 2. Wire the J101 links: SPARE1 to MIDI_TX, SPARE2 to MIDI_RX. Without them, Teensy pins 1 and 0
-   stay plain spare GPIO.
-3. Run block 13.
+   stay plain spare GPIO. **Boy2 receives MIDI only, so it needs just SPARE2 to MIDI_RX**; leave
+   SPARE1 free.
+3. Run block 13 once the deck is wired, with notes from a real MIDI source into the MIDI-in jack.
 
 ## Stage 8: the control deck
 
@@ -262,4 +276,6 @@ pads, hence the link to JPS2.
 | 2026-10-30 | 5 | PlatformIO's Teensy compiler and teensy_loader_cli are x86_64 only, and this Mac has no Rosetta | `arm64_toolchain.py` (PlatformIO's arm64 GCC) and the Teensy Loader app (`teensy-gui`) | |
 | 2026-10-30 | 6 | Blocks 1–5 pass. Open CV inputs +0.206 to +0.209 V (+0.205 predicted). DAC to ADC, uncalibrated: −5.18 to −5.24 V at code 0, +5.28 to +5.30 V at 65535 (−5.22 and +5.30 predicted through the 2 kΩ path), the 0 V code within 13 mV of 0, worst error 34 mV; every switch isolates | | |
 | 2026-10-30 | 7 | H11L1 fitted at U1002, dot on pin 1 | | |
+| 2026-10-31 | 6 | Block 6 passes: the codec returns samples (AIN1 −198 to 0, AIN2 +72 to +138 codes, inputs open), so MCLK, BCK, LRCK and the data lines all work. DC averages 1.34 V (MCLK), 1.51 V (BCK), 1.64 V (LRCK): all switching; the faster clocks read lower, as edge times take a bigger share of each cycle | | |
+| 2026-10-31 | 6 | Block 7 passes: GOUT1–4 read 5.02–5.05 V high and 0.00 V low, each in both patterns | | |
 | 2026-10-31 | 8 | Fit agreed: n8synth deck, board upright (24 wires, 800 mm, 6 across; the other upright fit 889 mm, 10 across). Encoder on GIN3 + GIN1, the holes nearest its cell, with its common on POT_REF; block 12 changed to match. The screen's cells lend their pads, so nothing runs between the boards outside the strips: JPS1 for the screen, JPS2 for the encoder's push and the deck ground | | Put each panel zone's channel holes level with it (Rev B's template does); give the encoder a 3.3 V hole beside its cell; plan the deck's ground link and any extra part pins into the strips from the start |

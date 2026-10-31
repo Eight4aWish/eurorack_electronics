@@ -260,3 +260,14 @@ is the source; what it has said so far:
 - **The power and the core blocks worked first time.** Every rail in range; I2C, EEPROM,
   expander, ADC, and DAC through all six switches pass, the DAC within 34 mV of the design
   uncalibrated. No bodges yet.
+- **MIDI on link holes [for consideration, David 2026-10-31; not decided].** The module's two
+  serial pins (Pico GP0/GP1, Teensy 1/0) reach MIDI only through J101's links, so every MIDI build
+  needs a jumper first (Boy2 links SPARE2 to MIDI_RX). They became link holes because they were
+  promised as spare GPIO on 14 October, before TRS MIDI came back on the 15th. The alternative:
+  wire them to MIDI through solder jumpers that come closed. MIDI then works as delivered, and
+  cutting a track frees a pin, with J101's holes kept as taps.
+
+  The case for it: the board has other expansion routes, so the spares are rarely needed. These
+  routes are the I2C holes (J703), the gate-expansion holes (J603), the LED holes (J704), the
+  expander's spare switch lines and the pot ADC. The spares are the board's only fast direct
+  processor pins, and their likeliest use is serial, which MIDI already is.
