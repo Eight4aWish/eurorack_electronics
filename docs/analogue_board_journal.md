@@ -31,7 +31,7 @@ the story between them.
 | **Layers** | 4, one face of parts | 6, both faces of parts; ground plane on In1, +5VD plane on In4 for the Pico board |
 | **Feature set** | Fixed CV in and out, switchable jacks, eight pots, gates, MIDI, Qwiic, display | Six switchable CV jacks, six pots, four gates each way, TRS MIDI, display on I2C holes. The "core set": anything less is a patch.Init |
 | **Who routes** | Freerouting, with hand finishing in KiCad | Scripts only. David has no KiCad experience, so hand work became the last resort and the tools grew until they could finish the board |
-| **Cost** | Unknown | £268 for 5 boards with 2 assembled on both faces (6 layers, OSP finish), plus import VAT |
+| **Cost** | Unknown | USD 353 (£278) for 5 boards with 2 assembled on both faces (6 layers, OSP finish), plus £69 customs and tax on delivery: **£347 landed** |
 
 ---
 
