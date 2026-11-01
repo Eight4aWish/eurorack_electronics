@@ -1304,7 +1304,8 @@ The hardware assumes these. Each is cheap in code and costly to rediscover on th
 13. **Encoder:** A and B on gate inputs 3–4 (PIO quadrature on Pico GP8/GP9, QuadEncoder on
     Teensy 4/5), not through the TCA9555, whose shared I2C bus a busy OLED holds for about
     23 ms. Debounce buttons in firmware. Treat the TCA9555 INT as a level and poll as a
-    backstop.
+    backstop. **Boy2 on Rev A (2026-10-31):** A on gate input 3 (Teensy 4) and B on gate input 1
+    (Teensy 2), the holes nearest its cell; any gate-in pin works with QuadEncoder.
 14. **Panel bus:** the 74HCT595 sees every MCP3208 frame (SER = MOSI, SRCLK = SCK). Always
     shift a full gate word before pulsing RCLK, and keep SCLK ≤ 1 MHz while CS_POT is low.
 15. Cap the total LED current (for example ≤ 150 mA at 5 V).

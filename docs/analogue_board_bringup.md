@@ -4,6 +4,9 @@ The plan for the first of the two `teensy_core_midi` boards, from the box to a w
 module. Written 2026-10-30, the day the boards arrived. Fill in the readings as you go; what
 Rev A needed feeds [Rev B §7](analogue_board_revb.md#7-lessons-from-the-teensy-bring-up).
 
+**Status, 2026-11-01: done for Boy2.** Every function Boy2 uses passed on the built module.
+For firmware, start from [the firmware notes](analogue_board_reva_firmware.md).
+
 **The rule:** one stage at a time, and stop at the first reading that is off. Every stage
 assumes the one before it passed.
 
