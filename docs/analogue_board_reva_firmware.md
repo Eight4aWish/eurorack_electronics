@@ -270,24 +270,27 @@ doesn't offer them again as new. Every panel jack is committed. What's left to b
 A USB audio interface is left out too: the ES-10 and the Scarlett already do that job. Also,
 whether the Move as host would accept a combined MIDI and audio device is unknown.
 
-**Direction (David, 2026-11-01, not yet settled): a firmware with modes.**
+**Decided (David, 2026-11-01): a firmware with three modes.**
 - **Mode 1** is the Move companion.
-- **Mode 2** takes two audio signals and does something to one with the other. It starts from
-  Warps and goes further, because Warps runs on much less: an STM32F4 Cortex-M4 at 168 MHz
-  (`warps/makefile`), a 96 kHz codec, its cross-modulation 6× oversampled, a 20-band vocoder,
-  one main output plus an aux, and no long buffers.
+- **Mode 2** is a straight port of Warps: two audio signals in, one played against the other.
+- **Mode 3** is weirder things on the same idea, from the menu below. Warps leaves room for them,
+  because it runs on much less: an STM32F4 Cortex-M4 at 168 MHz (`warps/makefile`), a 96 kHz
+  codec, its cross-modulation 6× oversampled, a 20-band vocoder, one main output plus an aux, and
+  no long buffers.
 
 What makes modes work on this board:
 - **The six CV jacks are bidirectional.** With a jack's switch off it's an input to the ADS8688
-  (±10.24 V), so mode 2 can have six CV ins where Warps has five. The bring-up checked open inputs
-  and switch isolation; reading a patched CV isn't tested yet.
+  (±10.24 V), so modes 2 and 3 can have six CV ins. Warps has four: Level 1, Level 2, Algorithm
+  and Timbre, with Level 1's taken as V/oct when the internal oscillator is on (`cv_scaler.cc`).
+  That leaves two spare in mode 2. The bring-up checked open inputs and switch isolation; reading
+  a patched CV isn't tested yet.
 - **The panel's labels belong to mode 1.** In other modes the screen says what each jack does.
 - **The gate outs** can carry gates made from the audio: comparator, envelope or onset.
-- **MIDI still arrives in mode 2.** Move notes can set the internal carrier's pitch.
+- **MIDI still arrives in modes 2 and 3.** Move notes can set the internal carrier's pitch.
 - **Changing mode changes jack directions.** A source still patched into a CV jack would meet the
   DAC through the 1 kΩ, so a mode change wants a confirm screen.
 
-Mode 2's menu beyond Warps:
+Mode 3's menu:
 - stereo out, with the two sides as two algorithms or a spread;
 - more vocoder bands, or an FFT vocoder with a formant shift;
 - FFT cross-synthesis: one input's spectral envelope on the other, or a morph between the two
@@ -300,8 +303,19 @@ Mode 2's menu beyond Warps:
 - pitch-follow: the pitch tracked from one input tunes a resonant filter or harmoniser on the
   other.
 
-Warps' oscillator and filters are designed for 96 kHz. The Teensy Audio library runs at 44.1 kHz,
-so a port either retunes Warps' constants or sets up the codec at 96 kHz itself.
+What a straight Warps port has to settle:
+- **Sample rate.** Warps' oscillator, filter banks and resampling filters are designed for 96 kHz.
+  The Teensy Audio library runs at 44.1 kHz. A straight port favours running the codec at 96 kHz,
+  if the PCM3060 and the Teensy's I2S will (check the datasheet, then the bench). Otherwise
+  retune the constants.
+- **Knobs.** Warps has four knobs and a button (carrier shape, and the frequency-shifter easter
+  egg). Boy2 has one encoder. Either the encoder pages through them, or the Move sets them by CC,
+  if it can send CCs from its knobs (untested).
+- **Patch detection.** Warps finds unpatched jacks with a normalisation probe. Boy2 has none: the
+  jack-detect probe was dropped on 2026-10-16. Its open CV inputs read about +0.207 V, which
+  calibration can trim out.
+- **Jack order.** IN-L and IN-R are the carrier and modulator, and OUT-L and OUT-R are Warps' OUT
+  and AUX. The screen shows which four CV jacks are which.
 
 **Outside the Move role:** plugged into the Mac, Boy2 is a USB MIDI-to-CV with three voices and,
 with the two CV outs above, two CC outs. That's what the Strudel re-record lost with the Workshop
