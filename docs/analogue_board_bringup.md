@@ -257,7 +257,7 @@ hole beeps to a GND hole (SW6 beeps only while the encoder is pressed).
 | 3. CV outs | JPS4 → CV4, JPS5 → CV5, JPS7 → CV6, JPS8 → CV2, JPS10 → CV1, JPS11 → CV3 | block 5 (nothing patched), then `c N V` holds jack N's voltage for the meter (passed 2026-10-31) |
 | 4. Audio | JPS13 → AIN2, JPS16 → AIN1, JPS15 → AOUT1, JPS18 → AOUT2 | block 10: sine out, then patch the outs into the ins (passed 2026-11-01) |
 | 5. MIDI in | JPS17 A → MI_T, B → MI_R | block 13: its loop test fails (no MIDI out on Boy2); play notes in and watch the bytes |
-| 6. Screen | JPS1 A → SDA, B → SCL, C → 3V3D | block 1: the screen's address joins 0x20 and 0x50 |
+| 6. Screen | JPS1 A → SDA, B → SCL, C → 3V3D | block 1: the screen's address joins 0x20 and 0x50; block 14 draws on it (passed 2026-11-01) |
 
 **Links on the deck itself.** Every D pad is on one deck-wide ground bus.
 - Each mono jack's sleeve to its cell's D: JPS4–16 and JPS18, 14 jacks.
@@ -301,3 +301,5 @@ pads, hence the link to JPS2.
 | 2026-10-31 | 8 | Batch 4, audio, wired; the outputs pass. Block 10's 440 Hz sine read nothing at either out jack on the meter, but a new command, `a V`, held both outs at +5 V DC and both jacks read +4.86 V. So the codec's DAC, the output stage and both wires work, and the sine reading was the meter, not the board. The inputs are not yet tested: patch the outs into the ins (block 10) or an oscillator into them (block 6) | | |
 | 2026-11-01 | 3 | +3V3D to GND, unpowered, deck off: about 680 Ω, R210 (the minimum load), as expected | | |
 | 2026-11-01 | 8 | Batch 4, audio, passes. Block 10 with audio out L patched to audio in R (AOUT1 to AIN1) and out R to in L (AOUT2 to AIN2): both inputs read 9.9 Vpp of the 10 sent, and both invert, as designed | | |
+| 2026-11-01 | 8 | Batches 5 (MIDI in) and 6 (the screen) wired. MIDI in waits for a TRS Type A source (block 13) | | |
+| 2026-11-01 | 8 | Batch 6, the screen, passes. Block 1 finds it at 0x3C beside 0x20 and 0x50. A new block 14 drives it as an SSD1306 (page addressing, so an SH1106 works with `14 sh`): every pixel, then a border and a square. The border's top line was missing, and not hidden by the cutout. With the picture shifted down a row (`14 d`), the top line showed and the bottom line, now on the top row, vanished: the screen's top row of pixels is dead. Boy2's display keeps off that row | | |
