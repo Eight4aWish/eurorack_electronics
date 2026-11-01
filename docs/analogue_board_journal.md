@@ -447,8 +447,9 @@ The moments, and what can show each one:
   layers. The proposal of 1 Nov is to route Rev B on four layers as it stands first, then compare
   landed quotes.
 - **Boy's firmware.** Started 1 Nov in `eurorack_modules`. It took over `teensy_move`, and the old
-  Boy's code became `teensy_move_old`. The mode is chosen at power-on: mode 1, the Move companion,
-  builds and waits for the bench; Warps and other two-input processing are to come.
+  Boy's code became `teensy_move_old`. The mode is chosen at power-on. Mode 1, the Move companion,
+  works on the bench, all but TRS MIDI in, which isn't tried yet. Warps and other two-input
+  processing are to come.
 - **Calibration:** the CV outputs, about 1.8% low, kept in the EEPROM.
 - **The noise comparison** against the Daisy Seed MultiFX and the Teensy Chaos.
 - **The second assembled board:** a second module, or a known-good reference.

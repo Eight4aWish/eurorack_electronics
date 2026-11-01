@@ -32,7 +32,7 @@ hardware, is **the old Boy**: its firmware is `teensy_move_old` in `eurorack_mod
   - switches other than SW6;
   - the noise comparison.
 - **Boy's firmware was started on 2026-11-01:** `eurorack_modules`, `src/teensy_move/`, env
-  `teensy41`, with its own `docs/TEENSY_MOVE.md`. Mode 1 builds but hasn't run on the board yet.
+  `teensy41`, with its own `docs/TEENSY_MOVE.md`. Mode 1 works on the bench (2026-11-01), all but TRS MIDI in, not yet tried.
   It's ported from the old Boy's firmware, now `src/teensy_move_old/`, but the old Boy's chips and
   pins are all different: see [Porting from the old Boy](#porting-from-the-old-boy).
 - **It took over `teensy_move`** (David, 2026-11-01). The old Boy's code is `teensy_move_old`, and
