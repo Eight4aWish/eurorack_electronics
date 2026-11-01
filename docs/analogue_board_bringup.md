@@ -256,7 +256,7 @@ hole beeps to a GND hole (SW6 beeps only while the encoder is pressed).
 | 2. Gate outs | JPS6 → GOUT1, JPS9 → GOUT3, JPS12 → GOUT2, JPS14 → GOUT4 | block 7, meter on each jack's tip pad (passed 2026-10-31) |
 | 3. CV outs | JPS4 → CV4, JPS5 → CV5, JPS7 → CV6, JPS8 → CV2, JPS10 → CV1, JPS11 → CV3 | block 5 (nothing patched), then `c N V` holds jack N's voltage for the meter (passed 2026-10-31) |
 | 4. Audio | JPS13 → AIN2, JPS16 → AIN1, JPS15 → AOUT1, JPS18 → AOUT2 | block 10: sine out, then patch the outs into the ins (passed 2026-11-01) |
-| 5. MIDI in | JPS17 A → MI_T, B → MI_R | block 13: its loop test fails (no MIDI out on Boy2); play notes in and watch the bytes |
+| 5. MIDI in | JPS17 A → MI_T, B → MI_R | block 13: its loop test fails (no MIDI out on Boy2); play notes in and watch the bytes (passed 2026-11-01) |
 | 6. Screen | JPS1 A → SDA, B → SCL, C → 3V3D | block 1: the screen's address joins 0x20 and 0x50; block 14 draws on it (passed 2026-11-01) |
 
 **Links on the deck itself.** Every D pad is on one deck-wide ground bus.
@@ -303,3 +303,4 @@ pads, hence the link to JPS2.
 | 2026-11-01 | 8 | Batch 4, audio, passes. Block 10 with audio out L patched to audio in R (AOUT1 to AIN1) and out R to in L (AOUT2 to AIN2): both inputs read 9.9 Vpp of the 10 sent, and both invert, as designed | | |
 | 2026-11-01 | 8 | Batches 5 (MIDI in) and 6 (the screen) wired. MIDI in waits for a TRS Type A source (block 13) | | |
 | 2026-11-01 | 8 | Batch 6, the screen, passes. Block 1 finds it at 0x3C beside 0x20 and 0x50. A new block 14 draws every pixel, then a border and a square. It was first written for a 128x64 screen (the spec's table said so), and the border's top line went missing. A row shift looked like a dead top row, and was logged as one. In fact the screen is Boy's 128x32 (its firmware: Adafruit_SSD1306 at 128 x 32), and a 32-row screen driven as 64 rows shows only every other row. With block 14 set up as the library does for 128x32 (32 rows, sequential COM pins), the whole border shows. `14 64` and `14 sh` cover a 128x64 and an SH1106 | | |
+| 2026-11-01 | 8 | Batch 5, MIDI in, passes: every batch is now in and tested. A Befaco TRS-to-DIN cable, red (Type A; their grey is Type B), from a Proton passing MIDI through on channel 1. Block 13 over 30 s: the loop test fails as expected (no MIDI out on Boy2); then 15 note-on/note-off pairs (90 3C 64, 80 3C 40), every one complete, and 1,439 clock bytes (F8, 120 BPM), with nothing garbled | | |
