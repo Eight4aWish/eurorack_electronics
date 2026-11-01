@@ -255,7 +255,7 @@ hole beeps to a GND hole (SW6 beeps only while the encoder is pressed).
 | 1. Encoder | JPS3 A → GIN3, B → REF, C → GIN1; JPS2 B → SW6 | block 8: turning slowly steps GIN1 and GIN3 in turn. Then flash the current program and run block 12 (passed 2026-10-31) |
 | 2. Gate outs | JPS6 → GOUT1, JPS9 → GOUT3, JPS12 → GOUT2, JPS14 → GOUT4 | block 7, meter on each jack's tip pad (passed 2026-10-31) |
 | 3. CV outs | JPS4 → CV4, JPS5 → CV5, JPS7 → CV6, JPS8 → CV2, JPS10 → CV1, JPS11 → CV3 | block 5 (nothing patched), then `c N V` holds jack N's voltage for the meter (passed 2026-10-31) |
-| 4. Audio | JPS13 → AIN2, JPS16 → AIN1, JPS15 → AOUT1, JPS18 → AOUT2 | block 10: sine out, then patch the outs into the ins |
+| 4. Audio | JPS13 → AIN2, JPS16 → AIN1, JPS15 → AOUT1, JPS18 → AOUT2 | block 10: sine out, then patch the outs into the ins (passed 2026-11-01) |
 | 5. MIDI in | JPS17 A → MI_T, B → MI_R | block 13: its loop test fails (no MIDI out on Boy2); play notes in and watch the bytes |
 | 6. Screen | JPS1 A → SDA, B → SCL, C → 3V3D | block 1: the screen's address joins 0x20 and 0x50 |
 
@@ -299,3 +299,5 @@ pads, hence the link to JPS2.
 | 2026-10-31 | 8 | Batch 2, the gate outs, passes: block 7 metered at each jack's tip, clk (GOUT1), drum1 (GOUT3), drum3 (GOUT2) and rst (GOUT4), each 5 V and 0 V in turn in both patterns | | |
 | 2026-10-31 | 8 | Batch 3, the CV outs, passes after one fix. Block 5 passes on all six (−5.18 to −5.24 V at code 0, +5.28 to +5.30 V at full scale, the 0 V code within 13 mV). Each jack then held at its own voltage and metered at its tip: gate1 (CV4) 3.93 of 4, pitch1 (CV5) 4.91 of 5, gate2 (CV6) −1.95 of −2, pitch2 (CV2) 1.96 of 2, pitch3 (CV3) 2.95 of 3, so no wires crossed. gate3 (CV1) read 0.00 V while the board read 0.99 V at CV1: a wiring error on the deck, fixed, then 0.98 V. Every output reads about 1.8% low, the same on all six: the DAC path's gain, for pitch calibration in firmware. `c N V` read the jack number as the voltage when typed with a space after c; fixed | | |
 | 2026-10-31 | 8 | Batch 4, audio, wired; the outputs pass. Block 10's 440 Hz sine read nothing at either out jack on the meter, but a new command, `a V`, held both outs at +5 V DC and both jacks read +4.86 V. So the codec's DAC, the output stage and both wires work, and the sine reading was the meter, not the board. The inputs are not yet tested: patch the outs into the ins (block 10) or an oscillator into them (block 6) | | |
+| 2026-11-01 | 3 | +3V3D to GND, unpowered, deck off: about 680 Ω, R210 (the minimum load), as expected | | |
+| 2026-11-01 | 8 | Batch 4, audio, passes. Block 10 with audio out L patched to audio in R (AOUT1 to AIN1) and out R to in L (AOUT2 to AIN2): both inputs read 9.9 Vpp of the 10 sent, and both invert, as designed | | |
