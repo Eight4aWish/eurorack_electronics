@@ -195,8 +195,9 @@ is built the n8synth way (JPS1 top left on the front panel) and the board sits u
 Of the four ways the two boards can meet, this one needs the least hand wire: 24 wires, 800 mm in
 all, 6 across the board (the other upright fit needs 889 mm and 10 across). Every wire leaves the
 deck through a strip, so nothing runs between the boards outside the headers. Every wire below is
-also drawn on the [wiring map](https://claude.ai/artifact/RptmC4zktQrcPzZHXxPau4) (its "Show wires"
-layer).
+also drawn on the wiring map: turn on its "Show wires" layer, or pick a batch. The live page is
+at <https://claude.ai/artifact/RptmC4zktQrcPzZHXxPau4>, and a copy of its final version, which
+opens in any browser, is kept at [`analogue_board_bringup/wiring_map.html`](analogue_board_bringup/wiring_map.html).
 
 **The panel**, as the front reads (cells JPS1–18, left to right, top to bottom):
 

@@ -1,0 +1,548 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Rev B Panel Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: two drawings side by side (panel from the front, PCB from the module side), then the reasoning in tables. Same sheet as the wiring map. */
+:root {
+  --bg: #eef1f3; --surface: #ffffff; --ink: #16202b; --muted: #586574; --line: #d3d9df;
+  --accent: #106b57; --band: #f4f6f8; --panel: #d9dde1; --panel-edge: #aab2ba; --nut: #c4cad0; --hole: #2b3038; --knob: #f7f8f9;
+  --board: #e6efe9; --board-edge: #8fb3a2; --warn: #c2412d;
+  --k-cv: #2f5fd0; --k-aud: #8a4cc9; --k-gin: #23894a; --k-gout: #0b8794; --k-pot: #e06a12;
+  --k-sw: #a98000; --k-gnd: #2a2f36; --k-midi: #c43b86; --k-deck: #3d7a64; --k-pwr: #d3332f; --k-dig: #6a7685;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-head: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f151b; --surface: #161e26; --ink: #e4e9ee; --muted: #93a0ad; --line: #2a3540;
+  --accent: #5cc8a8; --band: #131b22; --panel: #2a323b; --panel-edge: #46515c; --nut: #56616c; --hole: #0b0f13; --knob: #3a444f;
+  --board: #15241d; --board-edge: #3f6b58; --warn: #ff7a62;
+  --k-cv: #7ea2ff; --k-aud: #c39bff; --k-gin: #5fd08c; --k-gout: #4fd1dc; --k-pot: #ff9d55;
+  --k-sw: #f2c94c; --k-gnd: #d8dee6; --k-midi: #f27fbf; --k-deck: #7fbfa8; --k-pwr: #ff7a72; --k-dig: #a3adba; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f151b; --surface: #161e26; --ink: #e4e9ee; --muted: #93a0ad; --line: #2a3540;
+  --accent: #5cc8a8; --band: #131b22; --panel: #2a323b; --panel-edge: #46515c; --nut: #56616c; --hole: #0b0f13; --knob: #3a444f;
+  --board: #15241d; --board-edge: #3f6b58; --warn: #ff7a62;
+  --k-cv: #7ea2ff; --k-aud: #c39bff; --k-gin: #5fd08c; --k-gout: #4fd1dc; --k-pot: #ff9d55;
+  --k-sw: #f2c94c; --k-gnd: #d8dee6; --k-midi: #f27fbf; --k-deck: #7fbfa8; --k-pwr: #ff7a72; --k-dig: #a3adba; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--f-head); font-weight: 600; text-wrap: balance; margin: 0; letter-spacing: 0.01em; }
+h1 { font-size: 2rem; line-height: 1.15; }
+h2 { font-size: 1.35rem; }
+p { margin: 0; }
+.eyebrow { font-family: var(--f-head); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); font-weight: 600; }
+.lede { max-width: 70ch; color: var(--muted); }
+header { display: grid; gap: 10px; }
+section { display: grid; gap: 14px; }
+.note { font-size: 0.88rem; color: var(--muted); max-width: 70ch; }
+
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; }
+.rule { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 10px 13px; display: grid; gap: 3px; min-width: 0; }
+.rule b { font-family: var(--f-head); font-weight: 600; }
+.rule b span { color: var(--accent); font-family: var(--f-mono); font-weight: 500; margin-right: 6px; }
+.rule p { color: var(--muted); font-size: 0.88rem; }
+
+.figs { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .figs { grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr); } }
+figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+figcaption { font-size: 0.85rem; color: var(--muted); }
+figcaption b { color: var(--ink); font-family: var(--f-head); font-weight: 600; font-size: 0.98rem; display: block; }
+.svgwrap { overflow-x: auto; }
+svg.draw { display: block; width: 100%; height: auto; }
+svg.panel { max-width: 340px; margin: 0 auto; }
+svg.pcb { min-width: 520px; max-width: 760px; margin: 0 auto; }
+.draw text { font-family: var(--f-mono); fill: var(--ink); }
+.draw .muted { fill: var(--muted); }
+.draw .lab { font-weight: 500; }
+.draw .zone { fill: var(--band); stroke: var(--line); stroke-width: 0.25; }
+.draw .zt { font-family: var(--f-body); fill: var(--muted); }
+.draw .warnbox { fill: none; stroke: var(--warn); stroke-width: 0.35; stroke-dasharray: 1 0.8; }
+.draw .warn { fill: var(--warn); font-family: var(--f-body); }
+.k-cv { --kc: var(--k-cv) } .k-aud { --kc: var(--k-aud) } .k-gin { --kc: var(--k-gin) } .k-gout { --kc: var(--k-gout) }
+.k-pot, .k-ref { --kc: var(--k-pot) } .k-sw { --kc: var(--k-sw) } .k-gnd { --kc: var(--k-gnd) } .k-midi { --kc: var(--k-midi) }
+.k-spi { --kc: var(--k-cv) } .k-spi2 { --kc: var(--k-gout) } .k-pwr { --kc: var(--k-pwr) } .k-dig { --kc: var(--k-dig) } .k-p4 { --kc: var(--accent) } .k-free { --kc: var(--muted) }
+.tpl .pwrhdr { border-radius: 4px; border: 1px dashed var(--k-pwr); background: color-mix(in srgb, var(--k-pwr) 10%, var(--surface));
+  display: grid; place-content: center; text-align: center; font-size: 0.7rem; color: var(--ink); line-height: 1.3; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.82rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.g { width: 9px; height: 9px; border-radius: 50%; background: var(--kc); display: inline-block; flex: none; }
+.g.ring { background: transparent; border: 2px solid var(--kc); box-sizing: border-box; }
+.g.sq { border-radius: 1px; }
+
+.tablewrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+.tablewrap.wide table { min-width: 640px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+th { font-family: var(--f-head); font-weight: 600; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+td.m { font-family: var(--f-mono); font-size: 0.8rem; white-space: nowrap; }
+td.n { font-variant-numeric: tabular-nums; }
+tfoot td { font-weight: 600; border-top: 1px solid var(--line); }
+.chip { font-family: var(--f-mono); font-size: 0.76rem; padding: 0 5px; border-radius: 3px; background: color-mix(in srgb, var(--kc) 14%, var(--surface)); white-space: nowrap; }
+.two { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.panelbox { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.panelbox ul, .panelbox ol { margin: 0; padding-left: 1.2em; display: grid; gap: 7px; }
+.panelbox li { max-width: 72ch; }
+.src { font-size: 0.82rem; color: var(--muted); }
+/* the Rev B hole template: one grid row per strip position in the three deck bands */
+.tpl { display: grid; grid-template-columns: 1.6rem 4.4rem 6.8rem 6.8rem minmax(10rem, 1fr) 6.8rem 6.8rem 4.4rem 1.6rem;
+  grid-auto-rows: 1.32rem; column-gap: 3px; row-gap: 1px; min-width: 54rem; font-size: 0.72rem; }
+.tpl > * { min-width: 0; }
+.tpl .ch { font-family: var(--f-head); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); align-self: end; text-align: center; }
+.tpl .rn { font-family: var(--f-mono); color: var(--muted); text-align: center; align-self: center; font-variant-numeric: tabular-nums; }
+.tpl .cell { border-radius: 4px; background: color-mix(in srgb, var(--k-deck) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--k-deck) 35%, var(--surface));
+  display: grid; place-content: center; text-align: center; font-family: var(--f-head); font-weight: 600; font-size: 0.8rem; line-height: 1.15; }
+.tpl .cell small { display: block; font-family: var(--f-body); font-weight: 400; font-size: 0.62rem; color: var(--muted); }
+.tpl .hole { display: flex; align-items: center; gap: 5px; padding: 0 5px; border-radius: 3px; background: color-mix(in srgb, var(--kc) 13%, var(--surface));
+  font-family: var(--f-mono); white-space: nowrap; overflow: hidden; }
+.tpl .zone2 { border-radius: 6px; border: 1px dashed var(--line); background: var(--band); display: grid; place-content: center; text-align: center;
+  color: var(--muted); font-size: 0.72rem; line-height: 1.4; padding: 4px 8px; }
+.tpl .zone2 b { color: var(--ink); font-family: var(--f-head); font-weight: 600; }
+.tpl .gaprow { border-radius: 4px; background: repeating-linear-gradient(135deg, var(--band) 0 5px, transparent 5px 10px); border: 1px dashed var(--line);
+  display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 0.72rem; padding: 0 8px; }
+.added { color: var(--accent); font-weight: 600; }
+.scroll { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px; }
+span.m { font-family: var(--f-mono); font-size: 0.78rem; color: var(--muted); }
+.src a { color: var(--accent); }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Analogue board · Rev B planning · panel first</div>
+    <h1>A patch.Init()-style panel on the 10HP deck</h1>
+    <p class="lede">Start from what a 10HP DSP module usually puts on its panel, place each part in a deck cell by your six rules, then read
+      off which strip positions carry which signals. Those set where the wiring holes go, and the holes set where the chips go.
+      This is a mock-up to plan from, not a decision.</p>
+  </header>
+
+  <div class="rules" id="rules"></div>
+
+  <div class="figs">
+    <figure>
+      <figcaption><b>The panel, from the front</b>Cell positions from the n8synth 10HP deck drawing, on a 3U 10HP blank. The bar on each cell's edge shows which strip its pads reach.</figcaption>
+      <div class="svgwrap" id="panel"></div>
+    </figure>
+    <figure>
+      <figcaption><b>The PCB, from the module side</b>Deck fitted the n8synth way (JPS1 top left on the front), so the panel's left strip is the PCB's right. Each signal pad gets a channel hole level with it; the shaded zones show where its circuit would sit.</figcaption>
+      <div class="svgwrap" id="pcb"></div>
+    </figure>
+  </div>
+  <div class="legend" id="legend"></div>
+  <p class="note">Fitted the other way round (JPS1 top right on the front), the two strips swap. Pots and switches work either way. Inputs and outputs would then reach the far side of the PCB from their circuits, so their wires get longer.</p>
+
+  <section>
+    <h2>What each strip carries</h2>
+    <p class="note">Pads per the n8synth deck: a pot's three legs on A, B and C; a jack's tip on A, its switch on B and its sleeve on D; a button or toggle on A with its return on D. D is the deck-wide ground bus, so one more wire grounds every jack, pot and switch.</p>
+    <div class="two" id="strips"></div>
+  </section>
+
+  <section>
+    <h2>Compared with patch.Init() and with this board</h2>
+    <div class="tablewrap wide"><table>
+      <thead><tr><th>Panel item</th><th>patch.Init()</th><th>This mock-up</th><th>Rev A board</th><th>Rev B proposal</th></tr></thead>
+      <tbody>
+        <tr><td>Pots</td><td class="n">4</td><td class="n">4</td><td class="n">6</td><td class="n">6</td></tr>
+        <tr><td>Button, toggle</td><td class="n">1 + 1</td><td class="n">1 + 1</td><td>9 switch inputs</td><td>6 switch inputs, one per top cell</td></tr>
+        <tr><td>LED</td><td>1, driven by its second CV output</td><td>none (a WS2812 needs a cell)</td><td>WS2812 chain</td><td>WS2812 chain</td></tr>
+        <tr><td>CV in / CV out</td><td class="n">4 / 1</td><td class="n">2 / 2</td><td>6 channels, each in or out</td><td>6 two-way, plus 1 fixed in and 1 fixed out</td></tr>
+        <tr><td>Gate in / gate out</td><td class="n">2 / 2</td><td class="n">2 / 2</td><td class="n">4 / 4</td><td class="n">4 / 4</td></tr>
+        <tr><td>Audio in / out</td><td>2 / 2 (stereo)</td><td>2 / 2</td><td class="n">2 / 2</td><td class="n">2 / 2</td></tr>
+        <tr><td>MIDI</td><td>none</td><td>variant below</td><td>TRS in and out</td><td>TRS in and out</td></tr>
+        <tr><td>Screen</td><td>none</td><td>variant below</td><td>I2C holes</td><td>I2C holes, top gap rows</td></tr>
+      </tbody>
+      <tfoot><tr><td>Panel channels</td><td class="n">20 parts (13 jacks)</td><td class="n">18 of 18 cells</td><td class="n">35</td><td class="n">34</td></tr></tfoot>
+    </table></div>
+    <p class="note">patch.Init()'s set does not quite fit 18 cells: 20 parts, or 19 without its LED. The mock-up trades two of its CV inputs for a second CV output, so that inputs and outputs split evenly between the strips.</p>
+  </section>
+
+  <section>
+    <h2>Rev B channel set: patch.Init() plus what comes cheap</h2>
+    <p class="note">The board offers more holes than one panel uses, so different panels can be wired from it. Each addition below takes a spare channel on a chip
+      that already sits in that block's zone. It adds a few passives and a short local trace, never a new chip or a run across the board.</p>
+    <div class="tablewrap wide"><table>
+      <thead><tr><th>Block (cells)</th><th>From patch.Init()</th><th>Added</th><th>Chip in that zone (channels used)</th></tr></thead>
+      <tbody>
+        <tr><td>Top, panel left<br><span class="m">JPS1, 2, 4</span></td><td>2 pots, button</td><td class="added">1 pot; a switch hole beside every cell</td><td>MCP3208 (6 of 8), TCA9555</td></tr>
+        <tr><td>Top, panel right<br><span class="m">JPS3, 5, 6</span></td><td>2 pots, toggle</td><td class="added">1 pot; a switch hole beside every cell</td><td>same chips</td></tr>
+        <tr><td>Middle, panel left<br><span class="m">JPS7, 8, 10</span></td><td>3 CV in, 1 gate in</td><td class="added">the 3 CV jacks become two-way (CV1–3, as Rev A); 2 gate in, so every cell can be CV or gate</td><td>ADS8688 and DAC8568, a DG412, two LM393</td></tr>
+        <tr><td>Middle, panel right<br><span class="m">JPS9, 11, 12</span></td><td>1 CV out, 1 gate out</td><td class="added">2 more CV, all three two-way (CV4–6); 2 gate out</td><td>DAC8568 and ADS8688, a DG412, one quad op-amp, 74HCT595 (4 of 8)</td></tr>
+        <tr><td>Bottom, panel left<br><span class="m">JPS13, 14, 16</span></td><td>audio in L and R, 1 CV in, 1 gate in</td><td class="added">MIDI in; the CV in is a fixed input (CVI7)</td><td>codec inputs, ADS8688 (7 of 8), MIDI receiver</td></tr>
+        <tr><td>Bottom, panel right<br><span class="m">JPS15, 17, 18</span></td><td>audio out L and R, 1 gate out</td><td class="added">1 fixed CV out (CVO7), MIDI out</td><td>codec outputs, DAC8568 (7 of 8), MIDI driver</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">In the top band a pot or switch in cell JPS<i>n</i> uses POT<i>n</i> or SW<i>n</i>, so a hole's number tells you its cell.</p>
+    <div class="scroll"><div class="tpl" id="tpl" aria-label="Rev B hole template, seen from the module side"></div></div>
+    <div class="two">
+      <div class="panelbox">
+        <h2>Two-way CV, kept</h2>
+        <ul>
+          <li><b>Six two-way channels, as Rev A.</b> One DG412 per middle block, so each side's three switches sit beside its holes. Their enable lines come from the expander at the top, about 30 mm away; a second 595 beside the switches would make them local.</li>
+          <li><b>One fixed CV each way in the bottom blocks</b>, from the converters' seventh channels.</li>
+          <li><b>Switch inputs, 9 to 6</b>, one beside each top cell. The expander keeps three spare lines.</li>
+        </ul>
+      </div>
+      <div class="panelbox">
+        <h2>Kept, and the headroom</h2>
+        <ul>
+          <li><b>Gate inputs stay at four.</b> Each needs its own module pin for timing, and the Rev B pin map has none to spare.</li>
+          <li><b>Headroom with no new chips:</b> 1 more CV in and 1 more CV out (the converters' eighth channels), 2 more pots, 4 more gate outs and 3 more switches.</li>
+          <li><b>Cross-zone runs:</b> only the bottom band's CV and gate channels reach up to the middle zone's converters, about 20 mm each.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Module, pins and power</h2>
+    <div class="figs">
+      <figure>
+        <figcaption><b>Floorplan, from the module side</b>Pico 2 footprint solid, ESP32-P4-WIFI6 dashed (from Waveshare's drawing). Coloured bars mark what each group of module pins carries; dots are the wiring holes above.</figcaption>
+        <div class="svgwrap" id="floor"></div>
+      </figure>
+      <div class="panelbox">
+        <h2>USB end down</h2>
+        <ul>
+          <li><b>The P4's antenna points up.</b> It reaches 17 mm past the Pico footprint, over the low top zone and towards the top edge, away from the audio at the bottom.</li>
+          <li><b>Pins meet their circuits.</b> Power, I2S and MIDI pins sit at the bottom, by the power header, codec and MIDI circuits. Both SPI buses' pins sit at the top, by the converters and the pots ADC. The gate-input pins face the panel-left side, where the gate inputs are. Only I2C (pins 4, 5) has to run up to the expander.</li>
+          <li><b>The USB plug runs down over the bottom zone</b>, so parts there stay low and the power header goes to the side.</li>
+          <li><b>P4 parts.</b> The Q201 bypass and the module's 5 V feed (at least 4.5 V at up to 0.7 A) sit between the power header and pin 39. The P4's own I2C (pins 16, 17) goes to two holes in the top gap rows.</li>
+          <li><b>Camera and display ribbons</b> leave the connectors on the P4's top face and route over the board as needed, so they don't constrain the orientation.</li>
+        </ul>
+        <h2>Power header in the lower gap</h2>
+        <ul>
+          <li><b>On the PCB's left</b>, the outputs side, next to the module's power pins and away from the audio inputs.</li>
+          <li><b>A keyed 2×5 shroud is 20 mm long</b>, longer than the six gap rows. It stands just inside the strip and covers the hole columns from position 25 to 32 on that side. That side's middle ground hole moves to 24 and its first bottom cell's holes to 34. Wires to the strip's inner holes at 25, 31 and 32 there run on the deck face.</li>
+          <li><b>The module sits 1 mm right of centre</b> to clear it.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tablewrap wide"><table>
+      <thead><tr><th>Pin</th><th>Pico 2</th><th>ESP32-P4</th><th>Rev A</th><th>Rev B</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td class="m">1, 2</td><td class="m">GP0, GP1</td><td class="m">GPIO52, 51</td><td>SPARE1, SPARE2 (MIDI by link)</td><td>same</td><td></td></tr>
+        <tr><td class="m">4, 5</td><td class="m">GP2, GP3</td><td class="m">GPIO31, 30</td><td>SDA, SCL</td><td>same</td><td></td></tr>
+        <tr><td class="m">6</td><td class="m">GP4</td><td class="m">GPIO29</td><td>EXP_INT</td><td>GATE_IN3</td><td>EXP_INT dropped: the firmware polls the expander</td></tr>
+        <tr><td class="m">7</td><td class="m">GP5</td><td class="m">GPIO28</td><td>LED_DATA</td><td>same</td><td></td></tr>
+        <tr><td class="m">9, 10, 12</td><td class="m">GP6, 7, 9</td><td class="m">GPIO50, 49, 4</td><td>GATE_IN1, 2, 4</td><td>same</td><td></td></tr>
+        <tr><td class="m">11</td><td class="m">GP8</td><td class="m">GPIO5</td><td>GATE_IN3</td><td>SPIB_MISO</td><td>the Pico's other SPI1 data-in pin</td></tr>
+        <tr><td class="m">14, 15</td><td class="m">GP10, GP11</td><td class="m">GPIO3, 2</td><td>SPIB_SCK, SPIB_MOSI</td><td>same</td><td>the pots ADC and 595 keep their own bus (spec §6.1)</td></tr>
+        <tr><td class="m">16, 17</td><td class="m">GP12, GP13</td><td class="m">GPIO8, 7: the P4's own I2C</td><td>SPIB_MISO, CS_595</td><td>two holes, P4_SCL and P4_SDA</td><td>reserved for the P4's own I2C on every board, so its camera, display and codec keep their bus</td></tr>
+        <tr><td class="m">19</td><td class="m">GP14</td><td class="m">GPIO24</td><td>CS_POT</td><td>same</td><td></td></tr>
+        <tr><td class="m">20</td><td class="m">GP15</td><td class="m">GPIO25</td><td>unused</td><td>CS_595</td><td>free since jack detect was dropped</td></tr>
+        <tr><td class="m">21</td><td class="m">GP16</td><td class="m">GPIO48, programmable bank</td><td>SPIA_MISO</td><td>CS_DAC</td><td>the programmable bank now only drives outwards</td></tr>
+        <tr><td class="m">22, 24</td><td class="m">GP17, GP18</td><td class="m">GPIO47, 46, programmable bank</td><td>CS_ADC, SPIA_SCK</td><td>same</td><td></td></tr>
+        <tr><td class="m">25</td><td class="m">GP19</td><td class="m">GPIO33</td><td>SPIA_MOSI</td><td>same</td><td></td></tr>
+        <tr><td class="m">26</td><td class="m">GP20</td><td class="m">GPIO32</td><td>CS_DAC</td><td>SPIA_MISO</td><td>an SPI0 data-in pin on the Pico, a 3.3 V bank on the P4</td></tr>
+        <tr><td class="m">27–34</td><td class="m">GP21, 22, 26–28</td><td class="m">GPIO27, 26, 23, 22, 21</td><td>I2S</td><td>same</td><td></td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">Both SPI buses stay as on Rev A. The spec (§6.1) gives the converter bus to the CV ADC and DAC alone, for audio-rate CV at about 41 kHz per channel. The pots ADC runs at 1 MHz at most, so a pot read on that bus would block the converters for a whole CV sample period.
+      Pins 16 and 17 go to the P4, and pin 20 (free) takes CS_595, but the pots ADC's data line still needs a pin. EXP_INT is dropped (agreed 2026-10-25): the firmware polls the expander, and gate input 3 takes its pin.
+      On the P4, pins 21, 22 and 24 carry only signals the module drives, so a programmable bank left off or at 1.8 V can no longer have 3.3 V forced into it. The converters still need the one-line firmware fix before they work.
+      Rev B is the Pico 2 / ESP32-P4 board; the Teensy board stays at Rev A.</p>
+  </section>
+
+  <div class="two">
+    <div class="panelbox">
+      <h2>What it means for the board</h2>
+      <ul>
+        <li><b>A hole level with every signal pad.</b> Signals land on each cell's A pad (positions 1, 4, 7, 17, 20, 23, 32, 35, 38) and on B for a pot's wiper. A channel hole beside each one makes every panel wire a short sideways hop.</li>
+        <li><b>The same set on both sides.</b> Each strip has 9 cells and 11 signal wires. Pots and switches in the top band on both sides, so the deck works fitted either way round.</li>
+        <li><b>Zones follow the bands.</b> Pots ADC, pot reference and switch expander at the top. CV channels in the middle, two per side; they are switchable, so each side holds whole channels. Gate inputs on the PCB right, gate outputs and the 595 on the PCB left. Codec at the bottom centre, inputs right, outputs left.</li>
+        <li><b>The power header has to move.</b> On Rev A it sits at positions 33–37 next to the PCB's right strip, exactly where the audio-in holes need to go. Rev B puts it in the lower gap instead.</li>
+        <li><b>Utility holes in the gap rows</b> (10–16 and 26–31), where the deck has no pads: screen I2C and LEDs in the top gap, MIDI and gate expansion in the lower one.</li>
+        <li><b>More holes than one panel uses.</b> The channel set above keeps about Rev A's count (34 against 35) but spends it on cheap channels, so other panels can be wired from the same board.</li>
+      </ul>
+    </div>
+    <div class="panelbox">
+      <h2>Variants and open questions</h2>
+      <ul>
+        <li><b>MIDI.</b> Swap JPS8 (CV in 2, panel left) for MIDI in and JPS11 (CV out 2, panel right) for MIDI out. Ins stay left and outs right, and the MIDI circuit holes sit in the lower gap rows. A TRS jack uses A and B (tip and ring).</li>
+        <li><b>Screen.</b> It mounts in the front panel; a panel with one leaves the cells it covers empty. Its I2C holes are in the top gap rows.</li>
+        <li><b>Module.</b> In the middle, USB end down: see "Module, pins and power".</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="src">patch.Init() feature set: <a href="https://www.perfectcircuit.com/electrosmith-patch-init.html">Perfect Circuit</a>,
+    <a href="https://forum.electro-smith.com/t/patch-init-of-cv-outs/9179">Electrosmith forum (the second CV output drives the LED)</a>,
+    <a href="https://www.synthtopia.com/content/2022/01/25/electrosmith-intros-40-platform-for-creating-dsp-based-eurorack-modules/">Synthtopia</a>.
+    Deck geometry and pads: n8synth 10HP template and <code>docs/mod2_reference_review.md</code>.</p>
+</div>
+
+<script>
+(function () {
+  // The mock-up. strip: the deck strip a cell's pads reach (L = panel left); pos: its A pad's strip position
+  const CELLS = [
+    { n: 1, col: 0, row: 0, strip: "L", pos: 1, part: "pot", label: "POT 1", A: "POT_REF", B: "POT1" },
+    { n: 2, col: 1, row: 0, strip: "L", pos: 4, part: "button", label: "BUTTON", A: "SW1" },
+    { n: 3, col: 2, row: 0, strip: "R", pos: 1, part: "pot", label: "POT 2", A: "POT_REF", B: "POT2" },
+    { n: 4, col: 0, row: 1, strip: "L", pos: 7, part: "pot", label: "POT 3", A: "POT_REF", B: "POT3" },
+    { n: 5, col: 1, row: 1, strip: "R", pos: 4, part: "toggle", label: "TOGGLE", A: "SW2" },
+    { n: 6, col: 2, row: 1, strip: "R", pos: 7, part: "pot", label: "POT 4", A: "POT_REF", B: "POT4" },
+    { n: 7, col: 0, row: 2, strip: "L", pos: 17, part: "jack", label: "CV IN 1", A: "CV1" },
+    { n: 8, col: 1, row: 2, strip: "L", pos: 20, part: "jack", label: "CV IN 2", A: "CV2" },
+    { n: 9, col: 2, row: 2, strip: "R", pos: 17, part: "jack", label: "CV OUT 1", A: "CV3" },
+    { n: 10, col: 0, row: 3, strip: "L", pos: 23, part: "jack", label: "GATE IN 1", A: "GIN1" },
+    { n: 11, col: 1, row: 3, strip: "R", pos: 20, part: "jack", label: "CV OUT 2", A: "CV4" },
+    { n: 12, col: 2, row: 3, strip: "R", pos: 23, part: "jack", label: "GATE OUT 1", A: "GOUT1" },
+    { n: 13, col: 0, row: 4, strip: "L", pos: 32, part: "jack", label: "AUDIO IN L", A: "AIN1" },
+    { n: 14, col: 1, row: 4, strip: "L", pos: 35, part: "jack", label: "GATE IN 2", A: "GIN2" },
+    { n: 15, col: 2, row: 4, strip: "R", pos: 32, part: "jack", label: "AUDIO OUT L", A: "AOUT1" },
+    { n: 16, col: 0, row: 5, strip: "L", pos: 38, part: "jack", label: "AUDIO IN R", A: "AIN2" },
+    { n: 17, col: 1, row: 5, strip: "R", pos: 35, part: "jack", label: "GATE OUT 2", A: "GOUT2" },
+    { n: 18, col: 2, row: 5, strip: "R", pos: 38, part: "jack", label: "AUDIO OUT R", A: "AOUT2" },
+  ];
+  const RULES = [
+    ["a", "10HP", "The n8synth 10HP deck: 18 cells in three columns and six rows, one part per cell."],
+    ["b", "Controls at the top", "Four pots, a button and a toggle fill the top two rows. Screen I2C holes go in the top gap rows."],
+    ["c", "Jacks next", "Rows 3 and 4: CV in and out, gate in and out."],
+    ["d", "Audio at the bottom", "Rows 5 and 6. Ins on the panel's left (the PCB's right), outs on the panel's right."],
+    ["e", "Even sides", "Every input reaches the panel's left strip and every output the right: 9 cells and 11 wires each."],
+    ["f", "Others in the gaps", "MIDI swaps in for the middle CV pair; its circuit holes sit in the gap rows, where the deck has no pads."],
+  ];
+  const KINDS = [["pot", "Pot wiper"], ["ref", "Pot reference"], ["sw", "Switch"], ["cv", "CV"], ["gin", "Gate in"], ["gout", "Gate out"], ["aud", "Audio"], ["midi", "MIDI"], ["gnd", "Ground"]];
+  function kind(net) {
+    if (net === "GND") return "gnd";
+    if (net === "POT_REF") return "ref";
+    if (/^POT\d/.test(net)) return "pot";
+    if (/^SW\d/.test(net)) return "sw";
+    if (/^CV\d/.test(net)) return "cv";
+    if (/^GIN/.test(net)) return "gin";
+    if (/^GOUT/.test(net)) return "gout";
+    return "aud";
+  }
+  const cellKind = c => c.part === "pot" ? "pot" : c.part === "jack" ? kind(c.A) : "sw";
+
+  document.getElementById("rules").innerHTML = RULES.map(([k, t, d]) => `<div class="rule"><b><span>${k}</span>${t}</b><p>${d}</p></div>`).join("");
+  document.getElementById("legend").innerHTML = KINDS.map(([k, l]) => `<span class="k-${k}"><i class="g${k === "ref" ? " ring" : ""}${k === "gnd" ? " sq" : ""}"></i>${l}</span>`).join("")
+    + `<span style="--kc: var(--k-deck)"><i class="g" style="border-radius:1px;width:4px;height:12px"></i>Strip the cell reaches</span>`;
+
+  // ---- the panel, front view, mm
+  (function panel() {
+    const W = 50.5, H = 128.5, ox = 0.45, oy = 12.75, CX = [9.47, 24.71, 39.95];
+    let s = `<svg class="draw panel" viewBox="-1 -1 ${W + 2} ${H + 2}" role="img" aria-label="10HP panel mock-up, front view">`;
+    s += `<rect x="0" y="0" width="${W}" height="${H}" rx="0.8" fill="var(--panel)" stroke="var(--panel-edge)" stroke-width="0.3"/>`;
+    [[7.5, 3], [43.06, 3], [7.5, H - 3], [43.06, H - 3]].forEach(([x, y]) =>
+      s += `<rect x="${x - 1.6}" y="${y - 1.6}" width="3.2" height="3.2" rx="1.6" fill="var(--bg)" stroke="var(--panel-edge)" stroke-width="0.25"/>`);
+    s += `<text x="${W / 2}" y="9.4" text-anchor="middle" font-size="2.2" class="muted">patch.Init()-style mock-up</text>`;
+    s += `<text x="${W / 2}" y="${H - 7}" text-anchor="middle" font-size="1.8" class="muted">10HP · n8synth deck</text>`;
+    CELLS.forEach(c => {
+      const cx = ox + CX[c.col], cy = oy + 8.49 + 17.23 * c.row, k = cellKind(c);
+      s += `<g class="k-${k}">`;
+      s += `<rect x="${cx - 7.2}" y="${cy - 7.6}" width="14.4" height="15.4" rx="1" fill="none" stroke="var(--panel-edge)" stroke-width="0.2" stroke-dasharray="0.8 0.6"/>`;
+      s += `<rect x="${c.strip === "L" ? cx - 7.2 : cx + 6.6}" y="${cy - 7.6}" width="0.6" height="15.4" fill="var(--k-deck)"/>`;
+      s += `<text x="${c.strip === "L" ? cx - 6.1 : cx + 6.1}" y="${cy - 5.4}" text-anchor="${c.strip === "L" ? "start" : "end"}" font-size="1.5" class="muted">${c.n}</text>`;
+      const gy = cy - 1.2;
+      if (c.part === "pot") {
+        s += `<circle cx="${cx}" cy="${gy}" r="4.3" fill="var(--knob)" stroke="var(--kc)" stroke-width="0.55"/>`;
+        s += `<line x1="${cx}" y1="${gy}" x2="${cx - 1.7}" y2="${gy - 3}" stroke="var(--kc)" stroke-width="0.6" stroke-linecap="round"/>`;
+      } else if (c.part === "jack") {
+        s += `<circle cx="${cx}" cy="${gy}" r="3.1" fill="var(--nut)" stroke="var(--kc)" stroke-width="0.6"/>`;
+        s += `<circle cx="${cx}" cy="${gy}" r="1.7" fill="var(--hole)"/>`;
+      } else if (c.part === "button") {
+        s += `<circle cx="${cx}" cy="${gy}" r="3.4" fill="var(--nut)" stroke="var(--kc)" stroke-width="0.5"/>`;
+        s += `<circle cx="${cx}" cy="${gy}" r="2.3" fill="var(--kc)"/>`;
+      } else {
+        s += `<circle cx="${cx}" cy="${gy}" r="2.6" fill="var(--nut)" stroke="var(--kc)" stroke-width="0.5"/>`;
+        s += `<line x1="${cx}" y1="${gy}" x2="${cx + 1.3}" y2="${gy - 4.2}" stroke="var(--ink)" stroke-width="1" stroke-linecap="round"/>`;
+      }
+      s += `<text x="${cx}" y="${cy + 5.6}" text-anchor="middle" font-size="1.75" class="lab">${c.label}</text></g>`;
+    });
+    document.getElementById("panel").innerHTML = s + "</svg>";
+  })();
+
+  // ---- the PCB, module-side view, mm. Panel-left strip (deck L) is on the PCB's right.
+  const y = n => 2.07 + 2.54 * (n - 1);
+  function holesFor(strip) {   // [position, net] for every signal pad on this strip, plus one ground hole
+    const out = [];
+    CELLS.filter(c => c.strip === strip).forEach(c => { out.push([c.pos, c.A]); if (c.B) out.push([c.pos + 1, c.B]); });
+    out.push([3, "GND"]);
+    return out.sort((a, b) => a[0] - b[0]);
+  }
+  (function pcb() {
+    const BW = 49.6, BH = 103, M = 25;
+    const side = { R: { outer: 1.92, inner: 4.46, hole: 7.0, lx: 8.5, anchor: "start", bx: -1.2, tx: -2.2, tanchor: "end" },      // panel-right strip, PCB left
+                   L: { outer: 47.68, inner: 45.14, hole: 42.6, lx: 41.1, anchor: "end", bx: BW + 1.2, tx: BW + 2.2, tanchor: "start" } };
+    let s = `<svg class="draw pcb" viewBox="${-M} -5 ${BW + 2 * M} ${BH + 8}" role="img" aria-label="PCB plan, module side view">`;
+    s += `<rect x="0" y="0" width="${BW}" height="${BH}" rx="1" fill="var(--board)" stroke="var(--board-edge)" stroke-width="0.35"/>`;
+    s += `<text x="${3.2}" y="-1.6" text-anchor="middle" font-size="1.6" class="muted">panel right</text>`;
+    s += `<text x="${BW - 3.2}" y="-1.6" text-anchor="middle" font-size="1.6" class="muted">panel left</text>`;
+    // zones
+    const Z = [[1, 23, ["Pots ADC", "pot reference", "switch expander"]], [25, 40, ["screen I2C, LEDs", "spare GPIO holes"]],
+               [42, 64, ["◀ CV out, gate out", "CV in, gate in ▶", "(CV channels switchable)"]], [66, 79, ["MIDI circuit,", "gate expansion holes"]],
+               [81, 101, ["◀ audio out", "codec", "audio in ▶"]]];
+    Z.forEach(([a, b, lines]) => {
+      s += `<rect class="zone" x="17.2" y="${a}" width="15.2" height="${b - a}" rx="1"/>`;
+      const mid = (a + b) / 2 - (lines.length - 1) * 1.15;
+      lines.forEach((t, i) => s += `<text class="zt" x="24.8" y="${mid + i * 2.3 + 0.6}" text-anchor="middle" font-size="1.65">${t}</text>`);
+    });
+    // Rev A power header (J201 and its shroud) where the audio-in holes want to be
+    s += `<rect class="warnbox" x="33.7" y="78.3" width="8.9" height="20.3" rx="0.6"/>`;
+    s += `<text class="warn" x="38.15" y="87.6" text-anchor="middle" font-size="1.45">Rev A</text><text class="warn" x="38.15" y="89.5" text-anchor="middle" font-size="1.45">power</text><text class="warn" x="38.15" y="91.4" text-anchor="middle" font-size="1.45">header</text>`;
+    // strips
+    const padRow = n => (n >= 1 && n <= 9) || (n >= 17 && n <= 25) || (n >= 32 && n <= 40);
+    ["L", "R"].forEach(st => {
+      const g = side[st];
+      for (let n = 1; n <= 40; n++) {
+        const on = padRow(n);
+        [g.outer, g.inner].forEach(x => s += `<circle cx="${x}" cy="${y(n)}" r="0.55" fill="${on ? "var(--k-deck)" : "none"}" stroke="${on ? "none" : "var(--muted)"}" stroke-width="0.2"/>`);
+      }
+      // cells in the margin
+      CELLS.filter(c => c.strip === st).forEach(c => {
+        s += `<line x1="${g.bx}" y1="${y(c.pos) - 0.9}" x2="${g.bx}" y2="${y(c.pos + 2) + 0.9}" stroke="var(--k-deck)" stroke-width="0.35"/>`;
+        s += `<text x="${g.tx}" y="${y(c.pos + 1) - 0.25}" text-anchor="${g.tanchor}" font-size="1.55" class="muted">JPS${c.n}</text>`;
+        s += `<text x="${g.tx}" y="${y(c.pos + 1) + 1.75}" text-anchor="${g.tanchor}" font-size="1.7" class="lab k-${cellKind(c)}" style="fill: var(--kc)">${c.label}</text>`;
+      });
+      // a channel hole level with each signal pad
+      holesFor(st).forEach(([n, net]) => {
+        const k = kind(net), yy = y(n);
+        s += `<line x1="${g.inner}" y1="${yy}" x2="${g.hole}" y2="${yy}" stroke="var(--muted)" stroke-width="0.25" stroke-dasharray="0.6 0.4"/>`;
+        s += k === "gnd"
+          ? `<rect x="${g.hole - 0.75}" y="${yy - 0.75}" width="1.5" height="1.5" fill="var(--k-gnd)"/>`
+          : `<circle class="k-${k}" cx="${g.hole}" cy="${yy}" r="0.8" fill="${k === "ref" ? "var(--board)" : "var(--kc)"}" stroke="var(--kc)" stroke-width="${k === "ref" ? 0.45 : 0}"/>`;
+        s += `<text x="${g.lx}" y="${yy + 0.6}" text-anchor="${g.anchor}" font-size="1.7">${net}</text>`;
+      });
+    });
+    document.getElementById("pcb").innerHTML = s + "</svg>";
+  })();
+
+  // ---- the Rev B hole template, module side. PCB left = the panel's right strip (outputs), PCB right = the panel's left
+  // strip (inputs). c1 is the column next to the strip, c2 the next one in. [position, column, net]
+  const TPL = {
+    R: [[1, "c1", "POT_REF"], [1, "c2", "SW1"], [2, "c1", "POT1"], [4, "c1", "POT_REF"], [4, "c2", "SW2"], [5, "c1", "POT2"],
+        [7, "c1", "POT_REF"], [7, "c2", "SW4"], [8, "c1", "POT4"], [9, "c2", "GND"],
+        [17, "c1", "CV1"], [17, "c2", "GIN1"], [20, "c1", "CV2"], [20, "c2", "GIN2"], [23, "c1", "CV3"], [23, "c2", "GIN3"], [25, "c2", "GND"],
+        [32, "c1", "AIN_L"], [32, "c2", "GIN4"], [35, "c1", "CVI7"], [35, "c2", "MIDI_IN_T"], [36, "c2", "MIDI_IN_R"], [38, "c1", "AIN_R"], [40, "c2", "GND"]],
+    L: [[1, "c1", "POT_REF"], [1, "c2", "SW3"], [2, "c1", "POT3"], [4, "c1", "POT_REF"], [4, "c2", "SW5"], [5, "c1", "POT5"],
+        [7, "c1", "POT_REF"], [7, "c2", "SW6"], [8, "c1", "POT6"], [9, "c2", "GND"],
+        [17, "c1", "CV4"], [17, "c2", "GOUT1"], [20, "c1", "CV5"], [20, "c2", "GOUT2"], [23, "c1", "CV6"], [23, "c2", "GOUT3"], [24, "c2", "GND"],
+        [34, "c1", "AOUT_L"], [34, "c2", "GOUT4"], [35, "c1", "CVO7"], [35, "c2", "MIDI_OUT_T"], [36, "c2", "MIDI_OUT_R"], [38, "c1", "AOUT_R"], [40, "c2", "GND"]],
+  };
+  const tkind = net => /^CV[IO]/.test(net) ? "cv" : /^MIDI/.test(net) ? "midi" : /^A(IN|OUT)_/.test(net) ? "aud" : kind(net);
+  (function template() {
+    const rows = [];                       // grid rows: a strip position, or a gap band
+    [[1, 9], [17, 25], [32, 40]].forEach(([a, b], i) => {
+      for (let n = a; n <= b; n++) rows.push(n);
+      if (i === 0) rows.push("gap1"); else if (i === 1) rows.push("gap2");
+    });
+    const at = p => rows.indexOf(p) + 2;   // grid row of a position (row 1 holds the headings)
+    const C = { rn: 1, cl: 2, Lc1: 3, Lc2: 4, mid: 5, Rc2: 6, Rc1: 7, cr: 8, rn2: 9 };
+    let h = "";
+    const put = (cls, col, r0, r1, html) => {
+      const c = Array.isArray(col) ? `${C[col[0]]} / ${C[col[1]] + 1}` : C[col];
+      h += `<div class="${cls}" style="grid-column:${c};grid-row:${r0}${r1 ? " / " + (r1 + 1) : ""}">${html}</div>`;
+    };
+    [["rn", "Pos"], ["cl", "Deck"], ["Lc1", "Next to strip"], ["Lc2", "Next in"], ["mid", "Circuits"], ["Rc2", "Next in"], ["Rc1", "Next to strip"], ["cr", "Deck"], ["rn2", "Pos"]]
+      .forEach(([c, t]) => put("ch", c, 1, 0, t));
+    rows.forEach(p => {
+      if (typeof p === "number") { put("rn", "rn", at(p), 0, p); put("rn", "rn2", at(p), 0, p); }
+    });
+    put("gaprow", ["cl", "cr"], at("gap1"), 0, "Positions 10–16, no deck pads: screen I2C, P4 I2C, WS2812 LEDs, codec reset");
+    put("gaprow", ["mid", "cr"], at("gap2"), 0, "Positions 26–31, no deck pads: MIDI circuit, gate expansion");
+    put("pwrhdr", ["Lc1", "Lc2"], at(25), at(32), "power header<br>2×5 keyed,<br>positions 25–32");
+    // deck cells: PCB left shows the panel's right strip
+    CELLS.forEach(c => put("cell", c.strip === "R" ? "cl" : "cr", at(c.pos), at(c.pos + 2), `JPS${c.n}<small>panel ${c.strip === "R" ? "right" : "left"}</small>`));
+    // holes
+    ["L", "R"].forEach(side => TPL[side].forEach(([p, col, net]) => {
+      const k = tkind(net);
+      const g = `<i class="g${k === "ref" ? " ring" : ""}${k === "gnd" ? " sq" : ""}"></i>`;
+      put(`hole k-${k}`, side + col, at(p), 0, `${g}<span>${net}</span>`);
+    }));
+    // zones
+    put("zone2", "mid", at(1), at(9), "<b>Top, under the P4's antenna end</b>pots ADC, pot reference<br>switch expander");
+    put("zone2", "mid", at(17), at(25), "<b>Middle, mostly under the module</b>DAC, ADC, a DG412 each side<br>◀ output stages, 595 · LM393 gate ins ▶");
+    put("zone2", "mid", at(32), at(40), "<b>Bottom</b>◀ codec outputs · codec · codec inputs ▶<br>MIDI driver ◀ ▶ MIDI receiver");
+    document.getElementById("tpl").innerHTML = h;
+  })();
+
+  // ---- Rev B floorplan, module side, mm. USB end down; the module 1 mm right of centre to clear the power header
+  (function floorplan() {
+    const BW = 49.6, BH = 103, M = 31, MX = 25.8, SOCK = [17.9, 68.9];   // Pico footprint: far end, USB end
+    const P4 = [SOCK[0] - 16.9, SOCK[1] + 3.2];                             // Waveshare drawing: 16.9 past the far end, 3.2 past the USB end
+    const rowR = MX + 8.89, rowL = MX - 8.89;                               // USB down: pins 1-20 on the PCB right, 21-40 on the left
+    const pinY = n => n <= 20 ? SOCK[1] - 1.37 - (n - 1) * 2.54 : SOCK[0] + 1.37 + (n - 21) * 2.54;
+    const pinX = n => n <= 20 ? rowR : rowL;
+    const y = n => 2.07 + 2.54 * (n - 1);
+    const GROUPS = [["MIDI UART", [1, 2], "midi"], ["I2C to expander", [4, 5], "dig"], ["gate in 3", [6], "gin"], ["LED data", [7], "dig"],
+      ["gate in 1, 2", [9, 10], "gin"], ["panel SPI data in", [11], "spi2"], ["gate in 4", [12], "gin"], ["panel SPI", [14, 15], "spi2"],
+      ["P4 I2C, to 2 holes", [16, 17], "p4"], ["CS_POT, CS_595", [19, 20], "spi2"], ["converter SPI", [21, 22, 24, 25, 26], "spi"],
+      ["I2S to codec", [27, 29, 31, 32, 34], "aud"], ["power", [36, 39, 40], "pwr"]];
+    let s = `<svg class="draw" viewBox="${-M} -4 ${BW + 2 * M} ${BH + 7}" role="img" aria-label="Rev B floorplan, module side">`;
+    s += `<rect x="0" y="0" width="${BW}" height="${BH}" rx="1" fill="var(--board)" stroke="var(--board-edge)" stroke-width="0.35"/>`;
+    s += `<text x="3.2" y="-1.4" text-anchor="middle" font-size="1.5" class="muted">panel right</text><text x="${BW - 3.2}" y="-1.4" text-anchor="middle" font-size="1.5" class="muted">panel left</text>`;
+    // zones above and below the module
+    s += `<rect class="zone" x="11" y="2" width="28" height="14.6" rx="1"/>`;
+    s += `<text class="zt" x="25" y="12.4" text-anchor="middle" font-size="1.5">top: pots ADC, expander</text><text class="zt" x="25" y="14.4" text-anchor="middle" font-size="1.35">low parts, under the P4's antenna</text>`;
+    s += `<rect class="zone" x="11" y="77" width="28" height="24" rx="1"/>`;
+    s += `<text class="zt" x="25" y="96.6" text-anchor="middle" font-size="1.5">bottom: codec, audio, MIDI</text><text class="zt" x="25" y="98.6" text-anchor="middle" font-size="1.35">low parts under the USB plug</text>`;
+    // strips: Rev B keeps holes only where the 10HP deck has header pins
+    const omit = n => (n >= 11 && n <= 15) || (n >= 26 && n <= 30);
+    [[1.92, 4.46], [45.14, 47.68]].forEach(xs => {
+      for (let n = 1; n <= 40; n++) {
+        if (omit(n)) continue;
+        const pad = !(n === 10 || n === 16 || n === 31);
+        xs.forEach(x => s += `<circle cx="${x}" cy="${y(n)}" r="0.5" fill="${pad ? "var(--k-deck)" : "none"}" stroke="${pad ? "none" : "var(--muted)"}" stroke-width="0.2"/>`);
+      }
+    });
+    // wiring holes from the template
+    const COLX = { L: { c1: 7.0, c2: 9.54 }, R: { c1: 42.6, c2: 40.06 } };
+    ["L", "R"].forEach(side => TPL[side].forEach(([p, col, net]) => {
+      const k = tkind(net), x = COLX[side][col], yy = y(p);
+      s += k === "gnd" ? `<rect x="${x - 0.6}" y="${yy - 0.6}" width="1.2" height="1.2" fill="var(--k-gnd)"/>`
+        : `<circle class="k-${k}" cx="${x}" cy="${yy}" r="0.65" fill="${k === "ref" ? "var(--board)" : "var(--kc)"}" stroke="var(--kc)" stroke-width="${k === "ref" ? 0.35 : 0}"/>`;
+    }));
+    // power header: keyed 2x5, pins at x 9.0 / 11.54, centred on the gap
+    s += `<rect x="5.82" y="61.7" width="8.9" height="20.4" rx="0.6" fill="color-mix(in srgb, var(--k-pwr) 14%, var(--board))" stroke="var(--k-pwr)" stroke-width="0.35"/>`;
+    for (let i = 0; i < 5; i++) [9.0, 11.54].forEach(x => s += `<rect x="${x - 0.5}" y="${66.82 + i * 2.54 - 0.5}" width="1" height="1" fill="var(--k-pwr)"/>`);
+    s += `<text x="-2" y="71.4" text-anchor="end" font-size="1.6" style="fill: var(--k-pwr)">power header</text><text x="-2" y="73.4" text-anchor="end" font-size="1.4" class="muted">in the lower gap</text>`;
+    s += `<line x1="5.6" y1="72" x2="-1.4" y2="72" stroke="var(--k-pwr)" stroke-width="0.2" stroke-dasharray="0.6 0.4"/>`;
+    // ESP32-P4-WIFI6 outline, antenna, camera and display connectors, USB and its plug
+    s += `<rect x="${MX - 10.5}" y="${P4[0]}" width="21" height="${P4[1] - P4[0]}" rx="1" fill="none" stroke="var(--accent)" stroke-width="0.3" stroke-dasharray="1 0.6"/>`;
+    s += `<rect x="${MX - 10.5}" y="${P4[0]}" width="21" height="7" fill="color-mix(in srgb, var(--accent) 16%, transparent)"/>`;
+    s += `<text x="${MX}" y="${P4[0] + 4.4}" text-anchor="middle" font-size="1.5" style="fill: var(--accent)">P4 antenna end</text>`;
+    [22.3, 36.1].forEach(d => s += `<rect x="${MX - 7}" y="${P4[1] - d - 0.6}" width="14" height="1.2" fill="var(--accent)" opacity="0.55"/>`);
+    s += `<text x="${MX}" y="${P4[1] - 29.2 + 0.5}" text-anchor="middle" font-size="1.3" style="fill: var(--accent)">camera / display FPC</text>`;
+    s += `<rect x="${MX - 4.5}" y="${P4[1] - 0.8}" width="9" height="2.1" rx="0.5" fill="var(--nut)" stroke="var(--ink)" stroke-width="0.2"/>`;
+    s += `<rect x="${MX - 6}" y="${P4[1] + 1.5}" width="12" height="${96 - P4[1] - 1.5}" rx="1" fill="none" stroke="var(--muted)" stroke-width="0.25" stroke-dasharray="0.8 0.6"/>`;
+    s += `<text x="${MX}" y="${P4[1] + 6}" text-anchor="middle" font-size="1.4" class="muted">USB plug</text>`;
+    // Pico footprint and its pins
+    s += `<rect x="${MX - 10.5}" y="${SOCK[0]}" width="21" height="${SOCK[1] - SOCK[0]}" rx="0.6" fill="none" stroke="var(--ink)" stroke-width="0.3"/>`;
+    GROUPS.forEach(([label, pins, k]) => {
+      const ys = pins.map(pinY), x = pinX(pins[0]), y0 = Math.min(...ys) - 1.1, y1 = Math.max(...ys) + 1.1, ym = (y0 + y1) / 2;
+      s += `<rect class="k-${k}" x="${x - 1}" y="${y0}" width="2" height="${y1 - y0}" rx="0.5" fill="var(--kc)" opacity="${k === "free" ? 0.25 : 0.5}"/>`;
+      const right = x > MX, tx = right ? BW + 2 : -2;
+      s += `<line x1="${right ? x + 1.1 : x - 1.1}" y1="${ym}" x2="${right ? BW + 1.4 : -1.4}" y2="${ym}" stroke="var(--muted)" stroke-width="0.15" stroke-dasharray="0.5 0.5"/>`;
+      s += `<text x="${tx}" y="${ym + 0.55}" text-anchor="${right ? "start" : "end"}" font-size="1.6" class="k-${k}" style="fill: var(--kc)">${label}</text>`;
+    });
+    for (let n = 1; n <= 40; n++) s += `<rect x="${pinX(n) - 0.45}" y="${pinY(n) - 0.45}" width="0.9" height="0.9" fill="var(--ink)"/>`;
+    s += `<text x="${MX}" y="${SOCK[0] + 3.2}" text-anchor="middle" font-size="1.45">Pico 2 footprint</text><text x="${MX}" y="${SOCK[1] - 2.2}" text-anchor="middle" font-size="1.45">USB end</text>`;
+    document.getElementById("floor").innerHTML = s + "</svg>";
+  })();
+
+  // ---- strip tables
+  document.getElementById("strips").innerHTML = [["L", "Panel left strip (PCB right)"], ["R", "Panel right strip (PCB left)"]].map(([st, title]) => {
+    const cs = CELLS.filter(c => c.strip === st).sort((a, b) => a.pos - b.pos);
+    let wires = 0;
+    const rows = cs.map(c => {
+      const w = [`A ${c.pos} → <span class="chip k-${kind(c.A)}">${c.A}</span>`];
+      if (c.B) w.push(`B ${c.pos + 1} → <span class="chip k-${kind(c.B)}">${c.B}</span>`);
+      wires += w.length;
+      const rest = c.part === "pot" ? `C ${c.pos + 2} → D` : c.part === "jack" ? "sleeve → D" : "return → D";
+      return `<tr><td class="m">JPS${c.n}</td><td class="m">${c.label}</td><td>${w.join("<br>")}</td><td class="m" style="color:var(--muted)">${rest}</td></tr>`;
+    }).join("");
+    return `<div class="tablewrap"><table><thead><tr><th colspan="4">${title}</th></tr><tr><th>Cell</th><th>Part</th><th>Signal wires</th><th>Ground</th></tr></thead><tbody>${rows}</tbody>`
+      + `<tfoot><tr><td colspan="2">9 cells</td><td>${wires} wires</td><td></td></tr></tfoot></table></div>`;
+  }).join("");
+})();
+</script>
+
+</body></html>

@@ -149,8 +149,8 @@ Boy2 has no pots.
 
 The panel is Boy's, fitted to the n8synth 10HP deck: a push encoder replaces the button and pot 1,
 and TRS MIDI in replaces Boy's USB-only input. The full wire list is in stage 8 of the bring-up
-plan, and the [wiring map](https://claude.ai/artifact/RptmC4zktQrcPzZHXxPau4) draws it batch by
-batch.
+plan, and the [wiring map](analogue_board_bringup/wiring_map.html) draws it batch by batch. That's
+a copy kept in the repo; open it in a browser.
 
 | Panel | Board channel | Firmware |
 |---|---|---|

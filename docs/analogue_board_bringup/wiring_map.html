@@ -1,0 +1,805 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Analogue Board Wiring Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a drawing sheet. Row-for-row map of the board on the left, the deck's cells beside it, bank comparison below. */
+:root {
+  --bg: #eef1f3; --surface: #ffffff; --ink: #16202b; --muted: #586574; --line: #d3d9df;
+  --accent: #106b57; --hatch: #e3e8ec; --hl: #ffe39a; --band: #f4f6f8; --warn: #c2412d;
+  --k-cv: #2f5fd0; --k-aud: #8a4cc9; --k-gin: #23894a; --k-gout: #0b8794; --k-pot: #e06a12;
+  --k-sw: #a98000; --k-gnd: #2a2f36; --k-pwr: #d3332f; --k-midi: #c43b86; --k-dig: #6a7685;
+  --k-deck: #3d7a64;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-head: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f151b; --surface: #161e26; --ink: #e4e9ee; --muted: #93a0ad; --line: #2a3540;
+  --accent: #5cc8a8; --hatch: #1c2630; --hl: #5a4a12; --band: #131b22; --warn: #ff7a62;
+  --k-cv: #7ea2ff; --k-aud: #c39bff; --k-gin: #5fd08c; --k-gout: #4fd1dc; --k-pot: #ff9d55;
+  --k-sw: #f2c94c; --k-gnd: #d8dee6; --k-pwr: #ff7a72; --k-midi: #f27fbf; --k-dig: #a3adba;
+  --k-deck: #7fbfa8; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f151b; --surface: #161e26; --ink: #e4e9ee; --muted: #93a0ad; --line: #2a3540;
+  --accent: #5cc8a8; --hatch: #1c2630; --hl: #5a4a12; --band: #131b22; --warn: #ff7a62;
+  --k-cv: #7ea2ff; --k-aud: #c39bff; --k-gin: #5fd08c; --k-gout: #4fd1dc; --k-pot: #ff9d55;
+  --k-sw: #f2c94c; --k-gnd: #d8dee6; --k-pwr: #ff7a72; --k-midi: #f27fbf; --k-dig: #a3adba;
+  --k-deck: #7fbfa8; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--f-head); font-weight: 600; text-wrap: balance; margin: 0; letter-spacing: 0.01em; }
+h1 { font-size: 2rem; line-height: 1.15; }
+h2 { font-size: 1.35rem; }
+h3 { font-size: 1.02rem; }
+p { margin: 0; }
+.eyebrow { font-family: var(--f-head); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); font-weight: 600; }
+.lede { max-width: 68ch; color: var(--muted); }
+code, .mono { font-family: var(--f-mono); font-size: 0.86em; }
+header { display: grid; gap: 10px; }
+
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.fact { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; display: grid; gap: 4px; min-width: 0; }
+.fact b { font-family: var(--f-head); font-weight: 600; font-size: 0.98rem; }
+.fact p { color: var(--muted); font-size: 0.9rem; }
+.ok { color: var(--k-gin); font-weight: 600; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.seg button { font: 500 0.92rem var(--f-body); color: var(--ink); background: transparent; border: 0; padding: 8px 14px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--surface); }
+.seg button:focus-visible, .card:focus-visible, .jps:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hint { color: var(--muted); font-size: 0.86rem; }
+
+.filters { border: 1px solid var(--line); border-radius: 6px; background: var(--surface); margin: 0; padding: 8px 14px 12px; display: grid; gap: 10px; min-width: 0; }
+.filters legend { font-family: var(--f-head); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); font-weight: 600; padding: 0 6px; }
+.opts { display: flex; flex-wrap: wrap; gap: 6px 8px; }
+.opt { display: inline-flex; align-items: center; gap: 6px; font-size: 0.84rem; padding: 4px 10px 4px 7px; border: 1px solid var(--line); border-radius: 5px; cursor: pointer; user-select: none;
+  background: color-mix(in srgb, var(--kc, var(--muted)) 9%, var(--surface)); }
+.opt input { margin: 0; accent-color: var(--accent); }
+.opt .ct { font-family: var(--f-mono); font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.opt.all { font-weight: 600; }
+.opt:has(input:not(:checked)) { background: var(--surface); color: var(--muted); }
+.opt:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+.key { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.8rem; color: var(--muted); }
+.key > span { display: inline-flex; align-items: center; gap: 6px; }
+.off-cv .k-cv, .off-aud .k-aud, .off-gin .k-gin, .off-gout .k-gout, .off-pot .k-pot, .off-ref .k-ref, .off-sw .k-sw,
+.off-gnd .k-gnd, .off-pwr .k-pwr, .off-midi .k-midi, .off-dig .k-dig { opacity: 0.12; }
+
+.layout { display: grid; gap: 24px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1180px) { .layout { grid-template-columns: minmax(0, 800px) minmax(0, 1fr); align-items: start; } }
+.scroll { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px; }
+
+/* the map: one grid row per edge position */
+.map { display: grid; grid-template-columns: 1.6rem 4.4rem 1.2rem 1.2rem 6.3rem 6.3rem minmax(4.6rem, 1fr) 6.3rem 1.2rem 1.2rem 7.8rem 1.6rem;
+  grid-auto-rows: 1.32rem; column-gap: 3px; row-gap: 1px; min-width: 50rem; font-size: 0.72rem; position: relative; }
+.map > * { min-width: 0; }
+.colhead { font-family: var(--f-head); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); align-self: end; text-align: center; padding-bottom: 2px; }
+.rn { font-family: var(--f-mono); color: var(--muted); text-align: center; align-self: center; font-variant-numeric: tabular-nums; }
+.rn.gap { opacity: 0.55; }
+.jps { border-radius: 4px; background: color-mix(in srgb, var(--k-deck) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--k-deck) 35%, var(--surface));
+  display: grid; place-content: center; text-align: center; font-family: var(--f-head); font-weight: 600; font-size: 0.8rem; color: var(--ink); cursor: default; line-height: 1.15; }
+.jps small { display: block; font-family: var(--f-body); font-weight: 400; font-size: 0.64rem; color: var(--muted); }
+.nopad { border-radius: 4px; background: repeating-linear-gradient(135deg, var(--hatch) 0 5px, transparent 5px 10px); border: 1px dashed var(--line);
+  display: grid; place-content: center; text-align: center; color: var(--muted); font-size: 0.66rem; line-height: 1.2; padding: 2px; }
+.strip { display: flex; align-items: center; justify-content: space-between; padding: 0 2px; position: relative; }
+.strip::before { content: ""; position: absolute; left: 8px; right: 8px; top: 50%; height: 2px; margin-top: -1px; background: var(--k-deck); opacity: 0.55; }
+.strip i, .solo i:not(.g) { width: 9px; height: 9px; border-radius: 50%; background: var(--k-deck); position: relative; z-index: 1; flex: none; }
+.strip em { position: relative; z-index: 1; font-style: normal; font-family: var(--f-mono); font-size: 0.6rem; background: var(--surface); color: var(--k-deck); padding: 0 1px; line-height: 1; }
+.strip.free i, .solo.free i { background: var(--surface); border: 1.5px solid var(--muted); width: 8px; height: 8px; }
+.strip.free::before { background: var(--muted); opacity: 0.35; }
+.solo { display: grid; place-items: center; }
+.solo.warnpad { display: flex; align-items: center; justify-content: center; gap: 1px; box-shadow: inset 0 0 0 1px var(--warn); border-radius: 3px; }
+.solo.warnpad i { background: var(--warn); width: 7px; height: 7px; }
+.solo.warnpad em { font-style: normal; font-family: var(--f-mono); font-size: 0.58rem; color: var(--warn); line-height: 1; }
+/* the Boy panel: each assigned hole outlined and named, the part on its deck cell and card */
+.hole.boyhole, .solo.boyhole { box-shadow: inset 0 0 0 2px var(--accent); }
+.hole .part, .slab .part { margin-left: auto; font-family: var(--f-head); font-weight: 600; font-size: 0.62rem; color: var(--accent); white-space: nowrap; }
+.jps .part { display: block; font-family: var(--f-head); font-weight: 600; font-size: 0.62rem; color: var(--accent); margin-top: 1px; }
+.card .part { font-family: var(--f-head); font-weight: 600; font-size: 0.9rem; color: var(--accent); }
+.card .wire { font-family: var(--f-mono); font-size: 0.68rem; color: var(--muted); line-height: 1.35; }
+.card .wire b { color: var(--ink); font-weight: 500; }
+td.across { color: var(--warn); }
+td.link { color: var(--muted); font-size: 0.8rem; }
+.card .link { font-size: 0.7rem; color: var(--k-deck); }
+/* the wires layer: each planned wire from its strip hole to its channel hole */
+.map svg.wires { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; z-index: 3; }
+.wires path { fill: none; stroke: var(--kc); stroke-width: 2; stroke-linecap: round; opacity: 0.78; }
+.wires circle { fill: var(--kc); }
+.wires path.hl { stroke-width: 4; opacity: 1; }
+/* wiring batches: the chosen batch strong, the ones wired before it faint, the later ones left off */
+.wires g.done path { stroke-width: 1.5; opacity: 0.28; }
+.wires g.done circle { opacity: 0.35; }
+.hole.boyhole.done, .solo.boyhole.done { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 45%, var(--surface)); }
+.hole.done .part, .slab .part.done { color: var(--muted); font-weight: 500; }
+.jps.now { border: 2px solid var(--accent); }
+.card.now { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 7%, var(--surface)); }
+.jps.later, .card.later, tr.later { opacity: 0.42; }
+tr.now td { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+td.bt { font-family: var(--f-head); font-weight: 600; white-space: nowrap; }
+[hidden] { display: none !important; }
+.batches { display: grid; gap: 8px; justify-items: start; }
+.batches .fitted { max-width: 90ch; }
+.tog { display: inline-flex; align-items: center; gap: 7px; font-size: 0.92rem; padding: 7px 12px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--surface); cursor: pointer; user-select: none; }
+.tog input { margin: 0; accent-color: var(--accent); }
+.tog:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+.fitted { font-size: 0.86rem; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+  border-radius: 6px; padding: 8px 12px; max-width: 72ch; }
+.hole { display: flex; align-items: center; gap: 5px; padding: 0 5px; border-radius: 3px; background: color-mix(in srgb, var(--kc) 13%, var(--surface));
+  font-family: var(--f-mono); color: var(--ink); white-space: nowrap; overflow: hidden; position: relative; }
+.hole .n { overflow: hidden; text-overflow: ellipsis; }
+.g { width: 9px; height: 9px; border-radius: 50%; background: var(--kc); flex: none; display: inline-block; }
+.g.sq { border-radius: 1px; }
+.g.ring { background: transparent; border: 2px solid var(--kc); width: 9px; height: 9px; box-sizing: border-box; }
+.wtag { margin-left: auto; font-family: var(--f-head); font-weight: 600; font-size: 0.6rem; color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 0 3px; line-height: 1.3; background: var(--surface); flex: none; }
+.wtag.nolabel { border-style: dashed; }
+.slab { display: flex; align-items: center; gap: 6px; padding: 0 5px; font-family: var(--f-mono); position: relative; z-index: 1; white-space: nowrap; overflow: hidden; }
+.slab .t { color: var(--kc); font-weight: 500; }
+.band { border-radius: 6px; border: 1px dashed var(--line); background: var(--band); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  color: var(--muted); font-size: 0.68rem; padding: 4px; line-height: 1.25; }
+.band b { font-family: var(--f-head); font-weight: 600; color: var(--ink); font-size: 0.76rem; }
+.hl { box-shadow: inset 0 0 0 100px var(--hl); }
+.k-cv { --kc: var(--k-cv) } .k-aud { --kc: var(--k-aud) } .k-gin { --kc: var(--k-gin) } .k-gout { --kc: var(--k-gout) }
+.k-pot, .k-ref { --kc: var(--k-pot) } .k-sw { --kc: var(--k-sw) } .k-gnd { --kc: var(--k-gnd) } .k-pwr { --kc: var(--k-pwr) }
+.k-midi { --kc: var(--k-midi) } .k-dig { --kc: var(--k-dig) } .k-deck { --kc: var(--k-deck) }
+
+/* the deck */
+aside { display: grid; gap: 14px; min-width: 0; }
+.deck { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 8px 9px; display: grid; gap: 5px; align-content: start; min-width: 0; cursor: default; }
+.card .top { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+.card .name { font-family: var(--f-head); font-weight: 600; font-size: 0.95rem; }
+.card .where { font-family: var(--f-mono); font-size: 0.68rem; color: var(--k-deck); white-space: nowrap; }
+.chips { display: flex; flex-wrap: wrap; gap: 3px; }
+.chip { font-family: var(--f-mono); font-size: 0.66rem; padding: 0 4px; border-radius: 3px; background: color-mix(in srgb, var(--kc) 14%, var(--surface)); color: var(--ink);
+  display: inline-flex; align-items: center; gap: 4px; line-height: 1.55; }
+.chip .g { width: 7px; height: 7px; }
+.none { color: var(--muted); font-size: 0.72rem; font-style: italic; }
+.card.hl, .jps.hl { box-shadow: 0 0 0 2px var(--accent); }
+.note { font-size: 0.86rem; color: var(--muted); max-width: 62ch; }
+
+/* banks */
+.tablewrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+table { border-collapse: collapse; width: 100%; min-width: 720px; font-size: 0.86rem; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+th { font-family: var(--f-head); font-weight: 600; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+td.b { font-family: var(--f-head); font-weight: 600; white-space: nowrap; }
+td.w { font-family: var(--f-mono); font-size: 0.78rem; white-space: nowrap; color: var(--muted); }
+td.c { color: var(--muted); font-size: 0.8rem; }
+.two { display: grid; gap: 24px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.panel ul, .panel ol { margin: 0; padding-left: 1.2em; display: grid; gap: 7px; }
+.panel li { max-width: 70ch; }
+.draft { font-family: var(--f-head); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--k-pwr); font-weight: 600; }
+section { display: grid; gap: 14px; }
+@media (prefers-reduced-motion: no-preference) { .hl { transition: box-shadow 0.12s; } }
+</style>
+
+<div class="wrap" id="app">
+  <header>
+    <div class="eyebrow">Analogue board · wiring field</div>
+    <h1>Wiring holes, edge strips and deck cells</h1>
+    <p class="lede">Every wiring hole on the Teensy board (Rev A, ordered) and the Pico 2 / ESP32-P4 board (Rev B), drawn row for row against the 40 edge-strip positions and the
+      deck cell pad at each one. Seen from the outward (module) face, as KiCad draws it: from the deck side, left and right swap.
+      Data read from the routed boards and the 10HP deck file on 2026-10-23.</p>
+    <p class="fitted"><b>Fitted as agreed, 2026-10-31:</b> the deck built the n8synth way (JPS1 top left on the front panel) and the board
+      upright behind it. Of the four ways the two boards can meet, this one needs the least hand wire for the first build.</p>
+  </header>
+
+  <div class="facts">
+    <div class="fact"><b>Outer and inner strip holes: <span class="ok">joined</span></b>
+      <p>On the routed Teensy board, all 67 positions that have an inner hole have it joined to the outer hole (the deck pin) by a 2.5 mm track: 40 on the left, 27 on the right. Nothing else on the board touches the strips, so every panel signal is a wire you add from an inner hole to a channel hole.</p></div>
+    <div class="fact"><b>Right strip gaps</b>
+      <p>The right strip has no holes at 11–15 and 26–30; some channel holes sit there instead (columns RSI and RS). At 10, 16 and 31 it keeps only the outer hole, which connects to nothing.</p></div>
+    <div class="fact"><b>Ground</b>
+      <p>Ground holes are square. Every deck cell's D pad sits on the deck-wide ground bus, so one wire from a D pad to any square hole grounds every jack and pot on the deck.</p></div>
+  </div>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Board">
+      <button type="button" id="b-teensy" data-board="teensy_core_midi" aria-pressed="true">Teensy (Rev A, ordered)</button>
+      <button type="button" id="b-revb" data-board="pico_revb" aria-pressed="false">Pico (Rev B)</button>
+    </div>
+    <div class="seg" role="group" aria-label="Panel">
+      <button type="button" id="p-enc" data-panel="enc" aria-pressed="true">Boy, encoder + MIDI in</button>
+      <button type="button" id="p-none" data-panel="none" aria-pressed="false">No panel</button>
+    </div>
+    <label class="tog" for="wires-on"><input type="checkbox" id="wires-on">Show wires</label>
+    <span class="hint">Hover or tab to a deck cell to light up its rows. Untick a type to fade it out of the map, the deck cells and the bank table.</span>
+  </div>
+
+  <div class="batches" id="batchbar">
+    <div class="seg" role="group" aria-label="Wiring batch" id="batchseg"></div>
+    <p class="fitted" id="batchnote" aria-live="polite"></p>
+  </div>
+
+  <fieldset class="filters">
+    <legend>Show</legend>
+    <div class="opts" id="opts"></div>
+    <div class="key" id="key"></div>
+  </fieldset>
+
+  <div class="layout">
+    <div class="scroll"><div class="map" id="map" aria-label="Wiring map, one row per edge position"></div></div>
+    <aside>
+      <h2>Deck cells</h2>
+      <p class="note">The 10HP deck's 18 cells as the front panel reads. Each cell's A, B and C pads land on three strip positions; the middle
+        column alternates between the strips row by row. The board map is seen from the module side, so a cell on the panel's left reaches the
+        PCB's right-hand strip. Under each cell are the holes level with its pads or, with a panel chosen, its part, its wires and
+        what its other legs do on the deck.</p>
+      <div class="deck" id="deck"></div>
+      <p class="note">On the Teensy board, cells 13 to 18 (positions 32–40) have no channel holes beside them on either side: the left has MIDI, LED and gate expansion holes there, and the right column stops at 30, above the power header.</p>
+    </aside>
+  </div>
+
+  <section id="boysec">
+    <h2>Panel wiring</h2>
+    <p class="note" id="boysum"></p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Batch</th><th>Panel</th><th>Cell</th><th>Lands on</th><th>Wire to</th><th>Block</th><th>Length</th><th>On the deck</th></tr></thead>
+      <tbody id="boyrows"></tbody>
+    </table></div>
+    <p class="note">Every wire runs from a strip's inner hole, level with its pad, to the nearest free hole it may take, by straight hand-wire length.
+      Channel names are firmware labels, so which CV is pitch 2 or which audio input is L does not matter. Gates and pitches are CV outputs (the
+      two-way channels set as outputs; Rev B's fixed CVO7 counts too), and drums, rst and clk are the four gate outputs. A jack's tip is on its A pad
+      and its sleeve goes to the cell's D pad on the deck.</p>
+    <p class="note"><b>The encoder</b> (Bourns PEC11R): its A, C (common) and B pins sit on the cell's A, B and C pads. A and B go to two gate inputs,
+      not through the I2C expander, whose bus the screen holds for about 23 ms per update. On Rev B only gate inputs 1 and 2 (GP6, GP7) are
+      neighbouring pins, as Pico PIO decoding needs. The common goes to 3.3 V, never to D, which is ground. This panel has no pots, so it takes the
+      pot reference (POT_REF, labelled REF in the bring-up pictures), much nearer than +3V3D; if pots are added later, move it to +3V3D. The push
+      switch's two pins sit on the far side of the body: one is linked on the deck to a pad borrowed from the cell beside it, the other goes to D.
+      <b>MIDI in:</b> tip (A) to MI_T, ring (B) to MI_R. Leave the sleeve open or wire it to MI_S, never to D (no ground loop).</p>
+    <p class="note"><b>Borrowed pads, the screen and ground</b> (2026-10-31). The screen sits in the panel over the first two cells, so their six pads
+      are free. The first carries the screen's SDA, SCL and 3V3 to the display holes (J703); its GND goes to D. The second carries the encoder's push
+      and the deck's one ground link: a pad bridged to D on the deck, wired to a bank's ground hole. Every D pad is on one deck-wide bus, so that
+      one wire grounds the whole deck. No wire runs between the boards outside the strips.</p>
+  </section>
+
+  <section>
+    <h2>The banks on this board</h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Bank</th><th>Where</th><th>Holes, in reading order</th><th>Mix</th></tr></thead>
+      <tbody id="banks"></tbody>
+    </table></div>
+  </section>
+
+  <div class="two">
+    <div class="panel">
+      <h2>No standard bank</h2>
+      <p>On the Teensy board (Rev A) the four banks were packed to suit routing, not laid out to one pattern:</p>
+      <ul>
+        <li><b>Different mix.</b> CVs run 3, 1, 1, 1 (CV1, CV2 and CV5 are all top left). Pots run 2, 2, 2, 0. Switches run 3, 2, 2, 2. Audio inputs are in the top banks and outputs in the lower ones.</li>
+        <li><b>Different shape.</b> The left banks fill two columns row by row; the right banks are one column, partly moved into the strip's empty positions.</li>
+        <li><b>Split banks.</b> On the Teensy board the right-middle bank's CV6, AOUT2 and GIN4 sit at RS 13–15, ten rows above its GOUT4, SW8, SW9 and ground at R 24–27.</li>
+        <li><b>Ground and reference move about.</b> The ground hole is LI 5, LI 24, RS 12 or 15, and R 27. POT_REF is LO 5, LO 24, and R 7 or RS 11.</li>
+        <li><b>A block has no silkscreen label.</b> W8: there was no room.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <span class="draft">The Rev B proposal: Rev B took it up with one column a side</span>
+      <h2>A standard bank</h2>
+      <ol>
+        <li><b>One template, same slots everywhere.</b> Take the left-top order: CV, CV, audio, gate in, pot, pot, pot reference, ground, gate out, switch, switch, switch. A bank that lacks a channel leaves that slot empty instead of closing up, so ground is always in the same place.</li>
+        <li><b>Each bank level with a band of three cells</b> (positions 1–9, 17–25 or 32–40), so every cell has its channels beside it.</li>
+        <li><b>Mirror the right side</b>, with the column nearest the strip on the outside. Two columns on the right cost 2.54 mm of the lane U501, U502 and U801 sit in, so this trades against routing space. A single right column in the same order is the cheaper option.</li>
+        <li><b>The same field on both boards.</b> Fix the field first and place the chips around it, instead of moving holes per board.</li>
+        <li><b>Number channels bank by bank</b>, so each bank holds consecutive numbers (CV1–2 top left, CV3–4 next, and so on).</li>
+        <li><b>Utility holes in the gap rows</b> 10–16 and 26–31, where the deck has no pads: MIDI, LEDs, gate expansion, spare GPIO.</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<script type="application/json" id="data">{"teensy_core_midi":{"holes":[{"c":"LI","r":1,"net":"CV2","g":false,"ref":"J412","w":"W1","bank":"TL"},{"c":"LO","r":1,"net":"CV1","g":false,"ref":"J410","w":"W1","bank":"TL"},{"c":"R","r":1,"net":"CV4","g":false,"ref":"J413","w":"W5","bank":"TR"},{"c":"LO","r":2,"net":"CV5","g":false,"ref":"J410","w":"W1","bank":"TL"},{"c":"LI","r":3,"net":"GIN1","g":false,"ref":"J810","w":"W1","bank":"TL"},{"c":"LO","r":3,"net":"AIN1","g":false,"ref":"J310","w":"W1","bank":"TL"},{"c":"R","r":3,"net":"AIN2","g":false,"ref":"J312","w":"W6","bank":"TR"},{"c":"LI","r":4,"net":"POT2","g":false,"ref":"J612","w":"W1","bank":"TL"},{"c":"LO","r":4,"net":"POT1","g":false,"ref":"J610","w":"W1","bank":"TL"},{"c":"R","r":4,"net":"GIN3","g":false,"ref":"J812","w":"W6","bank":"TR"},{"c":"LI","r":5,"net":"GND","g":true,"ref":"J612","w":"W1","bank":"TL"},{"c":"LO","r":5,"net":"POT_REF","g":false,"ref":"J610","w":"W1","bank":"TL"},{"c":"R","r":5,"net":"POT5","g":false,"ref":"J614","w":"W6","bank":"TR"},{"c":"LI","r":6,"net":"SW1","g":false,"ref":"J712","w":"W1","bank":"TL"},{"c":"LO","r":6,"net":"GOUT1","g":false,"ref":"J610","w":"W1","bank":"TL"},{"c":"R","r":6,"net":"POT6","g":false,"ref":"J614","w":"W6","bank":"TR"},{"c":"LI","r":7,"net":"SW3","g":false,"ref":"J712","w":"W1","bank":"TL"},{"c":"LO","r":7,"net":"SW2","g":false,"ref":"J710","w":"W1","bank":"TL"},{"c":"R","r":7,"net":"POT_REF","g":false,"ref":"J614","w":"W6","bank":"TR"},{"c":"R","r":8,"net":"GOUT3","g":false,"ref":"J614","w":"W6","bank":"TR"},{"c":"R","r":9,"net":"SW6","g":false,"ref":"J714","w":"W6","bank":"TR"},{"c":"Ro","r":11,"net":"SW7","g":false,"ref":"J716","w":"W8","bank":"TR"},{"c":"Ro","r":12,"net":"GND","g":true,"ref":"J716","w":"W8","bank":"TR"},{"c":"LI","r":13,"net":"CODEC_RST","g":false,"ref":"J303","w":"W2","bank":null},{"c":"LO","r":13,"net":"SPARE1","g":false,"ref":"J101","w":"W2","bank":null},{"c":"Ro","r":13,"net":"CV6","g":false,"ref":"J414","w":"W8","bank":"BR"},{"c":"LI","r":14,"net":"GND","g":true,"ref":"J303","w":"W2","bank":null},{"c":"LO","r":14,"net":"MIDI_TX","g":false,"ref":"J101","w":"W2","bank":null},{"c":"Ro","r":14,"net":"AOUT2","g":false,"ref":"J313","w":"W8","bank":"BR"},{"c":"LO","r":15,"net":"SPARE2","g":false,"ref":"J101","w":"W2","bank":null},{"c":"Ro","r":15,"net":"GIN4","g":false,"ref":"J813","w":"W8","bank":"BR"},{"c":"LO","r":16,"net":"MIDI_RX","g":false,"ref":"J101","w":"W2","bank":null},{"c":"LO","r":17,"net":"GND","g":true,"ref":"J101","w":"W2","bank":null},{"c":"LO","r":21,"net":"CV3","g":false,"ref":"J411","w":"W3","bank":"BL"},{"c":"LI","r":22,"net":"GIN2","g":false,"ref":"J811","w":"W3","bank":"BL"},{"c":"LO","r":22,"net":"AOUT1","g":false,"ref":"J311","w":"W3","bank":"BL"},{"c":"LI","r":23,"net":"POT4","g":false,"ref":"J613","w":"W3","bank":"BL"},{"c":"LO","r":23,"net":"POT3","g":false,"ref":"J611","w":"W3","bank":"BL"},{"c":"LI","r":24,"net":"GND","g":true,"ref":"J613","w":"W3","bank":"BL"},{"c":"LO","r":24,"net":"POT_REF","g":false,"ref":"J611","w":"W3","bank":"BL"},{"c":"R","r":24,"net":"GOUT4","g":false,"ref":"J615","w":"W7","bank":"BR"},{"c":"LI","r":25,"net":"SW4","g":false,"ref":"J713","w":"W3","bank":"BL"},{"c":"LO","r":25,"net":"GOUT2","g":false,"ref":"J611","w":"W3","bank":"BL"},{"c":"R","r":25,"net":"SW8","g":false,"ref":"J715","w":"W7","bank":"BR"},{"c":"LO","r":26,"net":"SW5","g":false,"ref":"J711","w":"W3","bank":"BL"},{"c":"R","r":26,"net":"SW9","g":false,"ref":"J715","w":"W7","bank":"BR"},{"c":"Ro","r":26,"net":"SDA","g":false,"ref":"J703","w":"W9","bank":null},{"c":"R","r":27,"net":"GND","g":true,"ref":"J715","w":"W7","bank":"BR"},{"c":"Ro","r":27,"net":"SCL","g":false,"ref":"J703","w":"W9","bank":null},{"c":"Ro","r":28,"net":"+3V3D","g":false,"ref":"J703","w":"W9","bank":null},{"c":"Ro","r":29,"net":"GND","g":true,"ref":"J703","w":"W9","bank":null},{"c":"LO","r":30,"net":"MO_T","g":false,"ref":"J1001","w":"W4","bank":null},{"c":"LO","r":31,"net":"MO_R","g":false,"ref":"J1001","w":"W4","bank":null},{"c":"LO","r":32,"net":"MI_T","g":false,"ref":"J1001","w":"W4","bank":null},{"c":"LO","r":33,"net":"MI_R","g":false,"ref":"J1001","w":"W4","bank":null},{"c":"LO","r":34,"net":"MI_S","g":false,"ref":"J1001","w":"W4","bank":null},{"c":"LI","r":35,"net":"GATE_SER_OUT","g":false,"ref":"J603","w":"W4","bank":null},{"c":"LO","r":35,"net":"GND","g":true,"ref":"J1001","w":"W4","bank":null},{"c":"LI","r":36,"net":"SPIB_SCK","g":false,"ref":"J603","w":"W4","bank":null},{"c":"LO","r":36,"net":"LED_DIN","g":false,"ref":"J704","w":"W4","bank":null},{"c":"LI","r":37,"net":"CS_595","g":false,"ref":"J603","w":"W4","bank":null},{"c":"LO","r":37,"net":"+5VD","g":false,"ref":"J704","w":"W4","bank":null},{"c":"LI","r":38,"net":"GATE_OE_N","g":false,"ref":"J603","w":"W4","bank":null},{"c":"LO","r":38,"net":"+5VD","g":false,"ref":"J704","w":"W4","bank":null},{"c":"LI","r":39,"net":"+5VD","g":false,"ref":"J603","w":"W4","bank":null},{"c":"LO","r":39,"net":"GND","g":true,"ref":"J704","w":"W4","bank":null},{"c":"LI","r":40,"net":"GND","g":true,"ref":"J603","w":"W4","bank":null},{"c":"LO","r":40,"net":"GND","g":true,"ref":"J704","w":"W4","bank":null}],"unlabelled":["W8"]},"pico_revb":{"holes":[{"c":"LO","r":1,"net":"POT_REF","g":false,"ref":"J610","w":"W1","bank":"TL"},{"c":"R","r":1,"net":"POT_REF","g":false,"ref":"J618","w":"W7","bank":"TR"},{"c":"LO","r":2,"net":"POT3","g":false,"ref":"J610","w":"W1","bank":"TL"},{"c":"R","r":2,"net":"POT1","g":false,"ref":"J618","w":"W7","bank":"TR"},{"c":"LO","r":3,"net":"SW3","g":false,"ref":"J710","w":"W1","bank":"TL"},{"c":"R","r":3,"net":"SW1","g":false,"ref":"J713","w":"W7","bank":"TR"},{"c":"LO","r":4,"net":"POT_REF","g":false,"ref":"J611","w":"W1","bank":"TL"},{"c":"R","r":4,"net":"POT_REF","g":false,"ref":"J619","w":"W7","bank":"TR"},{"c":"LO","r":5,"net":"POT5","g":false,"ref":"J611","w":"W1","bank":"TL"},{"c":"R","r":5,"net":"POT2","g":false,"ref":"J619","w":"W7","bank":"TR"},{"c":"LO","r":6,"net":"SW5","g":false,"ref":"J711","w":"W1","bank":"TL"},{"c":"R","r":6,"net":"SW2","g":false,"ref":"J714","w":"W7","bank":"TR"},{"c":"LO","r":7,"net":"POT_REF","g":false,"ref":"J612","w":"W1","bank":"TL"},{"c":"R","r":7,"net":"POT_REF","g":false,"ref":"J620","w":"W7","bank":"TR"},{"c":"LO","r":8,"net":"POT6","g":false,"ref":"J612","w":"W1","bank":"TL"},{"c":"R","r":8,"net":"POT4","g":false,"ref":"J620","w":"W7","bank":"TR"},{"c":"LO","r":9,"net":"SW6","g":false,"ref":"J712","w":"W1","bank":"TL"},{"c":"R","r":9,"net":"SW4","g":false,"ref":"J715","w":"W7","bank":"TR"},{"c":"LO","r":10,"net":"GND","g":true,"ref":"J613","w":"W1","bank":"TL"},{"c":"R","r":10,"net":"GND","g":true,"ref":"J621","w":"W7","bank":"TR"},{"c":"Ls","r":11,"net":"LED_DIN","g":false,"ref":"J704","w":"W5","bank":null},{"c":"Lsi","r":11,"net":"CODEC_RST","g":false,"ref":"J303","w":"W5","bank":null},{"c":"Ri","r":11,"net":"P4_SCL","g":false,"ref":"J102","w":"W13","bank":null},{"c":"Ls","r":12,"net":"+5VD","g":false,"ref":"J704","w":"W5","bank":null},{"c":"Lsi","r":12,"net":"GND","g":true,"ref":"J303","w":"W5","bank":null},{"c":"Ri","r":12,"net":"P4_SDA","g":false,"ref":"J102","w":"W13","bank":null},{"c":"Ls","r":13,"net":"+5VD","g":false,"ref":"J704","w":"W5","bank":null},{"c":"Ri","r":13,"net":"SDA","g":false,"ref":"J703","w":"W13","bank":null},{"c":"Ls","r":14,"net":"GND","g":true,"ref":"J704","w":"W5","bank":null},{"c":"Ri","r":14,"net":"SCL","g":false,"ref":"J703","w":"W13","bank":null},{"c":"Ls","r":15,"net":"GND","g":true,"ref":"J704","w":"W5","bank":null},{"c":"Ri","r":15,"net":"+3V3D","g":false,"ref":"J703","w":"W13","bank":null},{"c":"Ri","r":16,"net":"GND","g":true,"ref":"J703","w":"W13","bank":null},{"c":"LO","r":17,"net":"CV4","g":false,"ref":"J410","w":"W2","bank":"ML"},{"c":"R","r":17,"net":"CV1","g":false,"ref":"J414","w":"W8","bank":"MR"},{"c":"LO","r":18,"net":"GOUT1","g":false,"ref":"J614","w":"W2","bank":"ML"},{"c":"R","r":18,"net":"GIN1","g":false,"ref":"J810","w":"W8","bank":"MR"},{"c":"LO","r":19,"net":"GND","g":true,"ref":"J614","w":"W2","bank":"ML"},{"c":"LO","r":20,"net":"CV5","g":false,"ref":"J411","w":"W2","bank":"ML"},{"c":"R","r":20,"net":"CV2","g":false,"ref":"J415","w":"W9","bank":"MR"},{"c":"LO","r":21,"net":"GOUT2","g":false,"ref":"J615","w":"W2","bank":"ML"},{"c":"R","r":21,"net":"GIN2","g":false,"ref":"J811","w":"W9","bank":"MR"},{"c":"LI","r":23,"net":"GOUT3","g":false,"ref":"J617","w":"W3","bank":"ML"},{"c":"LO","r":23,"net":"CV6","g":false,"ref":"J412","w":"W3","bank":"ML"},{"c":"R","r":23,"net":"CV3","g":false,"ref":"J416","w":"W10","bank":"MR"},{"c":"R","r":24,"net":"GIN3","g":false,"ref":"J812","w":"W10","bank":"MR"},{"c":"R","r":25,"net":"GND","g":true,"ref":"J812","w":"W10","bank":"MR"},{"c":"Lsi","r":26,"net":"SPARE1","g":false,"ref":"J101","w":"W6","bank":null},{"c":"Ri","r":26,"net":"GATE_SER_OUT","g":false,"ref":"J603","w":"W14","bank":null},{"c":"Lsi","r":27,"net":"MIDI_TX","g":false,"ref":"J101","w":"W6","bank":null},{"c":"Ri","r":27,"net":"SPIB_SCK","g":false,"ref":"J603","w":"W14","bank":null},{"c":"Lsi","r":28,"net":"SPARE2","g":false,"ref":"J101","w":"W6","bank":null},{"c":"Ri","r":28,"net":"CS_595","g":false,"ref":"J603","w":"W14","bank":null},{"c":"Lsi","r":29,"net":"MIDI_RX","g":false,"ref":"J101","w":"W6","bank":null},{"c":"Ri","r":29,"net":"GATE_OE_N","g":false,"ref":"J603","w":"W14","bank":null},{"c":"Lsi","r":30,"net":"RUN","g":false,"ref":"J101","w":"W6","bank":null},{"c":"Ri","r":30,"net":"+5VD","g":false,"ref":"J603","w":"W14","bank":null},{"c":"Lsi","r":31,"net":"GND","g":true,"ref":"J101","w":"W6","bank":null},{"c":"Ri","r":31,"net":"GND","g":true,"ref":"J603","w":"W14","bank":null},{"c":"R","r":32,"net":"AIN1","g":false,"ref":"J313","w":"W11","bank":"BR"},{"c":"R","r":33,"net":"GIN4","g":false,"ref":"J813","w":"W11","bank":"BR"},{"c":"LO","r":34,"net":"AOUT1","g":false,"ref":"J310","w":"W4","bank":"BL"},{"c":"R","r":34,"net":"CVI7","g":false,"ref":"J417","w":"W11","bank":"BR"},{"c":"LO","r":35,"net":"MO_T","g":false,"ref":"J1001","w":"W4","bank":null},{"c":"R","r":35,"net":"MI_T","g":false,"ref":"J1002","w":"W11","bank":null},{"c":"LO","r":36,"net":"MO_R","g":false,"ref":"J1001","w":"W4","bank":null},{"c":"R","r":36,"net":"MI_R","g":false,"ref":"J1002","w":"W11","bank":null},{"c":"LO","r":37,"net":"GOUT4","g":false,"ref":"J616","w":"W4","bank":"BL"},{"c":"R","r":37,"net":"MI_S","g":false,"ref":"J1002","w":"W11","bank":null},{"c":"LO","r":38,"net":"AOUT2","g":false,"ref":"J311","w":"W4","bank":"BL"},{"c":"R","r":38,"net":"AIN2","g":false,"ref":"J314","w":"W11","bank":"BR"},{"c":"LO","r":39,"net":"CVO7","g":false,"ref":"J413","w":"W4","bank":"BL"},{"c":"LO","r":40,"net":"GND","g":true,"ref":"J312","w":"W4","bank":"BL"},{"c":"R","r":40,"net":"GND","g":true,"ref":"J315","w":"W12","bank":"BR"}],"unlabelled":["W12"]}}</script>
+<script>
+(function () {
+  const DATA = JSON.parse(document.getElementById("data").textContent);
+  const BOARDS = {
+    teensy_core_midi: { name: "Teensy (Rev A)", module: [2, 25, "Teensy 4.1 socket", "A101"], power: [33, 37, "power header"] },
+    pico_revb: { name: "Pico (Rev B)", module: [7, 27, "Pico 2 / ESP32-P4 socket", "A101"], power: [28, 31, "power header, beside the left strip"] },
+  };
+  // cell, strip, first position (pads A, B, C on three positions in a row): tools/visualizer/boards/n8synth-10hp.json
+  const CELLS = [["JPS1","L",1],["JPS2","L",4],["JPS3","R",1],["JPS4","L",7],["JPS5","R",4],["JPS6","R",7],
+    ["JPS7","L",17],["JPS8","L",20],["JPS9","R",17],["JPS10","L",23],["JPS11","R",20],["JPS12","R",23],
+    ["JPS13","L",32],["JPS14","L",35],["JPS15","R",32],["JPS16","L",38],["JPS17","R",35],["JPS18","R",38]];
+  const GAPS = [[10, 16], [26, 31]];
+  const R_NONE = new Set([11, 12, 13, 14, 15, 26, 27, 28, 29, 30]);   // right strip: no holes
+  const R_OUTER_ONLY = new Set([10, 16, 31]);                          // right strip: header pin only
+  // which strip positions have holes: Rev A keeps the left strip whole (6HP); Rev B is 10HP only
+  const TENHP = { none: R_NONE, outerOnly: R_OUTER_ONLY }, WHOLE = { none: new Set(), outerOnly: new Set() };
+  const STRIPS = { teensy_core_midi: { L: WHOLE, R: TENHP }, pico_revb: { L: TENHP, R: TENHP } };
+  const COL = { rn: 1, jl: 2, Lo: 3, Li: 4, LO: 5, LI: 6, mid: 7, R: 8, Ri: 9, Ro: 10, jr: 11, rn2: 12 };
+  const COLNAME = { LO: "LO", LI: "LI", R: "R", Ri: "RSI", Ro: "RS", Ls: "LS", Lsi: "LSI" };   // Ls, Lsi: Rev B's left-strip gap holes
+  const ORDER = { Ls: -2, Lsi: -1, LO: 0, LI: 1, R: 2, Ri: 3, Ro: 4 };
+  const KINDS = [["cv", "CV in/out"], ["aud", "Audio in/out"], ["gin", "Gate in"], ["gout", "Gate out"], ["pot", "Pot wiper"],
+    ["ref", "Pot reference"], ["sw", "Switch"], ["gnd", "Ground (square)"], ["pwr", "Power out"], ["midi", "TRS MIDI"],
+    ["dig", "Digital, utility"]];
+  const BANKS_A = [["TL", "Left top"], ["BL", "Left bottom"], ["TR", "Right top"], ["BR", "Right middle"]];
+  const BANKS_B = [["TL", "Left top"], ["ML", "Left middle"], ["BL", "Left bottom"], ["TR", "Right top"], ["MR", "Right middle"], ["BR", "Right bottom"]];
+  const banksOf = board => (board === "pico_revb" ? BANKS_B : BANKS_A);
+
+  // Where a deck strip's position lands on the PCB. The deck is built one of two ways (JPS1 top left
+  // on the front is the n8synth way), and the board behind it is upright or turned over. Seen from
+  // the module side, the panel's left is the PCB's right. Turned over, position n lands on 41 - n:
+  // the deck's header spans, 1-10, 16-25 and 31-40, map onto themselves, so the deck still plugs in.
+  // In the board's own frame the four cases are JPS1 top left, top right, bottom right, bottom left.
+  // fitted as agreed, 2026-10-31: the deck built the n8synth way, the board upright (the other three fits are no longer offered)
+  let build = "n8", turn = "up", panel = "enc";
+  let orient = "n8";
+  const setOrient = () => { orient = turn === "up" ? (build === "n8" ? "n8" : "other") : (build === "n8" ? "br" : "bl"); };
+  const upside = () => orient === "bl" || orient === "br";
+  const pcbSide = strip => ((strip === "L") === ({ n8: true, other: false, br: false, bl: true })[orient] ? "R" : "L");
+  const boardPos = n => (upside() ? 41 - n : n);
+  const cellRows = f => (upside() ? [39 - f, 41 - f] : [f, f + 2]);   // a cell's lowest and highest board position
+  function pads() {
+    const p = { L: {}, R: {} };
+    CELLS.forEach(([name, strip, first]) => ["A", "B", "C"].forEach((x, i) => { p[pcbSide(strip)][boardPos(first + i)] = [name, x]; }));
+    return p;
+  }
+  function frontOrder() {   // the cells as seen from the front panel, row by row
+    const s = CELLS.slice().sort((a, b) => +a[0].slice(3) - +b[0].slice(3));
+    const rows = [0, 1, 2, 3, 4, 5].map(i => s.slice(i * 3, i * 3 + 3));
+    return rows.flatMap(row => (build === "other" ? row.slice().reverse() : row));
+  }
+  const gaps = () => (upside() ? [[10, 15], [25, 31]] : GAPS);   // board rows with no deck pad
+  const isGap = r => gaps().some(([a, b]) => r >= a && r <= b);
+
+  // ---- the first build (David, 2026-10-27): the Boy panel with a push encoder for its button and pot1, MIDI in in
+  // clk's cell and clk up in pot1's, as the panel reads. Gates and pitches on CV outputs; drums, rst and clk on the gate
+  // outputs. The screen sits in the panel over the first two cells, so their pads are borrowed (2026-10-31).
+  const LAYOUTS = {
+    enc: [["screen", "under screen", "encoder"], ["gate1", "pitch1", "clk"], ["gate2", "pitch2", "drum1"],
+          ["gate3", "pitch3", "drum3"], ["audio in L", "rst", "audio out L"], ["audio in R", "midi in", "audio out R"]],
+  };
+  const LAYOUT_NAME = { enc: "Boy panel with the encoder and MIDI in" };
+  // one object per set of holes: wires that share a set share its holes, each hole used once
+  const CVOUT = /^(CV\d|CVO\d)$/, GOUT = /^GOUT\d$/, SW = /^SW\d$/, AIN = /^AIN\d$/, AOUT = /^AOUT\d$/, V33 = /^\+3V3D$/;
+  const GIN_ANY = /^GIN\d$/, GIN_PIO = /^GIN[12]$/;   // Pico PIO quadrature needs neighbouring pins: on Rev B, GP6/GP7
+  // the encoder's common needs 3.3 V; with no pots on the panel the pot reference is free and nearer (2026-10-31)
+  const V33_OR_REF = /^(\+3V3D|POT_REF)$/;
+  const BANK_GND = h => h.g && !!h.bank;   // a bank's ground hole: the ones the bring-up pictures label GND
+  const match = (pool, h) => (typeof pool === "function" ? pool(h) : pool.test(h.net));
+  // each part's wires: [pad (A 0, B 1, C 2; null: whichever free pad of the cell gives the shortest wires), the holes it
+  // may take, label, and the part it belongs to when that is not the cell's own]
+  const wiresOf = board => {
+    const gin = board === "pico_revb" ? GIN_PIO : GIN_ANY;
+    const w = {
+      encoder: [[0, gin, "A"], [2, gin, "B"], [1, V33_OR_REF, "common"]],
+      // the screen's three signals on the first borrowed cell; its GND goes to D on the deck
+      screen: [[null, /^SDA$/, "SDA"], [null, /^SCL$/, "SCL"], [null, V33, "3V3"]],
+      // the second: the encoder's push (its other pin to D), and the deck's one ground link, a pad bridged to D
+      "under screen": [[null, SW, "push", "encoder"], [null, BANK_GND, "", "deck ground"]],
+      "midi in": [[0, /^MI_T$/, "tip"], [1, /^MI_R$/, "ring"]],
+      "audio in L": [[0, AIN, ""]], "audio in R": [[0, AIN, ""]], "audio out L": [[0, AOUT, ""]], "audio out R": [[0, AOUT, ""]] };
+    ["gate1", "gate2", "gate3", "pitch1", "pitch2", "pitch3"].forEach(p => { w[p] = [[0, CVOUT, ""]]; });
+    ["drum1", "drum3", "rst", "clk"].forEach(p => { w[p] = [[0, GOUT, ""]]; });
+    return w;
+  };
+  const XPOS = { LO: 7.05, LI: 9.59, R: 42.65, Ri: 45.19, Ro: 47.73, Ls: 1.97, Lsi: 4.51 };
+  const STRIP_IN = { L: 4.51, R: 45.19 };
+  const ypos = r => 2.12 + 2.54 * (r - 1);
+  const sideOfCol = c => (c === "R" || c === "Ri" || c === "Ro" ? "R" : "L");
+  const sideFor = (o, strip) => ((strip === "L") === ({ n8: true, other: false, br: false, bl: true })[o] ? "R" : "L");
+  const posFor = (o, n) => (o === "bl" || o === "br" ? 41 - n : n);
+  const buildOf = o => (o === "other" || o === "bl" ? "other" : "n8");
+  const cellAt = (o, i, j) => `JPS${3 * i + (buildOf(o) === "other" ? 2 - j : j) + 1}`;
+  function* perms(arr, k) {
+    if (k === 0) { yield []; return; }
+    for (let i = 0; i < arr.length; i++)
+      for (const p of perms(arr.slice(0, i).concat(arr.slice(i + 1)), k - 1)) yield [arr[i], ...p];
+  }
+  // each wire to the nearest free channel hole it may take: fewest mm of hand wire in all, per set of holes, then the
+  // borrowed pads, each cell's wires on whichever of its pads give the shortest wires. Every wire leaves through a strip.
+  function planFor(board, o, layout) {
+    const holes = DATA[board].holes, kinds = wiresOf(board), needs = [];
+    LAYOUTS[layout].forEach((row, i) => row.forEach((part, j) => {
+      const name = cellAt(o, i, j), [, strip, f] = CELLS.find(c => c[0] === name), side = sideFor(o, strip);
+      (kinds[part] || []).forEach(([off, pool, label, as]) => {
+        if (off !== null) needs.push({ part: as || part, label, cell: name, side, pad: posFor(o, f + off), padName: "ABC"[off], pool });
+      });
+    }));
+    const d = (n, h) => Math.hypot(STRIP_IN[n.side] - XPOS[h.c], ypos(n.pad) - ypos(h.r));
+    const wires = []; let total = 0, across = 0;
+    const add = (n, h) => {
+      const len = d(n, h), x = sideOfCol(h.c) !== n.side;
+      total += len; across += x; wires.push({ ...n, hole: h, len, across: x });
+    };
+    [...new Set(needs.map(n => n.pool))].forEach(pool => {
+      const ns = needs.filter(n => n.pool === pool), hs = holes.filter(h => match(pool, h));
+      let best = null;
+      for (const p of perms(hs, ns.length)) {
+        let s = 0;
+        for (let i = 0; i < ns.length; i++) s += d(ns[i], p[i]);
+        if (!best || s < best[0]) best = [s, p];
+      }
+      ns.forEach((n, i) => (best ? add(n, best[1][i]) : wires.push({ ...n, missing: true })));
+    });
+    LAYOUTS[layout].forEach((row, i) => row.forEach((part, j) => {
+      const specs = (kinds[part] || []).filter(s => s[0] === null);
+      if (!specs.length) return;
+      const name = cellAt(o, i, j), [, strip, f] = CELLS.find(c => c[0] === name), side = sideFor(o, strip);
+      let best = null;
+      for (const offs of perms([0, 1, 2], specs.length)) {
+        let s = 0;
+        const got = [];
+        for (let k = 0; k < specs.length && s < Infinity; k++) {
+          const n = { side, pad: posFor(o, f + offs[k]) };
+          const hs = holes.filter(h => match(specs[k][1], h) && !got.includes(h) && !wires.some(w => w.hole === h));
+          if (!hs.length) { s = Infinity; break; }
+          const h = hs.reduce((m, x) => (d(n, x) < d(n, m) ? x : m));
+          got.push(h);
+          s += d(n, h);
+        }
+        if (!best || s < best[0]) best = [s, offs, got];
+      }
+      specs.forEach(([, , label, as], k) => {
+        const n = { part: as || part, label, cell: name, side, pad: posFor(o, f + best[1][k]), padName: "ABC"[best[1][k]] };
+        if (best[0] < Infinity) add(n, best[2][k]); else wires.push({ ...n, missing: true });
+      });
+    }));
+    return { wires, total, across };
+  }
+  // what each part's other legs do on the deck itself; its D pad is the deck-wide ground bus
+  const deckLink = part => ({
+    encoder: "pins A, C, B on pads A, B, C; one push pin to the borrowed pad listed, the other to D",
+    screen: "SDA, SCL and 3V3 to this cell's pads as listed; its GND to D",
+    "under screen": "the encoder's push pin to one pad, another pad bridged to D, the third spare",
+    "midi in": "sleeve open or to MI_S, never D",
+    "deck ground": "this pad bridged to D: the deck's only ground link" }[part] || "sleeve to D");
+  const wireName = w => (w.label ? `${w.part} ${w.label}` : w.part);
+  // the order the wires go in at bring-up, each batch tested before the next (David, 2026-10-31): the batch
+  // table in docs/analogue_board_bringup.md, stage 8. Name, its parts, and its test on the Rev A test program
+  const BATCHES = [
+    ["Deck ground", ["deck ground"], "continuity, any jack sleeve to the board's GND"],
+    ["Encoder", ["encoder"], "block 8: turning slowly steps GIN1 and GIN3 in turn. Then flash the current program and run block 12"],
+    ["Gate outs", ["drum1", "drum3", "rst", "clk"], "block 7, meter on each jack's tip pad"],
+    ["CV outs", ["gate1", "gate2", "gate3", "pitch1", "pitch2", "pitch3"], "block 5 (nothing patched), then c N V holds jack N's voltage for the meter"],
+    ["Audio", ["audio in L", "audio in R", "audio out L", "audio out R"], "block 10: sine out, then patch the outs into the ins"],
+    ["MIDI in", ["midi in"], "block 13: its loop test fails (no MIDI out on Boy2); play notes in and watch the bytes"],
+    ["Screen", ["screen"], "block 1: the screen's address joins 0x20 and 0x50"],
+  ];
+  const batchOf = w => BATCHES.findIndex(b => b[1].includes(w.part));
+  let batch = -1;   // -1: every wire; otherwise this batch strong, the earlier ones faint, the later ones left off
+  try {
+    const s = localStorage.getItem("wiring-map-batch");
+    if (s !== null && +s >= 0 && +s < BATCHES.length) batch = +s;
+  } catch (e) { /* not remembered: every wire */ }
+  const stage = w => (batch < 0 || batchOf(w) === batch ? "now" : batchOf(w) < batch ? "done" : "later");
+  const boyMarks = plan => {   // "column:row" of each assigned hole -> its part, and whether its batch is already wired
+    const m = {};
+    plan.wires.forEach(w => {
+      if (!w.hole || stage(w) === "later") return;
+      const k = `${w.hole.c}:${w.hole.r}`, done = stage(w) === "done";
+      m[k] = m[k] ? { text: m[k].text + ", " + wireName(w), done: m[k].done && done } : { text: wireName(w), done };
+    });
+    return m;
+  };
+  const cellStage = (plan, name) => {   // a deck cell holding wires of the chosen batch is "now"; one whose wires all come later, "later"
+    if (batch < 0) return "";
+    const ss = plan.wires.filter(w => w.cell === name).map(stage);
+    return ss.includes("now") ? "now" : ss.length && ss.every(s => s === "later") ? "later" : "";
+  };
+  const boyPartOf = name => {   // the panel's part in a deck cell, for this build
+    for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) if (cellAt(orient, i, j) === name) return LAYOUTS[panel][i][j];
+    return "";
+  };
+
+  function kind(net) {
+    if (net === "GND") return "gnd";
+    if (/^CV\d/.test(net)) return "cv";
+    if (/^A(IN|OUT)\d/.test(net)) return "aud";
+    if (/^GIN\d/.test(net)) return "gin";
+    if (/^GOUT\d/.test(net)) return "gout";
+    if (net === "POT_REF") return "ref";
+    if (/^POT\d/.test(net)) return "pot";
+    if (/^SW\d/.test(net)) return "sw";
+    if (/^\+/.test(net)) return "pwr";
+    if (/^(MO_|MI_|MIDI_)/.test(net)) return "midi";
+    return "dig";
+  }
+  const glyph = k => `<i class="g${k === "gnd" ? " sq" : ""}${k === "ref" ? " ring" : ""}"></i>`;
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  function el(cls, col, row, html, extra) {
+    const d = document.createElement("div");
+    d.className = cls;
+    const c = Array.isArray(col) ? `${COL[col[0]]} / ${COL[col[1]] + 1}` : COL[col];
+    const r = Array.isArray(row) ? `${row[0] + 1} / ${row[1] + 2}` : row + 1;
+    d.style.gridColumn = c;
+    d.style.gridRow = r;
+    if (html != null) d.innerHTML = html;
+    if (extra) Object.entries(extra).forEach(([k, v]) => d.setAttribute(k, v));
+    return d;
+  }
+
+  // type filter: All plus one box per type; a viewer's choice is remembered in this browser only
+  const KEYS = KINDS.map(k => k[0]);
+  let on = new Set(KEYS);
+  try {
+    const saved = JSON.parse(localStorage.getItem("wiring-map-types"));
+    if (Array.isArray(saved) && saved.length) on = new Set(saved.filter(k => KEYS.includes(k)));
+  } catch (e) { /* no storage: every type shown */ }
+  const opts = document.getElementById("opts");
+  opts.innerHTML = `<label class="opt all" for="f-all"><input type="checkbox" id="f-all">All</label>`
+    + KINDS.map(([k, label]) => `<label class="opt" for="f-${k}" style="--kc: var(--k-${k === "ref" ? "pot" : k})"><input type="checkbox" id="f-${k}" data-k="${k}">${glyph(k)}<span>${label}</span><span class="ct" id="ct-${k}" title="holes on this board"></span></label>`).join("");
+  document.getElementById("key").innerHTML = `<span><span class="strip" style="width:34px;height:12px"><i></i><i></i></span>Strip holes, joined; deck pad</span>`
+    + `<span><span class="strip free" style="width:34px;height:12px"><i></i><i></i></span>No deck pad</span>`;
+  function applyFilter() {
+    const app = document.getElementById("app");
+    KEYS.forEach(k => { app.classList.toggle("off-" + k, !on.has(k)); document.getElementById("f-" + k).checked = on.has(k); });
+    const all = document.getElementById("f-all");
+    all.checked = on.size === KEYS.length;
+    all.indeterminate = on.size > 0 && on.size < KEYS.length;
+    try { localStorage.setItem("wiring-map-types", JSON.stringify([...on])); } catch (e) { /* not remembered */ }
+  }
+  opts.addEventListener("change", e => {
+    const t = e.target;
+    if (t.id === "f-all") on = t.checked ? new Set(KEYS) : new Set();
+    else if (t.dataset.k) { if (t.checked) on.add(t.dataset.k); else on.delete(t.dataset.k); }
+    applyFilter();
+  });
+  applyFilter();
+  function counts(board) {
+    const c = {};
+    DATA[board].holes.forEach(h => { const k = kind(h.net); c[k] = (c[k] || 0) + 1; });
+    KEYS.forEach(k => { document.getElementById("ct-" + k).textContent = c[k] || 0; });
+  }
+
+  function drawMap(board) {
+    const padAt = pads();
+    const map = document.getElementById("map");
+    map.innerHTML = "";
+    const add = (...a) => { const d = el(...a); map.appendChild(d); return d; };
+    const holes = DATA[board].holes;
+    const unl = new Set(DATA[board].unlabelled);
+    const first = {};
+    holes.forEach(h => { const k = h.r * 10 + ORDER[h.c]; if (!first[h.w] || k < first[h.w].k) first[h.w] = { k, h }; });
+    const tag = h => first[h.w] && first[h.w].h === h
+      ? `<span class="wtag${unl.has(h.w) ? " nolabel" : ""}" title="${unl.has(h.w) ? "Block " + h.w + ": no silkscreen label (no room)" : "Block " + h.w + " on the silkscreen"}">${h.w}</span>` : "";
+    const tip = h => `${h.net}: ${COLNAME[h.c]} ${h.r}, ${h.ref}${h.bank ? ", bank " + banksOf(board).find(b => b[0] === h.bank)[1].toLowerCase() : ""}, block ${h.w}${unl.has(h.w) ? " (unlabelled)" : ""}`;
+    const SL = STRIPS[board].L, SR = STRIPS[board].R;
+    const plan = panel !== "none" ? planFor(board, orient, panel) : null, boy = plan ? boyMarks(plan) : {};
+
+    // column heads (grid row 0)
+    [["rn", "Pos"], ["jl", "Deck L"], [["Lo", "Li"], "Strip"], ["LO", "LO"], ["LI", "LI"], ["R", "R"], [["Ri", "Ro"], "Strip"], ["jr", "Deck R"], ["rn2", "Pos"]]
+      .forEach(([c, t]) => add("colhead", c, 0, t));
+
+    for (let r = 1; r <= 40; r++) {
+      const gap = isGap(r);
+      add("rn" + (gap ? " gap" : ""), "rn", r, r);
+      add("rn" + (gap ? " gap" : ""), "rn2", r, r);
+      const pl = padAt.L[r];
+      if (SL.outerOnly.has(r)) {   // turned over, a middle cell's pad can land on one of these
+        add(pl ? "solo warnpad" : "solo free", "Lo", r, pl ? `<i></i><em>${pl[1]}</em>` : "<i></i>", { "data-side": "L", "data-r": r,
+          title: pl ? `Left strip ${r}: ${pl[0]} pad ${pl[1]} lands here, but this position has only its outer hole, the deck's header pin: wire to that pin`
+                    : `Left strip ${r}: deck header pin only, no inner hole, connects to nothing` });
+      } else if (!SL.none.has(r)) {
+        add("strip" + (pl ? "" : " free"), ["Lo", "Li"], r, `<i></i>${pl ? "<em>" + pl[1] + "</em>" : ""}<i></i>`,
+          { "data-side": "L", "data-r": r, title: `DECK_L${r}: outer hole (deck pin) joined to the inner hole${pl ? "; " + pl[0] + " pad " + pl[1] : "; no deck pad"}` });
+      }
+      if (SR.none.has(r)) continue;
+      if (SR.outerOnly.has(r)) {   // turned over, a middle cell's pad can land on one of these
+        const po = padAt.R[r];
+        add(po ? "solo warnpad" : "solo free", "Ro", r, po ? `<i></i><em>${po[1]}</em>` : "<i></i>", { "data-side": "R", "data-r": r,
+          title: po ? `Right strip ${r}: ${po[0]} pad ${po[1]} lands here, but this position has only its outer hole, the deck's header pin: wire to that pin`
+                    : `Right strip ${r}: deck header pin only, no inner hole, connects to nothing` });
+        continue;
+      }
+      const pr = padAt.R[r];
+      add("strip" + (pr ? "" : " free"), ["Ri", "Ro"], r, `<i></i>${pr ? "<em>" + pr[1] + "</em>" : ""}<i></i>`,
+        { "data-side": "R", "data-r": r, title: `DECK_R${r}: inner hole joined to the outer hole (deck pin)${pr ? "; " + pr[0] + " pad " + pr[1] : ""}` });
+    }
+    // deck cells and gap bands
+    CELLS.forEach(([name, side, f]) => {
+      const [lo, hi] = cellRows(f);
+      const part = plan ? boyPartOf(name) : "", st = plan ? cellStage(plan, name) : "";
+      add("jps" + (st ? " " + st : ""), pcbSide(side) === "L" ? "jl" : "jr", [lo, hi], `${name}<small>${lo}–${hi}</small>${part ? `<span class="part">${esc(part)}</span>` : ""}`,
+          { tabindex: 0, "data-cell": name });
+    });
+    gaps().forEach(([a, b]) => {
+      add("nopad", "jl", [a, b], "no deck pad");
+      add("nopad", "jr", [a, b], "");
+    });
+    // module and power header
+    const [m0, m1, mlabel, mref] = BOARDS[board].module;
+    add("band", "mid", [m0, m1], `<b>${mlabel}</b>${mref}, positions ${m0}–${m1}`);
+    const [p0, p1, plabel] = BOARDS[board].power;
+    add("band", "mid", [p0, p1], `<b>J201</b>${plabel}`);
+    // wiring holes; with the Boy panel, each assigned hole outlined and named. Holes in a strip's own
+    // columns (its empty positions) show as dots there, their names in the deck column beside them
+    const stripLabels = { L: {}, R: {} };
+    holes.forEach(h => {
+      const k = kind(h.net), m = boy[`${h.c}:${h.r}`], mark = m && m.text, cls = m ? " boyhole" + (m.done ? " done" : "") : "";
+      const title = tip(h) + (mark ? `; Boy panel: ${mark}${m.done ? " (an earlier batch)" : ""}` : "");
+      if (h.c === "Ri" || h.c === "Ro" || h.c === "Ls" || h.c === "Lsi") {
+        const s = h.c === "Ls" || h.c === "Lsi" ? "L" : "R";
+        add(`solo k-${k}${cls}`, { Ls: "Lo", Lsi: "Li" }[h.c] || h.c, h.r, glyph(k), { "data-side": s, "data-r": h.r, "data-c": h.c, title });
+        (stripLabels[s][h.r] = stripLabels[s][h.r] || []).push(h);
+        return;
+      }
+      add(`hole k-${k}${cls}`, h.c, h.r, `${glyph(k)}<span class="n">${esc(h.net)}</span>${mark ? `<span class="part">${esc(mark)}</span>` : tag(h)}`,
+        { "data-side": h.c === "R" ? "R" : "L", "data-r": h.r, "data-c": h.c, title });
+    });
+    ["L", "R"].forEach(s => Object.entries(stripLabels[s]).forEach(([r, hs]) => {
+      hs.sort((a, b) => ORDER[a.c] - ORDER[b.c]);
+      const t = hs.map(h => `<span class="t k-${kind(h.net)}" title="${esc(tip(h))}">${esc(h.net)}</span>`).join("<span>·</span>");
+      const parts = hs.map(h => boy[`${h.c}:${h.r}`]).filter(Boolean);
+      const w = parts.length ? `<span class="part${parts.every(p => p.done) ? " done" : ""}">${parts.map(p => esc(p.text)).join(", ")}</span>` : hs.map(tag).join("");
+      add("slab", s === "L" ? "jl" : "jr", +r, t + w, { "data-side": s, "data-r": r });
+    }));
+  }
+
+  // the wires layer, drawn over the map once it is laid out: each wire from the strip's inner hole to the dot of its hole
+  let showWires = true;
+  try { showWires = localStorage.getItem("wiring-map-wires") !== "off"; } catch (e) { /* not remembered: shown */ }
+  function drawWires(board) {
+    const map = document.getElementById("map");
+    const old = map.querySelector("svg.wires");
+    if (old) old.remove();
+    if (!showWires || panel === "none") return;
+    const box = map.getBoundingClientRect();
+    const at = (el, fx) => { const r = el.getBoundingClientRect(); return [r.left + r.width * fx - box.left, r.top + r.height / 2 - box.top]; };
+    let out = "";
+    planFor(board, orient, panel).wires.forEach(w => {
+      if (!w.hole || stage(w) === "later") return;
+      const dst = map.querySelector(`[data-c="${w.hole.c}"][data-r="${w.hole.r}"] .g`);
+      const strip = map.querySelector(`.strip[data-side="${w.side}"][data-r="${w.pad}"]`);
+      const dots = strip ? strip.querySelectorAll("i") : [];
+      if (!dst || dots.length !== 2) return;
+      const [x1, y1] = at(dots[w.side === "L" ? 1 : 0], 0.5);   // the inner hole: Li on the left, Ri on the right
+      const [x2, y2] = at(dst, 0.5), bend = (x2 - x1) * 0.45;
+      out += `<g class="k-${kind(w.hole.net)}${stage(w) === "done" ? " done" : ""}"><path data-cell="${w.cell}" d="M${x1.toFixed(1)} ${y1.toFixed(1)} C${(x1 + bend).toFixed(1)} ${y1.toFixed(1)} ${(x2 - bend).toFixed(1)} ${y2.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}">`
+        + `<title>${esc(wireName(w))}: ${esc(w.hole.net)} ${COLNAME[w.hole.c]} ${w.hole.r}, ${Math.round(w.len)} mm, batch ${batchOf(w)}</title></path>`
+        + `<circle cx="${x1.toFixed(1)}" cy="${y1.toFixed(1)}" r="2.5"/><circle cx="${x2.toFixed(1)}" cy="${y2.toFixed(1)}" r="2.5"/></g>`;
+    });
+    map.insertAdjacentHTML("beforeend", `<svg class="wires" width="${map.scrollWidth}" height="${map.scrollHeight}" aria-hidden="true">${out}</svg>`);
+  }
+
+  function drawDeck(board) {
+    const holes = DATA[board].holes;
+    const plan = panel !== "none" ? planFor(board, orient, panel) : null;
+    const at = h => `${COLNAME[h.c]} ${h.r}`;
+    document.getElementById("deck").innerHTML = frontOrder().map(([name, side, f]) => {
+      const [lo, hi] = cellRows(f);
+      let body;
+      if (plan) {   // the panel's part in this cell and its wires
+        const part = boyPartOf(name), ws = plan.wires.filter(x => x.cell === name);
+        const line = ws.map(w => (w.part !== part ? w.part + " " : "") + (w.label ? w.label + " " : "") + (w.missing ? "no channel left"
+          : `(pad ${w.padName}) → <b>${esc(w.hole.net)}</b> ${at(w.hole)} · ${Math.round(w.len)} mm${w.across ? " across" : ""}`)).join("<br>");
+        const link = part ? `<div class="link">On the deck: ${esc(deckLink(part))}</div>` : "";
+        body = `<div class="part">${esc(part)}</div><div class="wire">${line}</div>${link}`;
+      } else {
+        const near = holes.filter(h => h.r >= lo && h.r <= hi && (pcbSide(side) === "L" ? ["Ls", "Lsi", "LO", "LI"] : ["R", "Ri", "Ro"]).includes(h.c))
+          .sort((a, b) => a.r - b.r || ORDER[a.c] - ORDER[b.c]);
+        body = near.length ? `<div class="chips">${near.map(h => `<span class="chip k-${kind(h.net)}" title="${at(h)}">${glyph(kind(h.net))}${esc(h.net)}</span>`).join("")}</div>`
+          : `<span class="none">no holes level with it</span>`;
+      }
+      const st = plan ? cellStage(plan, name) : "";
+      return `<div class="card${st ? " " + st : ""}" tabindex="0" data-cell="${name}"><div class="top"><span class="name">${name}</span><span class="where">PCB ${pcbSide(side) === "L" ? "left" : "right"} ${lo}–${hi}</span></div>${body}</div>`;
+    }).join("");
+  }
+
+  // the panel's wiring list: every wire, and what each part's other legs do on the deck
+  function drawBoy(board) {
+    const sec = document.getElementById("boysec");
+    sec.hidden = panel === "none";
+    if (sec.hidden) return;
+    const plan = planFor(board, orient, panel), at = h => `${COLNAME[h.c]} ${h.r}`;
+    document.getElementById("boysum").textContent = `${LAYOUT_NAME[panel]} on the ${BOARDS[board].name} board, as fitted: `
+      + `${plan.wires.length} wires, ${Math.round(plan.total)} mm of hand wire, ${plan.across} across the board. Every one leaves the deck through a strip.`;
+    const from = w => `PCB ${w.side === "L" ? "left" : "right"} ${w.pad}, pad ${w.padName}`;
+    // in batch order, the order they go in; within a batch, as the panel reads
+    const order = [...LAYOUTS[panel].flat().filter((p, i, a) => a.indexOf(p) === i), "deck ground"];
+    const seen = new Set(), seenB = new Set();
+    const rows = order.flatMap(p => plan.wires.filter(w => w.part === p)).sort((a, b) => batchOf(a) - batchOf(b));
+    document.getElementById("boyrows").innerHTML = rows.map(w => {
+      const link = seen.has(w.part) ? "" : deckLink(w.part), b = batchOf(w);
+      const bt = seenB.has(b) ? "" : `${b}. ${BATCHES[b][0]}`, st = batch < 0 ? "" : stage(w);
+      seen.add(w.part); seenB.add(b);
+      const lead = `<tr${st ? ` class="${st}"` : ""}><td class="bt">${esc(bt)}</td><td>${esc(wireName(w))}</td><td class="m">${w.cell}</td>`;
+      if (w.missing) return `${lead}<td colspan="4">no channel of this kind left</td><td class="link">${esc(link)}</td></tr>`;
+      return `${lead}<td>${from(w)}</td><td class="m">${esc(w.hole.net)} ${at(w.hole)}</td>`
+        + `<td class="m">${w.hole.w || ""}</td><td class="${w.across ? "across" : ""}">${Math.round(w.len)} mm${w.across ? ", across" : ""}</td>`
+        + `<td class="link">${esc(link)}</td></tr>`;
+    }).join("");
+  }
+
+  function drawBanks(board) {
+    const holes = DATA[board].holes;
+    document.getElementById("banks").innerHTML = banksOf(board).map(([b, label]) => {
+      const hs = holes.filter(h => h.bank === b).sort((x, y) => x.r - y.r || ORDER[x.c] - ORDER[y.c]);
+      const cols = {};
+      hs.forEach(h => (cols[h.c] = cols[h.c] || []).push(h.r));
+      const where = Object.entries(cols).sort((a, b) => ORDER[a[0]] - ORDER[b[0]]).map(([c, rs]) => {
+        const runs = []; rs.sort((a, b) => a - b).forEach(r => { const last = runs[runs.length - 1]; if (last && r <= last[1] + 1) last[1] = r; else runs.push([r, r]); });
+        return COLNAME[c] + " " + runs.map(([a, z]) => a === z ? a : a + "–" + z).join(", ");
+      }).join("<br>");
+      const count = {};
+      hs.forEach(h => { const k = kind(h.net); count[k] = (count[k] || 0) + 1; });
+      const mix = KINDS.filter(([k]) => count[k]).map(([k, l]) => `${count[k]} ${l.toLowerCase().replace(" (square)", "")}`).join(" · ");
+      const chips = hs.map(h => `<span class="chip k-${kind(h.net)}" title="${COLNAME[h.c]} ${h.r}">${glyph(kind(h.net))}${esc(h.net)}</span>`).join("");
+      return `<tr><td class="b">${label}</td><td class="w">${where}</td><td><div class="chips">${chips}</div></td><td class="c">${mix}</td></tr>`;
+    }).join("");
+  }
+
+  function highlight(name, on) {
+    const c = CELLS.find(x => x[0] === name);
+    if (!c) return;
+    const [, side, f] = c;
+    const [lo, hi] = cellRows(f);
+    document.querySelectorAll(`#map [data-side="${pcbSide(side)}"]`).forEach(d => {
+      const r = +d.getAttribute("data-r");
+      if (r >= lo && r <= hi) d.classList.toggle("hl", on);
+    });
+    document.querySelectorAll(`[data-cell="${name}"]`).forEach(d => d.classList.toggle("hl", on));
+  }
+  ["mouseover", "focusin"].forEach(ev => document.addEventListener(ev, e => {
+    const t = e.target.closest && e.target.closest("[data-cell]");
+    if (t) highlight(t.getAttribute("data-cell"), true);
+  }));
+  ["mouseout", "focusout"].forEach(ev => document.addEventListener(ev, e => {
+    const t = e.target.closest && e.target.closest("[data-cell]");
+    if (t) highlight(t.getAttribute("data-cell"), false);
+  }));
+
+  // the batch picker, and what the chosen batch holds and how it is tested
+  document.getElementById("batchseg").innerHTML = [["All wires", -1], ...BATCHES.map((b, i) => [`${i}. ${b[0]}`, i])]
+    .map(([t, i]) => `<button type="button" data-batch="${i}" aria-pressed="false">${esc(t)}</button>`).join("");
+  function drawBatches(board) {
+    const bar = document.getElementById("batchbar");
+    bar.hidden = panel === "none";
+    if (bar.hidden) return;
+    document.querySelectorAll("#batchseg button").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.batch === batch)));
+    const plan = planFor(board, orient, panel), note = document.getElementById("batchnote");
+    if (batch < 0) {
+      note.innerHTML = `<b>Wiring batches:</b> the ${plan.wires.length} wires go in ${BATCHES.length} batches, each tested before the next.`
+        + " Pick one to see it, with the batches wired before it drawn faint and the later ones left off.";
+      return;
+    }
+    const ws = plan.wires.filter(w => batchOf(w) === batch), mm = ws.reduce((s, w) => s + (w.len || 0), 0);
+    const before = batch === 0 ? "" : batch === 1 ? " Batch 0 is drawn faint: it goes in first." : ` Batches 0–${batch - 1} are drawn faint: they go in first.`;
+    const check = batch === 0 ? "" : ` Before powering, check that none of its holes beeps to a GND hole${batch === 1 ? " (SW6 beeps only while the encoder is pressed)" : ""}.`;
+    const test = board === "teensy_core_midi" ? ` <b>Test:</b> ${esc(BATCHES[batch][2])}.` : " Its test is written for the Rev A test program.";
+    note.innerHTML = `<b>Batch ${batch}. ${esc(BATCHES[batch][0])}:</b> ${ws.length} wire${ws.length === 1 ? "" : "s"}, ${Math.round(mm)} mm.${before}${check}${test}`;
+  }
+  document.getElementById("batchseg").addEventListener("click", e => {
+    const b = e.target.closest("button[data-batch]");
+    if (!b) return;
+    batch = +b.dataset.batch;
+    try { localStorage.setItem("wiring-map-batch", String(batch)); } catch (err) { /* not remembered */ }
+    show(current);
+  });
+
+  let current = "teensy_core_midi";
+  function show(board) {
+    current = board;
+    document.querySelectorAll(".seg button[data-board]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.board === board)));
+    document.querySelectorAll(".seg button[data-panel]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.panel === panel)));
+    setOrient();
+    drawMap(board); drawWires(board); drawDeck(board); drawBanks(board); counts(board); drawBoy(board); drawBatches(board);
+  }
+  document.querySelectorAll(".seg button[data-board]").forEach(b => b.addEventListener("click", () => show(b.dataset.board)));
+  document.querySelectorAll(".seg button[data-panel]").forEach(b => b.addEventListener("click", () => { panel = b.dataset.panel; show(current); }));
+  const wiresBox = document.getElementById("wires-on");
+  wiresBox.checked = showWires;
+  wiresBox.addEventListener("change", () => {
+    showWires = wiresBox.checked;
+    try { localStorage.setItem("wiring-map-wires", showWires ? "on" : "off"); } catch (e) { /* not remembered */ }
+    drawWires(current);
+  });
+  // the wires follow the layout: redraw when the window or the web fonts change it
+  let redraw = 0;
+  window.addEventListener("resize", () => { cancelAnimationFrame(redraw); redraw = requestAnimationFrame(() => drawWires(current)); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => drawWires(current));
+  show({ "#pico": "pico_revb", "#revb": "pico_revb" }[location.hash] || "teensy_core_midi");
+})();
+</script>
+
+</body></html>

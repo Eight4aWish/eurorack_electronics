@@ -1,4 +1,4 @@
-# Design Journal: the analogue board, from spec to order
+# Design Journal: the analogue board, from spec to the first module
 
 A record of how the analogue board was actually arrived at, wrong turns included. It was
 kept because the *process* is part of what this repo documents, and because it may become a
@@ -247,6 +247,77 @@ open. So the last step routed three minimal variants at once and kept the best.
 pins flagged are the DAC's CLR and the 595's MR, logic pins tied to a rail). 13 of its 14
 wiring blocks carry a silkscreen label. Image 18.
 
+**15. Rev A arrives: bring-up, and the first module, Boy2 (27 Oct to 1 Nov).**
+
+**What to build first (27 Oct).** With the boards in the post, David picked the first panel:
+Boy's, with one change. *"i did wonder whether the discrete button/pot could be combined into a
+push encoder. That would leave the pot position free for, say, another gate out/drum or TRS midi
+in."* That became
+**Boy2**: Boy's panel and screen, a push encoder (a Bourns PEC11R) for the button and pot 1, and
+TRS MIDI in. Looking at the wires the panel would need, he was blunt about why there were so
+many: *"the spaghetti of wiring is my poor Rev A planning."*
+
+**The boards land (30 Oct),** four days early. The bring-up started in a session in another
+project, and that evening stages 1–5 and the first five test blocks passed. The board itself
+held two surprises:
+- **No test point numbers on the silkscreen.** David couldn't find "TP209". From then on the
+  plan named holes as marked-up pictures show them, never by reference designator.
+- **PlatformIO's Teensy compiler and loader are Intel-only, and this Mac has no Rosetta.** A
+  small script swaps in an arm64 compiler, and the Teensy Loader app does the flashing.
+
+**Back to this project (31 Oct).** The other session didn't have the design history. David:
+*"it is struggling because it lacks some of the details which are available to this chat ... my
+preference would be to revert back here to complete the work."* The lesson for this way of
+working: the context lives with the project, so the work should too.
+
+**One fit, and the least wire.** The deck can be built two ways, and the board can sit upright
+or turned over, so the two boards can meet in four ways. David: *"Where there are opportunities
+to reduce the length of wires we should take them."*
+- **The choice:** the wiring map planned every wire for each fit. The n8synth way, board
+  upright, needed 24 wires and 800 mm, with 6 crossing the board; the next best needed 889 mm.
+- **The encoder** moved to gate inputs 3 and 1, the holes nearest its cell, with its common on
+  the pot reference, which Boy2 doesn't otherwise use.
+- **Borrowed pads.** The encoder needed one pin more than its cell has. The screen covers two
+  cells, so their pads were free: *"I can borrow any of the abc positions from JPS cells 1 and
+  2."* No wire runs between the boards outside the strips.
+
+**Rules for the bench.** David set three:
+- *"i don't want to attach any temp wires"*;
+- test only what Boy2 uses;
+- ground first: *"experience has taught me that is an important one to remember so I have
+  wired that first"*.
+
+He checked the ground at once and found the plan's ground pad wasn't bridged on the deck.
+
+**The MIDI links.** Rev A puts MIDI on two spare pins, with link holes to choose. David: *"it
+seems odd not to just assign those 2 pins to midi r and midi t."* He kept Rev A as it was and
+asked for a Rev B note: closed solder jumpers instead of link holes.
+
+**Batches.** *"I have previously found this to be easy to get wrong ... I tend to start making
+mistakes when I go for more than an hour wiring."* The 24 wires went in seven batches, each
+checked with the meter and tested before the next, and the wiring map gained a batch picker:
+
+| Batch | Result |
+|---|---|
+| 0. Deck ground | continuity to the board's GND |
+| 1. Encoder | 4 counts per click, clockwise counts up; the push reads |
+| 2. Gate outs | 5.02–5.05 V and 0 V at each jack |
+| 3. CV outs | **gate3 read 0.00 V** while the board read 0.99 V at its hole: a slip on the deck, fixed, then 0.98 V. The rest read about 1.8% low, the same on all six: a calibration job |
+| 4. Audio | **the meter showed nothing** on the 440 Hz sine, and David planned to recheck the wiring. A DC level (+5 V asked, 4.86 V read) proved the outputs. Then the board's own loopback read 9.9 Vpp of 10, and he listened to the tone: *"the wiring was right all along. it was something to do with the test?"* It was the meter |
+| 5. MIDI in | David's two unlabelled Befaco cables: red is Type A. The board read notes and a 120 BPM clock from his Proton, clean |
+| 6. Screen | **a "dead" top row** that wasn't: the error table below |
+
+**1 Nov: every batch passed.** Boy2's hardware works, and the firmware notes
+([`analogue_board_reva_firmware.md`](analogue_board_reva_firmware.md)) hand it to the next stage.
+
+**Afterwards.**
+- **The cost:** USD 353 (£278) for five boards, two of them assembled, plus £69 customs: **£347
+  landed**. Three bare boards are the minimum order's overhead; the second assembled board is a
+  spare module.
+- **The spare capacity.** David: *"amazing the huge amount of functionality that is not being
+  used in this design."* Boy2 uses about half the board. That raised Rev B's next question:
+  trim it towards four layers instead of six?
+
 ---
 
 ## Errors caught, and the pattern behind them
@@ -264,11 +335,26 @@ Mine, in the order they happened:
 | The leftover router returned an empty route for overlapping copper and retried it forever | **About 5 hours overnight, two runs stuck** | No empty routes; a no-progress guard; runs checked every 15 minutes |
 | The leftover router coloured its grid one cell at a time | Long connections took hours | Row-at-a-time marking and an A* search |
 
+**In the bring-up (30 Oct to 1 Nov):**
+
+| Error | Cost | What changed |
+|---|---|---|
+| The wiring planner gave each audio input its own copy of the hole pattern, so two inputs could claim one hole | Caught on the map, before any wire | One shared pattern per kind of hole |
+| The encoder's pins assumed to run A, B, push; the PEC11R's run A, C, B | Caught before wiring | Its common lands on the middle pad |
+| The deck ground first planned to a hole no picture labels | Hard to find at the bench | Only holes the pictures label |
+| The hold-voltage command (`c N V`) read the jack number as the voltage | Five jacks held at the wrong values, one refused | Each number parsed in turn |
+| The screen set up as 128×64, as the spec's table said, not as Boy's own code had it (128×32) | A dead pixel row logged that didn't exist. David: *"Did you use the exact same settings and libraries that are used in boy?"* | Read a module's firmware before writing a driver for a part taken from it; the log and the spec corrected |
+
 **The pattern:** most of these are a script's model of the board disagreeing with KiCad's.
 Bounding box against outline. "Touching" against KiCad's rule that a track end must land
 inside the other copper. My idea of a dead end against KiCad's. Each was fixed by asking
 KiCad, through its DRC, rather than trusting the model. The other lesson is operational:
 **silence is not progress.** A long run gets a timeout and a regular check.
+
+The bring-up's errors follow the same pattern. A second-hand source was trusted over the
+first-hand one: the spec's table over Boy's own code, a meter reading over the board's own
+loopback. The fix each time was the most direct source. The costliest one, the screen, was
+caught by David's bench sense: he knew the screen had been working in Boy.
 
 ---
 
@@ -286,6 +372,19 @@ The scripts did the routing; every big step in placement came from David looking
 | Right-column holes into the strip gap, so chips slide right | A lane beside the header row |
 | *"slimming the number of [test points] would actually help the pico layout"* | 18 bus test points dropped from the Pico board |
 | *"we need to adjust placement at the top of the board"* | The Pico top re-laid: 7 after stage 1 |
+
+At the bench, during the bring-up:
+
+| Observation | Effect |
+|---|---|
+| *"the clk and reset are gate outs not ins"* | Boy2's panel plan corrected before wiring |
+| *"could be combined into a push encoder"* | Boy2: an encoder for the button and pot 1, freeing a cell for TRS MIDI in |
+| *"I can borrow any of the abc positions from JPS cells 1 and 2"* | No wires between the boards outside the strips |
+| *"JPS2 C is not attached to ground"* | The deck's missing ground bridge found before power |
+| *"I tend to start making mistakes when I go for more than an hour wiring"* | Seven tested batches, and a batch picker on the wiring map |
+| *"I have concerns over the resistance between ground and the 3v3"* | About 680 Ω: R210, the regulator's load, as designed |
+| *"this is the screen from the boy which was working fine"* | The "dead row" traced to a set-up error |
+| *"they are befaco cables so we might be able to find out which is which"* | Red is Type A, then confirmed by the board |
 
 ---
 
@@ -308,13 +407,48 @@ The scripts did the routing; every big step in placement came from David looking
   in the repo root to render more of them.
 - **The conversation:** the full transcript, with every message and decision, is on David's
   machine at `~/.claude/projects/-Users-dbaghurst-GitHub-eurorack-electronics/` (about 110 MB of
-  JSON lines). It is not in the repo.
+  JSON lines). It is not in the repo. The first evening of the bring-up (30 Oct) ran in a session
+  in the eight4awish project, under `~/.claude/projects/-Users-dbaghurst-GitHub-eight4awish/`.
+- **The bring-up (chapter 15):**
+  - [`analogue_board_bringup.md`](analogue_board_bringup.md): the plan, and its Log, which holds
+    every reading with its date;
+  - [`analogue_board_bringup/`](analogue_board_bringup/): the marked-up pictures, and
+    `wiring_map.html`, the wiring map with its batch picker;
+  - [`analogue_board_revb/panel_plan.html`](analogue_board_revb/panel_plan.html): the Rev B panel
+    mock-up from chapter 14.
+
+  The two pages began on claude.ai; these copies keep them, and open in any browser. The test
+  program is in [`firmware/analogue_board_test`](../firmware/analogue_board_test/src/main.cpp).
+  The commits run from the plan (72d3e4d, 30 Oct) to the firmware notes (c4ef4d8, 1 Nov).
+
+### For a video of chapter 15
+
+The moments, and what can show each one:
+
+| Moment | What shows it |
+|---|---|
+| The boards arrive, four days early | David's footage, if filmed (the plan asked for the unboxing and the first power-on) |
+| "Where is TP209?" | A test-point picture against the bare silkscreen |
+| The other session loses the thread; the work comes home | The two conversations, side by side |
+| Four fits, one chosen | The wiring map, fit by fit, with "Show wires" on |
+| Borrowed pads | The wiring map's JPS1 and JPS2 cards |
+| Seven batches | The wiring map's batch picker, stepping 0 to 6, against the deck being wired |
+| gate3 reads 0.00 V | The six meter readings, one wrong |
+| "Nothing" on the meter, then the tone | DC 4.86 V, the loopback's 9.9 Vpp, and the sound itself |
+| The screen's "dead row" | The border with its missing line, David's question, then the full border |
+| Red cable, Type A | Notes and clock scrolling in from the Proton |
+| *"amazing the huge amount of functionality that is not being used"* | The board, with Boy2's half lit; on to Rev B |
 
 ## Still open
 
-- Whether to order the Pico board now or after the Teensy board is brought up.
-- The Teensy board's arrival: bring-up, first power-on, and what Rev A needs bodging.
-- Whether the Pico board's wiring field should match the Teensy board's (the right-hand holes
-  moved differently on each). Superseded by Rev B, whose field is one template.
-- Rev B's order: after the Teensy board's bring-up, whose lessons go in first
-  (`docs/analogue_board_revb.md` §7).
+- **Rev B's order.** Rev A's lessons are in: the Log's "For Rev B?" column and
+  [`analogue_board_revb.md`](analogue_board_revb.md) §7. Open: whether to trim it towards four
+  layers. The proposal of 1 Nov is to route Rev B on four layers as it stands first, then compare
+  landed quotes.
+- **Boy2's firmware.** Not written yet. It probably goes beside Boy in `eurorack_modules`, but
+  that hasn't been decided.
+- **Calibration:** the CV outputs, about 1.8% low, kept in the EEPROM.
+- **The noise comparison** against the Daisy Seed MultiFX and the Teensy Chaos.
+- **The second assembled board:** a second module, or a known-good reference.
+- **ESP32-P4:** the HDMI picture's sideways glitch, and the APLL conflict
+  ([`analogue_board_esp32p4.md`](analogue_board_esp32p4.md)).

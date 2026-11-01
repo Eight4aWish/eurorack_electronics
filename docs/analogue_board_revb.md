@@ -63,9 +63,13 @@ TCA9555.
 
 Rev A packed the wiring banks to suit routing. The mix, shape, ground slot and position all
 differ between banks, and between the two boards, and deck cells 13-18 (positions 32-40) have no
-channel holes beside them. Rev B starts from the panel instead. Two private pages in David's
-claude.ai gallery hold the detail: "Analogue Board Wiring Map" (Rev A, every hole against the deck
-cells) and "Rev B Panel Plan" (the mock-up below).
+channel holes beside them. Rev B starts from the panel instead. Two pages hold the detail; they
+began as private claude.ai pages, and copies are kept in the repo so they can't be lost:
+- [Analogue Board Wiring Map](analogue_board_bringup/wiring_map.html): Rev A, every hole against
+  the deck cells;
+- [Rev B Panel Plan](analogue_board_revb/panel_plan.html): the mock-up below.
+
+Open either file in a browser.
 
 **David's rules (2026-10-25):**
 - (a) 10HP only. 6HP need not be considered, which frees space.
