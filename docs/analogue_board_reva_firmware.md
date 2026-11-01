@@ -1,9 +1,13 @@
 # Analogue board Rev A (Teensy 4.1): notes for firmware
 
-What a firmware session needs to know about the Rev A board (`teensy_core_midi`) and the Boy2
-module built on it. Written 2026-11-01, when the Boy2 bring-up finished. Every value here was
+What a firmware session needs to know about the Rev A board (`teensy_core_midi`) and the Boy
+module built on it. Written 2026-11-01, when its bring-up finished. Every value here was
 read from the netlist, the generator's pin map or the working test program, or measured on the
 built module. Where something is from the design only and not yet seen on the bench, it says so.
+
+**Names.** The module was called Boy2 during the bring-up, and is now just **Boy** (David,
+2026-11-01; the name was never used outside these repos). The earlier Boy, on its own hand-built
+hardware, is **the old Boy**: its firmware is `teensy_move_old` in `eurorack_modules`.
 
 **Sources, in order of authority:**
 - **The working code:** [`firmware/analogue_board_test/src/main.cpp`](../firmware/analogue_board_test/src/main.cpp).
@@ -17,9 +21,9 @@ built module. Where something is from the design only and not yet seen on the be
 
 ## Status
 
-- **Boy2's hardware is fully tested (2026-11-01).** Every function Boy2 uses passed on the built
+- **Boy's hardware is fully tested (2026-11-01).** Every function Boy uses passed on the built
   module through its own jacks.
-- **Not yet tested anywhere** (Boy2 doesn't use them):
+- **Not yet tested anywhere** (Boy doesn't use them):
   - the pots (MCP3208);
   - the WS2812 LED chain;
   - MIDI out;
@@ -27,13 +31,14 @@ built module. Where something is from the design only and not yet seen on the be
   - CV inputs from an outside source;
   - switches other than SW6;
   - the noise comparison.
-- **Boy2's firmware isn't written yet.** Boy's firmware (`eurorack_modules`, `src/teensy_move/`)
-  is the starting point, but Boy's chips and pins are all different: see
-  [Porting from Boy](#porting-from-boy).
-- **Boy2's firmware goes in `eurorack_modules`, and it replaces `teensy_move`** (David,
-  2026-11-01). Once Boy2 has taken over, Boy is decommissioned.
+- **Boy's firmware was started on 2026-11-01:** `eurorack_modules`, `src/teensy_move/`, env
+  `teensy41`, with its own `docs/TEENSY_MOVE.md`. Mode 1 builds but hasn't run on the board yet.
+  It's ported from the old Boy's firmware, now `src/teensy_move_old/`, but the old Boy's chips and
+  pins are all different: see [Porting from the old Boy](#porting-from-the-old-boy).
+- **It took over `teensy_move`** (David, 2026-11-01). The old Boy's code is `teensy_move_old`, and
+  the old Boy is decommissioned once the new one has taken over.
 - **Its given job:** the Move companion. It takes the Move's three gate and pitch voices, two drum
-  triggers, clock and reset into the rack. Move audio doesn't need to come in through Boy2.
+  triggers, clock and reset into the rack. Move audio doesn't need to come in through Boy.
 
 ## Building and flashing on this Mac
 
@@ -42,9 +47,10 @@ x86_64 only, so neither runs.
 
 - **Compiler:** copy [`arm64_toolchain.py`](../firmware/analogue_board_test/arm64_toolchain.py)
   into the project and add `extra_scripts = post:arm64_toolchain.py`. It swaps in PlatformIO's
-  arm64 GCC. Boy's own `[env:teensy41]` in `eurorack_modules` doesn't have it.
+  arm64 GCC. Boy's `[env:teensy41]` in `eurorack_modules` has it; the old Boy's
+  `[env:teensy_move_old]` doesn't.
 - **Upload:** use `upload_protocol = teensy-gui` (the Teensy Loader app), not `teensy-cli`.
-  Boy's env uses `teensy-cli`, which won't run here.
+  The old Boy's env uses `teensy-cli`, which won't run here.
 - **Flash in the foreground,** never in the background: a background upload once half-programmed
   and bricked a module.
 - **Uploads often report `Error -1` or FAILED and still program the board.** Check that the new
@@ -71,8 +77,8 @@ x86_64 only, so neither runs.
 | 7, 8 | I2S_DOUT, I2S_DIN | to the codec's DIN, from its DOUT |
 | 2, 3, 4, 5 | GATE_IN1–4 | gate inputs, active high |
 | 17 | LED_DATA | WS2812 data (`WS2812Serial`, Serial4 TX), buffered to 5 V |
-| 0 | SPARE2 | Serial1 RX. **Boy2: linked to MIDI_RX on J101** |
-| 1 | SPARE1 | Serial1 TX. Not linked on Boy2, so there's no MIDI out and pin 1 is free |
+| 0 | SPARE2 | Serial1 RX. **Boy: linked to MIDI_RX on J101** |
+| 1 | SPARE1 | Serial1 TX. Not linked on Boy, so there's no MIDI out and pin 1 is free |
 
 Any pin not in this table isn't connected to the board.
 
@@ -117,7 +123,7 @@ Any pin not in this table isn't connected to the board.
 - **QE–QH are unused,** and QH′ reaches J603 for an off-board 74HCT595 chain.
 
 **MCP3208, SPI-B:** six pots on CH0–5; CH6–7 are tied to ground. 1 MHz at most. Untested, and
-Boy2 has no pots.
+Boy has no pots.
 
 **PCM3060 codec:**
 - **Hardware mode, with no control bus:** it starts on its own once MCLK runs. There is no
@@ -150,11 +156,11 @@ Boy2 has no pots.
 - **TRS Type A.** David's red Befaco cable is Type A; the grey one is Type B.
 - There is no hardware THRU.
 
-## Boy2: what is wired where
+## Boy: what is wired where
 
-The panel is Boy's, fitted to the n8synth 10HP deck: a push encoder replaces the button and pot 1,
-and TRS MIDI in replaces Boy's USB-only input. The full wire list is in stage 8 of the bring-up
-plan, and the [wiring map](analogue_board_bringup/wiring_map.html) draws it batch by batch. That's
+The panel is the old Boy's, fitted to the n8synth 10HP deck: a push encoder replaces the button and
+pot 1, and TRS MIDI in replaces the old Boy's USB-only input. The full wire list is in stage 8 of
+the bring-up plan, and the [wiring map](analogue_board_bringup/wiring_map.html) draws it batch by batch. That's
 a copy kept in the repo; open it in a browser.
 
 | Panel | Board channel | Firmware |
@@ -170,19 +176,21 @@ a copy kept in the repo; open it in a browser.
 | screen | J703 | SSD1306 **128×32** at 0x3C on `Wire` |
 
 **Encoder** (a Bourns PEC11R):
-- Its common is on POT_REF, the pot reference: 3.3 V. Free here because Boy2 has no pots. If pots
+- Its common is on POT_REF, the pot reference: 3.3 V. Free here because Boy has no pots. If pots
   are ever added, the common must move to +3V3D.
 - The test program's settings: `QuadEncoder(1, 4, 2, 0)`, with no internal pull-ups (the LM393s
   have their own), `filterCount` 7 and `filterSamplePeriod` 255.
 - **4 counts per detent, clockwise counts up.**
 - The A contact bounces, about two edges a click, and the filter absorbs it.
 
-**Screen:** the same 128×32 SSD1306 that was in Boy. Drive it as
-`Adafruit_SSD1306(128, 32, &Wire, -1)`, as Boy does. Driven as 128×64, it shows only every other
-row. It shares the I2C bus with the expander that reads the encoder's push, so keep Boy's
-partial, one-page-per-pass updates.
+**Screen:** the same 128×32 SSD1306 that was in the old Boy. Drive it as
+`Adafruit_SSD1306(128, 32, &Wire, -1, 400000, 400000)`. Driven as 128×64, it shows only every other
+row. The last two arguments matter: by default the library sets the bus back to 100 kHz after each
+of its transfers, which left the old Boy's screen at a quarter of its intended speed. The screen
+shares the I2C bus with the expander that reads the encoder's push, so keep updates partial: Boy
+sends a changed row in 32-byte pieces, one per pass of the loop.
 
-## Measured on Boy2's board
+## Measured on Boy's board
 
 Starting points for calibration, which belongs in the EEPROM (requirement 10: one point per volt
 for pitch):
@@ -198,20 +206,20 @@ for pitch):
 | Audio loopback | out to in: 9.9 Vpp read of the 10 sent, inverted, both channels |
 | MIDI in | clean at 31 250 baud: note pairs and a 120 BPM clock with no garbled bytes |
 
-## Porting from Boy
+## Porting from the old Boy
 
-Boy here means Boy with its Teensy Expander, the 6HP companion that carries voices 3–4 and the
+The old Boy here includes its Teensy Expander, the 6HP companion that carries voices 3–4 and the
 drums.
 
-| | Boy (`eurorack_modules/src/teensy_move`) | Boy2 on Rev A |
+| | The old Boy (`eurorack_modules/src/teensy_move_old`) | Boy on Rev A |
 |---|---|---|
 | Audio | SGTL5000 audio shield, `AudioControlSGTL5000`. Its line-in gain suits the Move's line-level output, which it sends on at Eurorack level | PCM3060, no control object; inputs inverted. Scaled for Eurorack audio (10 Vpp nominal). Line-level sources come in through another module |
 | Voices | four, on MIDI ch 1–4: gate, pitch and mod each | three: gate and pitch each, **no mod**. Ch 4 has no jacks |
-| CV | four MCP4822s, eight outputs (pitch and mod × 4). Two on Boy (CS 33, 34); two on the Expander, selected through its 595's Q6 and Q7 | DAC8568 on SPI-A, its start-up order, and a TCA9555 switch per jack. Six outputs: three pitches and three gates |
+| CV | four MCP4822s, eight outputs (pitch and mod × 4). Two on the old Boy (CS 33, 34); two on the Expander, selected through its 595's Q6 and Q7 | DAC8568 on SPI-A, its start-up order, and a TCA9555 switch per jack. Six outputs: three pitches and three gates |
 | Pitch range | −3.0 to +6.6 V, note 36 at 0 V | about ±5.3 V: with the same law, notes above about 99 clip |
 | Gates | gates 1–2 on pins 40 and 38; gates 3–4 on the Expander's 595 (Q1, Q0). All through 74HCT14 inverters: low at the pin is high at the jack | DAC8568 channels: a gate is a voltage written to the DAC, +5 V under its +5.3 V top |
 | Clock, reset | pins 39 and 37, inverted the same way | GOUT1 and GOUT4 through the 74HCT595 on SPI-B, not inverted (1 = +5 V); OE through the TCA9555 |
-| Drums | four, ch 10 notes 36–39, 500 µs pulses, on the Expander's 74HC595 (latch 32, Q2–Q5), inverted | two: drum1 on GOUT3 and drum2 on GOUT2, notes 36 and 37 by Boy's numbering |
+| Drums | four, ch 10 notes 36–39, 500 µs pulses, on the Expander's 74HC595 (latch 32, Q2–Q5), inverted | two: drum1 on GOUT3 and drum2 on GOUT2, notes 36 and 37 by the old Boy's numbering |
 | Mod | per channel, from velocity, CC#42 or a pot, last actuator wins | no jacks |
 | Pots | four, by `analogRead`: Mod 1–4 on the STATUS page, the four FX settings on the FX page | none: the encoder replaces the button and pot 1 |
 | Button | pin 2, `INPUT_PULLUP` | encoder push on TCA9555 SW6. **Pin 2 is now GIN1, the encoder's B** |
@@ -219,18 +227,18 @@ drums.
 | MIDI | USB MIDI only (`USB_MIDI_SERIAL`), its link to the Move, forced to full speed for hubs in `setup()` | USB MIDI still, plus TRS MIDI in on Serial1 |
 | Calibration | `calib_static.h`: gain and offset per channel | the EEPROM |
 
-**None of Boy's pin numbers carry over.** Pins 32–34 and 40 aren't connected on Rev A, and 37–39
-now carry SPI-B.
+**None of the old Boy's pin numbers carry over.** Pins 32–34 and 40 aren't connected on Rev A,
+and 37–39 now carry SPI-B.
 
-**Features Boy had and later dropped,** in its history in `eurorack_modules`. Both saw little use
-because Boy's audio path was too noisy (David, 2026-11-01). Neither is a commitment for Boy2:
-what the rest of the Teensy does is still open.
+**Features the old Boy had and later dropped,** in its history in `eurorack_modules`. Both saw
+little use because the old Boy's audio path was too noisy (David, 2026-11-01). Neither is a
+commitment for Boy: what the rest of the Teensy does is still open.
 - **Chord mode** (added in `a2007a4`; last in `842fc36^:include/teensy_move/chord_library.h` and
   `1c3eaec^:src/teensy_move/main.cpp`): one-finger chords on MIDI ch 6, Maschine-style.
   - 40 progressions in five categories, eight chords each, played from the white keys.
   - Every voicing has four notes, with five voicing transforms.
   - The pots set root, category, progression and voicing. It drove the four pitch and gate CVs.
-  - Boy2 has three voices, so a four-note voicing doesn't fit its CVs as it stands.
+  - Boy has three voices, so a four-note voicing doesn't fit its CVs as it stands.
 - **Drone** (last in `d691282^:src/teensy_move/main.cpp`): four voices of two detuned oscillators,
   each with an envelope, mixed into the passthrough. Removed in v3.
 
@@ -287,8 +295,14 @@ What makes modes work on this board:
 - **The panel's labels belong to mode 1.** In other modes the screen says what each jack does.
 - **The gate outs** can carry gates made from the audio: comparator, envelope or onset.
 - **MIDI still arrives in modes 2 and 3.** Move notes can set the internal carrier's pitch.
-- **Changing mode changes jack directions.** A source still patched into a CV jack would meet the
-  DAC through the 1 kΩ, so a mode change wants a confirm screen.
+- **The mode is chosen at power-on and holds for the session** (David). Jack directions are set
+  once a session and never switched within a mode. A source still patched into a CV jack would
+  meet the DAC through the 1 kΩ.
+- **Back to the chooser without a power cycle** (David: MultiOsc's lack of this is a pain). Hold the
+  encoder's push for 2 s. The board goes to its power-on state and the Teensy restarts into the
+  chooser, so each mode starts from a clean Teensy.
+
+Mode 3 starts with **spectral morphing and sidechain ducking** (David, 2026-11-01).
 
 Mode 3's menu:
 - stereo out, with the two sides as two algorithms or a spread;
@@ -305,19 +319,21 @@ Mode 3's menu:
 
 What a straight Warps port has to settle:
 - **Sample rate.** Warps' oscillator, filter banks and resampling filters are designed for 96 kHz.
-  The Teensy Audio library runs at 44.1 kHz. A straight port favours running the codec at 96 kHz,
-  if the PCM3060 and the Teensy's I2S will (check the datasheet, then the bench). Otherwise
-  retune the constants.
+  The Teensy Audio library isn't tied to the audio shield: only `AudioControlSGTL5000` is. The
+  bring-up ran the PCM3060 through its `AudioOutputI2S` and `AudioInputI2S`. But the library runs
+  at 44.1 kHz. A straight port favours its own I2S at 96 kHz with Warps' DSP called directly, if
+  the PCM3060 and the Teensy's SAI will run there (check the datasheet, then the bench). Otherwise
+  retune the constants and keep the library.
 - **Knobs.** Warps has four knobs and a button (carrier shape, and the frequency-shifter easter
-  egg). Boy2 has one encoder. Either the encoder pages through them, or the Move sets them by CC,
-  if it can send CCs from its knobs (untested).
-- **Patch detection.** Warps finds unpatched jacks with a normalisation probe. Boy2 has none: the
+  egg). Boy has one encoder, and the Move can't send CCs (David, 2026-11-01). So the encoder pages
+  through them, with the CV ins on top.
+- **Patch detection.** Warps finds unpatched jacks with a normalisation probe. Boy has none: the
   jack-detect probe was dropped on 2026-10-16. Its open CV inputs read about +0.207 V, which
   calibration can trim out.
 - **Jack order.** IN-L and IN-R are the carrier and modulator, and OUT-L and OUT-R are Warps' OUT
   and AUX. The screen shows which four CV jacks are which.
 
-**Outside the Move role:** plugged into the Mac, Boy2 is a USB MIDI-to-CV with three voices and,
+**Outside the Move role:** plugged into the Mac, Boy is a USB MIDI-to-CV with three voices and,
 with the two CV outs above, two CC outs. That's what the Strudel re-record lost with the Workshop
 Computer. In the rig's cable list (`eight4awish-video/src/cables.ts`), it gave one pitch and
 one gate (to Ogham's CLK/VOCT and SYNC) and two CC outs (to Ogham CVA and Alchemy Lab CV1).

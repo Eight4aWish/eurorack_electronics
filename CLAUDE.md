@@ -19,9 +19,9 @@ a module. No single repo sees all of it, so do not infer the full picture from t
 ## Analogue board
 
 Before writing firmware for the analogue board (Rev A, Teensy 4.1, `teensy_core_midi`) or
-for **Boy2**, the module built on it, read **`docs/analogue_board_reva_firmware.md`**. It
+for **Boy**, the module built on it, read **`docs/analogue_board_reva_firmware.md`**. It
 covers:
-- the pin map, the chips and the Boy2 wiring;
+- the pin map, the chips and the Boy wiring;
 - the measured values;
 - how to build and flash on this Mac.
 

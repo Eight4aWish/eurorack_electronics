@@ -247,13 +247,14 @@ open. So the last step routed three minimal variants at once and kept the best.
 pins flagged are the DAC's CLR and the 595's MR, logic pins tied to a rail). 13 of its 14
 wiring blocks carry a silkscreen label. Image 18.
 
-**15. Rev A arrives: bring-up, and the first module, Boy2 (27 Oct to 1 Nov).**
+**15. Rev A arrives: bring-up, and the first module, Boy (27 Oct to 1 Nov).**
 
 **What to build first (27 Oct).** With the boards in the post, David picked the first panel:
-Boy's, with one change. *"i did wonder whether the discrete button/pot could be combined into a
+the old Boy's, with one change. *"i did wonder whether the discrete button/pot could be combined into a
 push encoder. That would leave the pot position free for, say, another gate out/drum or TRS midi
 in."* That became
-**Boy2**: Boy's panel and screen, a push encoder (a Bourns PEC11R) for the button and pot 1, and
+**Boy2**, renamed plain **Boy** on 1 Nov because the name had never been used outside these repos:
+the old Boy's panel and screen, a push encoder (a Bourns PEC11R) for the button and pot 1, and
 TRS MIDI in. Looking at the wires the panel would need, he was blunt about why there were so
 many: *"the spaghetti of wiring is my poor Rev A planning."*
 
@@ -276,14 +277,14 @@ to reduce the length of wires we should take them."*
 - **The choice:** the wiring map planned every wire for each fit. The n8synth way, board
   upright, needed 24 wires and 800 mm, with 6 crossing the board; the next best needed 889 mm.
 - **The encoder** moved to gate inputs 3 and 1, the holes nearest its cell, with its common on
-  the pot reference, which Boy2 doesn't otherwise use.
+  the pot reference, which Boy doesn't otherwise use.
 - **Borrowed pads.** The encoder needed one pin more than its cell has. The screen covers two
   cells, so their pads were free: *"I can borrow any of the abc positions from JPS cells 1 and
   2."* No wire runs between the boards outside the strips.
 
 **Rules for the bench.** David set three:
 - *"i don't want to attach any temp wires"*;
-- test only what Boy2 uses;
+- test only what Boy uses;
 - ground first: *"experience has taught me that is an important one to remember so I have
   wired that first"*.
 
@@ -307,7 +308,7 @@ checked with the meter and tested before the next, and the wiring map gained a b
 | 5. MIDI in | David's two unlabelled Befaco cables: red is Type A. The board read notes and a 120 BPM clock from his Proton, clean |
 | 6. Screen | **a "dead" top row** that wasn't: the error table below |
 
-**1 Nov: every batch passed.** Boy2's hardware works, and the firmware notes
+**1 Nov: every batch passed.** Boy's hardware works, and the firmware notes
 ([`analogue_board_reva_firmware.md`](analogue_board_reva_firmware.md)) hand it to the next stage.
 
 **Afterwards.**
@@ -315,7 +316,7 @@ checked with the meter and tested before the next, and the wiring map gained a b
   landed**. Three bare boards are the minimum order's overhead; the second assembled board is a
   spare module.
 - **The spare capacity.** David: *"amazing the huge amount of functionality that is not being
-  used in this design."* Boy2 uses about half the board. That raised Rev B's next question:
+  used in this design."* Boy uses about half the board. That raised Rev B's next question:
   trim it towards four layers instead of six?
 
 ---
@@ -377,8 +378,8 @@ At the bench, during the bring-up:
 
 | Observation | Effect |
 |---|---|
-| *"the clk and reset are gate outs not ins"* | Boy2's panel plan corrected before wiring |
-| *"could be combined into a push encoder"* | Boy2: an encoder for the button and pot 1, freeing a cell for TRS MIDI in |
+| *"the clk and reset are gate outs not ins"* | Boy's panel plan corrected before wiring |
+| *"could be combined into a push encoder"* | Boy: an encoder for the button and pot 1, freeing a cell for TRS MIDI in |
 | *"I can borrow any of the abc positions from JPS cells 1 and 2"* | No wires between the boards outside the strips |
 | *"JPS2 C is not attached to ground"* | The deck's missing ground bridge found before power |
 | *"I tend to start making mistakes when I go for more than an hour wiring"* | Seven tested batches, and a batch picker on the wiring map |
@@ -437,7 +438,7 @@ The moments, and what can show each one:
 | "Nothing" on the meter, then the tone | DC 4.86 V, the loopback's 9.9 Vpp, and the sound itself |
 | The screen's "dead row" | The border with its missing line, David's question, then the full border |
 | Red cable, Type A | Notes and clock scrolling in from the Proton |
-| *"amazing the huge amount of functionality that is not being used"* | The board, with Boy2's half lit; on to Rev B |
+| *"amazing the huge amount of functionality that is not being used"* | The board, with Boy's half lit; on to Rev B |
 
 ## Still open
 
@@ -445,8 +446,9 @@ The moments, and what can show each one:
   [`analogue_board_revb.md`](analogue_board_revb.md) §7. Open: whether to trim it towards four
   layers. The proposal of 1 Nov is to route Rev B on four layers as it stands first, then compare
   landed quotes.
-- **Boy2's firmware.** Not written yet. It probably goes beside Boy in `eurorack_modules`, but
-  that hasn't been decided.
+- **Boy's firmware.** Started 1 Nov in `eurorack_modules`. It took over `teensy_move`, and the old
+  Boy's code became `teensy_move_old`. The mode is chosen at power-on: mode 1, the Move companion,
+  builds and waits for the bench; Warps and other two-input processing are to come.
 - **Calibration:** the CV outputs, about 1.8% low, kept in the EEPROM.
 - **The noise comparison** against the Daisy Seed MultiFX and the Teensy Chaos.
 - **The second assembled board:** a second module, or a known-good reference.

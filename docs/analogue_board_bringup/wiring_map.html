@@ -463,7 +463,7 @@ section { display: grid; gap: 14px; }
     ["Gate outs", ["drum1", "drum3", "rst", "clk"], "block 7, meter on each jack's tip pad"],
     ["CV outs", ["gate1", "gate2", "gate3", "pitch1", "pitch2", "pitch3"], "block 5 (nothing patched), then c N V holds jack N's voltage for the meter"],
     ["Audio", ["audio in L", "audio in R", "audio out L", "audio out R"], "block 10: sine out, then patch the outs into the ins"],
-    ["MIDI in", ["midi in"], "block 13: its loop test fails (no MIDI out on Boy2); play notes in and watch the bytes"],
+    ["MIDI in", ["midi in"], "block 13: its loop test fails (no MIDI out on Boy); play notes in and watch the bytes"],
     ["Screen", ["screen"], "block 1: the screen's address joins 0x20 and 0x50"],
   ];
   const batchOf = w => BATCHES.findIndex(b => b[1].includes(w.part));
