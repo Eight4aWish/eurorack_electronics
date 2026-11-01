@@ -73,7 +73,7 @@ writes and would port here. Bought modules are benchmarks.
 | Sorrow | Patch SM | 10 | 4 | 2 | 1 | 2 | (2) / 2 | 4 | button, toggle | — | — |
 | Joy | Patch SM | 10 | 4 | 2 | — | — | — / 2 | 4 | button | OLED 64×48 | — |
 | Girl | Ksoloti | 20 | 9 | 1 | — | 1 | — / 2 | 8 | 4 buttons, **2 encoders** | OLED 128×64 | — |
-| Boy | Teensy 4.1 | 10 | — | — | 4 (2 V/oct) | 4 (+6 on expander) | 2 / 2 | 4 | button | OLED 128×64 | USB |
+| Boy | Teensy 4.1 | 10 | — | — | 4 (2 V/oct) | 4 (+6 on expander) | 2 / 2 | 4 | button | OLED 128×32 (corrected 2026-11-01 from Boy's firmware; it was given as 128×64) | USB |
 | Chaos | Teensy 4.1 | 10 | 4 | (2 of the CV) | 2 | — | 1 / 2 | 4 | button | OLED 128×64 | — |
 | CortHex | Nano ESP32 | 10 | — | 1 | **6 (±5 V, calibrated)** | — | 2 / 2 | — | 7 buttons + 7 LEDs | — | — |
 | Daisy MultiOsc | Patch SM | 10 | 4 | 2 | 1 | 2 | 2 / 2 | 4 | button | OLED 64×48 | — |

@@ -649,8 +649,9 @@ static void block_midi() {
   Serial.println();
 }
 
-// ---- the screen: a 128x64 I2C OLED on J703 at 0x3C, an SSD1306 or an SH1106. Page addressing suits both;
-// the SH1106's RAM is 132 columns wide, so its glass starts at column 2
+// ---- the screen: an I2C OLED on J703 at 0x3C. Boy's is a 128x32 SSD1306 (eurorack_modules, src/teensy_move:
+// Adafruit_SSD1306 at 128 x 32), so that is the default, set up with the library's values. Page addressing
+// also suits an SH1106, whose RAM is 132 columns wide, so its glass starts at column 2
 constexpr uint8_t ADDR_OLED = 0x3C;
 static bool oled_cmds(const uint8_t *c, size_t n) {
   Wire.beginTransmission(ADDR_OLED);
@@ -670,46 +671,49 @@ static bool oled_page(uint8_t page, uint8_t col0, const uint8_t *row) {  // 8 pi
   return true;
 }
 
-static void block_screen(bool sh1106, bool down) {
-  Serial.printf("Block 14, screen: 128x64 OLED at 0x3C, driven as an %s%s\n", sh1106 ? "SH1106" : "SSD1306",
-                down ? ", the picture shifted down a row (the bottom row wraps to the top)" : "");
+static void block_screen(bool sh1106, uint8_t rows) {
+  Serial.printf("Block 14, screen: 128x%d OLED at 0x3C, driven as an %s\n", rows, sh1106 ? "SH1106" : "SSD1306");
   if (!i2c_present(ADDR_OLED)) {
     Serial.println("  Nothing answers at 0x3C: check SDA, SCL and 3V3 from JPS1 to J703, and the screen's GND to D.");
     return;
   }
+  const bool tall = rows == 64;
   const uint8_t init[] = {
-      0xAE,                            // display off
-      0xD5, 0x80, 0xA8, 0x3F,          // clock; 64 rows
-      0xD3, 0x00, (uint8_t)(down ? 0x7F : 0x40),  // no offset; start line 0, or 63 to shift the picture down a row
+      0xAE,                                   // display off
+      0xD5, 0x80, 0xA8, (uint8_t)(rows - 1),  // clock; rows
+      0xD3, 0x00, 0x40,                       // no offset; start line 0
       sh1106 ? (uint8_t)0xAD : (uint8_t)0x8D, sh1106 ? (uint8_t)0x8B : (uint8_t)0x14,  // its own DC-DC or charge pump on
-      0xA1, 0xC8, 0xDA, 0x12,          // the usual orientation, header pins at the top; COM pins
-      0x81, 0xCF, 0xD9, 0xF1, 0xDB, 0x40,  // contrast, pre-charge, VCOMH
-      0xA6, 0xA5, 0xAF};               // not inverted; every pixel on, whatever the RAM holds; display on
-  if (!oled_cmds(init, sizeof(init))) {
+      0xA1, 0xC8,                             // the library's orientation
+      0xDA, (uint8_t)(tall ? 0x12 : 0x02),    // COM pins: alternate for 64 rows, sequential for 32
+      0x81, (uint8_t)(tall ? 0xCF : 0x8F), 0xD9, 0xF1, 0xDB, 0x40,  // contrast, pre-charge, VCOMH, as the library sets them
+      0xA6, 0xA5, 0xAF};                      // not inverted; every pixel on, whatever the RAM holds; display on
+  const uint8_t ssd1306_only[] = {0x20, 0x02, 0x2E};  // page addressing; scrolling off
+  if (!oled_cmds(init, sizeof(init)) || (!sh1106 && !oled_cmds(ssd1306_only, sizeof(ssd1306_only)))) {
     Serial.println("  The screen stopped answering during set-up.");
     return;
   }
   Serial.println("  Every pixel on for 3 s: any dark spot or line is a fault in the panel.");
   delay(3000);
-  // a border round the edge and a filled square in the top-left corner, the header pins' end
-  const uint8_t col0 = sh1106 ? 2 : 0;
+  // a border round the edge and a filled square at the left, the header pins' end
+  const uint8_t col0 = sh1106 ? 2 : 0, pages = rows / 8;
   uint8_t row[128];
   bool ok = true;
-  for (uint8_t p = 0; p < 8 && ok; p++) {
+  for (uint8_t p = 0; p < pages && ok; p++) {
     for (int x = 0; x < 128; x++) {
-      uint8_t b = (p == 0 ? 0x01 : 0) | (p == 7 ? 0x80 : 0);  // top and bottom edges
-      if (x == 0 || x == 127) b = 0xFF;                         // left and right edges
-      if (p >= 1 && p <= 2 && x >= 8 && x < 24) b = 0xFF;      // the square: 16 x 16
+      uint8_t b = (p == 0 ? 0x01 : 0) | (p == pages - 1 ? 0x80 : 0);  // top and bottom edges
+      if (x == 0 || x == 127) b = 0xFF;                                 // left and right edges
+      if (p >= 1 && p <= 2 && x >= 8 && x < 24) b = 0xFF;              // the square: 16 x 16
       row[x] = b;
     }
     ok = oled_page(p, col0, row);
   }
   const uint8_t show_ram = 0xA4;
   ok = ok && oled_cmds(&show_ram, 1);
-  Serial.println(ok ? "  Now a border round the edge and a filled square near the top-left corner. It stays until a restart."
+  Serial.println(ok ? "  Now a border round the edge and a filled square at the left. It stays until a restart."
                     : "  The screen stopped answering while the pattern was sent.");
-  if (ok && !sh1106)
-    Serial.println("  Left edge missing, or a stripe of noise down the right? It is an SH1106: run 14 sh.");
+  if (ok)
+    Serial.printf("  Every other row missing or the picture stretched? Try %s. Left edge missing? Try 14 sh.\n",
+                  tall ? "14 (128x32)" : "14 64 (128x64)");
 }
 
 // c N V: hold CV N (1-6) at V volts with its switch closed, for a meter on the jack or a module; 0 releases it
@@ -794,7 +798,7 @@ static void help() {
   Serial.println("  11   LEDs                        a WS2812 chain on the LED holes");
   Serial.println("  12   encoder, live               A on GIN3, B on GIN1, common to POT_REF; push through JPS2 to SW6");
   Serial.println("  13   MIDI                        after stage 7; a TRS cable from OUT to IN, or notes from a MIDI source");
-  Serial.println("  14   screen                      a 128x64 OLED on J703; 14 sh for an SH1106, 14 d shifts it down a row");
+  Serial.println("  14   screen                      Boy's 128x32 OLED on J703; 14 64 for a 128x64, 14 sh for an SH1106");
   Serial.println("  c N V  hold CV N at V volts      e.g. c 4 2.5; meter on its jack's tip; 0 releases it");
   Serial.println("  a V    hold the audio outs at V  e.g. a 5; DC volts on AOUT1-2 or their jacks; 0 stops it");
   Serial.println("  0    safe: switches off, gate outs off, DAC at 0 V, audio and LEDs off");
@@ -827,7 +831,7 @@ static void run(char *cmd) {
     case 11: return block_leds();
     case 12: return block_encoder();
     case 13: return block_midi();
-    case 14: return block_screen(strstr(cmd, "sh") != nullptr, strchr(cmd, 'd') != nullptr);
+    case 14: return block_screen(strstr(cmd, "sh") != nullptr, strstr(cmd, "64") ? 64 : 32);
   }
   Serial.printf("Not a command: %s (h for the list)\n", cmd);
 }
