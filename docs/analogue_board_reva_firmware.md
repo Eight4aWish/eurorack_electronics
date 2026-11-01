@@ -270,6 +270,39 @@ doesn't offer them again as new. Every panel jack is committed. What's left to b
 A USB audio interface is left out too: the ES-10 and the Scarlett already do that job. Also,
 whether the Move as host would accept a combined MIDI and audio device is unknown.
 
+**Direction (David, 2026-11-01, not yet settled): a firmware with modes.**
+- **Mode 1** is the Move companion.
+- **Mode 2** takes two audio signals and does something to one with the other. It starts from
+  Warps and goes further, because Warps runs on much less: an STM32F4 Cortex-M4 at 168 MHz
+  (`warps/makefile`), a 96 kHz codec, its cross-modulation 6× oversampled, a 20-band vocoder,
+  one main output plus an aux, and no long buffers.
+
+What makes modes work on this board:
+- **The six CV jacks are bidirectional.** With a jack's switch off it's an input to the ADS8688
+  (±10.24 V), so mode 2 can have six CV ins where Warps has five. The bring-up checked open inputs
+  and switch isolation; reading a patched CV isn't tested yet.
+- **The panel's labels belong to mode 1.** In other modes the screen says what each jack does.
+- **The gate outs** can carry gates made from the audio: comparator, envelope or onset.
+- **MIDI still arrives in mode 2.** Move notes can set the internal carrier's pitch.
+- **Changing mode changes jack directions.** A source still patched into a CV jack would meet the
+  DAC through the 1 kΩ, so a mode change wants a confirm screen.
+
+Mode 2's menu beyond Warps:
+- stereo out, with the two sides as two algorithms or a spread;
+- more vocoder bands, or an FFT vocoder with a formant shift;
+- FFT cross-synthesis: one input's spectral envelope on the other, or a morph between the two
+  spectra;
+- live convolution: capture a moment of one input as an impulse response and play the other
+  through it;
+- sidechain dynamics: ducking, gating or compression of one input keyed by the other;
+- cross-triggered grains: one input fills a buffer, and the other's onsets play grains from it
+  (Wish and Monsoon are granular, but neither is keyed by a second signal);
+- pitch-follow: the pitch tracked from one input tunes a resonant filter or harmoniser on the
+  other.
+
+Warps' oscillator and filters are designed for 96 kHz. The Teensy Audio library runs at 44.1 kHz,
+so a port either retunes Warps' constants or sets up the codec at 96 kHz itself.
+
 **Outside the Move role:** plugged into the Mac, Boy2 is a USB MIDI-to-CV with three voices and,
 with the two CV outs above, two CC outs. That's what the Strudel re-record lost with the Workshop
 Computer. In the rig's cable list (`eight4awish-video/src/cables.ts`), it gave one pitch and
