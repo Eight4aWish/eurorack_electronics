@@ -120,7 +120,8 @@ Boy2 has no pots.
   `AudioControl` object; just `AudioOutputI2S` and `AudioInputI2S`.
 - **Rate:** the Teensy Audio library's 44.1 kHz works (spec planned 48 kHz).
 - **Levels:**
-  - full scale is 20 Vpp in and out;
+  - full scale is about 22 Vpp in (gain −0.136 into the codec's 3 Vpp; the test program scales
+    by 22) and 20 Vpp out;
   - outputs are DC-coupled, and a sample of 1.0 is about +10 V;
   - inputs are AC-coupled.
 - **Inputs invert, by design:** negate them (requirement 6).
@@ -156,7 +157,7 @@ a copy kept in the repo; open it in a browser.
 |---|---|---|
 | gate1, gate2, gate3 | CV4, CV6, CV1 | DAC8568 ch 3, 5, 0; switches P03, P05, P00 |
 | pitch1, pitch2, pitch3 | CV5, CV2, CV3 | DAC8568 ch 4, 1, 2; switches P04, P01, P02 |
-| clk, drum1, drum3, rst | GOUT1, GOUT3, GOUT2, GOUT4 | 595 word bits 0, 2, 1, 3 |
+| clk, drum1, drum3, rst | GOUT1, GOUT3, GOUT2, GOUT4 | 595 word bits 0, 2, 1, 3. The panel prints the drums as DRM1 and DRM2 |
 | audio in L, audio in R | AIN2, AIN1 | I2S **right**, I2S **left**: the panel's L and R are swapped |
 | audio out L, audio out R | AOUT1, AOUT2 | I2S left, I2S right |
 | MIDI in (TRS, Type A) | MI_T, MI_R | Serial1 RX, pin 0, 31 250 baud |
@@ -195,17 +196,34 @@ for pitch):
 
 ## Porting from Boy
 
+Boy here means Boy with its Teensy Expander, the 6HP companion that carries voices 3–4 and the
+drums.
+
 | | Boy (`eurorack_modules/src/teensy_move`) | Boy2 on Rev A |
 |---|---|---|
-| Audio | SGTL5000 audio shield, `AudioControlSGTL5000` | PCM3060, no control object; inputs inverted; 20 Vpp full scale |
-| CV | two MCP4822s (CS 33, 34) | DAC8568 on SPI-A, its start-up order, and a TCA9555 switch per jack |
-| Clock, reset, gates | direct pins 37–40 | gate outs through the 74HCT595 on SPI-B, OE through the TCA9555 |
-| Drums | the Teensy Expander's 74HC595 (latch 32) | drum1 and drum3 on GOUT3 and GOUT2 |
-| Pots | four, by `analogRead` | none: the encoder replaces the button and pot 1 |
+| Audio | SGTL5000 audio shield, `AudioControlSGTL5000`. Its line-in gain suits the Move's line-level output, which it sends on at Eurorack level | PCM3060, no control object; inputs inverted. Scaled for Eurorack audio, so a line-level source arrives far below full scale and any make-up gain is in software |
+| Voices | four, on MIDI ch 1–4: gate, pitch and mod each | three: gate and pitch each, **no mod**. Ch 4 has no jacks |
+| CV | four MCP4822s, eight outputs (pitch and mod × 4). Two on Boy (CS 33, 34); two on the Expander, selected through its 595's Q6 and Q7 | DAC8568 on SPI-A, its start-up order, and a TCA9555 switch per jack. Six outputs: three pitches and three gates |
+| Pitch range | −3.0 to +6.6 V, note 36 at 0 V | about ±5.3 V: with the same law, notes above about 99 clip |
+| Gates | gates 1–2 on pins 40 and 38; gates 3–4 on the Expander's 595 (Q1, Q0). All through 74HCT14 inverters: low at the pin is high at the jack | DAC8568 channels: a gate is a voltage written to the DAC, +5 V under its +5.3 V top |
+| Clock, reset | pins 39 and 37, inverted the same way | GOUT1 and GOUT4 through the 74HCT595 on SPI-B, not inverted (1 = +5 V); OE through the TCA9555 |
+| Drums | four, ch 10 notes 36–39, 500 µs pulses, on the Expander's 74HC595 (latch 32, Q2–Q5), inverted | two, on GOUT3 and GOUT2 |
+| Mod | per channel, from velocity, CC#42 or a pot, last actuator wins | no jacks |
+| Pots | four, by `analogRead`: Mod 1–4 on the STATUS page, the four FX settings on the FX page | none: the encoder replaces the button and pot 1 |
 | Button | pin 2, `INPUT_PULLUP` | encoder push on TCA9555 SW6. **Pin 2 is now GIN1, the encoder's B** |
 | Screen | SSD1306 128×32 at 0x3C | the same screen and address; the bus is now shared |
-| MIDI | USB MIDI | USB MIDI if kept, plus TRS MIDI in on Serial1 |
-| Calibration | `calib_static.h` | the EEPROM |
+| MIDI | USB MIDI only (`USB_MIDI_SERIAL`), its link to the Move, forced to full speed for hubs in `setup()` | USB MIDI still, plus TRS MIDI in on Serial1 |
+| Calibration | `calib_static.h`: gain and offset per channel | the EEPROM |
 
 **None of Boy's pin numbers carry over.** Pins 32–34 and 40 aren't connected on Rev A, and 37–39
 now carry SPI-B.
+
+**Features Boy had and later dropped,** in its history in `eurorack_modules`:
+- **Chord mode** (added in `a2007a4`; last in `842fc36^:include/teensy_move/chord_library.h` and
+  `1c3eaec^:src/teensy_move/main.cpp`): one-finger chords on MIDI ch 6, Maschine-style.
+  - 40 progressions in five categories, eight chords each, played from the white keys.
+  - Every voicing has four notes, with five voicing transforms.
+  - The pots set root, category, progression and voicing. It drove the four pitch and gate CVs.
+  - Boy2 has three voices, so a four-note voicing doesn't fit its CVs as it stands.
+- **Drone** (last in `d691282^:src/teensy_move/main.cpp`): four voices of two detuned oscillators,
+  each with an envelope, mixed into the passthrough. Removed in v3 as never used.
