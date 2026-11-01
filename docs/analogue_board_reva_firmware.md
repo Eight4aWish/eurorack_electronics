@@ -233,3 +233,44 @@ what the rest of the Teensy does is still open.
   - Boy2 has three voices, so a four-note voicing doesn't fit its CVs as it stands.
 - **Drone** (last in `d691282^:src/teensy_move/main.cpp`): four voices of two detuned oscillators,
   each with an envelope, mixed into the passthrough. Removed in v3.
+
+## Ideas for the rest of the Teensy (brainstorm, 2026-11-01)
+
+Nothing here is decided. It's the whole menu, including the ideas left out, so a later session
+doesn't offer them again as new. Every panel jack is committed. What's left to build on:
+- the stereo audio pair: inputs AC-coupled, outputs DC-coupled at ±10 V, so the outputs can
+  carry CV;
+- the 600 MHz M7 with its FPU;
+- 1 MB RAM, plus pads under the Teensy for two 8 MB PSRAM chips (not fitted; the Teensy is
+  socketed);
+- 8 MB flash, and the microSD slot (the card sits behind the panel, so it suits files that are
+  rarely changed);
+- USB MIDI in both directions;
+- the 16-bit DAC, at about 0.2 cent per step;
+- spare MIDI: ch 4, drum notes above 37, CCs, and TRS as a second source.
+
+| Idea | What it uses | Against it, or what was there before |
+|---|---|---|
+| **Glide per voice** | DAC writes at a control rate well above 1 kHz | Abacus can slew CV patched through it |
+| **Audio outs as two CV outs**: velocity, or CC#42, for two voices | DC-coupled outputs | Shares the audio pair with every audio idea below |
+| **Alternative tunings**: each note mapped through a table (just intonation, slendro and pelog, quarter tones, Scala files) | 16-bit DAC, flash or SD | The Move's MIDI carries plain note numbers, so a tuning has to be applied here. VCO tracking hides the small shifts of just intonation; the bold tunings come through |
+| **Warps on the audio pair**: crossfade, fold, two ring mods, XOR, comparator, spectral, morph and vocoder | FPU | Source already in `eurorack_modules/third_party/eurorack/warps` (MIT), unused. Warps isn't in the rack. Its internal oscillator can be the carrier, played by a Move voice. Its oscillator runs at 96 kHz against the Teensy's 44.1 kHz. A vocoder was already on MultiOsc's list of future engines, unbuilt |
+| **The rack plays the Move**: pitch-track a rack voice on an audio input, send it to the Move as notes | FPU, USB MIDI out | Tracking adds a few tens of ms. Untested whether the Move plays and records notes from a USB device |
+| **Loop slicer**: record a bar or two of the rack on a Move note, play slices from Move pads | PSRAM (16 MB holds about 95 s of stereo) | The Move's own sampler may cover it. Oneiroi has a 5 s looper, not locked to the Move |
+| **Polyphonic voice** on a spare channel, so the Move can send chords through the rack's mono filters | FPU | The Move has its own polysynths. Successor to chord mode and the drone |
+| **Tempo-synced stereo FX**: delays in note values, beat repeat | FPU, MIDI clock | The Daisy MultiFX, FX Aid, Wish and Oneiroi already do delay and texture |
+
+**Left out because the rack already has them:**
+- clock division and swing: DivSkip, Steppy;
+- clock-synced LFOs and envelopes: Four LFO, Peaks, Waves, Steps;
+- granular: Monsoon, Wish;
+- envelope follower: the I4;
+- quantising: Scales, the O&C.
+
+A USB audio interface is left out too: the ES-10 and the Scarlett already do that job. Also,
+whether the Move as host would accept a combined MIDI and audio device is unknown.
+
+**Outside the Move role:** plugged into the Mac, Boy2 is a USB MIDI-to-CV with three voices and,
+with the two CV outs above, two CC outs. That's what the Strudel re-record lost with the Workshop
+Computer. In the rig's cable list (`eight4awish-video/src/cables.ts`), it gave one pitch and
+one gate (to Ogham's CLK/VOCT and SYNC) and two CC outs (to Ogham CVA and Alchemy Lab CV1).
