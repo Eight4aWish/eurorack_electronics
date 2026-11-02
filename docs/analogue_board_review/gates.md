@@ -303,7 +303,7 @@ The BAT54S maximum VF (MDD datasheet Rev 2024A2) is 0.24 V at 0.1 mA, 0.32 V at 
 
 | Load | Current |
 |---|---|
-| PCM3060 IDD, full power-down (SBAS437) | 0.15 mA |
+| PCM3060 IDD, full power-down (SLAS533B) | 0.15 mA |
 | ADS8688 DVDD (0.5 mA dynamic, SBAS582C; static not stated **[unverified]**) | ≤ 0.5 mA |
 | GATE_TH divider | 0.165 mA |
 | TCA9555, EEPROM | µA |
@@ -314,7 +314,7 @@ The BAT54S maximum VF (MDD datasheet Rev 2024A2) is 0.24 V at 0.1 mA, 0.32 V at 
   - On a **Pico 2** the digital pins are fault-tolerant ("tolerate voltages up to 5.5 V,
     provided IOVDD is powered", RP2350 datasheet). They will not clamp the rail, so the
     excess goes into whatever on +3V3D breaks down first.
-  - The PCM3060 VDD absolute maximum is **4.0 V** (SBAS437). On a **Teensy 4.1** (not
+  - The PCM3060 VDD absolute maximum is **4.0 V** (SLAS533B). On a **Teensy 4.1** (not
     5 V-tolerant) the GATE_IN lines, pulled up to +3V3D, would sit above the MCU's own
     3.3 V.
   - Treating the loads as a resistor, four 12 V gates would drive the rail far past 4 V
@@ -445,7 +445,7 @@ VOH ≥ 3.7 V at −6 mA.
   - Put a schematic note on it: "minimum load for gate-input clamps: XC6206 cannot sink".
 - **Why (evidence):** §4.5.
   - Injection is 0.80 mA per 12 V input.
-  - The minimum +3V3D load is about 0.3–0.8 mA: PCM3060 power-down 0.15 mA per SBAS437;
+  - The minimum +3V3D load is about 0.3–0.8 mA: PCM3060 power-down 0.15 mA per SLAS533B;
     ADS8688 DVDD ≤ 0.5 mA per SBAS582C; the divider 0.165 mA.
   - The XC6206 has no sink path.
   - The PCM3060 VDD absolute maximum is 4.0 V.
@@ -614,7 +614,7 @@ Not needed.
 - **TI TCA9555** (2009–2019): pin table, §9.3.1, §9.4.1, Tables 4–6.
 - **Torex XC6206:** <https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Torex-Semicon-XC6206P332MR-G_C5446.pdf>
 - **TI TPS54308:** §6.3.2 FCCM, low-side sink limit, 5 ms soft-start.
-- **TI PCM3060 SBAS437:** absolute maximum VDD 4.0 V, IDD.
+- **TI PCM3060 SLAS533B:** absolute maximum VDD 4.0 V, IDD.
 - **TI ADS8688 SBAS582C:** IDVDD_DYN.
 - **Raspberry Pi RP2350 datasheet:** fault-tolerant pins, VPIN_FT, erratum E9.
 

@@ -33,6 +33,8 @@ hardware, is **the old Boy**: its firmware is `teensy_move_old` in `eurorack_mod
   - the noise comparison.
 - **Boy's firmware was started on 2026-11-01:** `eurorack_modules`, `src/teensy_move/`, env
   `teensy41`, with its own `docs/TEENSY_MOVE.md`. Mode 1 works on the bench (2026-11-01), all but TRS MIDI in, not yet tried.
+  Mode 2, Warps, was written on 2026-11-02 and builds. It isn't flashed yet: its bench test is the
+  first of CV inputs from an outside source, and of the codec at 96 kHz.
   It's ported from the old Boy's firmware, now `src/teensy_move_old/`, but the old Boy's chips and
   pins are all different: see [Porting from the old Boy](#porting-from-the-old-boy).
 - **It took over `teensy_move`** (David, 2026-11-01). The old Boy's code is `teensy_move_old`, and
@@ -129,6 +131,19 @@ Boy has no pots.
 - **Hardware mode, with no control bus:** it starts on its own once MCLK runs. There is no
   `AudioControl` object; just `AudioOutputI2S` and `AudioInputI2S`.
 - **Rate:** the Teensy Audio library's 44.1 kHz works (spec planned 48 kHz).
+  - The library's rate is one constant, `AUDIO_SAMPLE_RATE_EXACT`. It derives MCLK from that as
+    256 fS, with BCK at 64 fS.
+  - The PCM3060 takes 256 fS up to 96 kHz in both its ADC and DAC (SLAS533B, p.15, Table 2).
+    Its ADC stops at 96 kHz; the DAC goes to 192 kHz. In slave mode BCK must be 64 or 48 fS
+    (p.19).
+  - Boy builds at 96 kHz since 2026-11-02, for Warps. Not yet heard on the bench.
+- **Fixed by the straps** (MODE 220 kΩ to ground; FMT, DEMP and IFMD 10 kΩ to ground): hardware
+  mode with differential outputs, 24-bit I2S, de-emphasis off, ADC and DAC both slaves, one MCLK
+  on SCKI1 and SCKI2. What only the serial modes reach is out of reach:
+  - digital attenuation and soft mute;
+  - the ADC high-pass's bypass, so it's always on (0.91 Hz at 48 kHz, 1.8 Hz at 96 kHz);
+  - the DAC's double-rate oversampling;
+  - the zero flags' settings. ZEROL and ZEROR aren't connected anyway.
 - **Levels:**
   - full scale is about 22 Vpp in (gain −0.136 into the codec's 3 Vpp; the test program scales
     by 22) and 20 Vpp out;
@@ -262,7 +277,7 @@ doesn't offer them again as new. Every panel jack is committed. What's left to b
 | **Glide per voice** | DAC writes at a control rate well above 1 kHz | Abacus can slew CV patched through it |
 | **Audio outs as two CV outs**: velocity, or CC#42, for two voices | DC-coupled outputs | Shares the audio pair with every audio idea below |
 | **Alternative tunings**: each note mapped through a table (just intonation, slendro and pelog, quarter tones, Scala files) | 16-bit DAC, flash or SD | The Move's MIDI carries plain note numbers, so a tuning has to be applied here. VCO tracking hides the small shifts of just intonation; the bold tunings come through |
-| **Warps on the audio pair**: crossfade, fold, two ring mods, XOR, comparator, spectral, morph and vocoder | FPU | Source already in `eurorack_modules/third_party/eurorack/warps` (MIT), unused. Warps isn't in the rack. Its internal oscillator can be the carrier, played by a Move voice. Its oscillator runs at 96 kHz against the Teensy's 44.1 kHz. A vocoder was already on MultiOsc's list of future engines, unbuilt |
+| **Warps on the audio pair**: crossfade, fold, two ring mods, XOR, comparator, spectral, morph and vocoder | FPU | **Built as mode 2, 2026-11-02**, from `eurorack_modules/third_party/eurorack/warps` (MIT). Warps isn't in the rack. Its internal oscillator can be the carrier, played by a Move voice. Its oscillator runs at 96 kHz against the Teensy's 44.1 kHz. A vocoder was already on MultiOsc's list of future engines, unbuilt |
 | **The rack plays the Move**: pitch-track a rack voice on an audio input, send it to the Move as notes | FPU, USB MIDI out | Tracking adds a few tens of ms. Untested whether the Move plays and records notes from a USB device |
 | **Loop slicer**: record a bar or two of the rack on a Move note, play slices from Move pads | PSRAM (16 MB holds about 95 s of stereo) | The Move's own sampler may cover it. Oneiroi has a 5 s looper, not locked to the Move |
 | **Polyphonic voice** on a spare channel, so the Move can send chords through the rack's mono filters | FPU | The Move has its own polysynths. Successor to chord mode and the drone |
@@ -317,21 +332,30 @@ Mode 3's menu:
 - pitch-follow: the pitch tracked from one input tunes a resonant filter or harmoniser on the
   other.
 
-What a straight Warps port has to settle:
-- **Sample rate.** Warps' oscillator, filter banks and resampling filters are designed for 96 kHz.
-  The Teensy Audio library isn't tied to the audio shield: only `AudioControlSGTL5000` is. The
-  bring-up ran the PCM3060 through its `AudioOutputI2S` and `AudioInputI2S`. But the library runs
-  at 44.1 kHz. A straight port favours its own I2S at 96 kHz with Warps' DSP called directly, if
-  the PCM3060 and the Teensy's SAI will run there (check the datasheet, then the bench). Otherwise
-  retune the constants and keep the library.
-- **Knobs.** Warps has four knobs and a button (carrier shape, and the frequency-shifter easter
-  egg). Boy has one encoder, and the Move can't send CCs (David, 2026-11-01). So the encoder pages
-  through them, with the CV ins on top.
-- **Patch detection.** Warps finds unpatched jacks with a normalisation probe. Boy has none: the
-  jack-detect probe was dropped on 2026-10-16. Its open CV inputs read about +0.207 V, which
-  calibration can trim out.
-- **Jack order.** IN-L and IN-R are the carrier and modulator, and OUT-L and OUT-R are Warps' OUT
-  and AUX. The screen shows which four CV jacks are which.
+How the Warps port settled them (2026-11-02; the details are in `docs/TEENSY_MOVE.md`):
+- **Sample rate: 96 kHz, through the Teensy Audio library.**
+  - Warps' pitch and vocoder tables are generated for 96 kHz (`warps/resources/lookup_tables.py`),
+    and so are its resampling filters. At any other rate they would have to be regenerated.
+  - The library isn't tied to the audio shield (only `AudioControlSGTL5000` is), and its rate is
+    one build flag. So Boy needs no I2S driver of its own; the 1 Nov note here suggested one.
+  - Blocks are 96 samples: Warps' largest, and its own host test's size.
+- **Knobs.** The encoder pages through Warps' four knobs and its button (carrier shape), plus
+  the frequency-shifter easter egg, with the CV ins on top. The Move can't send CCs (David,
+  2026-11-01).
+- **Patch detection.** Boy has no probe: the jack-detect probe was dropped on 2026-10-16.
+  - An open CV input sits still at the ADS8688's bias, about +0.207 V: 1 MΩ to its 2.25 V
+    against 100 kΩ to ground.
+  - So a jack within 20 mV of that, steady to 4 mV, for 100 ms counts as unpatched. This stands
+    in for Warps' probe.
+  - A patched source held still in that window can't be told from an open jack (requirement 8).
+- **Jacks:**
+  - IN-L and IN-R are the carrier and modulator, and OUT-L and OUT-R are Warps' OUT and AUX.
+  - PITCH1 is Level 1 (and V/oct), PITCH2 is Level 2, GATE1 is Algorithm and GATE2 is Timbre.
+  - The screen marks a patched jack with `*`.
+- **Levels follow Warps' hardware** (`warps_v30.pdf`):
+  - inputs gain 22/16 (Warps' full scale is 16 Vpp, Boy's 22);
+  - outputs are 1:1 (about 19.5 Vpp against Boy's 19.4);
+  - a 2.7 Hz high-pass stands in for Warps' output capacitors.
 
 **Outside the Move role:** plugged into the Mac, Boy is a USB MIDI-to-CV with three voices and,
 with the two CV outs above, two CC outs. That's what the Strudel re-record lost with the Workshop

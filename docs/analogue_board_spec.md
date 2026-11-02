@@ -387,7 +387,7 @@ produce, and the 595 drives eight from one chip.
 
 | Block | Circuit | Part (LCSC) | Stock / $@10 | Status |
 |---|---|---|---|---|
-| **Codec** | PCM3060 in hardware-control mode (no control bus). VCC 4.5–5.5 V analogue, VDD 2.7–3.6 V digital. ADC: single-ended, full scale 0.6 × VCC = 3 Vpp around VCOM = 2.5 V, Zin 10 kΩ. DAC: differential, 8 Vpp; load ≥ 10 kΩ DC-coupled. SCKI (MCLK) 2.048–36.864 MHz is required. *(PCM3060 datasheet SBAS437, 2008)* | PCM3060PWR **C2651841** | 1,955 / $4.08 | proposed |
+| **Codec** | PCM3060 in hardware-control mode (no control bus). VCC 4.5–5.5 V analogue, VDD 2.7–3.6 V digital. ADC: single-ended, full scale 0.6 × VCC = 3 Vpp around VCOM = 2.5 V, Zin 10 kΩ. DAC: differential, 8 Vpp; load ≥ 10 kΩ DC-coupled. SCKI (MCLK) 2.048–36.864 MHz is required. *(PCM3060 datasheet SLAS533B, 2008)* | PCM3060PWR **C2651841** | 1,955 / $4.08 | proposed |
 | **Audio in** | Eurorack 10 Vpp → AC-couple → inverting amp, gain −0.3, biased to VCOM → codec. Clamp to the codec rails. **Superseded 2026-10-15: 20 Vpp full scale, gain −0.136 (§15)** | op-amp | — | proposed |
 | **Audio out** | Codec VOUT± → difference amp, gain 1.25 → ±5 V, **DC-coupled** → 1 kΩ → jack. **Superseded 2026-10-15: balanced second-order MFB, gain 2.5, 20 Vpp (§15)** | op-amp | — | proposed |
 | **CV ADC** | ADS8688: 8 ch, 16-bit, 500 kSPS aggregate, per-channel ranges ±10.24 / ±5.12 / ±2.56 / 0–10.24 / 0–5.12 V, **1 MΩ** input, OVP ±20 V powered / **±11 V unpowered**, internal 4.096 V ref, AVDD 4.75–5.25 V, DVDD 1.65 V–AVDD, SCLK ≤ 17 MHz, 32-clock frames *(SBAS582C)*. No input op-amps needed. | ADS8688IDBTR **C527390** | 2,921 / $7.32 | proposed |
@@ -1332,7 +1332,7 @@ at the top edge. It marks the USB plug keep-out of §4.3, to be checked with the
 
 ## 16. Sources
 
-- Datasheets (TI unless noted): MCP4802/4812/4822 (Microchip DS20002249B); PCM3060 SBAS437; ADS8684/8688 SBAS582C; DAC7568/8168/8568
+- Datasheets (TI unless noted): MCP4802/4812/4822 (Microchip DS20002249B); PCM3060 SLAS533B; ADS8684/8688 SBAS582C; DAC7568/8168/8568
   SBAS430F; DAC8564, DAC8565; MCP3204/3208 (Microchip DS21298); DG411/412/413 (Vishay
   61564, rev B 2025); TL07xx (TL07xH data); SN74HCT595; SN74HC14 (superseded); LM4040.
 - Stock and prices: JLCPCB parts API (`selectSmtComponentList`), 2026-10-14.
