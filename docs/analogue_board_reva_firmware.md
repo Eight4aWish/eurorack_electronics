@@ -33,8 +33,8 @@ hardware, is **the old Boy**: its firmware is `teensy_move_old` in `eurorack_mod
   - the noise comparison.
 - **Boy's firmware was started on 2026-11-01:** `eurorack_modules`, `src/teensy_move/`, env
   `teensy41`, with its own `docs/TEENSY_MOVE.md`. Mode 1 works on the bench (2026-11-01), all but TRS MIDI in, not yet tried.
-  Mode 2, Warps, was written on 2026-11-02 and builds. It isn't flashed yet: its bench test is the
-  first of CV inputs from an outside source, and of the codec at 96 kHz.
+  Mode 2, Warps, went on Boy on 2026-11-02: the codec runs at 96 kHz (its internal carrier plays
+  C2 on a tuner where it should). Its CV inputs from an outside source aren't tried yet.
   It's ported from the old Boy's firmware, now `src/teensy_move_old/`, but the old Boy's chips and
   pins are all different: see [Porting from the old Boy](#porting-from-the-old-boy).
 - **It took over `teensy_move`** (David, 2026-11-01). The old Boy's code is `teensy_move_old`, and
@@ -136,7 +136,8 @@ Boy has no pots.
   - The PCM3060 takes 256 fS up to 96 kHz in both its ADC and DAC (SLAS533B, p.15, Table 2).
     Its ADC stops at 96 kHz; the DAC goes to 192 kHz. In slave mode BCK must be 64 or 48 fS
     (p.19).
-  - Boy builds at 96 kHz since 2026-11-02, for Warps. Not yet heard on the bench.
+  - Boy runs at 96 kHz since 2026-11-02, for Warps. Confirmed on the bench by pitch: Warps'
+    internal carrier, whose tables are built for 96 kHz, plays C2 where it should.
 - **Fixed by the straps** (MODE 220 kΩ to ground; FMT, DEMP and IFMD 10 kΩ to ground): hardware
   mode with differential outputs, 24-bit I2S, de-emphasis off, ADC and DAC both slaves, one MCLK
   on SCKI1 and SCKI2. What only the serial modes reach is out of reach:
