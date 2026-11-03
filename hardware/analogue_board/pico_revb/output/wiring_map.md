@@ -60,16 +60,12 @@ top, left column first. Ground holes are square. Rows are the edge strip positio
 | 6 | LS | 14 | J704.4 |
 | 7 | LS | 15 | J704.5 |
 
-## W6: rows 26-31, left strip (label on the deck and outward faces)
+## W6: rows 26-27, left strip (label on the deck and outward faces)
 
 | Hole | Column | Row | Signal |
 |---|---|---|---|
 | 1 | LSI | 26 | J101.1 |
 | 2 | LSI | 27 | J101.2 |
-| 3 | LSI | 28 | J101.3 |
-| 4 | LSI | 29 | J101.4 |
-| 5 | LSI | 30 | J101.5 |
-| 6 | LSI | 31 | J101.6 |
 
 ## W7: rows 1-10, right side (label on the deck and outward faces)
 
@@ -137,27 +133,16 @@ top, left column first. Ground holes are square. Rows are the edge strip positio
 | 5 | RSI | 15 | J703.3 |
 | 6 | RSI | 16 | J703.4 |
 
-## W14: rows 26-31, right strip (label on the deck and outward faces)
-
-| Hole | Column | Row | Signal |
-|---|---|---|---|
-| 1 | RSI | 26 | J603.1 |
-| 2 | RSI | 27 | J603.2 |
-| 3 | RSI | 28 | J603.3 |
-| 4 | RSI | 29 | J603.4 |
-| 5 | RSI | 30 | J603.5 |
-| 6 | RSI | 31 | J603.6 |
-
 ## Test points
 
 | Test point | Signal | Face | x, y (mm from the top left) | Labelled |
 |---|---|---|---|---|
-| TP201 | +12V | outward | 22.2, 79.1 | no room |
-| TP202 | -12V | outward | 21.9, 76.5 | no room |
-| TP203 | GND | outward | 24.4, 76.6 | yes |
-| TP204 | GND | deck | 17.9, 84.7 | no room |
-| TP205 | +5VD | deck | 25.4, 77.8 | yes |
-| TP206 | +5VA | deck | 26.4, 58.3 | no room |
-| TP207 | +3V3A | deck | 28.7, 16.7 | yes |
-| TP208 | +3V3D | outward | 22.1, 84.7 | no room |
-| TP209 | MOD_5V | outward | 23.6, 66.1 | no room |
+| TP201 | +12V | deck | 1.9, 73.8 | yes |
+| TP202 | -12V | outward | 17.1, 75.1 | yes |
+| TP205 | +5VD | deck | 22.0, 84.5 | yes |
+| TP206 | +5VA | deck | 24.9, 81.9 | yes |
+| TP207 | +3V3A | deck | 26.3, 16.3 | yes |
+| TP208 | +3V3D | deck | 23.2, 93.3 | yes |
+| TP209 | MOD_5V | outward | 13.3, 60.0 | yes |
+
+Board marking (ANALOGUE BOARD REV B / EIGHT4AWISH / CC BY-SA 4.0): outward face, 1 line, turned, centred 38.8, 53.7 mm from the top left.

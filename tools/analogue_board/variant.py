@@ -64,9 +64,11 @@ BOARDS = {
     # ESP32-P4's own I2C on pins 16 and 17, so EXP_INT goes and the panel bus keeps its own pins
     # (design.PINMAP_REVB); the module 1.2 mm right of centre, clear of the power header in the
     # lower gap on the PCB's left (placement.py)
+    # For the order (David, 2026-11-02/03; docs/analogue_board_revb.md §8): MIDI wired straight to
+    # the UART pins, no gate expansion (J603), the CV outputs at ±10 V, no ground test points
     "pico_revb": {"title": "Pico 2 / ESP32-P4", "modules": {"A101": "pico"}, "floorplan": "pico_revb",
-                  "drop": {"qwiic", "bus_tps", "exp_int"}, "fixed_cv": 1, "pots": 6, "switches": 6,
-                  "spacing": 0.4, "track": 0.127, "rev": "B", "ten_hp_only": True,
+                  "drop": {"qwiic", "bus_tps", "exp_int", "gate_exp", "gnd_tps"}, "fixed_cv": 1, "pots": 6, "switches": 6,
+                  "spacing": 0.4, "track": 0.127, "rev": "B", "ten_hp_only": True, "midi_direct": True, "cv_volts": 10,
                   "module_cx": 26.0, "header_pin1": (9.52, 66.82)},   # courtyard 5.84-15.84: clear of J901 and A101
 }
 DEFAULT = ("pico", "teensy")   # what build.py and pcb.py build with no argument
@@ -84,7 +86,8 @@ MODULES = BOARDS[BOARD]["modules"] if BOARD else {}        # ref -> "pico" | "te
 REF = {kind: ref for ref, kind in MODULES.items()}         # "pico" | "teensy" -> ref
 HAS_PICO, HAS_TEENSY = "pico" in REF, "teensy" in REF
 _B = BOARDS.get(BOARD, {})
-DROP = _B.get("drop", set())          # features left out: "fixed_cv", "midi", "qwiic", "bus_tps", "exp_int"
+DROP = _B.get("drop", set())          # features left out: "fixed_cv", "midi", "qwiic", "bus_tps", "exp_int", "gate_exp",
+                                      # "gnd_tps"
 FLOORPLAN = _B.get("floorplan", BOARD)   # whose placement anchors this board uses
 SPACING = _B.get("spacing", 0.1)      # courtyard-to-courtyard gap the auto-placer keeps, mm
 TRACK = _B.get("track", 0.15)         # default track width and clearance, mm
@@ -97,6 +100,8 @@ SWITCHES = _B.get("switches", 9)      # switch inputs on the TCA9555
 TEN_HP_ONLY = _B.get("ten_hp_only", False)   # both strips 10HP only: no 6HP deck on the left strip
 MODULE_CX = _B.get("module_cx")       # the module's centre line x, mm; None for the board's centre
 HEADER_PIN1 = _B.get("header_pin1")   # the power header's pin 1, mm; None for Rev A's bottom-right spot
+MIDI_DIRECT = _B.get("midi_direct", False)   # the UART pins wired to MIDI, not to link holes on J101
+CV_VOLTS = _B.get("cv_volts", 5)      # CV output range, ±5 or ±10 V (spec §15's resistor variant)
 
 
 def has(feature):

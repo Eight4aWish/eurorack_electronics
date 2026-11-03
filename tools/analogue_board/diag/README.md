@@ -18,3 +18,4 @@ KPY=/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/
 | `row_crossings.py board.kicad_pcb ...` | `$KPY` | How many module header rows each signal net's shortest pad-to-pad tree crosses |
 | `chip_moves.py board.kicad_pcb U602,U502 name=x,y ...` | `$KPY` | For each chip, total straight-line track to its pins and header rows crossed, now and at candidate spots: whether a move is worth trying |
 | `clear_dangling.py board.kicad_pcb` | `$KPY` | **Edits the board:** deletes exactly what KiCad's DRC calls a dangling track or via, repeating until none remain; stops if the unconnected count rises |
+| `lcsc_footprints.py routed.kicad_pcb jlc_bom.csv jlc_cpl.csv cache/` | `$KPY` | Every part type JLC places, against LCSC's own footprint (fetched with the repo's easyeda2kicad, cached): pad count, numbering, worst pad-centre gap, pad-size ratio, and whether `fab.py`'s rotation offset is the one LCSC's drawing needs. Run before every order |

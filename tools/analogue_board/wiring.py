@@ -118,11 +118,11 @@ PLAN_REVB = [
 UTILITY_REVB = {
     "J704": ("LS", 11),   # WS2812 chain (5)
     "J303": ("LSI", 11),  # codec reset (2)
-    "J101": ("LSI", 26),  # spare GPIO and MIDI links, RUN, GND (6), beside the power header
+    "J101": ("LSI", 26),  # RUN, GND (2; 6 with the spare GPIO and MIDI links), beside the power header
     # both in the inner column: in the outer one J102 sat behind J703, and P4_SCL could not get out
     "J102": ("RSI", 11),  # the ESP32-P4's own I2C (2), level with module pins 16 and 17
     "J703": ("RSI", 13),  # I2C for a wired display (4)
-    "J603": ("RSI", 26),  # gate expansion (6)
+    "J603": ("RSI", 26),  # gate expansion (6); removed for the order (David, 2026-11-02)
     "J1001": ("LO", 35),  # MIDI out: tip, ring (the sleeve to the deck's D bus)
     "J1002": ("R", 35),   # MIDI in: tip, ring, sleeve (not to D: CA-033)
 }
@@ -153,7 +153,10 @@ MOVES = {"teensy_core_midi": {("R", 10): ("RS", 11), ("R", 11): ("RS", 12),     
 PLAN = [(*MOVES.get(variant.BOARD, {}).get((c, s), (c, s)), bank, sheet, net) for c, s, bank, sheet, net in PLAN]
 if not variant.has("midi"):
     del UTILITY["J1001"]
-J101_SIZE = (4 if variant.has("midi") else 2) + (1 if variant.HAS_PICO else 0) + 1   # spares (+ MIDI links), RUN, GND
+if not variant.has("gate_exp"):
+    UTILITY.pop("J603", None)
+# spares (+ MIDI links), RUN, GND; with MIDI wired straight there are no spares or links
+J101_SIZE = (0 if variant.MIDI_DIRECT else 4 if variant.has("midi") else 2) + (1 if variant.HAS_PICO else 0) + 1
 
 
 def groups():

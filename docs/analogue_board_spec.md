@@ -631,7 +631,8 @@ plan. Confirm on a live quote.
 - TRS MIDI in and out are back; audio full scale is 20 Vpp in and out; every block gets a
   prior-art review before the schematic pass.
 - 15 V TVS diodes at the CV jacks (one new Extended type).
-- CV range stays **±5 V**, with a documented ±10 V resistor variant (§15).
+- CV range stays **±5 V**, with a documented ±10 V resistor variant (§15). **Rev B takes the
+  ±10 V variant** (David, 2026-11-03; Rev B notes §8).
 - The board accommodates the **ESP32-P4-WIFI6** (§5, §15).
 - The power header can go anywhere that keeps power-rail noise away from sensitive parts (§4.3).
 
@@ -1226,7 +1227,8 @@ Ten sheets, the pin map first; every sheet was also checked by eye for overlappi
 - **15 V TVS at each CV jack: yes.** PESD15VL1BA (C85378), one new Extended type.
 - **CV range stays ±5 V**, with a documented ±10 V resistor variant: Rf 75k, divider 15k/20k,
   all Basic. That gives gain 8.5, OFFSET_REF 1.429 V and −10.71 … +10.54 V; it needs ≥ 10 kΩ
-  loads and is calibrated within the ADC's ±10.24 V range.
+  loads and is calibrated within the ADC's ±10.24 V range. Rev A is ±5 V; **Rev B is ±10 V**
+  (2026-11-03), with the 75k in 0603.
 - **The ESP32-P4-WIFI6 is accommodated** (§5): Q201 and JP201 below, a firmware rule, and
   board length at checkpoint 2.
 - **The power header is free to move** (§4.3): place it to keep power-rail noise away

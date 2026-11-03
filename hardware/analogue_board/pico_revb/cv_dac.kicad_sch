@@ -1227,7 +1227,7 @@
 		)
 		(uuid "24f96668-2732-5604-bf7d-2cb049ff7c19")
 	)
-	(text "DAC8568 grade A: 0-2.5 V from its internal reference (off at power-up), outputs reset to zero. Each stage: non-inverting\ngain 1 + 33k/10k = 4.3, offset by OFFSET_REF = VREF × 22k/34k through the 10 kΩ: Vout = 4.3·Vdac − 5.34 V, so −5.34 V …\n+5.41 V, putting ±5 V inside the DAC's specified codes (0 V at code ≈ 32544). The offset tracks the DAC's own reference, as\nin Performer, O&C, Marbles and Stages. CVO7/8: the 1 kΩ sits inside the loop (feedback from the jack side, as Mutable\ndoes), so the jack holds its voltage under load. CV1-6 go through the DG412 switch; firmware corrects their load sag\nusing the ADC, which reads the jack. ±10 V variant (not Rev A): Rf 75k, divider 15k/20k, all Basic: gain 8.5,\nOFFSET_REF 1.429 V, −10.71 … +10.54 V; needs ≥ 10 kΩ loads. The TL074H can swing it."
+	(text "DAC8568 grade A: 0-2.5 V from its internal reference (off at power-up), outputs reset to zero. Each stage: non-inverting\ngain 1 + 75k/10k = 8.5, offset by OFFSET_REF = VREF × 20k/35k through the 10 kΩ: Vout = 8.5·Vdac − 10.71 V, so −10.71 V …\n+10.54 V, putting ±10 V inside the DAC's specified codes (0 V at code ≈ 33044). The offset tracks the DAC's own reference, as\nin Performer, O&C, Marbles and Stages. CVO7/8: the 1 kΩ sits inside the loop (feedback from the jack side, as Mutable\ndoes), so the jack holds its voltage under load. CV1-6 go through the DG412 switch; firmware corrects their load sag\nusing the ADC, which reads the jack (±10.24 V range). This is spec §15's ±10 V variant; it needs ≥ 10 kΩ loads, and\nthe TL074H swings it. The 100 pF across 75k puts the stage's pole at 21 kHz."
 		(exclude_from_sim no)
 		(at 20.32 22.86 0)
 		(effects
@@ -1421,7 +1421,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "7fb7f4d5-290a-5f98-b499-bf6a04f48e4d")
-		(property "Reference" "#PWR200"
+		(property "Reference" "#PWR198"
 			(at 39.37 88.9 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -1462,7 +1462,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR200")
+					(reference "#PWR198")
 					(unit 1)
 				)
 			)
@@ -1477,7 +1477,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "6c1a1358-c89a-5413-a12c-5791aaf6ccf6")
-		(property "Reference" "#PWR201"
+		(property "Reference" "#PWR199"
 			(at 49.53 91.44 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -1518,7 +1518,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR201")
+					(reference "#PWR199")
 					(unit 1)
 				)
 			)
@@ -1601,7 +1601,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "9cff3c1d-2dc3-5c5b-a7b8-a6a6efc6313a")
-		(property "Reference" "#PWR202"
+		(property "Reference" "#PWR200"
 			(at 66.04 74.93 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -1641,7 +1641,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR202")
+					(reference "#PWR200")
 					(unit 1)
 				)
 			)
@@ -1656,7 +1656,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "6ef8a778-eede-54b4-904d-27996e2dcf24")
-		(property "Reference" "#PWR203"
+		(property "Reference" "#PWR201"
 			(at 66.04 113.03 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -1696,7 +1696,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR203")
+					(reference "#PWR201")
 					(unit 1)
 				)
 			)
@@ -1814,7 +1814,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "a36d64cc-605f-55c5-b4aa-f49f14813643")
-		(property "Reference" "#PWR204"
+		(property "Reference" "#PWR202"
 			(at 35.56 133.35 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -1854,7 +1854,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR204")
+					(reference "#PWR202")
 					(unit 1)
 				)
 			)
@@ -1869,7 +1869,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "33714c90-04c5-5c25-90d9-bc4bed9799ec")
-		(property "Reference" "#PWR205"
+		(property "Reference" "#PWR203"
 			(at 35.56 140.97 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -1909,7 +1909,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR205")
+					(reference "#PWR203")
 					(unit 1)
 				)
 			)
@@ -2018,7 +2018,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "f32d0faf-bdbd-549e-9e55-f5c909f6bbd0")
-		(property "Reference" "#PWR206"
+		(property "Reference" "#PWR204"
 			(at 48.26 133.35 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -2058,7 +2058,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR206")
+					(reference "#PWR204")
 					(unit 1)
 				)
 			)
@@ -2073,7 +2073,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "41ac712f-8391-55dd-9240-a80fad648e11")
-		(property "Reference" "#PWR207"
+		(property "Reference" "#PWR205"
 			(at 48.26 140.97 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -2113,7 +2113,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR207")
+					(reference "#PWR205")
 					(unit 1)
 				)
 			)
@@ -2230,7 +2230,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "a65494c4-8b4e-57c6-8abf-e19c75114e04")
-		(property "Reference" "#PWR208"
+		(property "Reference" "#PWR206"
 			(at 68.58 143.51 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -2270,7 +2270,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR208")
+					(reference "#PWR206")
 					(unit 1)
 				)
 			)
@@ -2372,7 +2372,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "c90945d7-82ef-5ebe-8301-bbddb808be65")
-		(property "Reference" "#PWR209"
+		(property "Reference" "#PWR207"
 			(at 86.36 133.35 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -2412,7 +2412,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR209")
+					(reference "#PWR207")
 					(unit 1)
 				)
 			)
@@ -2436,7 +2436,7 @@
 			)
 		)
 	)
-	(text "OFFSET_REF = VREF × 22k/(12k + 22k) = 1.618 V, buffered"
+	(text "OFFSET_REF = VREF × 20k/(15k + 20k) = 1.429 V, buffered"
 		(exclude_from_sim no)
 		(at 39.37 154.94 0)
 		(effects
@@ -2469,7 +2469,7 @@
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Value" "12k"
+		(property "Value" "15k"
 			(at 48.26 174.752 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -2496,7 +2496,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C25752"
+		(property "LCSC" "C25756"
 			(at 48.26 172.72 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -2548,7 +2548,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "22k"
+		(property "Value" "20k"
 			(at 60.96 179.578 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -2576,7 +2576,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C25768"
+		(property "LCSC" "C25765"
 			(at 58.42 177.8 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -2798,7 +2798,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "1cd531d3-a8eb-51da-9081-878d9518d25a")
-		(property "Reference" "#PWR210"
+		(property "Reference" "#PWR208"
 			(at 58.42 186.69 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -2838,7 +2838,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR210")
+					(reference "#PWR208")
 					(unit 1)
 				)
 			)
@@ -2853,7 +2853,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "bc9b1f25-153d-5f91-9b88-be7de3b043b3")
-		(property "Reference" "#PWR211"
+		(property "Reference" "#PWR209"
 			(at 68.58 186.69 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -2893,7 +2893,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR211")
+					(reference "#PWR209")
 					(unit 1)
 				)
 			)
@@ -3101,13 +3101,13 @@
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Value" "33k"
+		(property "Value" "75k"
 			(at 205.74 56.642 90)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 205.74 54.61 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -3128,7 +3128,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C25779"
+		(property "LCSC" "C23242"
 			(at 205.74 54.61 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -3461,13 +3461,13 @@
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Value" "33k"
+		(property "Value" "75k"
 			(at 205.74 87.122 90)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 205.74 85.09 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -3488,7 +3488,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C25779"
+		(property "LCSC" "C23242"
 			(at 205.74 85.09 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -3821,13 +3821,13 @@
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Value" "33k"
+		(property "Value" "75k"
 			(at 205.74 117.602 90)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 205.74 115.57 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -3848,7 +3848,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C25779"
+		(property "LCSC" "C23242"
 			(at 205.74 115.57 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -4181,13 +4181,13 @@
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Value" "33k"
+		(property "Value" "75k"
 			(at 205.74 148.082 90)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 205.74 146.05 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -4208,7 +4208,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C25779"
+		(property "LCSC" "C23242"
 			(at 205.74 146.05 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -4541,13 +4541,13 @@
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Value" "33k"
+		(property "Value" "75k"
 			(at 312.42 56.642 90)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 312.42 54.61 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -4568,7 +4568,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C25779"
+		(property "LCSC" "C23242"
 			(at 312.42 54.61 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -4901,13 +4901,13 @@
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Value" "33k"
+		(property "Value" "75k"
 			(at 312.42 87.122 90)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 312.42 85.09 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -4928,7 +4928,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C25779"
+		(property "LCSC" "C23242"
 			(at 312.42 85.09 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -5346,13 +5346,13 @@
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Value" "33k"
+		(property "Value" "75k"
 			(at 312.42 109.982 90)
 			(effects
 				(font (size 1.27 1.27))
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 312.42 107.95 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -5373,7 +5373,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C25779"
+		(property "LCSC" "C23242"
 			(at 312.42 107.95 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -5635,7 +5635,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "cffe044a-602b-5493-851a-59fcc021bcbc")
-		(property "Reference" "#PWR212"
+		(property "Reference" "#PWR210"
 			(at 207.01 209.55 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -5675,7 +5675,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR212")
+					(reference "#PWR210")
 					(unit 1)
 				)
 			)
@@ -5690,7 +5690,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "80e5678c-f9cb-5168-be60-78ff1d4dd59a")
-		(property "Reference" "#PWR213"
+		(property "Reference" "#PWR211"
 			(at 207.01 222.25 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -5730,7 +5730,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR213")
+					(reference "#PWR211")
 					(unit 1)
 				)
 			)
@@ -5839,7 +5839,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "88deb464-9d88-589d-9c6a-93186c539eb5")
-		(property "Reference" "#PWR214"
+		(property "Reference" "#PWR212"
 			(at 222.25 209.55 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -5879,7 +5879,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR214")
+					(reference "#PWR212")
 					(unit 1)
 				)
 			)
@@ -5894,7 +5894,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "23e799a2-dcf2-55dd-8f15-31f332fea76a")
-		(property "Reference" "#PWR215"
+		(property "Reference" "#PWR213"
 			(at 222.25 217.17 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -5934,7 +5934,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR215")
+					(reference "#PWR213")
 					(unit 1)
 				)
 			)
@@ -6043,7 +6043,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "29f7b5d1-b931-5692-8c1a-be99245b0008")
-		(property "Reference" "#PWR216"
+		(property "Reference" "#PWR214"
 			(at 222.25 224.79 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -6083,7 +6083,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR216")
+					(reference "#PWR214")
 					(unit 1)
 				)
 			)
@@ -6098,7 +6098,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "dfcb09ea-c171-529e-8bb0-c19772467c10")
-		(property "Reference" "#PWR217"
+		(property "Reference" "#PWR215"
 			(at 222.25 232.41 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -6138,7 +6138,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR217")
+					(reference "#PWR215")
 					(unit 1)
 				)
 			)
@@ -6233,7 +6233,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "48923925-9a6f-5367-bb17-a37eac798ab1")
-		(property "Reference" "#PWR218"
+		(property "Reference" "#PWR216"
 			(at 242.57 209.55 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -6273,7 +6273,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR218")
+					(reference "#PWR216")
 					(unit 1)
 				)
 			)
@@ -6288,7 +6288,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "e282ea99-a0fb-54f2-9cd2-3ea8cd47cf27")
-		(property "Reference" "#PWR219"
+		(property "Reference" "#PWR217"
 			(at 242.57 222.25 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -6328,7 +6328,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR219")
+					(reference "#PWR217")
 					(unit 1)
 				)
 			)
@@ -6437,7 +6437,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "d51e25de-7779-5b9b-a428-f22c4ee24b68")
-		(property "Reference" "#PWR220"
+		(property "Reference" "#PWR218"
 			(at 257.81 209.55 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -6477,7 +6477,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR220")
+					(reference "#PWR218")
 					(unit 1)
 				)
 			)
@@ -6492,7 +6492,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "b76cf893-6a20-5308-986b-ee4c2024d694")
-		(property "Reference" "#PWR221"
+		(property "Reference" "#PWR219"
 			(at 257.81 217.17 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -6532,7 +6532,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR221")
+					(reference "#PWR219")
 					(unit 1)
 				)
 			)
@@ -6641,7 +6641,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "13236deb-2ac1-5ac8-a448-25b91fa9c55f")
-		(property "Reference" "#PWR222"
+		(property "Reference" "#PWR220"
 			(at 257.81 224.79 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -6681,7 +6681,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR222")
+					(reference "#PWR220")
 					(unit 1)
 				)
 			)
@@ -6696,7 +6696,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "4f144ce2-60fb-535c-a629-4d8b75eda98d")
-		(property "Reference" "#PWR223"
+		(property "Reference" "#PWR221"
 			(at 257.81 232.41 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -6736,7 +6736,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/2774d978-be01-5b5c-a5c0-07bf73cc5d50"
-					(reference "#PWR223")
+					(reference "#PWR221")
 					(unit 1)
 				)
 			)

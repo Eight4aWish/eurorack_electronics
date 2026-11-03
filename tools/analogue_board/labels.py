@@ -13,7 +13,11 @@ Within a block, holes count in reading order: row by row from the top, left colu
 label sits in the free row above the block, else below it, else beside it, on both faces where
 it fits. Ground holes stay square.
 
-Each test point gets a short name beside it.
+Each test point gets a short name beside it: on Rev B at 1.0 mm, JLC's minimum, as Rev A's
+0.8 mm names showed every one is needed (docs/analogue_board_revb.md §7).
+
+On Rev B the board's name and revision, "EIGHT4AWISH" and "CC BY-SA 4.0" go on as well, at
+1.0 mm: on one line where a free spot takes it, else stacked, the outward face first.
 
 Writes the labels into the board, and <board>/output/wiring_map.md: every block's holes with
 their signals, and every test point. Then 1:1 PDFs of each face's silkscreen, pads and outline
@@ -35,7 +39,9 @@ import wiring  # noqa: E402
 KICAD_CLI = "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli"
 MM = 1e6
 BLOCK_H, BLOCK_W = 1.0, 0.15     # block labels: text height and stroke, mm (JLC: 1.0 / 0.15 or more reads)
-TP_H, TP_W = 0.8, 0.12           # test point names
+TP_H, TP_W = (0.8, 0.12) if variant.REV == "A" else (1.0, 0.15)   # test point names
+MARK_H, MARK_W = 1.0, 0.15       # the board marking
+MARK = (f"ANALOGUE BOARD REV {variant.REV}", "EIGHT4AWISH", "CC BY-SA 4.0")
 GAP = 0.15                       # label to pad, part or other label, mm
 EDGE = 0.4                       # label to board edge, mm
 COL_X = {**wiring.COLUMNS, "SI": P.STRIPS["right"]["inner"]}   # "SI": the right strip's inner column
@@ -127,7 +133,9 @@ class Space:
                         self.boxes[silk].append((bb.GetLeft() / MM, bb.GetTop() / MM, bb.GetRight() / MM, bb.GetBottom() / MM))
 
     def fits(self, t, silk, ignore=None):
-        b = box_of(t)
+        return self.free(box_of(t), silk, ignore)
+
+    def free(self, b, silk, ignore=None):
         x0, y0, x1, y1 = self.edge
         if b[0] < x0 or b[1] < y0 or b[2] > x1 or b[3] > y1:
             return False
@@ -135,6 +143,43 @@ class Space:
 
     def take(self, t, silk):
         self.boxes[silk].append(box_of(t))
+
+
+def place_mark(board, space, origin):
+    """The board marking: one line if a spot takes it, else two, else three stacked; the outward
+    face first, then the deck face, level or turned. Scans the board on a 0.5 mm grid, bottom
+    up, with each candidate's boxes checked against the face's parts, pads and labels.
+    Returns where it went (mm from the board's top left corner, `origin`), or None."""
+    step, pitch = 0.5, MARK_H * 1.7
+    x0, y0, x1, y1 = space.edge
+    for lines in ([" · ".join(MARK)], [MARK[0], " · ".join(MARK[1:])], list(MARK)):
+        for silk in (pcbnew.F_SilkS, pcbnew.B_SilkS):
+            for ang in (0, 90):
+                sizes = []
+                for s in lines:   # each line's box at the origin, measured once
+                    t = text(board, s, 0, 0, silk, MARK_H, MARK_W, ang)
+                    sizes.append(box_of(t))
+                n = len(lines)
+                y = y1
+                while y > y0:
+                    x = x0
+                    while x < x1:
+                        # stacked downwards when level, rightwards when turned
+                        offs = [((0, (i - (n - 1) / 2) * pitch) if ang == 0 else ((i - (n - 1) / 2) * pitch, 0))
+                                for i in range(n)]
+                        boxes = [(b[0] + x + dx, b[1] + y + dy, b[2] + x + dx, b[3] + y + dy)
+                                 for b, (dx, dy) in zip(sizes, offs)]
+                        if all(space.free(b, silk) for b in boxes):
+                            for s, (dx, dy) in zip(lines, offs):
+                                t = text(board, s, x + dx, y + dy, silk, MARK_H, MARK_W, ang)
+                                board.Add(t)
+                                space.take(t, silk)
+                            return (f"{'outward' if silk == pcbnew.F_SilkS else 'deck'} face, {n} line{'s' if n > 1 else ''}"
+                                    f"{', turned' if ang else ''}, centred {x - origin[0]:.1f}, {y - origin[1]:.1f} "
+                                    "mm from the top left")
+                        x += step
+                    y -= step
+    return None
 
 
 def block_spots(b, occupied, origin):
@@ -171,6 +216,7 @@ def main(path):
     bl = blocks(hs)
     ours = {b["name"] for b in bl} | set(TP_NAMES.values()) | {fp.Pads()[0].GetNetname() for fp in board.GetFootprints()
                                                               if fp.GetReference().startswith("TP")}
+    ours |= set(MARK) | {" · ".join(MARK), " · ".join(MARK[1:])}
     for d in list(board.GetDrawings()):        # a re-run replaces its own labels
         if d.Type() == pcbnew.PCB_TEXT_T and d.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS) and d.GetText() in ours:
             board.Delete(d)
@@ -222,8 +268,10 @@ def main(path):
         c = (fp.GetPosition().x / MM, fp.GetPosition().y / MM)
         done = False
         # beside the pad, nearest first, along it or turned across it
-        tries = [(r * dx, r * dy, ang) for r in (1.2, 1.6, 2.0, 2.6, 3.2, 4.0)
-                 for dx, dy in ((0, -1), (0, 1), (1, 0), (-1, 0)) for ang in (0, 90)]
+        radii = (1.2, 1.6, 2.0, 2.6, 3.2, 4.0) + (() if variant.REV == "A" else (4.8, 5.6, 6.4))
+        tries = [(r * dx, r * dy, ang) for r in radii
+                 for dx, dy in ((0, -1), (0, 1), (1, 0), (-1, 0), (0.7, -0.7), (0.7, 0.7), (-0.7, -0.7), (-0.7, 0.7))
+                 for ang in (0, 90)]
         tries.sort(key=lambda d: abs(d[0]) + abs(d[1]))
         for dx, dy, ang in tries:
             t = text(board, name, c[0] + dx, c[1] + dy, silk, TP_H, TP_W, ang)
@@ -236,6 +284,8 @@ def main(path):
             tp_missed.append(fp.GetReference())
         lines.append(f"| {fp.GetReference()} | {net} | {'outward' if silk == pcbnew.F_SilkS else 'deck'} | "
                      f"{c[0] - e.GetLeft() / MM:.1f}, {c[1] - e.GetTop() / MM:.1f} | {'yes' if done else 'no room'} |")
+    mark = place_mark(board, space, origin) if variant.REV != "A" else "not on Rev A"
+    lines += ["", f"Board marking ({' / '.join(MARK)}): {mark or 'no room'}."]
     pcbnew.SaveBoard(path, board)
     out = os.path.join(variant.DIR, "output")
     with open(os.path.join(out, "wiring_map.md"), "w", encoding="utf-8") as f:
@@ -249,6 +299,7 @@ def main(path):
         subprocess.run(args, capture_output=True, text=True)
     print(f"Blocks: {len(bl)}, labelled {placed}; no room for: {missed}")
     print(f"Test points: {len(tps)}, labelled {len(tps) - len(tp_missed)}; no room for: {tp_missed}")
+    print(f"Board marking: {mark or 'no room'}")
     print(f"Wiring map: {os.path.join(out, 'wiring_map.md')}")
 
 

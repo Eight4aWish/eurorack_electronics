@@ -443,9 +443,14 @@ The moments, and what can show each one:
 ## Still open
 
 - **Rev B's order.** Rev A's lessons are in: the Log's "For Rev B?" column and
-  [`analogue_board_revb.md`](analogue_board_revb.md) §7. Open: whether to trim it towards four
-  layers. The proposal of 1 Nov is to route Rev B on four layers as it stands first, then compare
-  landed quotes.
+  [`analogue_board_revb.md`](analogue_board_revb.md) §7.
+  - **Routed for the order on six layers, 3 Nov** (§8 there): MIDI wired straight, no gate
+    expansion, ±10 V CV, named test points and the board marking.
+  - **Four layers came within 2 connections over five routes but never closed.**
+  - **Every placed part was checked against LCSC's own footprint;** that caught the H11L1's
+    rotation.
+  - **Order files** are in `hardware/analogue_board/pico_revb/fab/`. Left: the live JLC quote
+    and the finish, OSP or HASL.
 - **Boy's firmware.** Started 1 Nov in `eurorack_modules`. It took over `teensy_move`, and the old
   Boy's code became `teensy_move_old`. The mode is chosen at power-on. Mode 1, the Move companion,
   works on the bench, all but TRS MIDI in, which isn't tried yet. Warps and other two-input

@@ -65,6 +65,11 @@ PINMAP_REVB = [(net, func, *_REVB_PINS[net][:2], tl, _REVB_PINS[net][2]) if net 
     ("P4_SCL", "ESP32-P4's own I2C clock: hole J102 only", 16, "GP12", "", "Pico reserved: ESP32-P4 GPIO8"),
     ("P4_SDA", "ESP32-P4's own I2C data: hole J102 only", 17, "GP13", "", "Pico reserved: ESP32-P4 GPIO7"),
 ]
+# MIDI wired straight to the UART pins (David, 2026-11-02): no link holes, so no spare GPIO
+_MIDI_PINS = {"SPARE1": ("MIDI_TX", "MIDI out (UART TX)"), "SPARE2": ("MIDI_RX", "MIDI in (UART RX)")}
+if variant.MIDI_DIRECT:
+    PINMAP_REVB = [(*_MIDI_PINS[net], pin, gp, tl, note) if net in _MIDI_PINS else (net, func, pin, gp, tl, note)
+                   for net, func, pin, gp, tl, note in PINMAP_REVB]
 if variant.REV == "B":
     PINMAP = PINMAP_REVB
 MODULE_NETS = [r[0] for r in PINMAP]
@@ -96,8 +101,9 @@ def note_for(note):
 
 def J101_NETS():
     """Spare GPIO and MIDI links (without TRS MIDI, the spare pins alone); the Pico (and ESP32-P4)
-    also brings its RUN (reset) pin out."""
-    spares = ["SPARE1", "MIDI_TX", "SPARE2", "MIDI_RX"] if variant.has("midi") else ["SPARE1", "SPARE2"]
+    also brings its RUN (reset) pin out. With MIDI wired straight, RUN and GND are all that is left."""
+    spares = ([] if variant.MIDI_DIRECT else ["SPARE1", "MIDI_TX", "SPARE2", "MIDI_RX"] if variant.has("midi")
+              else ["SPARE1", "SPARE2"])
     return spares + (["RUN"] if PICO else []) + ["GND"]
 
 
@@ -146,12 +152,17 @@ def sheet_root(pr):
 
     j101 = J101_NETS()
     midi = variant.has("midi")
-    holes(sh, (75, 170.18), j101, "Spare GPIO" + (", MIDI links" if midi else "") + (", RUN" if PICO else ""), ref="J101",
-          stubs={j101.index("RUN") + 1: 15.24} if PICO else None)
-    sh.text(("MIDI: bridge SPARE1-MIDI_TX and SPARE2-MIDI_RX (adjacent holes)\nwith a wire or shunt. Left open, SPARE1/2 are plain GPIO.\n"
-             if midi else "SPARE1/2: plain GPIO (UART0 TX/RX on a Pico, Serial1 on a Teensy).\n")
-            + ("On a Pico, move the SDK console off UART0 to USB.\nRUN: wire a reset button to GND (Pico or ESP32-P4)." if PICO
-               else "On a Teensy they are Serial1 (TX1, RX1)."), (85, 162), size=1.27)
+    if variant.MIDI_DIRECT:
+        holes(sh, (75, 170.18), j101, "RUN", ref="J101", stubs={j101.index("RUN") + 1: 15.24})
+        sh.text("MIDI is wired straight to pins 1 and 2 (UART0 TX, RX): move the SDK console\noff UART0 to USB. "
+                "RUN: wire a reset button to GND (Pico or ESP32-P4).", (85, 162), size=1.27)
+    else:
+        holes(sh, (75, 170.18), j101, "Spare GPIO" + (", MIDI links" if midi else "") + (", RUN" if PICO else ""), ref="J101",
+              stubs={j101.index("RUN") + 1: 15.24} if PICO else None)
+        sh.text(("MIDI: bridge SPARE1-MIDI_TX and SPARE2-MIDI_RX (adjacent holes)\nwith a wire or shunt. Left open, SPARE1/2 are plain GPIO.\n"
+                 if midi else "SPARE1/2: plain GPIO (UART0 TX/RX on a Pico, Serial1 on a Teensy).\n")
+                + ("On a Pico, move the SDK console off UART0 to USB.\nRUN: wire a reset button to GND (Pico or ESP32-P4)." if PICO
+                   else "On a Teensy they are Serial1 (TX1, RX1)."), (85, 162), size=1.27)
     if variant.REV == "B":
         holes(sh, (75, 200.66), ["P4_SCL", "P4_SDA"], "ESP32-P4 own I2C", ref="J102")
         sh.text("J102: the ESP32-P4's own I2C bus (its camera, display and ES8311 codec;\n2.2 kΩ pull-ups on the "
@@ -167,7 +178,7 @@ def sheet_root(pr):
                  "Schottky D203" + ("; Q201 bypass if JP201" if PICO else "")])
     if PICO:
         rows.append(["PICO_VBUS", "Module USB 5 V sense", "VBUS (pin 40)", *(["—"] if TEENSY else []), "Q201 gate: off with USB plugged in"])
-        rows.append(["RUN", "Module reset", "RUN (pin 30)", *(["—"] if TEENSY else []), "To hole J101-5"])
+        rows.append(["RUN", "Module reset", "RUN (pin 30)", *(["—"] if TEENSY else []), f"To hole J101-{j101.index('RUN') + 1}"])
     sh.text("PIN MAP", (238, 18), size=2.0, bold=True)
     sh.table((238, 22), [22, 50, 25, 17, 52] if both else [22, 50, 25, 69], rows, row_h=5.08)
 
@@ -176,7 +187,7 @@ def sheet_root(pr):
         ("Power", "power.kicad_sch", "Power entry, buck, linear rails, test points"),
         ("Codec & audio", "codec_audio.kicad_sch", "PCM3060, two audio ins, two audio outs"),
         ("CV jacks & ADC", "cv_io.kicad_sch", "ADS8688, DG412 jack switches, CV holes"),
-        ("CV DAC", "cv_dac.kicad_sch", "DAC8568 and the eight ±5 V output stages"),
+        ("CV DAC", "cv_dac.kicad_sch", f"DAC8568 and the ±{variant.CV_VOLTS} V output stages"),
         ("Pots & gate outs", "pots_gates.kicad_sch", "MCP3208 pots, 74HCT595 gate outputs"),
         ("Expander, I2C & LEDs", "expander_i2c.kicad_sch", "TCA9555 buttons, EEPROM, Qwiic, WS2812"),
         ("Gate ins", "gate_in.kicad_sch", "LM393 gate inputs"),
@@ -280,9 +291,10 @@ def sheet_power(sh):
             "3 A parts: +12 V can reach ≈0.75 A with an ESP32-P4 and a lit LED chain.", (76.2, 96), size=1.27)
     sh.power("GND", (190.5, 66.04))
     sh.pwr_flag((190.5, 66.04))
-    tp(sh, (200.66, 63.5), "GND", ref="TP203")
-    tp(sh, (210.82, 63.5), "GND", ref="TP204")
-    sh.text("GND test pads", (195, 52), size=1.27)
+    if variant.has("gnd_tps"):   # Rev B: none; a meter's black lead takes any square ground hole (David, 2026-11-03)
+        tp(sh, (200.66, 63.5), "GND", ref="TP203")
+        tp(sh, (210.82, 63.5), "GND", ref="TP204")
+        sh.text("GND test pads", (195, 52), size=1.27)
 
     # ---- +5VD buck
     bx, by = 81.28, 135.89

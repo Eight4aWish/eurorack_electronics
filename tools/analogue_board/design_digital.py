@@ -19,7 +19,8 @@ def sheet_pots_gates(sh):
             "ratiometric and the hand-wired pot leads can't disturb the DAC's supply. Each wiper: 1 kΩ + 100 nF, 1 MΩ to\n"
             "ground so an unwired channel reads 0 (100 kΩ would bend a 100 kΩ pot's response by up to 12 %).\n"
             "Gate outs: four, one per wiring bank (2026-10-16), from QA-QD of a 74HCT595 at 5 V (VIH 2.0 V, so 3.3 V logic drives\n"
-            "it) → 1 kΩ → jack, BAV99 clamps to +5VD and GND. QE-QH are unused; QH' still chains a second 595 from J603.\n"
+            "it) → 1 kΩ → jack, BAV99 clamps to +5VD and GND. QE-QH are unused; "
+            + ("QH' still chains a second 595 from J603.\n" if variant.has("gate_exp") else "so is QH' (no gate expansion).\n") +
             "OE is held high (outputs off) by a pull-up until firmware drives GATE_OE_N low: the 595's register powers up random.",
             (20, 23), size=1.5)
     # channel n is pin n; channels beyond this board's pot count are grounded
@@ -63,7 +64,7 @@ def sheet_pots_gates(sh):
     # gate outputs
     ic(sh, "74HCT595", (55.88, 190.5), {14: "SPIB_MOSI", 11: "SPIB_SCK", 10: "+5VD", 12: "CS_595", 13: "GATE_OE_N",
                                          15: "GQ1", 1: "GQ2", 2: "GQ3", 3: "GQ4", 4: NC, 5: NC, 6: NC, 7: NC,
-                                         9: "GATE_SER_OUT", 16: "+5VD", 8: "GND"}, ref="U602")
+                                         9: "GATE_SER_OUT" if variant.has("gate_exp") else NC, 16: "+5VD", 8: "GND"}, ref="U602")
     decap(sh, (30.48, 223.52), "100n", "0402", "+5VD", "U602 VCC pin 16")
     r = R(sh, "10k", (25.4, 175.26), fields={"Note": "OE pull-up: gates off until firmware enables"})
     sh.connect(r, 1, "+3V3D", stub=0)
@@ -86,9 +87,10 @@ def sheet_pots_gates(sh):
         d = clamp_below(sh, "BAV99", node, "+5VD")
         sh.tie(f"GQ{n}", (r, "1"))
         sh.tie(f"GOUT{n}", (r, "2"), (d, "3"))
-    holes(sh, (370.84, 160.02), ["GATE_SER_OUT", "SPIB_SCK", "CS_595", "GATE_OE_N", "+5VD", "GND"],
-          "Gate expansion: QH', SRCLK, RCLK, OE", ref="J603")
-    sh.text("Chain a second 74HCT595 off-board from J603\n(74HCT595 only: a 74HC595 at 5 V needs\n3.15 V inputs). OE keeps it off at boot too.", (330, 180), size=1.27)
+    if variant.has("gate_exp"):
+        holes(sh, (370.84, 160.02), ["GATE_SER_OUT", "SPIB_SCK", "CS_595", "GATE_OE_N", "+5VD", "GND"],
+              "Gate expansion: QH', SRCLK, RCLK, OE", ref="J603")
+        sh.text("Chain a second 74HCT595 off-board from J603\n(74HCT595 only: a 74HC595 at 5 V needs\n3.15 V inputs). OE keeps it off at boot too.", (330, 180), size=1.27)
     for i, net in enumerate(["SPIB_SCK", "SPIB_MOSI", "SPIB_MISO", "CS_595", "CS_POT"]):
         tp(sh, (226.06 + i * 12.7, 162.56), net)
     sh.text("Panel bus test pads", (221, 150), size=1.27)
@@ -263,8 +265,10 @@ def sheet_edge(sh):
 def sheet_midi(sh):
     sh.text("TRS MIDI IN AND OUT", (20, 18), size=2.5, bold=True)
     sh.text("MIDI 1.0 over 3.5 mm TRS, Type A (MIDI Association RP-054): tip = current sink (DIN pin 5), ring = current source\n"
-            "(DIN pin 4), sleeve = shield (DIN pin 2). Electrical values per CA-033 (2014). Uses the two UART-capable spare pins through\n"
-            "link holes on J101 (SPARE1-MIDI_TX, SPARE2-MIDI_RX): left open, SPARE1/2 stay plain GPIO. Review: docs/analogue_board_review/midi.md",
+            "(DIN pin 4), sleeve = shield (DIN pin 2). Electrical values per CA-033 (2014). "
+            + ("Wired straight to the module's UART pins 1 and 2\n(TX, RX), with no links. " if variant.MIDI_DIRECT else
+               "Uses the two UART-capable spare pins through\nlink holes on J101 (SPARE1-MIDI_TX, SPARE2-MIDI_RX): left open, SPARE1/2 stay plain GPIO. ")
+            + "Review: docs/analogue_board_review/midi.md",
             (20, 23), size=1.5)
 
     # ---- MIDI OUT: buffered at 5 V so the jack never touches a module pin (the Teensy is not 5 V tolerant)
@@ -277,7 +281,8 @@ def sheet_midi(sh):
     u = part(sh, "AHCT1G125", (73.66, yo), **AHCT_TEXT(73.66, yo))
     a = u.p("2")
     sh.wire(r1.p("2"), a)
-    rpu = R(sh, "10k", (53.34, yo - 5.08), fields={"Note": "idles the line high when the link is open or the module boots"})
+    rpu = R(sh, "10k", (53.34, yo - 5.08), fields={"Note": "idles the line high while the module boots"
+                                                    + ("" if variant.MIDI_DIRECT else " or the link is open")})
     sh.wire(rpu.p("2"), (53.34, yo))
     sh.connect(rpu, "1", "+3V3D", stub=0)
     sh.connect(u, "1", "GND")
@@ -313,7 +318,8 @@ def sheet_midi(sh):
     # ---- MIDI IN: H11L1 Schmitt-output opto at 3.3 V
     yi = 157.48
     sh.text("MIDI IN: ring → 220 Ω → H11L1 LED → tip; 1N4148WS across the LED for reverse polarity. H11L1 switches at 1.6 mA\n"
-            "(a worst-case 3.3 V sender still gives ≈4.5 mA). Output pulled up by 1 kΩ to +3V3D, then 1 kΩ to the link hole.\n"
+            "(a worst-case 3.3 V sender still gives ≈4.5 mA). Output pulled up by 1 kΩ to +3V3D, then 1 kΩ to the "
+            + ("module pin.\n" if variant.MIDI_DIRECT else "link hole.\n") +
             "The IN jack's sleeve is NOT grounded (CA-033: no ground loop): wire it to MI_S (100 nF to ground) or leave it open.",
             (20, 124), size=1.27)
     opto = part(sh, "H11L1", (91.44, yi))
@@ -357,7 +363,7 @@ def sheet_midi(sh):
     sh.text("WIRING (two stereo jacks in deck cells):\n"
             "OUT: tip → MO_T, ring → MO_R, sleeve → the deck's D (ground) pad.\n"
             "IN:  tip → MI_T, ring → MI_R, sleeve → MI_S or open: NOT to D.\n"
-            "Turn MIDI on: link SPARE1-MIDI_TX and SPARE2-MIDI_RX on J101.\n"
+            + ("" if variant.MIDI_DIRECT else "Turn MIDI on: link SPARE1-MIDI_TX and SPARE2-MIDI_RX on J101.\n") +
             "Type B gear: swap that jack's tip and ring wires.\n"
             "Bring-up: loop OUT to IN with a stereo cable; ≈1.2-1.3 V\n"
             "across the 220 Ω while sending = 5.5-5.9 mA in the loop.\n"

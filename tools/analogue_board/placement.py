@@ -295,6 +295,10 @@ ANCHORS_BOARD["pico_revb"] = {
     "U402": (31.1, 41.5, 90, "B"),      # DG412 CV1-3 (right)   U504's in the gap between the two
     "U802": (30.0, 62.5, 0, "B"),       # LM393 gates 3-4 (right), clear of the ADC above
     "C222": (19.6, 63.6, 90, "F"),      # MOD_5V 10 uF, beside module pin 39 (J201 takes the left)
+    "TP209": (13.3, 60.0, 90, "F"),     # MOD_5V test pad, between the field holes and the module, above J201's
+                                        # shroud, its name turned above it: under the module a fitted ESP32-P4
+                                        # hid it, and the auto-placer's nearest room was 20 mm off, past the
+                                        # codec (David, 2026-11-03)
     # bottom
     # turned sideways and nudged right (David, 2026-10-26): about 3 mm shorter each, room for the
     # power parts below and beside J201

@@ -5,6 +5,12 @@ sheet 1). The board is the Waveshare **ESP32-P4-WIFI6** (SKU 32020; "-M" has hea
 an ESP32-P4NRW32 with 32 MB flash, plus an ESP32-C6-MINI-1 over SDIO for Wi-Fi 6, on a 2×20
 header with the Raspberry Pi Pico pinout. The ESP32-P4-Pico has the same header but no C6.
 
+**Updated 2026-11-02 for Rev B**, the board this module is now meant for. Rev B's pin map
+([`analogue_board_revb.md`](analogue_board_revb.md) §3) was made to suit it: pins 16 and 17 are
+left to the board's own I2C, and the programmable bank carries only module outputs. The pin
+table below is read from the routed Rev B board. The findings were written against the Rev A
+map; each has a Rev B note where Rev B changed it.
+
 **Verdict:** it plugs in and can work, but it is not a drop-in Pico 2. It needs:
 
 - one line of firmware before anything else;
@@ -32,8 +38,12 @@ pull-ups on CS_ADC, CS_DAC and CS_POT, helps every module.
      3300 mV (pass-through), and never enable UHS-I on the card.
    - **Fix, on the board (done):** CS_ADC, CS_DAC and CS_POT have 10 kΩ pull-ups, so no
      converter is selected while a module boots.
-   - **Why not move the nets:** that would break the Pico 2 mapping, because GP16-19 are the
-     RP2350's SPI0 pins.
+   - **Why not move every net off the bank:** that would break the Pico 2 mapping, because
+     GP16-19 are the RP2350's SPI0 pins.
+   - **Rev B:** the bank now carries CS_DAC, CS_ADC and SPIA_SCK, all driven by the module, so a
+     bank at 1.8 V can no longer have 3.3 V forced into it. The only input, SPIA_MISO, moved to
+     pin 26 (GP20, another SPI0 data-in pin; GPIO32, a 3.3 V bank). The converters still need
+     the LDO call before they work.
 2. **Length.** The board is 71 × 21 mm against the Pico's 51 × 21 mm. The extra length is
    3.2 mm at the USB end and 16.9 mm at the far (antenna) end.
    - With the USB end toward the board centre (§4.3), the antenna end reaches about 17 mm past
@@ -46,6 +56,8 @@ pull-ups on CS_ADC, CS_DAC and CS_POT, helps every module.
      around 92 mm and clears it. Supporting the P4 means moving the header, a very short
      right-angle cable, or no USB for the P4 in the rack (its USB-C is only a serial bridge
      anyway).
+   - **Settled:** the power header moved clear of the plug; on Rev B it sits in the lower gap
+     (Rev B notes §3).
 
 ## Soft problems
 
@@ -53,14 +65,18 @@ pull-ups on CS_ADC, CS_DAC and CS_POT, helps every module.
   and 22 pF, and go to the on-board ES8311 codec and the display and camera connectors.
   - SPIB_MISO and CS_595 still work.
   - A false I2C address match on the ES8311 is unlikely but not ruled out.
-- **Pins 19 and 20 (GPIO24 and GPIO25) are the USB-JTAG pads.** GPIO25 (PROBE) has the USB
-  pull-up enabled until firmware sets the pin up as a GPIO.
+  - **Rev B** leaves them to that bus: they go only to two wiring holes, P4_SCL and P4_SDA.
+- **Pins 19 and 20 (GPIO24 and GPIO25) are the USB-JTAG pads.** GPIO25 has the USB pull-up
+  enabled until firmware sets the pin up as a GPIO. On Rev B it is CS_595, so the 595's latch
+  sits high at boot; the gate outputs stay off, because GATE_OE_N powers up high.
 - **Power.**
   - Pin 39 is a real 5 V input, ORed with USB through a P-FET ideal diode, so USB plugged in at
     the same time is safe.
   - Its MP1658 buck needs at least 4.5 V, and MOD_5V is about 4.6 V after the Schottky: thin.
   - The board draws up to an estimated 0.45-0.7 A; the C6 alone peaks at 382 mA on transmit.
   - Raising +5VD to about 5.2 V, or using a lower-drop diode, would restore margin.
+  - **Settled (2026-10-15):** bridging JP201 lets Q201 bypass the Schottky (spec §15), so the P4
+    gets +5VD less a FET's drop. Fit a P4 with JP201 bridged.
 - **USB-C is a UART bridge (CH343P)**, not native USB. USB-MIDI needs the board's separate
   4-pin USB-OTG connector.
 - **Wi-Fi.** The C6's PCB antenna sits at the far end. On headers it would be about 11-13 mm
@@ -86,27 +102,28 @@ pull-ups on CS_ADC, CS_DAC and CS_POT, helps every module.
 ## Pin table
 
 Board signal and bank are from the Waveshare schematic, p.1, interface block; banks are from
-the ESP32-P4 datasheet v0.7, Table 2-1.
+the ESP32-P4 datasheet v0.7, Table 2-1. The nets are Rev B's, read from the routed board
+(`pico_revb/routed_trial`, socket A101) on 2026-11-02; Rev A's are in the Rev B notes §3.
 
-| Pico pin | P4 board | Bank | Our net | Verdict |
+| Pico pin | P4 board | Bank | Rev B net | Verdict |
 |---|---|---|---|---|
-| 1, 2 | GPIO52, 51 | VDD_IO_6 (3V3) | SPARE1, SPARE2 | OK |
+| 1, 2 | GPIO52, 51 | VDD_IO_6 (3V3) | SPARE1, SPARE2 (MIDI by J101 link) | OK |
 | 4, 5 | GPIO31, 30 | VDD_IO_4 (3V3) | SDA, SCL | OK |
-| 6, 7 | GPIO29, 28 | VDD_IO_4 | EXP_INT, LED_DATA | OK |
+| 6, 7 | GPIO29, 28 | VDD_IO_4 | GATE_IN3, LED_DATA | OK |
 | 9, 10 | GPIO50, 49 | VDD_IO_6 | GATE_IN1, 2 | OK |
-| 11, 12 | GPIO5, 4 | VDD_LP (3V3) | GATE_IN3, 4 | OK |
+| 11, 12 | GPIO5, 4 | VDD_LP (3V3) | SPIB_MISO, GATE_IN4 | OK |
 | 14, 15 | GPIO3, 2 | VDD_LP | SPIB_SCK, MOSI | OK |
-| 16 | GPIO8, board I2C SCL | VDD_LP | SPIB_MISO | soft |
-| 17 | GPIO7, board I2C SDA | VDD_LP | CS_595 | soft |
-| 19, 20 | GPIO24, 25 (USB-JTAG) | VDD_IO_4 | CS_POT, PROBE | soft |
-| 21, 22, 24 | **GPIO48, 47, 46** | **VDD_IO_5 = LDO channel 4** | SPIA_MISO, CS_ADC, SPIA_SCK | **hard** |
-| 25, 26 | GPIO33, 32 | VDD_IO_4 | SPIA_MOSI, CS_DAC | OK |
+| 16, 17 | GPIO8, 7: board I2C SCL, SDA | VDD_LP | P4_SCL, P4_SDA (wiring holes only) | OK, left to the board's bus |
+| 19, 20 | GPIO24, 25 (USB-JTAG) | VDD_IO_4 | CS_POT, CS_595 | soft: pin 20 high until claimed |
+| 21, 22, 24 | **GPIO48, 47, 46** | **VDD_IO_5 = LDO channel 4** | CS_DAC, CS_ADC, SPIA_SCK | **hard:** LDO call first; module outputs only |
+| 25, 26 | GPIO33, 32 | VDD_IO_4 | SPIA_MOSI, SPIA_MISO | OK |
 | 27, 29 | GPIO27, 26 | VDD_IO_4 | MCLK, I2S_DIN | OK |
 | 31, 32, 34 | GPIO23, 22, 21 | VDD_IO_0 (3V3) | BCK, LRCK, I2S_DOUT | OK |
-| 30 | chip enable (reset) | — | RUN | OK |
+| 30 | chip enable (reset) | — | RUN (J101 hole) | OK |
 | 35 | GPIO20 | VDD_IO_0 | unconnected | OK |
-| 39 | VCC_5V (buck in, ORed with USB) | — | MOD_5V | OK, thin margin |
-| 36, 37, 40 | 3V3 out, regulator enable, USB VBUS | — | unconnected | OK |
+| 39 | VCC_5V (buck in, ORed with USB) | — | MOD_5V | OK with JP201 bridged |
+| 36, 37 | 3V3 out, regulator enable | — | unconnected | OK |
+| 40 | USB VBUS | — | PICO_VBUS (Q201's gate) | OK |
 
 ## Bench tests
 

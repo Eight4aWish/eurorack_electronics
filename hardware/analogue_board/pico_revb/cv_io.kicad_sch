@@ -2309,7 +2309,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "c1e9f656-1043-5c4b-a84a-6dff253e5d40")
-		(property "Reference" "#PWR111"
+		(property "Reference" "#PWR109"
 			(at 44.45 110.49 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -2350,7 +2350,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR111")
+					(reference "#PWR109")
 					(unit 1)
 				)
 			)
@@ -2373,7 +2373,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "20366514-181a-5869-b195-ba29db18d02a")
-		(property "Reference" "#PWR112"
+		(property "Reference" "#PWR110"
 			(at 44.45 115.57 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -2414,7 +2414,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR112")
+					(reference "#PWR110")
 					(unit 1)
 				)
 			)
@@ -2437,7 +2437,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "cfa56977-5708-5efc-9aed-26ea100137b4")
-		(property "Reference" "#PWR113"
+		(property "Reference" "#PWR111"
 			(at 44.45 120.65 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -2478,7 +2478,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR113")
+					(reference "#PWR111")
 					(unit 1)
 				)
 			)
@@ -2501,7 +2501,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "17667b0e-e360-5192-ad62-5486304834da")
-		(property "Reference" "#PWR114"
+		(property "Reference" "#PWR112"
 			(at 44.45 125.73 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -2542,7 +2542,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR114")
+					(reference "#PWR112")
 					(unit 1)
 				)
 			)
@@ -2565,7 +2565,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "32f86092-2c3f-5875-a36e-7a73d538a328")
-		(property "Reference" "#PWR115"
+		(property "Reference" "#PWR113"
 			(at 44.45 130.81 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -2606,7 +2606,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR115")
+					(reference "#PWR113")
 					(unit 1)
 				)
 			)
@@ -2629,7 +2629,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "45bd083d-693e-5f62-97b9-618176c9d16f")
-		(property "Reference" "#PWR116"
+		(property "Reference" "#PWR114"
 			(at 44.45 135.89 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -2670,7 +2670,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR116")
+					(reference "#PWR114")
 					(unit 1)
 				)
 			)
@@ -2693,7 +2693,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "47b38c11-fc19-5c2c-8cf6-3bf11f617879")
-		(property "Reference" "#PWR117"
+		(property "Reference" "#PWR115"
 			(at 44.45 140.97 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -2734,7 +2734,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR117")
+					(reference "#PWR115")
 					(unit 1)
 				)
 			)
@@ -2749,7 +2749,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "514a38ec-4a49-5652-ad3e-46fb05a94d11")
-		(property "Reference" "#PWR118"
+		(property "Reference" "#PWR116"
 			(at 44.45 143.51 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -2790,7 +2790,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR118")
+					(reference "#PWR116")
 					(unit 1)
 				)
 			)
@@ -2805,7 +2805,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "c3479456-7074-52bd-ae2b-e0d1494723f6")
-		(property "Reference" "#PWR119"
+		(property "Reference" "#PWR117"
 			(at 44.45 146.05 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -2846,7 +2846,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR119")
+					(reference "#PWR117")
 					(unit 1)
 				)
 			)
@@ -2861,7 +2861,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "dc6c8799-6f1f-5b74-a846-42e30964295b")
-		(property "Reference" "#PWR120"
+		(property "Reference" "#PWR118"
 			(at 44.45 151.13 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -2902,7 +2902,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR120")
+					(reference "#PWR118")
 					(unit 1)
 				)
 			)
@@ -2917,7 +2917,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "e8086e87-fe16-50a3-8281-385448935457")
-		(property "Reference" "#PWR121"
+		(property "Reference" "#PWR119"
 			(at 44.45 153.67 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -2958,7 +2958,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR121")
+					(reference "#PWR119")
 					(unit 1)
 				)
 			)
@@ -2973,7 +2973,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "26eb0729-70d2-5090-9dc8-f933ad381093")
-		(property "Reference" "#PWR122"
+		(property "Reference" "#PWR120"
 			(at 63.5 99.06 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -3013,7 +3013,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR122")
+					(reference "#PWR120")
 					(unit 1)
 				)
 			)
@@ -3028,7 +3028,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "f2076f70-0af6-5aac-9d23-1ea2778cc97b")
-		(property "Reference" "#PWR123"
+		(property "Reference" "#PWR121"
 			(at 63.5 172.72 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -3068,7 +3068,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR123")
+					(reference "#PWR121")
 					(unit 1)
 				)
 			)
@@ -3083,7 +3083,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "dccd2264-1dd2-58aa-9ffa-cf2508b29745")
-		(property "Reference" "#PWR124"
+		(property "Reference" "#PWR122"
 			(at 66.04 93.98 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -3123,7 +3123,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR124")
+					(reference "#PWR122")
 					(unit 1)
 				)
 			)
@@ -3138,7 +3138,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "53f6e730-765b-55bb-a34a-fae4c65a195c")
-		(property "Reference" "#PWR125"
+		(property "Reference" "#PWR123"
 			(at 68.58 88.9 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -3178,7 +3178,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR125")
+					(reference "#PWR123")
 					(unit 1)
 				)
 			)
@@ -3193,7 +3193,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "2ed7b726-72f6-577f-b850-54d60b60a0a8")
-		(property "Reference" "#PWR126"
+		(property "Reference" "#PWR124"
 			(at 68.58 172.72 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -3233,7 +3233,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR126")
+					(reference "#PWR124")
 					(unit 1)
 				)
 			)
@@ -3320,7 +3320,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "6f6f6c3c-ca3f-5734-88e9-b32d4af1fb25")
-		(property "Reference" "#PWR127"
+		(property "Reference" "#PWR125"
 			(at 87.63 118.11 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -3361,7 +3361,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR127")
+					(reference "#PWR125")
 					(unit 1)
 				)
 			)
@@ -3384,7 +3384,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "e4f13da6-d01e-58bb-ad92-622b8800f4a9")
-		(property "Reference" "#PWR128"
+		(property "Reference" "#PWR126"
 			(at 87.63 128.27 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -3425,7 +3425,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR128")
+					(reference "#PWR126")
 					(unit 1)
 				)
 			)
@@ -3456,7 +3456,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "754304c9-ae02-5772-8a25-3ca3dae41afc")
-		(property "Reference" "#PWR129"
+		(property "Reference" "#PWR127"
 			(at 87.63 153.67 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -3497,7 +3497,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR129")
+					(reference "#PWR127")
 					(unit 1)
 				)
 			)
@@ -3615,7 +3615,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "95669a33-aab5-571d-8eb0-51498eb9727f")
-		(property "Reference" "#PWR130"
+		(property "Reference" "#PWR128"
 			(at 35.56 179.07 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -3655,7 +3655,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR130")
+					(reference "#PWR128")
 					(unit 1)
 				)
 			)
@@ -3670,7 +3670,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "39bb619c-19cc-5d19-87ae-566e000fdfb4")
-		(property "Reference" "#PWR131"
+		(property "Reference" "#PWR129"
 			(at 35.56 186.69 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -3710,7 +3710,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR131")
+					(reference "#PWR129")
 					(unit 1)
 				)
 			)
@@ -3819,7 +3819,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "0cf01f13-cd3c-548a-bc49-2446c928a658")
-		(property "Reference" "#PWR132"
+		(property "Reference" "#PWR130"
 			(at 48.26 179.07 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -3859,7 +3859,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR132")
+					(reference "#PWR130")
 					(unit 1)
 				)
 			)
@@ -3874,7 +3874,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "f55273e5-5784-519e-82c1-7ce915133721")
-		(property "Reference" "#PWR133"
+		(property "Reference" "#PWR131"
 			(at 48.26 186.69 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -3914,7 +3914,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR133")
+					(reference "#PWR131")
 					(unit 1)
 				)
 			)
@@ -4023,7 +4023,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "132192a3-f75c-5452-bfc5-9db9d173c6ca")
-		(property "Reference" "#PWR134"
+		(property "Reference" "#PWR132"
 			(at 60.96 179.07 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -4063,7 +4063,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR134")
+					(reference "#PWR132")
 					(unit 1)
 				)
 			)
@@ -4078,7 +4078,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "079ce64e-970b-5c50-8d54-a4ab1fa89ac3")
-		(property "Reference" "#PWR135"
+		(property "Reference" "#PWR133"
 			(at 60.96 186.69 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -4118,7 +4118,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR135")
+					(reference "#PWR133")
 					(unit 1)
 				)
 			)
@@ -4227,7 +4227,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "54720df3-d3c9-5a2a-a55b-0ea666792e51")
-		(property "Reference" "#PWR136"
+		(property "Reference" "#PWR134"
 			(at 76.2 179.07 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -4267,7 +4267,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR136")
+					(reference "#PWR134")
 					(unit 1)
 				)
 			)
@@ -4282,7 +4282,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "d9910ef3-9aa4-5514-9591-d34f021012f2")
-		(property "Reference" "#PWR137"
+		(property "Reference" "#PWR135"
 			(at 76.2 186.69 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -4322,7 +4322,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR137")
+					(reference "#PWR135")
 					(unit 1)
 				)
 			)
@@ -4431,7 +4431,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "57ed863b-d2c3-568f-91d6-23c12ecb0f95")
-		(property "Reference" "#PWR138"
+		(property "Reference" "#PWR136"
 			(at 88.9 179.07 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -4471,7 +4471,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR138")
+					(reference "#PWR136")
 					(unit 1)
 				)
 			)
@@ -4486,7 +4486,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "39883117-346a-59d0-a381-33cbad9be3d2")
-		(property "Reference" "#PWR139"
+		(property "Reference" "#PWR137"
 			(at 88.9 186.69 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -4526,7 +4526,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR139")
+					(reference "#PWR137")
 					(unit 1)
 				)
 			)
@@ -4643,7 +4643,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "a686ce6a-caca-578e-88e4-52ad67616920")
-		(property "Reference" "#PWR140"
+		(property "Reference" "#PWR138"
 			(at 104.14 189.23 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -4683,7 +4683,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR140")
+					(reference "#PWR138")
 					(unit 1)
 				)
 			)
@@ -4800,7 +4800,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "2710d135-1be6-50cc-b008-95312f617b2e")
-		(property "Reference" "#PWR141"
+		(property "Reference" "#PWR139"
 			(at 116.84 189.23 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -4840,7 +4840,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR141")
+					(reference "#PWR139")
 					(unit 1)
 				)
 			)
@@ -4957,7 +4957,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "8d3df49f-f03c-589b-847b-0cba07bb4551")
-		(property "Reference" "#PWR142"
+		(property "Reference" "#PWR140"
 			(at 129.54 189.23 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -4997,7 +4997,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR142")
+					(reference "#PWR140")
 					(unit 1)
 				)
 			)
@@ -5099,7 +5099,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "84d4a78e-e80f-5b66-8ffe-8e529faf9209")
-		(property "Reference" "#PWR143"
+		(property "Reference" "#PWR141"
 			(at 25.4 179.07 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -5139,7 +5139,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR143")
+					(reference "#PWR141")
 					(unit 1)
 				)
 			)
@@ -5249,7 +5249,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "30eabefa-b440-5df6-bf95-3dc53e9013cc")
-		(property "Reference" "#PWR144"
+		(property "Reference" "#PWR142"
 			(at 142.24 179.07 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -5289,7 +5289,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR144")
+					(reference "#PWR142")
 					(unit 1)
 				)
 			)
@@ -5409,7 +5409,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "19b071b7-2d85-5892-86b1-40ee34c9bd0c")
-		(property "Reference" "#PWR145"
+		(property "Reference" "#PWR143"
 			(at 154.94 179.07 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -5449,7 +5449,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR145")
+					(reference "#PWR143")
 					(unit 1)
 				)
 			)
@@ -5464,7 +5464,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "c8e30969-a5ad-523a-a386-195746b6d352")
-		(property "Reference" "#PWR146"
+		(property "Reference" "#PWR144"
 			(at 154.94 186.69 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -5504,7 +5504,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR146")
+					(reference "#PWR144")
 					(unit 1)
 				)
 			)
@@ -5851,7 +5851,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "a45424ec-0fe1-53f8-87ec-9ae1a6d236ea")
-		(property "Reference" "#PWR147"
+		(property "Reference" "#PWR145"
 			(at 215.9 59.69 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -5891,7 +5891,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR147")
+					(reference "#PWR145")
 					(unit 1)
 				)
 			)
@@ -5906,7 +5906,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "2d50b092-4418-564b-942c-a25500e34003")
-		(property "Reference" "#PWR148"
+		(property "Reference" "#PWR146"
 			(at 226.06 57.15 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -5946,7 +5946,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR148")
+					(reference "#PWR146")
 					(unit 1)
 				)
 			)
@@ -5961,7 +5961,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "86b02ca9-789d-5646-acbb-7461ec45a3df")
-		(property "Reference" "#PWR149"
+		(property "Reference" "#PWR147"
 			(at 200.66 60.96 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -6001,7 +6001,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR149")
+					(reference "#PWR147")
 					(unit 1)
 				)
 			)
@@ -6317,7 +6317,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "1106dd17-0e77-5dba-96a1-220c0488b08c")
-		(property "Reference" "#PWR150"
+		(property "Reference" "#PWR148"
 			(at 177.8 64.77 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -6357,7 +6357,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR150")
+					(reference "#PWR148")
 					(unit 1)
 				)
 			)
@@ -6712,7 +6712,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "36ce07cf-498b-5b5f-aece-f9fff0cd4ee1")
-		(property "Reference" "#PWR151"
+		(property "Reference" "#PWR149"
 			(at 215.9 80.01 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -6752,7 +6752,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR151")
+					(reference "#PWR149")
 					(unit 1)
 				)
 			)
@@ -6767,7 +6767,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "3911c331-dab7-5abd-909f-52cc8ac816fe")
-		(property "Reference" "#PWR152"
+		(property "Reference" "#PWR150"
 			(at 226.06 77.47 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -6807,7 +6807,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR152")
+					(reference "#PWR150")
 					(unit 1)
 				)
 			)
@@ -6822,7 +6822,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "58925c1e-8092-5e12-b948-f9c9f5af22a6")
-		(property "Reference" "#PWR153"
+		(property "Reference" "#PWR151"
 			(at 200.66 81.28 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -6862,7 +6862,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR153")
+					(reference "#PWR151")
 					(unit 1)
 				)
 			)
@@ -7178,7 +7178,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "44da5a33-9be8-50f0-9633-a47068bfea7e")
-		(property "Reference" "#PWR154"
+		(property "Reference" "#PWR152"
 			(at 177.8 85.09 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -7218,7 +7218,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR154")
+					(reference "#PWR152")
 					(unit 1)
 				)
 			)
@@ -7573,7 +7573,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "4bcbc191-588b-5510-bf5e-604e3b840aa5")
-		(property "Reference" "#PWR155"
+		(property "Reference" "#PWR153"
 			(at 215.9 100.33 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -7613,7 +7613,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR155")
+					(reference "#PWR153")
 					(unit 1)
 				)
 			)
@@ -7628,7 +7628,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "ef621a9e-6fce-5399-b012-3e8a2c2cedee")
-		(property "Reference" "#PWR156"
+		(property "Reference" "#PWR154"
 			(at 226.06 97.79 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -7668,7 +7668,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR156")
+					(reference "#PWR154")
 					(unit 1)
 				)
 			)
@@ -7683,7 +7683,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "52769b43-0ed4-55ec-9378-d97ac787585a")
-		(property "Reference" "#PWR157"
+		(property "Reference" "#PWR155"
 			(at 200.66 101.6 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -7723,7 +7723,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR157")
+					(reference "#PWR155")
 					(unit 1)
 				)
 			)
@@ -8039,7 +8039,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "efda81c0-5bef-53b5-bd9a-f5e437f92791")
-		(property "Reference" "#PWR158"
+		(property "Reference" "#PWR156"
 			(at 177.8 105.41 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -8079,7 +8079,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR158")
+					(reference "#PWR156")
 					(unit 1)
 				)
 			)
@@ -8434,7 +8434,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "d7ad2102-a820-589b-ba4e-a4c9f6be8247")
-		(property "Reference" "#PWR159"
+		(property "Reference" "#PWR157"
 			(at 215.9 120.65 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -8474,7 +8474,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR159")
+					(reference "#PWR157")
 					(unit 1)
 				)
 			)
@@ -8489,7 +8489,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "616f6908-50cb-5c2f-8f45-afe2c9d4a3e3")
-		(property "Reference" "#PWR160"
+		(property "Reference" "#PWR158"
 			(at 226.06 118.11 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -8529,7 +8529,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR160")
+					(reference "#PWR158")
 					(unit 1)
 				)
 			)
@@ -8544,7 +8544,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "51b79956-d345-5e80-9664-63230021bea2")
-		(property "Reference" "#PWR161"
+		(property "Reference" "#PWR159"
 			(at 200.66 121.92 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -8584,7 +8584,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR161")
+					(reference "#PWR159")
 					(unit 1)
 				)
 			)
@@ -8900,7 +8900,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "f4c05cd6-a8d2-528e-bd3e-263d575beff2")
-		(property "Reference" "#PWR162"
+		(property "Reference" "#PWR160"
 			(at 177.8 125.73 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -8940,7 +8940,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR162")
+					(reference "#PWR160")
 					(unit 1)
 				)
 			)
@@ -9295,7 +9295,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "17eefcc6-2f2b-59b4-8279-7b86967f60d5")
-		(property "Reference" "#PWR163"
+		(property "Reference" "#PWR161"
 			(at 215.9 140.97 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -9335,7 +9335,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR163")
+					(reference "#PWR161")
 					(unit 1)
 				)
 			)
@@ -9350,7 +9350,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "9dd65332-fb10-593e-90f6-cac3262338ae")
-		(property "Reference" "#PWR164"
+		(property "Reference" "#PWR162"
 			(at 226.06 138.43 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -9390,7 +9390,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR164")
+					(reference "#PWR162")
 					(unit 1)
 				)
 			)
@@ -9405,7 +9405,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "90a2dc32-3e6d-541f-abc8-688097912560")
-		(property "Reference" "#PWR165"
+		(property "Reference" "#PWR163"
 			(at 200.66 142.24 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -9445,7 +9445,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR165")
+					(reference "#PWR163")
 					(unit 1)
 				)
 			)
@@ -9761,7 +9761,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "ed21626e-d7d7-5a56-9d9c-fbed91e789c3")
-		(property "Reference" "#PWR166"
+		(property "Reference" "#PWR164"
 			(at 177.8 146.05 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -9801,7 +9801,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR166")
+					(reference "#PWR164")
 					(unit 1)
 				)
 			)
@@ -10156,7 +10156,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "49437a17-cb4a-5610-9f27-1a1a6f6e13d3")
-		(property "Reference" "#PWR167"
+		(property "Reference" "#PWR165"
 			(at 215.9 161.29 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -10196,7 +10196,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR167")
+					(reference "#PWR165")
 					(unit 1)
 				)
 			)
@@ -10211,7 +10211,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "4e6eb0a4-20a9-51fb-9ba7-4b6194265bf0")
-		(property "Reference" "#PWR168"
+		(property "Reference" "#PWR166"
 			(at 226.06 158.75 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -10251,7 +10251,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR168")
+					(reference "#PWR166")
 					(unit 1)
 				)
 			)
@@ -10266,7 +10266,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "d28ac850-8625-550b-84a5-04e8a50d573d")
-		(property "Reference" "#PWR169"
+		(property "Reference" "#PWR167"
 			(at 200.66 162.56 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -10306,7 +10306,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR169")
+					(reference "#PWR167")
 					(unit 1)
 				)
 			)
@@ -10622,7 +10622,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "db2aa582-1f47-5d6e-a290-75be00bd7ae4")
-		(property "Reference" "#PWR170"
+		(property "Reference" "#PWR168"
 			(at 177.8 166.37 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -10662,7 +10662,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR170")
+					(reference "#PWR168")
 					(unit 1)
 				)
 			)
@@ -11017,7 +11017,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "032e65ef-53d6-5c18-a3ab-780de0c1e631")
-		(property "Reference" "#PWR171"
+		(property "Reference" "#PWR169"
 			(at 215.9 181.61 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -11057,7 +11057,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR171")
+					(reference "#PWR169")
 					(unit 1)
 				)
 			)
@@ -11072,7 +11072,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "e90df668-30e4-535c-a9aa-18c888daf679")
-		(property "Reference" "#PWR172"
+		(property "Reference" "#PWR170"
 			(at 226.06 179.07 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -11112,7 +11112,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR172")
+					(reference "#PWR170")
 					(unit 1)
 				)
 			)
@@ -11127,7 +11127,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "4d9dac83-4702-530c-8a8c-f24f0dabcec4")
-		(property "Reference" "#PWR173"
+		(property "Reference" "#PWR171"
 			(at 200.66 182.88 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -11167,7 +11167,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR173")
+					(reference "#PWR171")
 					(unit 1)
 				)
 			)
@@ -11293,7 +11293,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "fb545165-8616-52df-a945-80b18863f346")
-		(property "Reference" "#PWR174"
+		(property "Reference" "#PWR172"
 			(at 265.43 54.61 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -11333,7 +11333,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR174")
+					(reference "#PWR172")
 					(unit 1)
 				)
 			)
@@ -11348,7 +11348,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "ff4e7ec6-7f14-5f69-90dd-8a4f29aedfaa")
-		(property "Reference" "#PWR175"
+		(property "Reference" "#PWR173"
 			(at 265.43 87.63 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -11388,7 +11388,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR175")
+					(reference "#PWR173")
 					(unit 1)
 				)
 			)
@@ -11403,7 +11403,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "43654be3-1a05-5928-836b-cf7d0a95758a")
-		(property "Reference" "#PWR176"
+		(property "Reference" "#PWR174"
 			(at 267.97 49.53 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -11443,7 +11443,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR176")
+					(reference "#PWR174")
 					(unit 1)
 				)
 			)
@@ -11458,7 +11458,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "e681cc66-49d9-5da9-8530-561c38170477")
-		(property "Reference" "#PWR177"
+		(property "Reference" "#PWR175"
 			(at 267.97 82.55 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -11498,7 +11498,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR177")
+					(reference "#PWR175")
 					(unit 1)
 				)
 			)
@@ -11607,7 +11607,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "5172929b-ed5e-5fb2-a829-869bcd974706")
-		(property "Reference" "#PWR178"
+		(property "Reference" "#PWR176"
 			(at 290.83 57.15 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -11647,7 +11647,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR178")
+					(reference "#PWR176")
 					(unit 1)
 				)
 			)
@@ -11662,7 +11662,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "5e97e346-c3c6-50b1-8182-97610b7834b7")
-		(property "Reference" "#PWR179"
+		(property "Reference" "#PWR177"
 			(at 290.83 64.77 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -11702,7 +11702,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR179")
+					(reference "#PWR177")
 					(unit 1)
 				)
 			)
@@ -11811,7 +11811,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "fefe29db-f953-5d72-8612-106149aba008")
-		(property "Reference" "#PWR180"
+		(property "Reference" "#PWR178"
 			(at 290.83 80.01 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -11851,7 +11851,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR180")
+					(reference "#PWR178")
 					(unit 1)
 				)
 			)
@@ -11866,7 +11866,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "54d02f6e-e35c-5b0f-9437-5dc4354e7793")
-		(property "Reference" "#PWR181"
+		(property "Reference" "#PWR179"
 			(at 290.83 87.63 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -11906,7 +11906,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR181")
+					(reference "#PWR179")
 					(unit 1)
 				)
 			)
@@ -12015,7 +12015,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "023728a9-a60d-5a19-b4fe-72e58673b10e")
-		(property "Reference" "#PWR182"
+		(property "Reference" "#PWR180"
 			(at 303.53 57.15 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -12055,7 +12055,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR182")
+					(reference "#PWR180")
 					(unit 1)
 				)
 			)
@@ -12070,7 +12070,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "4082dd69-1f92-5c81-8f83-a32253873d2b")
-		(property "Reference" "#PWR183"
+		(property "Reference" "#PWR181"
 			(at 303.53 64.77 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -12110,7 +12110,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR183")
+					(reference "#PWR181")
 					(unit 1)
 				)
 			)
@@ -12211,7 +12211,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "eb4b1641-ee8c-5a77-a6d6-49c4090fd156")
-		(property "Reference" "#PWR184"
+		(property "Reference" "#PWR182"
 			(at 328.93 54.61 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -12251,7 +12251,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR184")
+					(reference "#PWR182")
 					(unit 1)
 				)
 			)
@@ -12266,7 +12266,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "c4377f38-727b-5cad-8f81-7396d384fe97")
-		(property "Reference" "#PWR185"
+		(property "Reference" "#PWR183"
 			(at 328.93 87.63 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -12306,7 +12306,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR185")
+					(reference "#PWR183")
 					(unit 1)
 				)
 			)
@@ -12321,7 +12321,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "d43d4def-d595-59c8-b6e2-8165ccd97990")
-		(property "Reference" "#PWR186"
+		(property "Reference" "#PWR184"
 			(at 331.47 49.53 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -12361,7 +12361,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR186")
+					(reference "#PWR184")
 					(unit 1)
 				)
 			)
@@ -12376,7 +12376,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "cc933b0c-26f0-50d5-983e-e6c94b32d152")
-		(property "Reference" "#PWR187"
+		(property "Reference" "#PWR185"
 			(at 331.47 82.55 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -12416,7 +12416,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR187")
+					(reference "#PWR185")
 					(unit 1)
 				)
 			)
@@ -12525,7 +12525,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "566f777f-4408-5c14-9971-ba4180451cd3")
-		(property "Reference" "#PWR188"
+		(property "Reference" "#PWR186"
 			(at 354.33 57.15 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -12565,7 +12565,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR188")
+					(reference "#PWR186")
 					(unit 1)
 				)
 			)
@@ -12580,7 +12580,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "48cb7112-7817-5bca-ba19-fb52c08e95b4")
-		(property "Reference" "#PWR189"
+		(property "Reference" "#PWR187"
 			(at 354.33 64.77 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -12620,7 +12620,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR189")
+					(reference "#PWR187")
 					(unit 1)
 				)
 			)
@@ -12729,7 +12729,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "c6882d43-05e0-55e6-87b8-f7123a93a9c5")
-		(property "Reference" "#PWR190"
+		(property "Reference" "#PWR188"
 			(at 354.33 80.01 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -12769,7 +12769,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR190")
+					(reference "#PWR188")
 					(unit 1)
 				)
 			)
@@ -12784,7 +12784,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "82a8d56a-1a29-5398-adaf-43e01295fa6e")
-		(property "Reference" "#PWR191"
+		(property "Reference" "#PWR189"
 			(at 354.33 87.63 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -12824,7 +12824,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR191")
+					(reference "#PWR189")
 					(unit 1)
 				)
 			)
@@ -12933,7 +12933,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "abc50ac2-4e04-5980-9506-4e2de28d4c26")
-		(property "Reference" "#PWR192"
+		(property "Reference" "#PWR190"
 			(at 367.03 57.15 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -12973,7 +12973,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR192")
+					(reference "#PWR190")
 					(unit 1)
 				)
 			)
@@ -12988,7 +12988,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "e105f010-7b38-5fe9-8e11-46634121e14c")
-		(property "Reference" "#PWR193"
+		(property "Reference" "#PWR191"
 			(at 367.03 64.77 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -13028,7 +13028,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR193")
+					(reference "#PWR191")
 					(unit 1)
 				)
 			)
@@ -13136,7 +13136,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "e889f114-ef30-5c37-9ad2-fb14d33f7cf6")
-		(property "Reference" "#PWR194"
+		(property "Reference" "#PWR192"
 			(at 262.89 116.84 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -13177,7 +13177,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR194")
+					(reference "#PWR192")
 					(unit 1)
 				)
 			)
@@ -13192,7 +13192,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "a9deab5a-107a-5d0e-af36-7900c354e3a7")
-		(property "Reference" "#PWR195"
+		(property "Reference" "#PWR193"
 			(at 279.4 130.81 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -13232,7 +13232,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR195")
+					(reference "#PWR193")
 					(unit 1)
 				)
 			)
@@ -13247,7 +13247,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "514a446c-ef70-5a83-a080-a5d34000fe26")
-		(property "Reference" "#PWR196"
+		(property "Reference" "#PWR194"
 			(at 295.91 116.84 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -13288,7 +13288,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR196")
+					(reference "#PWR194")
 					(unit 1)
 				)
 			)
@@ -13387,7 +13387,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "4d7c83bd-05c1-5e91-8e09-c189a09c4d4b")
-		(property "Reference" "#PWR197"
+		(property "Reference" "#PWR195"
 			(at 313.69 116.84 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -13428,7 +13428,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR197")
+					(reference "#PWR195")
 					(unit 1)
 				)
 			)
@@ -13443,7 +13443,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "f9d0bf77-a3e0-5b65-9955-79e05e94bca6")
-		(property "Reference" "#PWR198"
+		(property "Reference" "#PWR196"
 			(at 330.2 130.81 0)
 			(effects
 				(font (size 1.27 1.27))
@@ -13483,7 +13483,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR198")
+					(reference "#PWR196")
 					(unit 1)
 				)
 			)
@@ -13498,7 +13498,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "478c886c-dd92-5267-9b3c-9028f9410cd7")
-		(property "Reference" "#PWR199"
+		(property "Reference" "#PWR197"
 			(at 346.71 116.84 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -13539,7 +13539,7 @@
 		(instances
 			(project "analogue_board_pico_revb"
 				(path "/3f7ff1a2-5152-5859-b53c-b0047341ed09/f50c8b2e-4172-5d1d-9028-6413c8b46ec0"
-					(reference "#PWR199")
+					(reference "#PWR197")
 					(unit 1)
 				)
 			)

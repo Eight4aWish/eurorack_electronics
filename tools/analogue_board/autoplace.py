@@ -44,6 +44,15 @@ PIN_TARGETS = {"FB301": ("U301", "24")}
 # board R401, ADC_RST's 10k pull-up, sat at the top edge where the +3V3D pins it averaged put it,
 # and ADC_RST could not climb round the ADC's corner past a fiducial's keep-out (2026-10-17)
 PIN_TARGETS_BOARD = {"pico_core_midi": {"R401": ("U401", "2")}}
+# Rev B's rail test pads (docs/analogue_board_revb.md §7, David 2026-11-03): each aims at its rail's
+# source (the 0 Ω link after its regulator, the rail entry, the module supply's diode) instead of the
+# middle of the power sheet, keeps room beside it for its 1.0 mm name (labels.py), and keeps out
+# from under the module on the outward face, where a fitted module, an ESP32-P4's length included,
+# would hide it. Rev A's boards are left as ordered.
+TP_TARGETS = {"pico_revb": {"TP201": ("FB201", "2"), "TP202": ("FB202", "2"), "TP205": ("R206", "2"),
+                            "TP206": ("R207", "2"), "TP207": ("R208", "2"), "TP208": ("R209", "2"),
+                            "TP209": ("D203", "1")}}.get(variant.FLOORPLAN, {})
+TP_LABEL = (1.0, -0.75, 7.4, 0.75)   # in the pad's own frame: from its courtyard's edge, room for "5V MOD"
 # capacitors serving these stay on the same face unless nothing fits within this many mm: the
 # buck's input and output loops carry 350 kHz switching current and must not run through vias
 SAME_FACE = {"U201": 12.0, "L201": 12.0}
@@ -107,12 +116,17 @@ class Placer:
         self.offsets = _offsets()
         # the module header rows: (x, top, bottom) of each column of module pins
         self.rows = []
+        self.module_bodies = []   # outward-face boxes a fitted module covers, for TP_TARGETS
         for ref in variant.MODULES:
             if ref in self.pos:
                 cols = {}
                 for x, y in self.pads(ref).values():
                     cols.setdefault(round(x, 1), []).append(y)
                 self.rows += [(x, min(ys), max(ys)) for x, ys in cols.items() if len(ys) > 4]
+                xs, ys = [p[0] for p in self.pads(ref).values()], [p[1] for p in self.pads(ref).values()]
+                if variant.MODULES[ref] == "pico":   # 21 x 51 mm round the pads; the ESP32-P4's far and USB ends
+                    self.module_bodies.append((min(xs) - 1.61, min(ys) - 1.37 - P.P4_EXTRA_FAR,
+                                               max(xs) + 1.61, max(ys) + 1.37 + P.P4_EXTRA_USB))
 
     def row_cost(self, x, y, pins):
         """ROW_CROSS for every header row between (x, y) and each pin."""
@@ -126,10 +140,14 @@ class Placer:
         return ROW_CROSS * n
 
     # ---------------------------------------------------------------- geometry
+    def boxes(self, ref):
+        """A part's courtyard rectangles in its own frame; a TP_TARGETS pad's name box with them."""
+        return self.crt(self.lib(self.comps[ref]["fp"])) + ([TP_LABEL] if ref in TP_TARGETS else [])
+
     def rects(self, ref, origin, rot, face):
         """World courtyard rectangles of a part placed at origin."""
         out = []
-        for x0, y0, x1, y1 in self.crt(self.lib(self.comps[ref]["fp"])):
+        for x0, y0, x1, y1 in self.boxes(ref):
             pts = [self.to_world(p, origin, rot, face) for p in ((x0, y0), (x1, y0), (x1, y1), (x0, y1))]
             xs, ys = [p[0] for p in pts], [p[1] for p in pts]
             out.append((min(xs), min(ys), max(xs), max(ys)))
@@ -181,6 +199,12 @@ class Placer:
     def target(self, ref):
         """(x, y, preferred face or None, strength, the pins it connects to) or None while nothing
         it connects to is placed."""
+        if ref in TP_TARGETS:   # its rail's source pin; weak, so the parts with real nets go first
+            tref, pin = TP_TARGETS[ref]
+            if tref not in self.pos:
+                return None
+            x, y = self.pads(tref)[pin]
+            return (x, y, None if self.is_tht(tref) else self.pos[tref][2], 0.5, [(x, y)])
         dec = self.decouples(ref)
         if dec:
             tref, pin = dec
@@ -219,8 +243,8 @@ class Placer:
     def find(self, ref, tx, ty, face_pref, m=MARGIN, offsets=None, pins=()):
         """The nearest free spot to (tx, ty): distance, plus the other-face penalty, plus
         ROW_CROSS for each header row between the spot and each of `pins`."""
-        lib = self.lib(self.comps[ref]["fp"])
-        boxes = self.crt(lib)
+        boxes = self.boxes(ref)
+        hidden = self.module_bodies if ref in TP_TARGETS else []   # outward-face spots a module covers
         bx0 = min(b[0] for b in boxes); by0 = min(b[1] for b in boxes)
         bx1 = max(b[2] for b in boxes); by1 = max(b[3] for b in boxes)
         best = None
@@ -239,6 +263,8 @@ class Placer:
                         break
                     x, y = tx + dx, ty + dy
                     r = grow((x - hx, y - hy, x + hx, y + hy), m)
+                    if face == "F" and any(r[0] < b[2] and b[0] < r[2] and r[1] < b[3] and b[1] < r[3] for b in hidden):
+                        continue
                     if self.grid.free(face, r):
                         d = base + (self.row_cost(x, y, pins) if pins else 0.0)
                         if not best or d < best[0]:

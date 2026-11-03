@@ -225,25 +225,45 @@ What the map changes:
   hole (square, so it reads as ground anyway). On Rev A, W8 on the Teensy board and W6 and W8 on
   the Pico board have none.
 - **Wiring map wording.** `wiring_map.md` now says "no room for a label" and names the strips.
-- **Test points.** 3 of 9 test points have a name beside them; the rest have no room. Rev A showed
-  that is not enough (§7): every one needs its name, at 1.0 mm or more. **Open.**
-- **Board marking [open, from Rev A, 2026-10-30].** A silkscreen line with the board name and
-  revision, "Eight4aWish" and "CC BY-SA 4.0", at 1.0 mm or more. Rev A has none of it.
+- **Test points [done in the generator, 2026-11-03; §8].** 3 of 9 test points had a name beside
+  them; the rest had no room. Rev A showed that is not enough (§7): every one needs its name, at
+  1.0 mm or more. Now all 7 have one.
+- **Board marking [done in the generator, 2026-11-03].** A silkscreen line with the board name and
+  revision, "Eight4aWish" and "CC BY-SA 4.0", at 1.0 mm or more (`labels.py`). Rev A has none of it.
 
 ## 5. Footprints
 
 - **U1002 (H11L1) [done, 2026-10-26].** `parts.py` now has `SMDIP-6_W9.53mm`, matching LCSC
   C20082. On the Teensy board, JLC left it off and a through-hole H11L1 goes in by hand.
-- **Idea:** an automatic check of every footprint against LCSC's own (EasyEDA) footprint,
-  through easyeda2kicad.
+  - **Checked against LCSC's own footprint (2026-11-03,** through easyeda2kicad): its pad rows
+    sit 9.34 mm apart against KiCad's 9.53 mm, and KiCad's larger pads cover LCSC's.
+  - **Its rotation was the remaining fault.** LCSC draws the part with its pins in rows and
+    pin 1 bottom left; KiCad's SMDIP has them in columns, pin 1 top left, as with SOIC. `fab.py`
+    had no offset for SMDIP, so the CPL would have turned it 90°. It now adds 270°, as for SOIC:
+    U1002 goes to JLC at 0°. Check pin 1 in JLC's placement preview all the same.
+- **Every part against LCSC's own footprint [done, 2026-11-03]** (`diag/lcsc_footprints.py`, on
+  the 59 part types JLC places):
+  - **Rotation:** for every part, `fab.py`'s offset is the one LCSC's drawing needs, the H11L1
+    included once SMDIP's offset went in.
+  - **Pads:** the counts match everywhere, and the numbering on every polarised part (pin 1,
+    cathodes, transistor legs).
+  - **Nine flags, all small geometry:**
+    - SOT-23 ×4 and SOIC ×2: LCSC's pads are shorter than KiCad's and sit inside them, 0.3-0.4 mm
+      off-centre along the pad;
+    - SOD-323 ×2: KiCad's pads are larger;
+    - the L78M05's DPAK: LCSC calls the tab pad 4 where KiCad calls it 2, the same tab in the
+      same place.
+  - **Proven on Rev A:** each flagged part was assembled there and worked, except Q201
+    (AO3401A). Q201 shares SOT-23 and its rule with parts that were, and its pads were compared
+    by hand.
 
 ## 6. Carried over from the P4 review
 
-- **MOD_5V margin.** MOD_5V is about 4.6 V after the Schottky, against the MP1658's 4.5 V
-  minimum. Raise +5VD to about 5.2 V or use a lower-drop diode.
-- **P4 doc out of date.** `docs/analogue_board_esp32p4.md` still lists pin 20 as PROBE (it is
-  unconnected) and does not mention the camera and display I2C. Update it when item 1 is
-  decided.
+- **MOD_5V margin [settled].** MOD_5V is about 4.6 V after the Schottky, against the MP1658's
+  4.5 V minimum. Q201 already answers it (spec §15, decided 2026-10-15): with JP201 bridged, the
+  FET bypasses the Schottky. Fit a P4 with JP201 bridged.
+- **P4 doc [done, 2026-11-02].** `docs/analogue_board_esp32p4.md` now has Rev B's pin table,
+  read from the routed board, and Rev B notes on each finding.
 
 ## 7. Lessons from the Teensy bring-up
 
@@ -264,7 +284,7 @@ is the source; what it has said so far:
 - **The power and the core blocks worked first time.** Every rail in range; I2C, EEPROM,
   expander, ADC, and DAC through all six switches pass, the DAC within 34 mV of the design
   uncalibrated. No bodges yet.
-- **MIDI on link holes [for consideration, David 2026-10-31; not decided].** The module's two
+- **MIDI on link holes [settled 2026-11-02: wired straight, §8].** The module's two
   serial pins (Pico GP0/GP1, Teensy 1/0) reach MIDI only through J101's links, so every MIDI build
   needs a jumper first (Boy links SPARE2 to MIDI_RX). They became link holes because they were
   promised as spare GPIO on 14 October, before TRS MIDI came back on the 15th. The alternative:
@@ -275,3 +295,121 @@ is the source; what it has said so far:
   routes are the I2C holes (J703), the gate-expansion holes (J603), the LED holes (J704), the
   expander's spare switch lines and the pot ADC. The spares are the board's only fast direct
   processor pins, and their likeliest use is serial, which MIDI already is.
+
+## 8. Order changes and the gesture module (2026-11-02)
+
+**Decided by David, 2026-11-02 and 03; in the generator from 2026-11-03** (`variant.py`:
+`midi_direct`, `cv_volts`, and `gate_exp` dropped). The build is clean: 363 parts, 0 ERC,
+netlist or datasheet problems.
+- **MIDI wired straight to the module,** with no link holes and no solder jumpers: pin 1 (GP0,
+  UART0 TX) to MIDI_TX, pin 2 (GP1, UART0 RX) to MIDI_RX. J101 keeps only RUN and GND. The
+  board has no spare GPIO left.
+- **The gate expansion goes.** J603 (QH′, SRCLK, RCLK, OE, +5VD, GND) is removed. The 595 keeps
+  its four gate outputs; QE-QH and QH′ are left unused.
+- **CV outputs at ±10 V** (David, 2026-11-03: "the full -10 to 10V"), spec §15's variant: Rf
+  75k (the 0603 75k already on the board, C23242, so no new part type), divider 15k/20k. Gain
+  8.5, OFFSET_REF 1.429 V, −10.71 to +10.54 V, 0 V at code ≈ 33044. The 100 pF across Rf now
+  puts the stage's pole at 21 kHz. It needs loads of 10 kΩ or more.
+
+**Placement moved.** Without J603 and four of J101's holes, the auto-placer packs the passives
+differently: 114 parts sit elsewhere than on vB, under the same rules. The committed generator
+still reproduces vB exactly, so the change is this one. vB's six-layer route no longer
+applies, and six layers is being routed again beside four (rC1).
+
+**34 channels for 18 cells [proposal].** The 34 are not 16 parts too many. Each cell offers a
+choice, and the chips behind the choices are shared:
+- top band: each of the 6 cells is a pot or a switch (12 channels);
+- middle band: each of the 6 cells is a two-way CV or a gate (12);
+- bottom band: the 6 cells choose from the 4 audio jacks, a fourth gate each way, the fixed CVs
+  and MIDI (10).
+
+A choice costs a hole and a short trace; the chips are what fill the board. The gesture module
+below uses nearly every chip, MIDI being optional. The two-way switching is what gives it six
+outputs. So the proposal is to keep the set, route on four layers as it stands (less J603 and
+the MIDI links), and, if that fails, trim where the router's leftovers point. On Rev A they were
+rails around the converters and the switches, not channel holes.
+
+**The gesture module's interface [proposal].** It drives the Befaco Oneiroi, which takes (user
+manual):
+- 17 CV inputs: 9 primary ones at −5 to +10 V, plus V/oct and 8 level and dry/wet inputs at 0 to
+  10 V;
+- 3 gate inputs, sync, record and random, high above 1 V;
+- no MIDI.
+
+On the P4, Espressif's esp-dl has a hand detector (a box per hand: x, y and size) and a gesture
+classifier (about 30 ms per hand).
+
+**The camera is not on the panel** (David, 2026-11-03): it sits on top of the rack in a
+3D-printed holder, on a ribbon long enough to reach a module in the middle of the rack, near
+the TLQ-SCREEN. So it takes no cells, and the board needs no slot for it.
+
+| Band | Cells | Use |
+|---|---|---|
+| Top | 6 | Controls: pots and buttons, or Boy's push encoder on two gate-in holes |
+| Middle | 6 | CV1-6, all set to output: x, y and size of each hand |
+| Bottom, outputs | 3 | AOUT1 and AOUT2 as further ±10 V CV; GOUT4 for a gesture gate |
+| Bottom, inputs | 3 | GIN4 as a clock in; two spare |
+
+Gates can also come from any CV output. With the CV outputs at ±10 V, all nine outputs reach
+the Oneiroi's full input ranges.
+
+**The display bridge [proposal].** The TLQ-SCREEN takes a mini-HDMI (Type C) input, and its
+cable runs behind the panels (apf's quick-start). The Olimex MIPI-HDMI bridge has a full-size
+HDMI socket and runs off the display ribbon's own 3.3 V. Proposed: mount the Olimex behind the
+TLQ-SCREEN in a printed holder, with a longer Pi 5 display ribbon (22-pin to 15-pin) from the
+P4, and a short, thin HDMI lead (a flat ribbon with Type A and mini plugs) into the screen. The
+gesture module stays shallow, and the board needs nothing for it.
+
+**For the order:**
+- **CV range:** ±10 V, decided above.
+- **The camera's ribbon:** settled; the camera is off the panel.
+- **Hand tracking, proven at the bench** with the camera and P4 alone: agreed for later
+  (David, 2026-11-03).
+- **The four-layer route (2026-11-03).** Six layers (rC1) routed completely on the first try:
+  509 connections in stage 1, 0 open after `finish.py`. Four layers came close but did not close.
+  Every leftover was in the chip stack under the module (DAC, U502, U504 and the DG412s), where
+  four layers has only In2 to cross on:
+
+  | Route | Change | Stage 1 | Stage 2 | After `finish.py` |
+  |---|---|---|---|---|
+  | r4L1 | none | 11 | 9 | 8 |
+  | v4A | the stack's gaps 0.5 mm wider | 11 | 9 | 5 |
+  | v4B | the DAC up 0.5 mm, U504 down 0.5 mm | 13 | 12 | 10 |
+  | v4C | U504 0.6 mm right | 3 | 2 | 2 (CVDRV4; R414 to U402) |
+
+  Claude's advice was six layers either way: the saving is on the bare boards only, and our
+  four-layer stack has one ground plane, +5VD as tracks and no plane beside the deck face's
+  signals.
+
+**Test points [decided, David 2026-11-03].** The bus test points went on 2026-10-16, so only the
+rails' are left, and the bring-up used all seven.
+- **The two ground test points go** (TP203, TP204): a meter's black lead takes any of the
+  field's square ground holes.
+- **The seven rail test points** each aim at their rail's source in the auto-placer (the 0 Ω link
+  after each regulator, the rail entry ferrite, the module supply), keep a box beside them for
+  their 1.0 mm name, and may not sit under the module on the outward face (an ESP32-P4's length
+  included). TP209 (MOD_5V), which sat under the module, is anchored left of it, above J201's
+  shroud, about 5 mm from module pin 39. On the placed board all seven take their names, and
+  the board marking fits on one line.
+
+**Final routes (2026-11-03):**
+
+| Route | Placement | Stage 1 | Stage 2 | After `finish.py` |
+|---|---|---|---|---|
+| **fA, six layers** | as the generator places it | 4 | 0 | **0**, every IC supply pin within 4 mm of a capacitor |
+| fB, six layers | v4C's U504 move | 3 | 3 | 0, the same |
+| fB, four layers | v4C's U504 move | 17 | 17 | 11 when stopped |
+
+**Six layers, fA, for the order (David, 2026-11-03).** The generator reproduces its placement
+exactly. It is `routed_trial/analogue_board_pico_revb_routed.kicad_pcb`:
+- KiCad's DRC with schematic parity: 0 unconnected, no copper faults. The 178 notices are
+  silkscreen and library ones, as vB's 184 were, and none is on a label of ours.
+- The decoupling review flags only the DAC's CLR (U501 pin 9) and the 595's MR (U602 pin 10),
+  logic pins tied to a rail.
+- Labels: 12 of 13 wiring blocks (W12 is a lone square ground hole), all 7 test points, and
+  the board marking on one line, turned, on the outward face.
+
+**Order files:** `pico_revb/fab/`: the six-layer gerbers and drill, and the JLC BOM and CPL for
+the 301 parts JLC places (132 top, 169 bottom, 59 part types, each with an LCSC number). Before
+paying: a live quote, JLC's stock for every part, and its placement preview with "Confirm
+Parts Placement" ticked (spec §14).

@@ -1,0 +1,33 @@
+
+== stage s1
+./src/common/stdpbase.cpp(59): assert ""traits"" failed in Get(): create wxApp before calling this
+  of which bent stubs (grid search): 0
+Ground vias placed before routing: 202; no room beside 3 pads: ['R415.2', 'R503.2', 'U401.8']
+Decoupling capacitors wired to their pins before routing: 55; no short path: []
+Routing with: (via "Via[0-3]_450:200_um" "Via[0-3]_600:300_um") (width 127) (clearance 127)
+Freerouting settings: --router.automatic_neckdown=false --router.hole_clearance_um=250 --router.copper_to_edge_clearance_um=500 --router.fanout.enabled=false --router.scoring.via_costs=20 --router.scoring.plane_via_costs=2
+Freerouting on 4 layers, 20 passes max, 10.7 min
+Connections to make: 529; left unrouted: 11 (97.9% routed)
+Tracks: 3663 segments, 5164 mm; vias: 628
+Trial board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/pico_revb/output/autoroute/analogue_board_pico_revb_r4L1_s1_autoroute_trial.kicad_pcb
+
+== stage s2
+04:28:39 AM: Debug: Adding duplicate image handler for 'PNG file'
+04:28:39 AM: Debug: Adding duplicate image handler for 'JPEG file'
+04:28:39 AM: Debug: Adding duplicate image handler for 'TIFF file'
+04:28:39 AM: Debug: Adding duplicate image handler for 'GIF file'
+04:28:39 AM: Debug: Adding duplicate image handler for 'PNM file'
+04:28:39 AM: Debug: Adding duplicate image handler for 'PCX file'
+04:28:39 AM: Debug: Adding duplicate image handler for 'IFF file'
+04:28:39 AM: Debug: Adding duplicate image handler for 'Windows icon file'
+04:28:39 AM: Debug: Adding duplicate image handler for 'Windows cursor file'
+04:28:39 AM: Debug: Adding duplicate image handler for 'Windows animated cursor file'
+04:28:39 AM: Debug: Adding duplicate image handler for 'TGA file'
+04:28:39 AM: Debug: Adding duplicate image handler for 'XPM file'
+Locked 4291 existing tracks and vias
+Routing with: (via "Via[0-3]_450:200_um" "Via[0-3]_600:300_um") (width 127) (clearance 127)
+Freerouting settings: --router.automatic_neckdown=false --router.hole_clearance_um=250 --router.copper_to_edge_clearance_um=500
+Freerouting on 4 layers, 20 passes max, 10.7 min
+Connections to make: 11; left unrouted: 9 (18.2% routed)
+Tracks: 3754 segments, 5186 mm; vias: 630
+Trial board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/pico_revb/output/autoroute/analogue_board_pico_revb_r4L1_s1_s2_autoroute_trial.kicad_pcb

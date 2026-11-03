@@ -45,6 +45,9 @@ ROTATION = [
     (r"^SOIC-", 270), (r"^TSSOP-", 270), (r"^HTSSOP-", 270), (r"^SSOP-", 270), (r"^MSOP-", 270),
     (r"^TSOP-", 270), (r"^QFN-", 270), (r"^LQFP-", 270), (r"^WSON-", 270), (r"^VSON-8_", 270),
     (r"^R_Array_Convex_", 90), (r"^R_Array_Concave_", 90), (r"^TO-277", 90),
+    # the H11L1 (C20082): LCSC's own footprint has its pins in rows, pin 1 bottom left, where
+    # KiCad's SMDIP has them in columns, pin 1 top left, as with SOIC (checked 2026-11-03)
+    (r"^SMDIP-", 270),
 ]
 
 

@@ -313,15 +313,29 @@ def sheet_cv_in(sh):
 
 
 # =====================================================================================  5  CV DAC
+# The output range (spec §15): ±5 V, or the ±10 V resistor variant, Rev B's (David, 2026-11-03).
+# (Rf, its size, divider top, divider bottom); the 75k is the 0603 already on the board
+CV_STAGE = {5: ("33k", "0402", "12k", "22k"), 10: ("75k", "0603", "15k", "20k")}[variant.CV_VOLTS]
+
+
 def sheet_cv_dac(sh):
     sh.text("CV DAC", (20, 18), size=2.5, bold=True)
+    _, _, rt_v, rb_v = CV_STAGE
+    if variant.CV_VOLTS == 10:
+        stage = ("gain 1 + 75k/10k = 8.5, offset by OFFSET_REF = VREF × 20k/35k through the 10 kΩ: Vout = 8.5·Vdac − 10.71 V, so −10.71 V …\n"
+                 "+10.54 V, putting ±10 V inside the DAC's specified codes (0 V at code ≈ 33044). The offset tracks the DAC's own reference, as\n")
+        variant_note = ("using the ADC, which reads the jack (±10.24 V range). This is spec §15's ±10 V variant; it needs ≥ 10 kΩ loads, and\n"
+                        "the TL074H swings it. The 100 pF across 75k puts the stage's pole at 21 kHz.")
+    else:
+        stage = ("gain 1 + 33k/10k = 4.3, offset by OFFSET_REF = VREF × 22k/34k through the 10 kΩ: Vout = 4.3·Vdac − 5.34 V, so −5.34 V …\n"
+                 "+5.41 V, putting ±5 V inside the DAC's specified codes (0 V at code ≈ 32544). The offset tracks the DAC's own reference, as\n")
+        variant_note = ("using the ADC, which reads the jack. ±10 V variant (not Rev A): Rf 75k, divider 15k/20k, all Basic: gain 8.5,\n"
+                        "OFFSET_REF 1.429 V, −10.71 … +10.54 V; needs ≥ 10 kΩ loads. The TL074H can swing it.")
     sh.text("DAC8568 grade A: 0-2.5 V from its internal reference (off at power-up), outputs reset to zero. Each stage: non-inverting\n"
-            "gain 1 + 33k/10k = 4.3, offset by OFFSET_REF = VREF × 22k/34k through the 10 kΩ: Vout = 4.3·Vdac − 5.34 V, so −5.34 V …\n"
-            "+5.41 V, putting ±5 V inside the DAC's specified codes (0 V at code ≈ 32544). The offset tracks the DAC's own reference, as\n"
+            + stage +
             "in Performer, O&C, Marbles and Stages. CVO7/8: the 1 kΩ sits inside the loop (feedback from the jack side, as Mutable\n"
             "does), so the jack holds its voltage under load. CV1-6 go through the DG412 switch; firmware corrects their load sag\n"
-            "using the ADC, which reads the jack. ±10 V variant (not Rev A): Rf 75k, divider 15k/20k, all Basic: gain 8.5,\n"
-            "OFFSET_REF 1.429 V, −10.71 … +10.54 V; needs ≥ 10 kΩ loads. The TL074H can swing it.",
+            + variant_note,
             (20, 23), size=1.5)
     dac = {2: "CS_DAC", 16: "SPIA_SCK", 15: "SPIA_MOSI", 1: "GND", 9: "+3V3A", 8: "DAC_VREF",
            4: "DAC1", 13: "DAC2", 5: "DAC3", 12: "DAC4", 6: "DAC5", 11: "DAC6",
@@ -339,10 +353,11 @@ def sheet_cv_dac(sh):
 
     # offset reference: 2/3 of DAC_VREF, filtered, buffered
     ox, oy = 88.9, 175.26
-    sh.text("OFFSET_REF = VREF × 22k/(12k + 22k) = 1.618 V, buffered", (40, 155), size=1.5, bold=True)
+    sh.text(f"OFFSET_REF = VREF × {rb_v}/({rt_v} + {rb_v}) = {'1.429' if variant.CV_VOLTS == 10 else '1.618'} V, buffered",
+            (40, 155), size=1.5, bold=True)
     sh.text("1 nF (not 1 µF): the offset must track VREF quickly, or\nenabling the reference glitches every output.", (40, 159), size=1.27)
-    rt = R(sh, "12k", (ox - 40.64, oy - 2.54), rot=90)
-    rb = R(sh, "22k", (ox - 30.48, oy + 2.54))
+    rt = R(sh, rt_v, (ox - 40.64, oy - 2.54), rot=90)
+    rb = R(sh, rb_v, (ox - 30.48, oy + 2.54))
     cf = C(sh, "1n", (ox - 20.32, oy + 2.54), fields={"Note": "light filter; must follow VREF at enable"})
     op = part(sh, "TL074H", (ox, oy), unit=1, ref="U504")
     plus = op.p("3")
@@ -377,7 +392,7 @@ def sheet_cv_dac(sh):
         inv, non, out = pins[unit]
         rg = R(sh, "10k", (ox - 17.78, oy - 2.54), rot=90)
         if n <= 6:
-            rf, cfb, n1, o = opamp_feedback(sh, ox, oy, "33k", "100p")
+            rf, cfb, n1, o = opamp_feedback(sh, ox, oy, CV_STAGE[0], "100p", rf_size=CV_STAGE[1])
             sh.wire(op.p(inv), n1, rg.p("2"))
             sh.wire(op.p(out), o, (o[0] + 5.08, oy))
             sh.label(f"CVDRV{n}", (o[0] + 5.08, oy), 0, kind="global")
@@ -388,7 +403,7 @@ def sheet_cv_dac(sh):
             o = (ox + 10.16, oy)
             rout = R(sh, "1k", (ox + 15.24, oy), rot=90, size="1206", fields={"Note": "inside the feedback loop; 1206 for patching faults"})
             j = (ox + 22.86, oy)
-            rf = R(sh, "33k", (ox, oy - 17.78), rot=90)
+            rf = R(sh, CV_STAGE[0], (ox, oy - 17.78), rot=90, size=CV_STAGE[1])
             cfb = C(sh, "100p", (ox, oy - 10.16), rot=90)
             sh.wire(op.p(inv), n1, rg.p("2"))
             sh.wire(n1, (n1[0], oy - 17.78), rf.p("1"))

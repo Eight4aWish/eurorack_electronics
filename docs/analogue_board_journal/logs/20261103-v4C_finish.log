@@ -1,0 +1,95 @@
+./src/common/stdpbase.cpp(59): assert ""traits"" failed in Get(): create wxApp before calling this
+Rules from the project: track 0.127 mm, clearance 0.127 mm
+Vias with their drill reset to keep a 0.125 mm ring: 0
+Tracks widened to 0.127 mm: 0
+Ground vias joined to nothing but the plane, removed: 0
+Decoupling paths protected from rip-up: 55
+Round 1: tracks and vias taken up from copper faults: 0
+Dead-end tracks and vias removed: 0
+Leftover connections routed: 0; no route found: [('CVDRV4', (51.9, 74.4)), ('CVDRV4', (62.3, 60.9)), ('Net-(R414-Pad1)', (59.5, 68.6)), ('Net-(R414-Pad1)', (52.7, 88.5))]
+  rip-up Net-(R414-Pad1): took up 21 pieces of ['+3V3D', '+5VA', '/CV DAC/DAC6', '/CV jacks & ADC/ADC_IN2', '/CV jacks & ADC/ADC_IN4', '/CV jacks & ADC/ADC_IN7', '/CV jacks & ADC/CV3', '/Gate ins/GATE_TH', 'CVDRV2', 'CVDRV3', 'Net-(U504C--)']; open 2 -> 8, undone
+05:19:12 AM: Debug: Adding duplicate image handler for 'PNG file'
+05:19:12 AM: Debug: Adding duplicate image handler for 'JPEG file'
+05:19:12 AM: Debug: Adding duplicate image handler for 'TIFF file'
+05:19:12 AM: Debug: Adding duplicate image handler for 'GIF file'
+05:19:12 AM: Debug: Adding duplicate image handler for 'PNM file'
+05:19:12 AM: Debug: Adding duplicate image handler for 'PCX file'
+05:19:12 AM: Debug: Adding duplicate image handler for 'IFF file'
+05:19:12 AM: Debug: Adding duplicate image handler for 'Windows icon file'
+05:19:12 AM: Debug: Adding duplicate image handler for 'Windows cursor file'
+05:19:12 AM: Debug: Adding duplicate image handler for 'Windows animated cursor file'
+05:19:12 AM: Debug: Adding duplicate image handler for 'TGA file'
+05:19:12 AM: Debug: Adding duplicate image handler for 'XPM file'
+  rip-up CVDRV4: took up 8 pieces of ['/CV DAC/DAC5', 'CVDRV2', 'Net-(U502B--)', 'Net-(U504B--)', 'SPIA_MISO', 'SW_EN3']; open 2 -> 6, undone
+05:19:47 AM: Debug: Adding duplicate image handler for 'PNG file'
+05:19:47 AM: Debug: Adding duplicate image handler for 'JPEG file'
+05:19:47 AM: Debug: Adding duplicate image handler for 'TIFF file'
+05:19:47 AM: Debug: Adding duplicate image handler for 'GIF file'
+05:19:47 AM: Debug: Adding duplicate image handler for 'PNM file'
+05:19:47 AM: Debug: Adding duplicate image handler for 'PCX file'
+05:19:47 AM: Debug: Adding duplicate image handler for 'IFF file'
+05:19:47 AM: Debug: Adding duplicate image handler for 'Windows icon file'
+05:19:47 AM: Debug: Adding duplicate image handler for 'Windows cursor file'
+05:19:47 AM: Debug: Adding duplicate image handler for 'Windows animated cursor file'
+05:19:47 AM: Debug: Adding duplicate image handler for 'TGA file'
+05:19:47 AM: Debug: Adding duplicate image handler for 'XPM file'
+  rip-up Net-(R414-Pad1): took up 21 pieces of ['+3V3D', '+5VA', '/CV DAC/DAC6', '/CV jacks & ADC/ADC_IN2', '/CV jacks & ADC/ADC_IN4', '/CV jacks & ADC/ADC_IN7', '/CV jacks & ADC/CV3', '/Gate ins/GATE_TH', 'CVDRV2', 'CVDRV3', 'Net-(U504C--)']; open 2 -> 8, undone
+05:20:20 AM: Debug: Adding duplicate image handler for 'PNG file'
+05:20:20 AM: Debug: Adding duplicate image handler for 'JPEG file'
+05:20:20 AM: Debug: Adding duplicate image handler for 'TIFF file'
+05:20:20 AM: Debug: Adding duplicate image handler for 'GIF file'
+05:20:20 AM: Debug: Adding duplicate image handler for 'PNM file'
+05:20:20 AM: Debug: Adding duplicate image handler for 'PCX file'
+05:20:20 AM: Debug: Adding duplicate image handler for 'IFF file'
+05:20:20 AM: Debug: Adding duplicate image handler for 'Windows icon file'
+05:20:20 AM: Debug: Adding duplicate image handler for 'Windows cursor file'
+05:20:20 AM: Debug: Adding duplicate image handler for 'Windows animated cursor file'
+05:20:20 AM: Debug: Adding duplicate image handler for 'TGA file'
+05:20:20 AM: Debug: Adding duplicate image handler for 'XPM file'
+  rip-up CVDRV4: took up 8 pieces of ['/CV DAC/DAC5', 'CVDRV2', 'Net-(U502B--)', 'Net-(U504B--)', 'SPIA_MISO', 'SW_EN3']; open 2 -> 6, undone
+05:20:55 AM: Debug: Adding duplicate image handler for 'PNG file'
+05:20:55 AM: Debug: Adding duplicate image handler for 'JPEG file'
+05:20:55 AM: Debug: Adding duplicate image handler for 'TIFF file'
+05:20:55 AM: Debug: Adding duplicate image handler for 'GIF file'
+05:20:55 AM: Debug: Adding duplicate image handler for 'PNM file'
+05:20:55 AM: Debug: Adding duplicate image handler for 'PCX file'
+05:20:55 AM: Debug: Adding duplicate image handler for 'IFF file'
+05:20:55 AM: Debug: Adding duplicate image handler for 'Windows icon file'
+05:20:55 AM: Debug: Adding duplicate image handler for 'Windows cursor file'
+05:20:55 AM: Debug: Adding duplicate image handler for 'Windows animated cursor file'
+05:20:55 AM: Debug: Adding duplicate image handler for 'TGA file'
+05:20:55 AM: Debug: Adding duplicate image handler for 'XPM file'
+  rip-up Net-(R414-Pad1): took up 21 pieces of ['+3V3D', '+5VA', '/CV DAC/DAC6', '/CV jacks & ADC/ADC_IN2', '/CV jacks & ADC/ADC_IN4', '/CV jacks & ADC/ADC_IN7', '/CV jacks & ADC/CV3', '/Gate ins/GATE_TH', 'CVDRV2', 'CVDRV3', 'Net-(U504C--)']; open 2 -> 8, undone
+05:21:28 AM: Debug: Adding duplicate image handler for 'PNG file'
+05:21:28 AM: Debug: Adding duplicate image handler for 'JPEG file'
+05:21:28 AM: Debug: Adding duplicate image handler for 'TIFF file'
+05:21:28 AM: Debug: Adding duplicate image handler for 'GIF file'
+05:21:28 AM: Debug: Adding duplicate image handler for 'PNM file'
+05:21:28 AM: Debug: Adding duplicate image handler for 'PCX file'
+05:21:28 AM: Debug: Adding duplicate image handler for 'IFF file'
+05:21:28 AM: Debug: Adding duplicate image handler for 'Windows icon file'
+05:21:28 AM: Debug: Adding duplicate image handler for 'Windows cursor file'
+05:21:28 AM: Debug: Adding duplicate image handler for 'Windows animated cursor file'
+05:21:28 AM: Debug: Adding duplicate image handler for 'TGA file'
+05:21:28 AM: Debug: Adding duplicate image handler for 'XPM file'
+  rip-up CVDRV4: took up 8 pieces of ['/CV DAC/DAC5', 'CVDRV2', 'Net-(U502B--)', 'Net-(U504B--)', 'SPIA_MISO', 'SW_EN3']; open 2 -> 6, undone
+05:22:02 AM: Debug: Adding duplicate image handler for 'PNG file'
+05:22:02 AM: Debug: Adding duplicate image handler for 'JPEG file'
+05:22:02 AM: Debug: Adding duplicate image handler for 'TIFF file'
+05:22:02 AM: Debug: Adding duplicate image handler for 'GIF file'
+05:22:02 AM: Debug: Adding duplicate image handler for 'PNM file'
+05:22:02 AM: Debug: Adding duplicate image handler for 'PCX file'
+05:22:02 AM: Debug: Adding duplicate image handler for 'IFF file'
+05:22:02 AM: Debug: Adding duplicate image handler for 'Windows icon file'
+05:22:02 AM: Debug: Adding duplicate image handler for 'Windows cursor file'
+05:22:02 AM: Debug: Adding duplicate image handler for 'Windows animated cursor file'
+05:22:02 AM: Debug: Adding duplicate image handler for 'TGA file'
+05:22:02 AM: Debug: Adding duplicate image handler for 'XPM file'
+Rip-up and reroute: 0 swaps kept; nets still open: ['CVDRV4', 'Net-(R414-Pad1)']
+Dead-end tracks and vias removed: 0
+  of which bent stubs (grid search): 0
+GND pads unconnected: 0; vias placed: 0; no room: []
+Round 2: tracks and vias taken up from copper faults: 0
+Decoupling paths shortened (cap, pin, mm before, mm added): []; still over 4 mm: [('C219', 'U203.2', 4.4)]
+Unconnected after finishing: 2
+Finished board: /Users/dbaghurst/GitHub/eurorack_electronics/hardware/analogue_board/pico_revb/output/variants/autoroute/v4C_s1_s2_autoroute_trial_finished.kicad_pcb
