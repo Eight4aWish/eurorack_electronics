@@ -351,15 +351,31 @@ classifier (about 30 ms per hand).
 3D-printed holder, on a ribbon long enough to reach a module in the middle of the rack, near
 the TLQ-SCREEN. So it takes no cells, and the board needs no slot for it.
 
-| Band | Cells | Use |
-|---|---|---|
-| Top | 6 | Controls: pots and buttons, or Boy's push encoder on two gate-in holes |
-| Middle | 6 | CV1-6, all set to output: x, y and size of each hand |
-| Bottom, outputs | 3 | AOUT1 and AOUT2 as further ±10 V CV; GOUT4 for a gesture gate |
-| Bottom, inputs | 3 | GIN4 as a clock in; two spare |
+**The panel [decided, David 2026-11-03].** The module is **Health** ("eleven for health"). Its
+PCB faceplate is `build123d/panels/p4_gesture.py`, with the order files in
+`build123d/exports/pcb/p4_gesture_10hp/`, to go in the same JLC basket as this board. It uses
+Boy's Rev A deck geometry, 2 mm lift included. No screen on the panel: the TLQ-SCREEN is the
+display.
 
-Gates can also come from any CV output. With the CV outputs at ±10 V, all nine outputs reach
-the Oneiroi's full input ranges.
+| Row | Panel left | Middle | Panel right |
+|---|---|---|---|
+| 1 | encoder (A, B on GIN1, GIN2; push SW1) | BTN1 (SW2) | BTN2 (SW3) |
+| 2 | X pot (POT4) | Y pot (POT5) | Z pot (POT6) |
+| 3 | X1 | Y1 | Z1 |
+| 4 | X2 | Y2 | Z2 |
+| 5 | IN-L (AIN1) | RST (GIN4) | OUT-L (AOUT1) |
+| 6 | IN-R (AIN2) | CLK (GIN3; its wire crosses the board) | OUT-R (AOUT2) |
+
+- Rows 3-4 are the six two-way CV channels, all set as outputs: each hand's x, y and size
+  (Z). The firmware maps any feature to any channel.
+- The encoder's common goes to 3.3 V digital, not POT_REF, since the panel has pots.
+- Pot tops may be daisy-chained on the deck through the cells' second A contacts; Rev B
+  gives every top cell its own POT_REF hole, where Rev A had one per two pots.
+- SW4-SW6 stay free (the pot cells use their POT channels): two footswitches on one TRS jack
+  could use them later, if a cell is given up. David left the panel as it is.
+- The audio outs are DC-coupled, so OUT-L and OUT-R can also carry CV. Gates can also come
+  from any CV output. With the CV outputs at ±10 V, all eight outputs reach the Oneiroi's
+  full input ranges.
 
 **The display bridge [proposal].** The TLQ-SCREEN takes a mini-HDMI (Type C) input, and its
 cable runs behind the panels (apf's quick-start). The Olimex MIPI-HDMI bridge has a full-size
