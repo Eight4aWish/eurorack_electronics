@@ -6142,14 +6142,14 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C4410"
+		(property "LCSC" "C4261071"
 			(at 193.04 45.72 90)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
-		(property "JLC" "Basic"
+		(property "JLC" "Extended"
 			(at 193.04 45.72 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -7003,14 +7003,14 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C4410"
+		(property "LCSC" "C4261071"
 			(at 193.04 66.04 90)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
-		(property "JLC" "Basic"
+		(property "JLC" "Extended"
 			(at 193.04 66.04 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -7864,14 +7864,14 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C4410"
+		(property "LCSC" "C4261071"
 			(at 193.04 86.36 90)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
-		(property "JLC" "Basic"
+		(property "JLC" "Extended"
 			(at 193.04 86.36 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -8725,14 +8725,14 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C4410"
+		(property "LCSC" "C4261071"
 			(at 193.04 106.68 90)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
-		(property "JLC" "Basic"
+		(property "JLC" "Extended"
 			(at 193.04 106.68 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -9586,14 +9586,14 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C4410"
+		(property "LCSC" "C4261071"
 			(at 193.04 127 90)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
-		(property "JLC" "Basic"
+		(property "JLC" "Extended"
 			(at 193.04 127 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -10447,14 +10447,14 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C4410"
+		(property "LCSC" "C4261071"
 			(at 193.04 147.32 90)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
-		(property "JLC" "Basic"
+		(property "JLC" "Extended"
 			(at 193.04 147.32 90)
 			(effects
 				(font (size 1.27 1.27))

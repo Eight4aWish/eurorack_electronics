@@ -66,7 +66,9 @@ def ic(sh, key, at, nets, rot=0, mirror=None, unit=1, ref=None, value=None, stub
 
 
 def R(sh, value, at, rot=0, size="0402", ref=None, fields=None, dnp=False, text_left=False):
-    f = {"LCSC": RES[(value, size)], "JLC": "Basic", "Tolerance": "1%"}
+    entry = RES[(value, size)]
+    code, jlc = (entry, "Basic") if isinstance(entry, str) else entry
+    f = {"LCSC": code, "JLC": jlc, "Tolerance": "1%"}
     f.update(fields or {})
     return sh.place("Device:R_Small", ref=ref, value=value, at=at, rot=rot, footprint=FP_R[size],
                     fields=f, prefix="R", dnp=dnp, text_left=text_left)

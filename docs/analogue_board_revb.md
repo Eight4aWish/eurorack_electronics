@@ -256,6 +256,8 @@ What the map changes:
   - **Proven on Rev A:** each flagged part was assembled there and worked, except Q201
     (AO3401A). Q201 shares SOT-23 and its rule with parts that were, and its pads were compared
     by hand.
+  - **Re-run after the output-resistor change (2026-11-03):** the ERJ-P08 (C4261071) matches
+    LCSC's footprint, pads within 0.02 mm and no rotation offset; the same nine flags otherwise.
 
 ## 6. Carried over from the P4 review
 
@@ -310,6 +312,12 @@ netlist or datasheet problems.
   75k (the 0603 75k already on the board, C23242, so no new part type), divider 15k/20k. Gain
   8.5, OFFSET_REF 1.429 V, −10.71 to +10.54 V, 0 V at code ≈ 33044. The 100 pF across Rf now
   puts the stage's pole at 21 kHz. It needs loads of 10 kΩ or more.
+- **The nine 1 kΩ output resistors take 0.66 W** (David, 2026-11-03): R321 and R328 (audio
+  out), R406-R426 (CV1-6) and R517 (CVO7) are Panasonic's anti-surge ERJ-P08F1001V, C4261071
+  (Extended, $0.018), in place of the 0.25 W 1206 C4410. At ±10 V an output patched into a
+  stiff one puts up to ≈0.5 W in them (`analogue_board_review/cv_in.md`, A2's correction).
+  The footprint is the same 1206, so the routing stands: the gerbers are unchanged, and only
+  the BOM line moves. JLC part types stay 59, one more of them Extended.
 
 **Placement moved.** Without J603 and four of J101's holes, the auto-placer packs the passives
 differently: 114 parts sit elsewhere than on vB, under the same rules. The committed generator

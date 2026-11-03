@@ -37,7 +37,7 @@
 "R306","220k","Resistor_SMD:R_0603_1608Metric","C22961","","Basic","1"
 "R315,R316,R322,R323","12k","Resistor_SMD:R_0402_1005Metric","C25752","","Basic","4"
 "R319,R320,R326,R327","30k","Resistor_SMD:R_0603_1608Metric","C22984","","Basic","4"
-"R321,R328,R406,R410,R414,R418,R422,R426,R517","1k","Resistor_SMD:R_1206_3216Metric","C4410","","Basic","9"
+"R321,R328,R406,R410,R414,R418,R422,R426,R517","1k","Resistor_SMD:R_1206_3216Metric","C4261071","","Extended","9"
 "R407,R411,R415,R419,R423,R427","4.7k","Resistor_SMD:R_0402_1005Metric","C25900","","Basic","6"
 "R503","20k","Resistor_SMD:R_0402_1005Metric","C25765","","Basic","1"
 "R601","100R","Resistor_SMD:R_0805_2012Metric","C17408","","Basic","1"

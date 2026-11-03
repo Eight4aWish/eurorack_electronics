@@ -7870,14 +7870,14 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C4410"
+		(property "LCSC" "C4261071"
 			(at 220.98 175.26 90)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
-		(property "JLC" "Basic"
+		(property "JLC" "Extended"
 			(at 220.98 175.26 90)
 			(effects
 				(font (size 1.27 1.27))
@@ -8910,14 +8910,14 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C4410"
+		(property "LCSC" "C4261071"
 			(at 220.98 218.44 90)
 			(effects
 				(font (size 1.27 1.27))
 				(hide yes)
 			)
 		)
-		(property "JLC" "Basic"
+		(property "JLC" "Extended"
 			(at 220.98 218.44 90)
 			(effects
 				(font (size 1.27 1.27))

@@ -95,7 +95,7 @@ ICS = {
                 ds="", jlc="bare pad", prefix="FID"),
 }
 
-RES = {  # (value, size) -> LCSC, all JLC Basic, 1 %
+RES = {  # (value, size) -> LCSC, JLC Basic unless marked, 1 %
     ("0R", "0402"): "C17168", ("0R", "0603"): "C21189", ("0R", "0805"): "C17477",
     ("10R", "0402"): "C25077", ("33R", "0402"): "C25105", ("100R", "0402"): "C25076", ("330R", "0402"): "C25104",
     ("1k", "0402"): "C11702", ("1.5k", "0402"): "C25867", ("2k", "0402"): "C4109", ("2.2k", "0402"): "C25879",
@@ -106,7 +106,11 @@ RES = {  # (value, size) -> LCSC, all JLC Basic, 1 %
     ("13k", "0603"): "C22797", ("30k", "0603"): "C22984", ("220k", "0603"): "C22961",
     ("680R", "0603"): "C23228", ("5.1R", "0603"): "C25197", ("510k", "0603"): "C23192", ("75k", "0603"): "C23242",
     ("100R", "0805"): "C17408", ("220R", "0805"): "C17557", ("1k", "0805"): "C17513",
-    ("100R", "1206"): "C17901", ("1k", "1206"): "C4410",
+    ("100R", "1206"): "C17901",
+    # Extended: (LCSC, JLC library). The 1k 1206 is every output's series resistor; at ±10 V an
+    # output patched into a stiff one puts up to ≈0.53 W in it, past a plain 1206's 0.25 W, so it
+    # is Panasonic's anti-surge ERJ-P08 at 0.66 W (datasheet 29-Sep-23), same footprint (2026-11-03)
+    ("1k", "1206"): ("C4261071", "Extended"),
 }
 
 CAP = {  # (value, size) -> (LCSC, rating, dielectric), all JLC Basic

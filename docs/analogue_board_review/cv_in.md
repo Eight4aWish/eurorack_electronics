@@ -427,6 +427,22 @@ only acceptable where the probe is always wired.
   the 1 kΩ exists precisely to survive it.
 - *Cost:* Basic, no fee. *Side effects:* 8 × 3.2 × 1.6 mm instead of 1.0 × 0.5 mm. The same check applies
   to the other 1 kΩ outputs on the board (audio out, gate out), outside this block.
+- *Correction (2026-11-03):* those figures hold for CV1-6 at ±5 V only, and they understate three
+  cases. Power in the 1 kΩ with our output at its negative extreme:
+
+  | Output | +10 V through 1 kΩ | +10 V through 100 Ω | +12 V direct |
+  |---|---|---|---|
+  | CV1-6 at ±5 V (Rev A) | 57 mW | 186 mW | 286 mW |
+  | CV1-6 at ±10 V (Rev B) | 105 mW | 339 mW | 491 mW |
+  | Audio out, ±10 V (both revisions) | 100 mW | 331 mW | 484 mW |
+  | CVO7/8, 1 kΩ inside the loop (a fight drives the op-amp to the rail, ≈ −11 V) | 110 mW | 364 mW | 529 mW |
+
+  The op-amp (≤ 23 mA) and the DG412 (30 mA) stay within their ratings; the resistor is the part
+  at risk. For Rev B the nine are Panasonic's anti-surge **ERJ-P08F1001V, C4261071** (Extended,
+  0.66 W at 70 °C, same 1206 footprint; Panasonic ERJ P datasheet, 29-Sep-23); the generator now
+  gives it to every board. Rev A as built (Boy) has C4410: its CV outputs stay inside 250 mW
+  against a 100 Ω source, and only its audio outputs, held against a stiff output at the
+  opposite extreme, go past it.
 
 ### B — worth adopting
 
