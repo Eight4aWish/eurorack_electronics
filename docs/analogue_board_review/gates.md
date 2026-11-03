@@ -473,8 +473,9 @@ VOH ≥ 3.7 V at −6 mA.
   float their pins while they boot. CS_595 was missed.
   - Because the TCA9555 has no reset pin (§4.10), the 595 outputs stay *enabled* across a
     module reset or reflash. A floating RCLK can then latch garbage onto the gate jacks.
-  - With the pull-up, RCLK sits high: Pico 2 pad pull-down (≈50k) against 10k gives about
-    2.7 V, above VIH 2.0 V. No edge means the outputs simply hold their last state.
+  - With the pull-up, RCLK sits high: Pico 2 pad pull-down (36–113 kΩ at 3.3 V, RP2350
+    datasheet Table 1683) against 10k gives 2.6–3.0 V, above VIH 2.0 V. No edge means the
+    outputs simply hold their last state.
 - **Firmware rule:** at boot, first write TCA9555 P06 = 1 (OE off), then clock zeros into
   the 595 and pulse RCLK, then enable.
 - **Cost:** 1 × 10k 0603, **C25804, Basic, already used**. No fee.
