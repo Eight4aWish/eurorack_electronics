@@ -142,9 +142,9 @@ registerLayout("Boy: Power", {
       "type": "D",
       "value": "SS34",
       "r1": 2,
-      "c1": "a",
+      "c1": "pwrL",
       "r2": 2,
-      "c2": "pwrL",
+      "c2": "a",
       "stage": 1
     },
     {

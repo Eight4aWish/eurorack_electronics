@@ -7,9 +7,14 @@ n8synth layout validator. Checks a visualizer JSON for:
   1d. A wire scheduled later than both ends it joins
   1e. A component reaching across the board for a rail
   1f. Anything on an outer hole a control-deck header occupies
+  1g. A hole that doesn't exist, or a power-rail hole the board's own capacitors fill
+  1h. A chip whose pin numbers couldn't sit on a real package
+  1i. A panel wire on a position with no deck pad, or a narrow deck using both edges
   2. Net-distinctness — every twoPin component must bridge two distinct (row, side) nets
   3. Power-rail parity — pwrL/pwrR endpoints match the alternating-parity rule
      (pwrL: odd=GND/even=+12V; pwrR: odd=GND/even=-12V)
+
+It knows the board, not the circuit: check_netlist.py checks the circuit.
 
 Usage:
     python3 validate_layout.py path/to/layout.json
@@ -67,11 +72,16 @@ def validate(path):
     for comp in layout.get('twoPins', []):
         occupy(comp.get('r1'), comp.get('c1'), f"{comp['id']}.1")
         occupy(comp.get('r2'), comp.get('c2'), f"{comp['id']}.2")
-    for group in ('jumpers', 'jpsWires', 'powerWires'):
+    for q in layout.get('transistors', []):
+        for leg in 'ebc':
+            occupy(q.get(leg + 'R'), q.get(leg + 'C'), f"{q['id']}.{leg.upper()}")
+    for group in ('jumpers', 'powerWires'):
         for jw in layout.get(group, []):
             name = jw.get('id', jw.get('label', '?'))
             occupy(jw.get('r1'), jw.get('c1'), f"{group}[{name}].1")
             occupy(jw.get('r2'), jw.get('c2'), f"{group}[{name}].2")
+    for jw in layout.get('jpsWires', []):
+        occupy(jw.get('row'), jw.get('col'), f"jpsWires[{jw.get('id', jw.get('lbl', '?'))}]")
 
     for (r, c), occupants in holes.items():
         if len(occupants) > 1:
@@ -176,6 +186,9 @@ def validate(path):
             note(pin['r'], pin['c'], ic.get('stage', 1))
     for w in layout.get('jpsWires', []):
         note(w['row'], w['col'], w.get('stage', 1))
+    for q in layout.get('transistors', []):
+        for leg in 'ebc':
+            note(q[leg + 'R'], q[leg + 'C'], q.get('stage', 1))
 
     for grp in ('jumpers', 'powerWires'):
         for w in layout.get(grp, []):
@@ -233,6 +246,73 @@ def validate(path):
                     if col.endswith('o') and row in blocked:
                         errs.append(f"{grp} {item.get('id', '?')}: {col}{row} is an OUTER hole "
                                     f"a header pin occupies — only the inner hole is free there")
+
+    # --- Holes that don't exist ------------------------------------------------
+    # The main area, the edge connector and the power rail are three different
+    # extents: see docs/n8synth_platform.md. Read the board from its profile; with
+    # none, assume the powered board, which is every kit's.
+    profile = None
+    if bid:
+        try:
+            profile = json.load(open(os.path.join(HERE, 'boards', bid + '.json')))
+        except Exception:
+            profile = None
+    boards = profile['breadboard']['boards'] if profile else [{'variant': 'powered', 'mainAreaRows': [1, 36]}]
+    main_rows = max(b['mainAreaRows'][1] for b in boards)
+    powered = all(b['variant'] == 'powered' for b in boards)
+    for (r, c) in sorted(holes, key=str):
+        who = ' + '.join(holes[(r, c)])
+        if len(str(c)) == 1 and str(c) in 'abcdefghij':
+            if not 1 <= r <= main_rows:
+                errs.append(f"{who}: {c}{r}: the main area has rows 1-{main_rows}")
+        elif str(c) in ('pwrL', 'pwrR', 'ctrlLo', 'ctrlLi', 'ctrlRo', 'ctrlRi', 'ctrlL', 'ctrlR'):
+            if not 1 <= r <= 40:
+                errs.append(f"{who}: {c}{r}: the edge connector and power rails have positions 1-40")
+            elif powered and str(c).startswith('pwr') and r in (37, 38):
+                errs.append(f"{who}: {c}{r}: the powered board's own 10uF capacitor is there")
+        else:
+            errs.append(f"{who}: no column called {c}")
+
+    # --- A chip's pin numbers must fit a real package --------------------------
+    # A DIP straddles the centre gap, numbered down one side and back up the other,
+    # either way up. A single-in-line part counts along one column.
+    for ic in layout.get('ics', []):
+        pins = ic.get('pins', [])
+        if not pins or not all(isinstance(p.get('n'), int) for p in pins):
+            continue
+        n = len(pins)
+        at = {p['n']: (p['r'], p['c']) for p in pins}
+        cols = {p['c'] for p in pins}
+        top = min(p['r'] for p in pins)
+        if set(at) != set(range(1, n + 1)):
+            errs.append(f"{ic['id']}: pins are numbered {sorted(at)}, not 1-{n}")
+        elif cols == {'e', 'f'} and n % 2 == 0:
+            half = n // 2
+            upright = {p: (top + p - 1, 'e') if p <= half else (top + n - p, 'f') for p in at}
+            flipped = {p: (top + half - p, 'f') if p <= half else (top + p - half - 1, 'e') for p in at}
+            if at != upright and at != flipped:
+                errs.append(f"{ic['id']}: pins don't fit a DIP: pin 1 at {at[1][1]}{at[1][0]}, and each "
+                            f"pin must follow on, down one side of the gap and back up the other")
+        elif len(cols) == 1:
+            rows = [at[p][0] for p in sorted(at)]
+            if rows != list(range(rows[0], rows[0] + n)) and rows != list(range(rows[0], rows[0] - n, -1)):
+                errs.append(f"{ic['id']}: pins don't fit a single-in-line part: rows {rows}")
+        else:
+            errs.append(f"{ic['id']}: pins on columns {sorted(cols)}: a DIP sits on e and f, "
+                        f"a single-in-line part on one column")
+
+    # --- The deck: pads, and which edges a narrow one uses ---------------------
+    if profile:
+        lanes = {str(c)[:5] for (_, c) in holes if str(c).startswith('ctrl')}
+        if profile['deck'].get('strips') == 1 and lanes == {'ctrlL', 'ctrlR'}:
+            errs.append(f"{bid}: this deck uses one edge connector, and this layout uses both")
+        pad_map = profile['ctrlMap']
+        for j in layout.get('jpsWires', []):
+            lane = str(j['col'])[:5]
+            pads = pad_map.get(lane, next(iter(pad_map.values())))
+            if not pads.get(str(j['row'])):
+                errs.append(f"jpsWires {j.get('id', j.get('lbl', '?'))}: position {j['row']} has no "
+                            f"deck pad on {bid}: a panel wire can't arrive there")
 
     if errs:
         print(f"\n✗ {len(errs)} error(s):")

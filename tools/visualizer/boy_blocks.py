@@ -42,6 +42,9 @@ class Block:
         self.jpsWires, self.netLabels, self.steps = [], [], []
 
     def two(self, id_, type_, value, pad1, pad2):
+        # KiCad's diode pad 1 is the cathode, and the viewer draws a diode's band at its second end
+        if type_ == 'D':
+            pad1, pad2 = pad2, pad1
         self.twoPins.append({'id': id_, 'type': type_, 'value': value, 'r1': pad1[0], 'c1': pad1[1],
                              'r2': pad2[0], 'c2': pad2[1], 'stage': 1})
 
@@ -403,7 +406,8 @@ def check_block(b, pin_net, members):
     # every pin the slide names: (ref, pad, row, col)
     pins = []
     for t in b.twoPins:
-        pins += [(t['id'], '1', t['r1'], t['c1']), (t['id'], '2', t['r2'], t['c2'])]
+        first, second = ('2', '1') if t['type'] == 'D' else ('1', '2')
+        pins += [(t['id'], first, t['r1'], t['c1']), (t['id'], second, t['r2'], t['c2'])]
     for ic in b.ics:
         pins += [(ic['id'], str(p['n']), p['r'], p['c']) for p in ic['pins'] if 'net' in p]
     for j in b.jpsWires:

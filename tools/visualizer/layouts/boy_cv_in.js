@@ -250,10 +250,10 @@ registerLayout("Boy: CV in, channel 1", {
       "id": "D401",
       "type": "D",
       "value": "TVS",
-      "r1": 29,
-      "c1": "pwrL",
-      "r2": 28,
-      "c2": "b",
+      "r1": 28,
+      "c1": "b",
+      "r2": 29,
+      "c2": "pwrL",
       "stage": 1
     },
     {

@@ -449,8 +449,8 @@ The moments, and what can show each one:
   - **Four layers came within 2 connections over five routes but never closed.**
   - **Every placed part was checked against LCSC's own footprint;** that caught the H11L1's
     rotation.
-  - **Order files** are in `hardware/analogue_board/pico_revb/fab/`. Left: the live JLC quote
-    and the finish, OSP or HASL.
+  - **Order files** are in `hardware/analogue_board/pico_revb/fab/`. Ordered 3 Nov: 5
+    boards, 2 assembled, OSP, USD 305.58 for the PCBs and assembly.
 - **Boy's firmware.** Started 1 Nov in `eurorack_modules`. It took over `teensy_move`, and the old
   Boy's code became `teensy_move_old`. The mode is chosen at power-on. Mode 1, the Move companion,
   works on the bench, all but TRS MIDI in, which isn't tried yet. Warps and other two-input

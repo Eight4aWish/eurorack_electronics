@@ -282,7 +282,8 @@ is the source; what it has said so far:
 - **No test point under the module.** TP206 (+5VA), TP401 and TP601 sit inside the Teensy's
   socket; TP605 and TP702 at its ends.
 - **Finish.** OSP was chosen over ENIG on cost, and solders well. It leaves the wiring holes
-  bare copper with a shelf life of months. HASL tins them, if JLC offers it for the board.
+  bare copper with a shelf life of months. HASL tins them, if JLC offers it for the board. Rev B
+  was ordered OSP too (David, 2026-11-04), so the same applies to it.
 - **The power and the core blocks worked first time.** Every rail in range; I2C, EEPROM,
   expander, ADC, and DAC through all six switches pass, the DAC within 34 mV of the design
   uncalibrated. No bodges yet.
@@ -441,6 +442,10 @@ exactly. It is `routed_trial/analogue_board_pico_revb_routed.kicad_pcb`:
 the 301 parts JLC places (132 top, 169 bottom, 59 part types, each with an LCSC number). Before
 paying: a live quote, JLC's stock for every part, and its placement preview with "Confirm
 Parts Placement" ticked (spec §14).
+
+**The order (David, 2026-11-04):** 5 boards, 2 assembled, OSP. USD 37.47 for the PCBs and 268.11
+for assembly, 305.58 together, against Rev A's 45.11 and 281.62, 326.73 together. Both exclude
+postage, tax and the extra panels.
 
 **JLC's placement preview, reviewed 2026-11-04 and confirmed by David: nothing to correct.** JLC
 flagged no errors. The check is `tools/analogue_board/diag/jlc_placement.py`.

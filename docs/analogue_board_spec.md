@@ -212,8 +212,8 @@ x = 24.8): those are for stacking a second board, and nothing stacks on this one
   type, so a panel part anywhere on the deck has its channel close by (`wiring.py`).
 - **Pads plated on both faces**, so wires can run on either face: across the
   outward face, or underneath in the stand-off gap on the deck face. A HASL finish arrives
-  tinned; Rev A was ordered OSP (2026-10-16), bare copper under a clear coat, so each hole is
-  tinned as it is wired.
+  tinned; Rev A (2026-10-16) and Rev B (2026-11-03) were both ordered OSP, bare copper under a
+  clear coat, so each hole is tinned as it is wired.
 - **Deck ground bus (D pads):** one wire from any D pad to an AGND hole (pot and jack
   grounds are on D).
 
