@@ -1150,8 +1150,8 @@ repo's `.venv` (scripted KiCad edits; exact JLC footprints by LCSC number). No p
      - **The story of both boards:** [`analogue_board_journal.md`](analogue_board_journal.md).
 4. **Routed board**, clean against the design rules, with test points on every rail and
    bus and 0 Ω links in each supply so a faulty rail can be isolated.
-5. **JLCPCB quote and preview**, rotations checked, "Confirm Parts Placement" ($0.45)
-   ticked, before paying. Then 5 PCBs, 2 assembled.
+5. **JLCPCB quote and preview**, rotations checked (`diag/jlc_placement.py`), "Confirm Parts
+   Placement" ($0.45) ticked, before paying. Then 5 PCBs, 2 assembled.
 
 Rev A is expected to need a few bodge wires. An outside layout review (KiCad forum,
 r/PrintedCircuitBoard) is held in reserve for if it does not bring up.

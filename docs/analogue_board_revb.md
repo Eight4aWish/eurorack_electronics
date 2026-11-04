@@ -442,18 +442,21 @@ the 301 parts JLC places (132 top, 169 bottom, 59 part types, each with an LCSC 
 paying: a live quote, JLC's stock for every part, and its placement preview with "Confirm
 Parts Placement" ticked (spec §14).
 
-**JLC's placement preview, reviewed 2026-11-04: nothing to correct.** JLC flagged no errors.
-- **Order files against the routed board:** all 301 parts match on position, face, footprint and
-  LCSC number. 70 part, face and rotation combinations are the same as on Rev A, which works; none
-  differs; 14 are new here (4 polarised: U1002, Q201, U602, D1002).
+**JLC's placement preview, reviewed 2026-11-04 and confirmed by David: nothing to correct.** JLC
+flagged no errors. The check is `tools/analogue_board/diag/jlc_placement.py`.
+- **Order files:** all 301 parts match the routed board on position, face and footprint, and the
+  schematic on LCSC number and value (the routed board carries no LCSC numbers). 70 part, face and
+  rotation combinations are the same as on Rev A, which works; none differs; 14 are new here (4
+  whose orientation matters: U1002, Q201, U602, D1002).
 - **The 44 ICs, diodes and transistors on the preview:**
   - On all 33 multi-pin parts, JLC's pin 1 mark is on our pad 1.
   - On the 4 polarised two-pad diodes (D201-D203, D1002), JLC's + is on pad 2 and its − on pad 1,
     the cathode. The SMA parts' bands show at the pad 1 end.
   - The 7 PESD15VL1BA are bidirectional, and JLC draws them so.
 - **Parts that looked odd and aren't:** JP201 is the grey oval, an open solder jumper JLC doesn't
-  place. C203 and C710 are bright yellow but ceramic (X5R), with no polarity. L201's mark is on pad
-  2, and an inductor has no polarity.
+  place. C209 and R205 are bare too: the buck's feed-forward, marked not fitted. C203 and C710 are
+  bright yellow but ceramic (X5R), with no polarity. L201's mark is on pad 2, and an inductor has
+  no polarity.
 - **Limit:** the preview is about 10 pixels per mm. Body dots and bands show on the SOICs and the
   SMA diodes, and they agree with the marks. On the TSSOPs and SOD-323s only JLC's marks can be
   read.
