@@ -28,13 +28,13 @@ hardware, is **the old Boy**: its firmware is `teensy_move_old` in `eurorack_mod
   - the WS2812 LED chain;
   - MIDI out;
   - the gate-input thresholds;
-  - CV inputs from an outside source;
   - switches other than SW6;
   - the noise comparison.
 - **Boy's firmware was started on 2026-11-01:** `eurorack_modules`, `src/teensy_move/`, env
   `teensy41`, with its own `docs/TEENSY_MOVE.md`. Mode 1 works on the bench (2026-11-01), all but TRS MIDI in, not yet tried.
   Mode 2, Warps, went on Boy on 2026-11-02: the codec runs at 96 kHz (its internal carrier plays
-  C2 on a tuner where it should). Its CV inputs from an outside source aren't tried yet.
+  C2 on a tuner where it should). CV in from another module works, by ear (V/oct into that
+  carrier, David, 2026-11-04); tracking and calibration are for later.
   It's ported from the old Boy's firmware, now `src/teensy_move_old/`, but the old Boy's chips and
   pins are all different: see [Porting from the old Boy](#porting-from-the-old-boy).
 - **It took over `teensy_move`** (David, 2026-11-01). The old Boy's code is `teensy_move_old`, and
