@@ -1,0 +1,227 @@
+registerLayout("Boy: Gate out, channel 1", {
+  "title": "BOY: Gate out, channel 1",
+  "source": "tools/visualizer/boy_blocks.py; Rev A netlist",
+  "board": "n8synth (single board, rows 1-36)",
+  "boardId": "n8synth-10hp",
+  "revision": "drawn, not built",
+  "notes": "One output of the 74HCT595.",
+  "stages": [
+    {
+      "id": 1,
+      "name": "Gate out, channel 1",
+      "desc": "One output of the 74HCT595.",
+      "test": "Not built: checked against Rev A's netlist.",
+      "color": "#c8202f"
+    }
+  ],
+  "ics": [
+    {
+      "id": "U602",
+      "value": "74HCT595",
+      "label": "74HCT595",
+      "stage": 1,
+      "pins": [
+        {
+          "n": 1,
+          "r": 10,
+          "c": "e"
+        },
+        {
+          "n": 2,
+          "r": 11,
+          "c": "e"
+        },
+        {
+          "n": 3,
+          "r": 12,
+          "c": "e"
+        },
+        {
+          "n": 4,
+          "r": 13,
+          "c": "e"
+        },
+        {
+          "n": 5,
+          "r": 14,
+          "c": "e"
+        },
+        {
+          "n": 6,
+          "r": 15,
+          "c": "e"
+        },
+        {
+          "n": 7,
+          "r": 16,
+          "c": "e"
+        },
+        {
+          "n": 8,
+          "r": 17,
+          "c": "e"
+        },
+        {
+          "n": 9,
+          "r": 17,
+          "c": "f"
+        },
+        {
+          "n": 10,
+          "r": 16,
+          "c": "f"
+        },
+        {
+          "n": 11,
+          "r": 15,
+          "c": "f"
+        },
+        {
+          "n": 12,
+          "r": 14,
+          "c": "f"
+        },
+        {
+          "n": 13,
+          "r": 13,
+          "c": "f"
+        },
+        {
+          "n": 14,
+          "r": 12,
+          "c": "f"
+        },
+        {
+          "n": 15,
+          "r": 11,
+          "c": "f",
+          "net": "GQ1"
+        },
+        {
+          "n": 16,
+          "r": 10,
+          "c": "f"
+        }
+      ]
+    },
+    {
+      "id": "D601",
+      "value": "BAV99",
+      "label": "BAV99",
+      "stage": 1,
+      "labelSide": "right",
+      "pins": [
+        {
+          "n": 1,
+          "r": 20,
+          "c": "g"
+        },
+        {
+          "n": 2,
+          "r": 21,
+          "c": "g"
+        },
+        {
+          "n": 3,
+          "r": 22,
+          "c": "g",
+          "net": "GOUT1"
+        }
+      ]
+    }
+  ],
+  "twoPins": [
+    {
+      "id": "R617",
+      "type": "R",
+      "value": "1k",
+      "r1": 11,
+      "c1": "i",
+      "r2": 22,
+      "c2": "i",
+      "stage": 1
+    }
+  ],
+  "jumpers": [
+    {
+      "id": "W1",
+      "r1": 22,
+      "c1": "ctrlRi",
+      "r2": 22,
+      "c2": "j",
+      "label": "GATE OUT 1",
+      "stage": 1
+    }
+  ],
+  "powerWires": [],
+  "jpsWires": [
+    {
+      "id": "J610.3",
+      "ref": "J610",
+      "pad": "3",
+      "label": "GATE OUT 1",
+      "lbl": "GATE OUT 1",
+      "row": 22,
+      "col": "ctrlRo",
+      "stage": 1
+    }
+  ],
+  "netLabels": [],
+  "boySteps": [
+    {
+      "net": "GQ1",
+      "line": "GQ1          U602.15 QA, R617 1k",
+      "rows": [
+        "11R"
+      ],
+      "ctrl": [],
+      "parts": [
+        "R617",
+        "U602"
+      ],
+      "wires": [],
+      "holes": [
+        [
+          11,
+          "i"
+        ],
+        [
+          11,
+          "f"
+        ]
+      ]
+    },
+    {
+      "net": "GOUT1",
+      "line": "GOUT1        R617, D601 BAV99, J610 (jack)",
+      "rows": [
+        "22R"
+      ],
+      "ctrl": [
+        "22R"
+      ],
+      "parts": [
+        "D601",
+        "J610",
+        "R617"
+      ],
+      "wires": [
+        "W1"
+      ],
+      "holes": [
+        [
+          22,
+          "i"
+        ],
+        [
+          22,
+          "g"
+        ],
+        [
+          22,
+          "ctrlRo"
+        ]
+      ]
+    }
+  ]
+});

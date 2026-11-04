@@ -1,0 +1,274 @@
+registerLayout("Boy: A button, channel 1", {
+  "title": "BOY: A button, channel 1",
+  "source": "tools/visualizer/boy_blocks.py; Rev A netlist",
+  "board": "n8synth (single board, rows 1-36)",
+  "boardId": "n8synth-10hp",
+  "revision": "drawn, not built",
+  "notes": "The TCA9555 on a breakout: 16 lines over two wires.",
+  "stages": [
+    {
+      "id": 1,
+      "name": "A button, channel 1",
+      "desc": "The TCA9555 on a breakout: 16 lines over two wires.",
+      "test": "Not built: checked against Rev A's netlist.",
+      "color": "#c8202f"
+    }
+  ],
+  "ics": [
+    {
+      "id": "U701",
+      "value": "TCA9555",
+      "label": "TCA9555",
+      "stage": 1,
+      "pins": [
+        {
+          "n": 1,
+          "r": 8,
+          "c": "e"
+        },
+        {
+          "n": 2,
+          "r": 9,
+          "c": "e"
+        },
+        {
+          "n": 3,
+          "r": 10,
+          "c": "e"
+        },
+        {
+          "n": 4,
+          "r": 11,
+          "c": "e"
+        },
+        {
+          "n": 5,
+          "r": 12,
+          "c": "e"
+        },
+        {
+          "n": 6,
+          "r": 13,
+          "c": "e"
+        },
+        {
+          "n": 7,
+          "r": 14,
+          "c": "e"
+        },
+        {
+          "n": 8,
+          "r": 15,
+          "c": "e"
+        },
+        {
+          "n": 9,
+          "r": 16,
+          "c": "e"
+        },
+        {
+          "n": 10,
+          "r": 17,
+          "c": "e"
+        },
+        {
+          "n": 11,
+          "r": 18,
+          "c": "e"
+        },
+        {
+          "n": 12,
+          "r": 19,
+          "c": "e"
+        },
+        {
+          "n": 13,
+          "r": 19,
+          "c": "f",
+          "net": "BTN1"
+        },
+        {
+          "n": 14,
+          "r": 18,
+          "c": "f"
+        },
+        {
+          "n": 15,
+          "r": 17,
+          "c": "f"
+        },
+        {
+          "n": 16,
+          "r": 16,
+          "c": "f"
+        },
+        {
+          "n": 17,
+          "r": 15,
+          "c": "f"
+        },
+        {
+          "n": 18,
+          "r": 14,
+          "c": "f"
+        },
+        {
+          "n": 19,
+          "r": 13,
+          "c": "f"
+        },
+        {
+          "n": 20,
+          "r": 12,
+          "c": "f"
+        },
+        {
+          "n": 21,
+          "r": 11,
+          "c": "f"
+        },
+        {
+          "n": 22,
+          "r": 10,
+          "c": "f"
+        },
+        {
+          "n": 23,
+          "r": 9,
+          "c": "f"
+        },
+        {
+          "n": 24,
+          "r": 8,
+          "c": "f"
+        }
+      ]
+    }
+  ],
+  "twoPins": [
+    {
+      "id": "R702",
+      "type": "R",
+      "value": "1k",
+      "r1": 25,
+      "c1": "g",
+      "r2": 19,
+      "c2": "g",
+      "stage": 1
+    },
+    {
+      "id": "R703",
+      "type": "R",
+      "value": "10k",
+      "r1": 22,
+      "c1": "h",
+      "r2": 19,
+      "c2": "h",
+      "stage": 1
+    },
+    {
+      "id": "C702",
+      "type": "C",
+      "value": "100n",
+      "r1": 19,
+      "c1": "i",
+      "r2": 21,
+      "c2": "pwrR",
+      "stage": 1
+    }
+  ],
+  "jumpers": [
+    {
+      "id": "W1",
+      "r1": 25,
+      "c1": "ctrlRi",
+      "r2": 25,
+      "c2": "j",
+      "label": "BUTTON 1",
+      "stage": 1
+    }
+  ],
+  "powerWires": [],
+  "jpsWires": [
+    {
+      "id": "J712.1",
+      "ref": "J712",
+      "pad": "1",
+      "label": "BUTTON 1",
+      "lbl": "BUTTON 1",
+      "row": 25,
+      "col": "ctrlRo",
+      "stage": 1
+    }
+  ],
+  "netLabels": [
+    {
+      "r": 22,
+      "side": "R",
+      "name": "+3V3D",
+      "stage": 1
+    }
+  ],
+  "boySteps": [
+    {
+      "net": "SW1",
+      "line": "SW1          J712 (button), R702 1k",
+      "rows": [
+        "25R"
+      ],
+      "ctrl": [
+        "25R"
+      ],
+      "parts": [
+        "J712",
+        "R702"
+      ],
+      "wires": [
+        "W1"
+      ],
+      "holes": [
+        [
+          25,
+          "g"
+        ],
+        [
+          25,
+          "ctrlRo"
+        ]
+      ]
+    },
+    {
+      "net": "BTN1",
+      "line": "BTN1         R702, R703 10k \u2192 +3V3D, C702 100n, U701.13 P10",
+      "rows": [
+        "19R"
+      ],
+      "ctrl": [],
+      "parts": [
+        "C702",
+        "R702",
+        "R703",
+        "U701"
+      ],
+      "wires": [],
+      "holes": [
+        [
+          19,
+          "g"
+        ],
+        [
+          19,
+          "h"
+        ],
+        [
+          19,
+          "i"
+        ],
+        [
+          19,
+          "f"
+        ]
+      ]
+    }
+  ]
+});
