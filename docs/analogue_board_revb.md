@@ -351,6 +351,10 @@ classifier (about 30 ms per hand).
 3D-printed holder, on a ribbon long enough to reach a module in the middle of the rack, near
 the TLQ-SCREEN. So it takes no cells, and the board needs no slot for it.
 
+**Update, David 2026-11-04: Health is dropped for now.** The platform is Boy, in two versions, Boy Rev A
+and Boy Rev B (this board), and gesture control is an app on Rev B, not a module of its own. The panel
+below was already on order with the board, so it stays as the record of what's coming.
+
 **The panel [decided, David 2026-11-03].** The module is **Health** ("eleven for health"). Its
 PCB faceplate is `build123d/panels/p4_gesture.py`, with the order files in
 `build123d/exports/pcb/p4_gesture_10hp/`, to go in the same JLC basket as this board. It uses
