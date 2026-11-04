@@ -310,7 +310,7 @@ At 16 MHz that is 500 k frames/s, so 8 ADC + 8 DAC channels run at **~31 kHz eac
 
 ```
 jack ─1k─┬─ ADS8688 AIN (1 MΩ, ±10.24 V or ±5.12 V range)
-         └─100k─ AGND                       (unpatched input reads 0 V)
+         └─100k─ AGND                       (unpatched input reads about +0.2 V: requirement 8)
 jack ─1k─ DG412 D ─ S ─ op-amp (×4, −5 V offset) ─ DAC8568 (0–2.5 V)
                     └ IN ← TCA9555 (pull-down: off at reset, so jacks start as inputs)
 ```
