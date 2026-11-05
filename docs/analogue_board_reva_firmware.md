@@ -350,8 +350,8 @@ DSP, since its Meta mode nulls against stock in all but three documented ways (`
 Its README says MIT for the STM32 projects, and the `warps/` and `stmlib` sources it builds from carry
 the MIT header, though GitHub detects no licence file. It isn't new: the Michigan Synth Works Twist ships with it, and
 [Warps Symbiote](https://leandrob13.github.io/Electronic-Ruminations/warps-symbiote) builds on it.
-Warps' CPU on Boy, with the chord engine running too: 65 % at peak in VOCODER and 64 % in META (2026-11-05).
-The chord engine alone is 27-38 %, by patch.
+Warps' CPU on Boy, with the chord engine running too: 61 % in META on HALO, Chordal's heaviest patch (2026-11-05).
+The chord engine alone is 11-41 %, by patch.
 
 How the Warps port settled them (2026-11-02; the details are in `docs/TEENSY_MOVE.md`):
 - **Sample rate: 96 kHz, through the Teensy Audio library.**
