@@ -32,9 +32,10 @@ hardware, is **the old Boy**: its firmware is `teensy_move_old` in `eurorack_mod
   - the noise comparison.
 - **Boy's firmware was started on 2026-11-01:** `eurorack_modules`, `src/teensy_move/`, env
   `teensy41`, with its own `docs/TEENSY_MOVE.md`. Mode 1 works on the bench (2026-11-01), all but TRS MIDI in, not yet tried.
-  Mode 2, Warps, went on Boy on 2026-11-02: the codec runs at 96 kHz (its internal carrier plays
+  Warps, now mode 3, went on Boy on 2026-11-02: the codec runs at 96 kHz (its internal carrier plays
   C2 on a tuner where it should). CV in from another module works, by ear (V/oct into that
   carrier, David, 2026-11-04); tracking and calibration are for later.
+  Chordal, now mode 2, was written on 2026-11-05 and isn't flashed yet.
   It's ported from the old Boy's firmware, now `src/teensy_move_old/`, but the old Boy's chips and
   pins are all different: see [Porting from the old Boy](#porting-from-the-old-boy).
 - **It took over `teensy_move`** (David, 2026-11-01). The old Boy's code is `teensy_move_old`, and
@@ -247,14 +248,14 @@ drums.
 and 37–39 now carry SPI-B.
 
 **Features the old Boy had and later dropped,** in its history in `eurorack_modules`. Both saw
-little use because the old Boy's audio path was too noisy (David, 2026-11-01). Neither is a
-commitment for Boy: what the rest of the Teensy does is still open.
+little use because the old Boy's audio path was too noisy (David, 2026-11-01). **Both came back as
+mode 2, Chordal, on 2026-11-05** (`docs/TEENSY_MOVE.md`).
 - **Chord mode** (added in `a2007a4`; last in `842fc36^:include/teensy_move/chord_library.h` and
   `1c3eaec^:src/teensy_move/main.cpp`): one-finger chords on MIDI ch 6, Maschine-style.
   - 40 progressions in five categories, eight chords each, played from the white keys.
   - Every voicing has four notes, with five voicing transforms.
   - The pots set root, category, progression and voicing. It drove the four pitch and gate CVs.
-  - Boy has three voices, so a four-note voicing doesn't fit its CVs as it stands.
+  - Boy's three voices don't take four notes, so Chordal puts the fourth on GATE1 as a second pitch CV.
 - **Drone** (last in `d691282^:src/teensy_move/main.cpp`): four voices of two detuned oscillators,
   each with an envelope, mixed into the passthrough. Removed in v3.
 
@@ -278,10 +279,10 @@ doesn't offer them again as new. Every panel jack is committed. What's left to b
 | **Glide per voice** | DAC writes at a control rate well above 1 kHz | Abacus can slew CV patched through it |
 | **Audio outs as two CV outs**: velocity, or CC#42, for two voices | DC-coupled outputs | Shares the audio pair with every audio idea below |
 | **Alternative tunings**: each note mapped through a table (just intonation, slendro and pelog, quarter tones, Scala files) | 16-bit DAC, flash or SD | The Move's MIDI carries plain note numbers, so a tuning has to be applied here. VCO tracking hides the small shifts of just intonation; the bold tunings come through |
-| **Warps on the audio pair**: crossfade, fold, two ring mods, XOR, comparator, spectral, morph and vocoder | FPU | **Built as mode 2, 2026-11-02**, from `eurorack_modules/third_party/eurorack/warps` (MIT). Warps isn't in the rack. Its internal oscillator can be the carrier, played by a Move voice. Its oscillator runs at 96 kHz against the Teensy's 44.1 kHz. A vocoder was already on MultiOsc's list of future engines, unbuilt |
+| **Warps on the audio pair**: crossfade, fold, two ring mods, XOR, comparator, spectral, morph and vocoder | FPU | **Built, 2026-11-02, now mode 3**, from `eurorack_modules/third_party/eurorack/warps` (MIT). Warps isn't in the rack. Its internal oscillator can be the carrier, played by a Move voice. Its oscillator runs at 96 kHz against the Teensy's 44.1 kHz. A vocoder was already on MultiOsc's list of future engines, unbuilt |
 | **The rack plays the Move**: pitch-track a rack voice on an audio input, send it to the Move as notes | FPU, USB MIDI out | Tracking adds a few tens of ms. Untested whether the Move plays and records notes from a USB device |
 | **Loop slicer**: record a bar or two of the rack on a Move note, play slices from Move pads | PSRAM (16 MB holds about 95 s of stereo) | The Move's own sampler may cover it. Oneiroi has a 5 s looper, not locked to the Move |
-| **Polyphonic voice** on a spare channel, so the Move can send chords through the rack's mono filters | FPU | The Move has its own polysynths. Successor to chord mode and the drone |
+| **Polyphonic voice** on a spare channel, so the Move can send chords through the rack's mono filters | FPU | The Move has its own polysynths. **Built as mode 2, Chordal, 2026-11-05** |
 | **Tempo-synced stereo FX**: delays in note values, beat repeat | FPU, MIDI clock | The Daisy MultiFX, FX Aid, Wish and Oneiroi already do delay and texture |
 
 **Left out because the rack already has them:**
@@ -294,23 +295,27 @@ doesn't offer them again as new. Every panel jack is committed. What's left to b
 A USB audio interface is left out too: the ES-10 and the Scarlett already do that job. Also,
 whether the Move as host would accept a combined MIDI and audio device is unknown.
 
-**Decided (David, 2026-11-01): a firmware with three modes.**
+**Decided (David, 2026-11-05): Move, Chordal, Warps.** This replaces the 2026-11-01 plan, where mode 3
+was weirder two-input processing.
 - **Mode 1** is the Move companion.
-- **Mode 2** is a straight port of Warps: two audio signals in, one played against the other.
-- **Mode 3** is weirder things on the same idea, from the menu below. Warps leaves room for them,
+- **Mode 2** is Chordal: one finger plays four notes that lead into the next chord.
+- **Mode 3** is Warps, the straight port, with Chordal's engine as a carrier. It goes further with
+  Parasites next, for the Beyond Warps video.
+
+The menu below is what's left of the two-input ideas, with no mode of its own for now. Warps leaves room for them,
   because it runs on much less: an STM32F4 Cortex-M4 at 168 MHz (`warps/makefile`), a 96 kHz
   codec, its cross-modulation 6× oversampled, a 20-band vocoder, one main output plus an aux, and
   no long buffers.
 
 What makes modes work on this board:
 - **The six CV jacks are bidirectional.** With a jack's switch off it's an input to the ADS8688
-  (±10.24 V), so modes 2 and 3 can have six CV ins. Warps has four: Level 1, Level 2, Algorithm
+  (±10.24 V), so any mode can have six CV ins. Warps has four: Level 1, Level 2, Algorithm
   and Timbre, with Level 1's taken as V/oct when the internal oscillator is on (`cv_scaler.cc`).
-  That leaves two spare in mode 2. The bring-up checked open inputs and switch isolation; reading
+  That leaves two spare in Warps. The bring-up checked open inputs and switch isolation; reading
   a patched CV isn't tested yet.
 - **The panel's labels belong to mode 1.** In other modes the screen says what each jack does.
 - **The gate outs** can carry gates made from the audio: comparator, envelope or onset.
-- **MIDI still arrives in modes 2 and 3.** Move notes can set the internal carrier's pitch.
+- **MIDI still arrives in every mode.** In Warps, Move notes play the CHORD carrier.
 - **The mode is chosen at power-on and holds for the session** (David). Jack directions are set
   once a session and never switched within a mode. A source still patched into a CV jack would
   meet the DAC through the 1 kΩ.
@@ -318,9 +323,9 @@ What makes modes work on this board:
   encoder's push for 2 s. The board goes to its power-on state and the Teensy restarts into the
   chooser, so each mode starts from a clean Teensy.
 
-Mode 3 starts with **spectral morphing and sidechain ducking** (David, 2026-11-01).
+**Spectral morphing and sidechain ducking** were first in line (David, 2026-11-01).
 
-Mode 3's menu:
+The menu:
 - stereo out, with the two sides as two algorithms or a spread;
 - more vocoder bands, or an FFT vocoder with a formant shift;
 - FFT cross-synthesis: one input's spectral envelope on the other, or a morph between the two
@@ -332,20 +337,19 @@ Mode 3's menu:
   (Wish and Monsoon are granular, but neither is keyed by a second signal);
 - pitch-follow: the pitch tracked from one input tunes a resonant filter or harmoniser on the
   other.
-- chords into the vocoder (2026-11-05): the Move plays chords, the Teensy makes a polyphonic carrier
-  and feeds it to Warps in place of IN-L, and the rack is the modulator. Warps' DSP is unchanged. Warps
-  has one internal oscillator and no MIDI;
+- chords into the vocoder (2026-11-05): **built as Warps' CHORD carrier.** The Move plays chords,
+  Chordal's engine feeds Warps in place of IN-L, and the rack is the modulator. Warps' DSP is unchanged;
 - vocoder bands as CV (2026-11-05): Warps has 20 band followers (`vocoder.h`, private, so this needs
   its filter bank and followers of our own). Group them into up to six jacks set as outputs: one audio
   input becomes six spectral modulators. The rack's I4 follows one level, not bands.
 
 Also found on 2026-11-05: [Warps Parasite](https://mqtthiqs.github.io/parasites/warps), nine modes
 including a dual delay, a binaural Doppler panner, a bit-mangler and a Chebyshev waveshaper, with the
-same DSP file names as stock Warps. Its site says MIT, though GitHub detects no licence file, so check
-the source headers first. It isn't new: the Michigan Synth Works Twist ships with it, and
+same DSP file names as stock Warps. Its site says MIT and its `warps/` sources carry Emilie Gillet's MIT
+header, though GitHub detects no licence file. It isn't new: the Michigan Synth Works Twist ships with it, and
 [Warps Symbiote](https://leandrob13.github.io/Electronic-Ruminations/warps-symbiote) builds on it.
-Nothing here is decided. Warps' CPU on Boy isn't recorded yet: mode 2 prints it over serial, and any
-dual or stereo idea needs that figure first.
+Warps' CPU on Boy isn't recorded yet: mode 3 prints it over serial, and any dual or stereo idea needs
+that figure first.
 
 How the Warps port settled them (2026-11-02; the details are in `docs/TEENSY_MOVE.md`):
 - **Sample rate: 96 kHz, through the Teensy Audio library.**
