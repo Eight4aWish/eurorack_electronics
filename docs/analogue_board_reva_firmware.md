@@ -7,7 +7,8 @@ built module. Where something is from the design only and not yet seen on the be
 
 **Names.** The module was called Boy2 during the bring-up, and is now just **Boy** (David,
 2026-11-01; the name was never used outside these repos). The earlier Boy, on its own hand-built
-hardware, is **the old Boy**: its firmware is `teensy_move_old` in `eurorack_modules`.
+hardware, is **the old Boy**, retired on 2026-11-05: its firmware is at the tag `teensy-move-old-final` in
+`eurorack_modules`.
 
 **Sources, in order of authority:**
 - **The working code:** [`firmware/analogue_board_test/src/main.cpp`](../firmware/analogue_board_test/src/main.cpp).
@@ -37,10 +38,10 @@ hardware, is **the old Boy**: its firmware is `teensy_move_old` in `eurorack_mod
   carrier, David, 2026-11-04); tracking and calibration are for later.
   Chordal, now mode 2, went on Boy on 2026-11-05 and works from MIDI. Parasites' modes in Warps are flashed, and
   most aren't tried yet.
-  It's ported from the old Boy's firmware, now `src/teensy_move_old/`, but the old Boy's chips and
+  It's ported from the old Boy's firmware, but the old Boy's chips and
   pins are all different: see [Porting from the old Boy](#porting-from-the-old-boy).
-- **It took over `teensy_move`** (David, 2026-11-01). The old Boy's code is `teensy_move_old`, and
-  the old Boy is decommissioned once the new one has taken over.
+- **It took over `teensy_move`** (David, 2026-11-01). The old Boy was retired on 2026-11-05
+  (David), with its code at the tag `teensy-move-old-final`.
 - **Its given job:** the Move companion. It takes the Move's three gate and pitch voices, two drum
   triggers, clock and reset into the rack. Move audio doesn't need to come in through Boy.
 
@@ -51,10 +52,9 @@ x86_64 only, so neither runs.
 
 - **Compiler:** copy [`arm64_toolchain.py`](../firmware/analogue_board_test/arm64_toolchain.py)
   into the project and add `extra_scripts = post:arm64_toolchain.py`. It swaps in PlatformIO's
-  arm64 GCC. Boy's `[env:teensy41]` in `eurorack_modules` has it; the old Boy's
-  `[env:teensy_move_old]` doesn't.
-- **Upload:** use `upload_protocol = teensy-gui` (the Teensy Loader app), not `teensy-cli`.
-  The old Boy's env uses `teensy-cli`, which won't run here.
+  arm64 GCC. Boy's `[env:teensy41]` in `eurorack_modules` has it.
+- **Upload:** use `upload_protocol = teensy-gui` (the Teensy Loader app), not `teensy-cli`,
+  which won't run here.
 - **Flash in the foreground,** never in the background: a background upload once half-programmed
   and bricked a module.
 - **Uploads often report `Error -1` or FAILED and still program the board.** Check that the new
@@ -229,7 +229,7 @@ for pitch):
 The old Boy here includes its Teensy Expander, the 6HP companion that carries voices 3–4 and the
 drums.
 
-| | The old Boy (`eurorack_modules/src/teensy_move_old`) | Boy on Rev A |
+| | The old Boy (`eurorack_modules`, tag `teensy-move-old-final`) | Boy on Rev A |
 |---|---|---|
 | Audio | SGTL5000 audio shield, `AudioControlSGTL5000`. Its line-in gain suits the Move's line-level output, which it sends on at Eurorack level | PCM3060, no control object; inputs inverted. Scaled for Eurorack audio (10 Vpp nominal). Line-level sources come in through another module |
 | Voices | four, on MIDI ch 1–4: gate, pitch and mod each | three: gate and pitch each, **no mod**. Ch 4 has no jacks |
