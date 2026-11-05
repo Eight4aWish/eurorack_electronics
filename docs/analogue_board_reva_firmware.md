@@ -35,7 +35,8 @@ hardware, is **the old Boy**: its firmware is `teensy_move_old` in `eurorack_mod
   Warps, now mode 3, went on Boy on 2026-11-02: the codec runs at 96 kHz (its internal carrier plays
   C2 on a tuner where it should). CV in from another module works, by ear (V/oct into that
   carrier, David, 2026-11-04); tracking and calibration are for later.
-  Chordal, now mode 2, and Parasites' modes in Warps were written on 2026-11-05 and aren't flashed yet.
+  Chordal, now mode 2, went on Boy on 2026-11-05 and works from MIDI. Parasites' modes in Warps are flashed, and
+  most aren't tried yet.
   It's ported from the old Boy's firmware, now `src/teensy_move_old/`, but the old Boy's chips and
   pins are all different: see [Porting from the old Boy](#porting-from-the-old-boy).
 - **It took over `teensy_move`** (David, 2026-11-01). The old Boy's code is `teensy_move_old`, and
@@ -349,8 +350,8 @@ DSP, since its Meta mode nulls against stock in all but three documented ways (`
 Its README says MIT for the STM32 projects, and the `warps/` and `stmlib` sources it builds from carry
 the MIT header, though GitHub detects no licence file. It isn't new: the Michigan Synth Works Twist ships with it, and
 [Warps Symbiote](https://leandrob13.github.io/Electronic-Ruminations/warps-symbiote) builds on it.
-Warps' CPU on Boy isn't recorded yet: mode 3 prints it over serial, and any dual or stereo idea needs
-that figure first.
+Warps' CPU on Boy, with the chord engine running too: 65 % at peak in VOCODER and 64 % in META (2026-11-05).
+The chord engine alone is 27-38 %, by patch.
 
 How the Warps port settled them (2026-11-02; the details are in `docs/TEENSY_MOVE.md`):
 - **Sample rate: 96 kHz, through the Teensy Audio library.**
