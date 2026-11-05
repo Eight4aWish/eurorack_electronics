@@ -332,6 +332,20 @@ Mode 3's menu:
   (Wish and Monsoon are granular, but neither is keyed by a second signal);
 - pitch-follow: the pitch tracked from one input tunes a resonant filter or harmoniser on the
   other.
+- chords into the vocoder (2026-11-05): the Move plays chords, the Teensy makes a polyphonic carrier
+  and feeds it to Warps in place of IN-L, and the rack is the modulator. Warps' DSP is unchanged. Warps
+  has one internal oscillator and no MIDI;
+- vocoder bands as CV (2026-11-05): Warps has 20 band followers (`vocoder.h`, private, so this needs
+  its filter bank and followers of our own). Group them into up to six jacks set as outputs: one audio
+  input becomes six spectral modulators. The rack's I4 follows one level, not bands.
+
+Also found on 2026-11-05: [Warps Parasite](https://mqtthiqs.github.io/parasites/warps), nine modes
+including a dual delay, a binaural Doppler panner, a bit-mangler and a Chebyshev waveshaper, with the
+same DSP file names as stock Warps. Its site says MIT, though GitHub detects no licence file, so check
+the source headers first. It isn't new: the Michigan Synth Works Twist ships with it, and
+[Warps Symbiote](https://leandrob13.github.io/Electronic-Ruminations/warps-symbiote) builds on it.
+Nothing here is decided. Warps' CPU on Boy isn't recorded yet: mode 2 prints it over serial, and any
+dual or stereo idea needs that figure first.
 
 How the Warps port settled them (2026-11-02; the details are in `docs/TEENSY_MOVE.md`):
 - **Sample rate: 96 kHz, through the Teensy Audio library.**
