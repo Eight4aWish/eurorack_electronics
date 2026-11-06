@@ -1,6 +1,6 @@
 # Eurorack Electronics
 
-Analog Eurorack breadboard layouts, a dual-channel low-pass gate, a mixed-signal MOD2 build, a build-phase schematic generator, and a layout visualiser. Originally lived inside [Eight4aWish/eurorack_modules](https://github.com/Eight4aWish/eurorack_modules) — split out so that repo can stay focused on firmware.
+Analog Eurorack breadboard layouts, a dual-channel low-pass gate, a mixed-signal MOD2 design (not built yet), a build-phase schematic generator, and a layout visualiser. Originally lived inside [Eight4aWish/eurorack_modules](https://github.com/Eight4aWish/eurorack_modules) — split out so that repo can stay focused on firmware.
 
 ## What's here
 
@@ -53,7 +53,7 @@ Or open `tools/visualizer/index.html` directly in a browser if you don't need mo
 
 ### `hardware/analogue_board/` and `tools/analogue_board/`
 
-**Analogue board Rev A**: a general-purpose I/O board for a Pico 2 or Teensy 4.1 behind an n8synth Control Deck, heading for a JLCPCB assembly order. Spec and decision log: [`docs/analogue_board_spec.md`](docs/analogue_board_spec.md).
+**The analogue board**: a general-purpose I/O board behind an n8synth Control Deck. **Rev A**, for a Teensy 4.1, was built and tested on 2026-11-01 and runs as Boy, whose firmware is in [`eurorack_modules`](https://github.com/Eight4aWish/eurorack_modules/blob/main/docs/TEENSY_MOVE.md). **Rev B**, the Pico 2 format for a Pico 2W or ESP32-P4, was ordered on 2026-11-03 (`hardware/analogue_board/pico_revb/`). Spec and decision log: [`docs/analogue_board_spec.md`](docs/analogue_board_spec.md). Rev A's firmware notes: [`docs/analogue_board_reva_firmware.md`](docs/analogue_board_reva_firmware.md). Rev B: [`docs/analogue_board_revb.md`](docs/analogue_board_revb.md).
 
 - `hardware/analogue_board/`: the KiCad 9 project, the schematic PDF and the check results. Hardware licence CC BY-SA 4.0.
 - `tools/analogue_board/build.py`: generates the schematic, runs KiCad's ERC, exports the PDF, netlist and BOM, and checks every IC pin against its datasheet, the netlist against intent, decoupling and diode orientation. See [`hardware/analogue_board/README.md`](hardware/analogue_board/README.md).

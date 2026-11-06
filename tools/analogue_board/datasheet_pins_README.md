@@ -30,4 +30,4 @@ Conventions: names are spelled as printed. Overbars, subscripts and en-dash minu
 | Raspberry Pi Pico 2 | pico2.pdf PDF p.5 Fig 2, p.8 Fig 3, p.9 Fig 4 + text | Pin 36 is "3V3(OUT)" in the figure but "3V3" in the text. Pin 33 is labelled both GND and AGND (text: AGND). The bottom mounting-hole offset (2 mm) is scaled from the drawing, not dimensioned. |
 | RP2350 GPIO 0-29 functions | rp2350.pdf Table 677 (doc p.540-541, PDF p.541-542) | Parsed by column position and verified cell by cell against the render. F9 also carries QMI CS1n and TRACE signals. |
 
-Added after transcription: TPS54308DDCR (TI SLUSCV2B p.3, same pinout as the TPS54202) and XC6206P332MR (Torex datasheet p.2: 1 VSS, 2 VOUT, 3 VIN).
+Added after transcription: TPS54308DDCR (TI SLUSCV2B p.3, same pinout as the TPS54202) XC6206P332MR (Torex datasheet p.2: 1 VSS, 2 VOUT, 3 VIN), 74HCT595PW (74hct595.pdf p.4-5: the same pins as the 74HCT595D), SS34 (MDD's SS32C-SS3200C sheet p.1, the SMC sibling, as the SMA sheet couldn't be fetched: band = cathode), H11L1M (onsemi datasheet p.1) and AO3401A (Alpha & Omega Rev 3.1 p.1).
