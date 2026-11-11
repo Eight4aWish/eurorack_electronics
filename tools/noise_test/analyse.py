@@ -70,13 +70,16 @@ def measure(x):
 
 
 def sync_onsets(x):
-    """Rising edges of the 1500 Hz sync, in samples."""
-    hop = 480
+    """Rising edges of the 1500 Hz sync, in samples. 20 ms frames; a frame counts when 1500 Hz is
+    within 10 dB of the loudest sync and 12 dB over 997 Hz, so the tone's leakage can't pass for it
+    (it did, on the first real run: the threshold was absolute, and the tone is at full level)."""
+    hop = 960
     n = len(x) // hop
     fr = x[:n * hop].reshape(n, hop)
-    k = np.exp(-2j * np.pi * 1500 / FS * np.arange(hop))
-    amp = np.abs(fr @ k) * 2 / hop  # sine amplitude at 1500 Hz, digital FS
-    on = amp > 0.1  # the sync is at 0.5
+    t = np.arange(hop) / FS
+    a15 = np.abs(fr @ np.exp(-2j * np.pi * 1500 * t))
+    a10 = np.abs(fr @ np.exp(-2j * np.pi * 997 * t))
+    on = (a15 > 0.316 * a15.max()) & (a15 > 4 * a10)
     edges = np.flatnonzero(on[1:] & ~on[:-1]) + 1
     return [int(e * hop) for e in edges]
 
