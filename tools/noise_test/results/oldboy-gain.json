@@ -1,0 +1,21 @@
+{
+ "file": "oldboy-gain_2026-11-11_15-23.wav",
+ "gain": true,
+ "sync_s": 34.52,
+ "outputs": [
+  {
+   "output": "L",
+   "from_input": "OUT 1",
+   "gain_db": -58.6,
+   "gain_vv": 0.001,
+   "crosstalk_db": -4.6
+  },
+  {
+   "output": "R",
+   "from_input": "OUT 1",
+   "gain_db": 10.4,
+   "gain_vv": 3.319,
+   "crosstalk_db": -0.2
+  }
+ ]
+}

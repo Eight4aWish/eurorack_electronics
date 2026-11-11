@@ -1,0 +1,21 @@
+{
+ "file": "boy-gain_2026-11-11_15-28.wav",
+ "gain": true,
+ "sync_s": 33.84,
+ "outputs": [
+  {
+   "output": "L",
+   "from_input": "OUT 2",
+   "gain_db": 0.3,
+   "gain_vv": 1.03,
+   "crosstalk_db": -73.3
+  },
+  {
+   "output": "R",
+   "from_input": "OUT 1",
+   "gain_db": 0.3,
+   "gain_vv": 1.039,
+   "crosstalk_db": -82.3
+  }
+ ]
+}

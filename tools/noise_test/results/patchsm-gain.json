@@ -1,0 +1,21 @@
+{
+ "file": "patchsm-gain_2026-11-11_15-42.wav",
+ "gain": true,
+ "sync_s": 33.2,
+ "outputs": [
+  {
+   "output": "L",
+   "from_input": "OUT 1",
+   "gain_db": 2.9,
+   "gain_vv": 1.388,
+   "crosstalk_db": -78.2
+  },
+  {
+   "output": "R",
+   "from_input": "OUT 2",
+   "gain_db": 2.8,
+   "gain_vv": 1.373,
+   "crosstalk_db": -79.6
+  }
+ ]
+}

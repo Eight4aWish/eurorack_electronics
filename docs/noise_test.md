@@ -166,7 +166,38 @@ left channel. Right matches within 0.5 dB except where noted. The takes agreed w
 - **The block-rate line at 1 kHz** sits at −108 dB or below on every board. The Seed's old comb,
   fixed by its buck, hasn't come back.
 
-**Not measured:** each board's input-to-output gain. The ES-10 sent only silence, so "the input's
-share" is as heard at the output and includes each board's gain. That matters most for the old Boy's
-line-level input. Absolute levels may be about 1 dB out (the ES-10 calibration); comparisons between
-boards are not affected. `tools/noise_test/results/summary.md` once boards are recorded.
+### The gains, and the same signal in
+
+**Measured the same day,** with the test firmware still on: 440 Hz into in L and 554 Hz into in R, about
+0.5 Vpp, read in the first pass-through segment, against the plain-cable loopback, which cancels the ES-10's
+calibration. "Per signal in" is the through noise less the gain: signal-to-noise for the same
+signal going in, the fair way to compare audio passing through.
+
+| Board | Gain, in to out | Through, per signal in | The input alone, referred to it |
+|---|---|---|---|
+| patch.init, stock | +2.9 dB | **−94.6** | −96.9 |
+| patch.init, OLED | +2.8 dB | **−94.6** | −96.9 |
+| Boy Rev A | +0.3 dB | −93.3 | **−99.8** |
+| Seed module | +0.6 dB | −85.9 | −88.4 |
+| old Boy (R) | +10.4 dB as read | −87.9 | −88.1 |
+
+**Readings, corrected by the gains:**
+- **For audio passing through, Boy Rev A is on a par with the factory patch.init.** It comes out 1.3 dB
+  behind, which clears the 0.3 dB take spread but is far below hearing at −93 dB, and is within the variation
+  to expect between two units. Its input stage alone is the quietest, about 3 dB under the patch.init's. Its
+  output stage is about 2.6 dB noisier (−96.3 against −98.9, the ES-10 taken out). The patch.init's
+  +2.9 dB of gain lifts the signal clear of its quieter output stage. It's well ahead of the earlier
+  builds: about 8 dB cleaner than the Seed module.
+- **The panels differ in size:** 64x48 on the patch.init, 128x32 on Boy, 128x64 on the Seed. The test
+  lit half of every pixel, so its screen costs grow with the panel. A text menu lights far fewer, so the
+  costs in use are lower than these.
+- **Left and right are swapped on Boy Rev A and on the Seed module**, the two hand-built boards: each one's
+  out L follows ES-10 OUT 2, with the patch as the doc gives it. Both patch.inits follow OUT 1, so the rig is
+  right and the swap is in each build.
+- **The old Boy's left input is miswired on the module** (David): both inputs reach its right channel and
+  the left gets almost nothing, 58.6 dB down. Its right channel's +10.4 dB was read with both ES-10 outputs on
+  one input, which halves each tone, so its true gain is likely nearer +16 dB. That fits a line-level input
+  brought up to a Eurorack output.
+
+Absolute levels may be about 1 dB out (the ES-10 calibration); comparisons between boards are not
+affected, and the gains are free of it. `tools/noise_test/results/summary.md` once boards are recorded.

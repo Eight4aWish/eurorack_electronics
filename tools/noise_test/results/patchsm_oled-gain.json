@@ -1,0 +1,21 @@
+{
+ "file": "patchsm_oled-gain_2026-11-11_15-39.wav",
+ "gain": true,
+ "sync_s": 33.68,
+ "outputs": [
+  {
+   "output": "L",
+   "from_input": "OUT 1",
+   "gain_db": 2.8,
+   "gain_vv": 1.381,
+   "crosstalk_db": -77.6
+  },
+  {
+   "output": "R",
+   "from_input": "OUT 2",
+   "gain_db": 3.1,
+   "gain_vv": 1.425,
+   "crosstalk_db": -79.5
+  }
+ ]
+}
