@@ -3,7 +3,8 @@
 The Scarlett 16i16 carries the ES-10 on ADAT (the rig the Wasp and Swords captures used,
 daisy_neural/captures/swords/rig.json). This plays digital silence on ES-10 outputs 1 and 2
 (Scarlett 7 and 8), which feed the module's audio inputs, and records ES-10 inputs 1 and 2
-(Scarlett 11 and 12), fed by the module's audio outputs, at 48 kHz.
+(Scarlett 11 and 12), fed by the module's audio outputs, at 48 kHz. ES-10 IN 3 (Scarlett 13) is
+recorded with nothing in it, so every run carries the interface's own input floor.
 
     python record.py patchsm_oled            # a board with a screen: 8.5 minutes
     python record.py oldboy --no-screen      # 3.5 minutes
@@ -25,7 +26,7 @@ import soundfile as sf
 FS = 48000
 DEVICE = "Scarlett 16i16"
 PLAY = [7, 8]   # ES-10 outputs 1, 2 -> module audio in L, R
-REC = [11, 12]  # ES-10 inputs 1, 2  <- module audio out L, R
+REC = [11, 12, 13]  # ES-10 inputs 1, 2 <- module audio out L, R; IN 3 left empty: the interface's own input floor
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 # the firmware's schedule (noise_schedule.h): 30 s, then 3 takes of 2 s + 50 s per screen state

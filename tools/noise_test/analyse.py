@@ -98,6 +98,8 @@ def analyse_board(path, screen=None):
     x, fs = sf.read(path, dtype="float64")
     assert fs == FS, fs
     x = np.atleast_2d(x.T) * IN_VFS  # volts, channels first
+    floor_ch = x[2] if x.shape[0] > 2 else None  # ES-10 IN 3, empty: the interface's own input floor
+    x = x[:2]
     ons = sync_onsets(x[0])
     if screen is None:  # spacing tells whether the board ran the screen states
         gaps = np.diff(ons) / FS
@@ -113,6 +115,8 @@ def analyse_board(path, screen=None):
         for g in range(groups):
             base = t0 + int((2 + 50 * g) * FS)
             seg = {"screen": SCREENS[g]}
+            if floor_ch is not None:
+                seg["es10_in"] = measure(floor_ch[base + 2 * FS: base + 19 * FS])
             for name, a, b in (("zero", 2, 19), ("tone", 22, 29), ("through", 32, 49)):
                 y = x[:, base + a * FS: base + b * FS]
                 if name == "tone":
@@ -125,6 +129,9 @@ def analyse_board(path, screen=None):
                 z, th = seg["zero"][ch]["noise_a"], seg["through"][ch]["noise_a"]
                 pz, pt = 10 ** (z / 10), 10 ** (th / 10)
                 seg.setdefault("input_a", []).append(round(10 * np.log10(pt - pz), 1) if pt > pz * 1.05 else None)
+                if "es10_in" in seg:  # the output stage alone: the interface's input floor taken out, as powers
+                    pf = 10 ** (seg["es10_in"]["noise_a"] / 10)
+                    seg.setdefault("zero_less_es10", []).append(round(10 * np.log10(pz - pf), 1) if pz > pf * 1.05 else None)
             take["groups"].append(seg)
         res["takes"].append(take)
     return res
@@ -148,6 +155,8 @@ def board_rows(name, r):
                          med_range([z["noise_a"] for z in zero]),
                          med_range([s["noise_a"] for s in thr]),
                          med_range([s["input_a"][ch] for s in T]),
+                         med_range([s.get("zero_less_es10", [None, None])[ch] for s in T]),
+                         med_range([s["es10_in"]["noise_a"] for s in T if "es10_in" in s]),
                          med_range([z["hum50"] for z in zero]),
                          med_range([z["hum100"] for z in zero]),
                          med_range([z["block1k"] for z in zero]),
@@ -156,7 +165,8 @@ def board_rows(name, r):
     return rows
 
 
-HEAD = ["board", "screen", "ch", "out only, A-wt", "through, A-wt", "input share", "hum 50",
+HEAD = ["board", "screen", "ch", "out only, A-wt", "through, A-wt", "input share",
+        "out only less ES-10 in", "ES-10 IN 3 floor", "hum 50",
         "hum 100", "1 kHz", "tallest spurs (out only, take 1)", "full scale Vpp"]
 
 

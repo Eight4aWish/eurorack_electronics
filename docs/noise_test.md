@@ -74,6 +74,8 @@ by itself.
 
 **The ES-10's inputs are AC-coupled** (the factory jumper, put back after the filter work). That suits this test: it blocks the boards' DC offsets, and its corner sits below the 20 Hz the analysis starts at. The 11.97 V per full scale from the Swords rig still holds at audio frequencies.
 
+**ES-10 IN 3 stays empty.** `record.py` records it beside every board, so each run carries the interface's own input floor, and the analysis takes it out of the output-only figure (as powers): "out only less ES-10 in".
+
 **One control, once:** with no module, a cable from ES-10 OUT 1 to IN 1 and one from OUT 2 to IN 2.
 That shows the interface's own floor, which every board's figures sit on.
 
@@ -117,4 +119,6 @@ IEC 61672 exactly (−19.1, 0 and −2.5 dB at 100 Hz, 1 kHz and 10 kHz).
 
 ## Results
 
-None yet. `tools/noise_test/results/summary.md` once boards are recorded.
+**The interface, 2026-11-11** (`es10_loop`, ES-10 OUT 1 → IN 1 and OUT 2 → IN 2): −96.2 dB A-weighted, −94.3 flat, no spurs; hum −122 dB at 50 Hz. A 1 kHz tone on each output came back on its own input only (leakage −79 dB), 2.0 dB down. The Swords rig's volts per full scale predict 0.8 dB, so absolute levels may be about 1 dB out. Comparisons between boards are unaffected, since every board goes through the same input. The earlier patch.init figure (−92 dB) was only 4 dB above this floor, which is why IN 3 is recorded with every board.
+
+The boards: none yet. `tools/noise_test/results/summary.md` once boards are recorded.
