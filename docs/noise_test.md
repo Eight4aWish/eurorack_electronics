@@ -146,10 +146,10 @@ left channel. Right matches within 0.5 dB except where noted. The takes agreed w
 | Seed module | **+11.1 dB** (R +6.0) | +11.4 dB (R +6.9) | **6.2 kHz −80** |
 
 **Readings:**
-- **The question from 6 Nov, is audio through Rev A cleaner than through the old boards?** Yes.
-  Input to output, Rev A is the quietest board measured: −93.0 dB, against the patch.init's −91.7,
-  the Seed's −85.3 and the old Boy's −76.8. Its input stage is about 5 dB quieter than the patch.init's.
-  Its output alone is 1.4 dB noisier than the patch.init's.
+- **The question from 6 Nov, is audio through Rev A cleaner than through the old boards?** Than the old
+  Boy and the Seed module, clearly. Than the patch.init, no: once the gains are taken into account (below)
+  they are on a par, Rev A 1.3 dB behind. As heard at the output, Rev A reads quietest input to output
+  (−93.0 dB), because the patch.init's +2.9 dB of gain lifts its noise along with the signal.
 - **The old Boy's through figure is its line-level input:** the input is gained up to the output.
   Its two outputs also differ in level (9.9 against 8.0 Vpp), with more hum on the right.
 - **The Seed module's screen is the biggest effect found.** Switching the panel on costs 6–11 dB,
