@@ -58,6 +58,10 @@ Or open `tools/visualizer/index.html` directly in a browser if you don't need mo
 - `hardware/analogue_board/`: the KiCad 9 project, the schematic PDF and the check results. Hardware licence CC BY-SA 4.0.
 - `tools/analogue_board/build.py`: generates the schematic, runs KiCad's ERC, exports the PDF, netlist and BOM, and checks every IC pin against its datasheet, the netlist against intent, decoupling and diode orientation. See [`hardware/analogue_board/README.md`](hardware/analogue_board/README.md).
 
+### `tools/noise_test/`
+
+The noise comparison of five audio boards (the old Boy, Boy Rev A, the stock and OLED patch.inits, the hand-built Seed module) with the screen off, still and redrawing: `record.py` records a run through the ES-10, `analyse.py` turns it into A-weighted noise, hum, spurs and the input's share. Method, what to plug and the procedure: [`docs/noise_test.md`](docs/noise_test.md). The test firmware is in `eurorack_daisy_patch_init/noise_test` and `eurorack_modules/src/noise_test`.
+
 ### `tools/schematic/`
 
 Build-phase schematic generator for the **Dual Pingable LPG**. Produces per-phase PNGs (Phase 1 / Phase 2 / Mix) into `docs/schematics/`, with component values read live from the LPG layout JSON so the diagrams stay in sync with the design. Built on [Schemdraw](https://schemdraw.readthedocs.io/). See [`tools/schematic/README.md`](tools/schematic/README.md).
