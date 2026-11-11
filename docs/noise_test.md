@@ -166,6 +166,30 @@ left channel. Right matches within 0.5 dB except where noted. The takes agreed w
 - **The block-rate line at 1 kHz** sits at −108 dB or below on every board. The Seed's old comb,
   fixed by its buck, hasn't come back.
 
+### The Teensy Chaos, 2026-11-11
+
+Added the same evening (David: "my perception is that it is not awful"): the Teensy Chaos, a
+Teensy 4.1 on an Audio Shield (SGTL5000) with a 128x64 SSD1306 on **SPI**, through the same schedule
+(`eurorack_modules` env `noise_chaos`, the codec set as Chaos sets it: line in 5, volume 0.7, line
+out 13). It has one mono audio input, which feeds its right channel. ES-10 OUT 1 fed it silence.
+
+| Chaos, A-wt against 10 Vpp | Left | Right |
+|---|---|---|
+| Out only, screen off | −85.5 | −86.7 |
+| Out only, screen still | −74.1 | −77.2 |
+| Out only, screen redrawing | −72.7 | −76.3 |
+| Through (R, the mono input), off / still / redrawing | | −81.0 / −67.0 / −65.0 |
+
+**Readings:**
+- **With the screen off,** it's about 10 dB noisier than the patch.init and 3 dB noisier than the Seed. Hum is
+  about −94 dB at 50 Hz, like the Seed's, with lines at 88, 107 and 117 Hz. Full scale is 10.1 Vpp.
+- **The screen costs about 11 dB** (L), dominated by a 5.7 kHz line at −76 dB with its harmonics; redrawing
+  adds a 91 Hz line. The screen also gets into the input path: through, the right channel goes from −81
+  to −65 dB.
+- **Audibility,** taking 10 Vpp to 100 dB SPL: screen off, the hiss is about 15 dB(A), at the edge of
+  hearing in a silent room and masked by its own output in use. Screen on, the 5.7 kHz line is about
+  24 dB SPL, audible in quiet passages, much as the Seed's.
+
 ### The gains, and the same signal in
 
 **Measured the same day,** with the test firmware still on: 440 Hz into in L and 554 Hz into in R, about
