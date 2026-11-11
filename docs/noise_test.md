@@ -191,9 +191,12 @@ signal going in, the fair way to compare audio passing through.
 - **The panels differ in size:** 64x48 on the patch.init, 128x32 on Boy, 128x64 on the Seed. The test
   lit half of every pixel, so its screen costs grow with the panel. A text menu lights far fewer, so the
   costs in use are lower than these.
-- **Left and right are swapped on Boy Rev A and on the Seed module**, the two hand-built boards: each one's
-  out L follows ES-10 OUT 2, with the patch as the doc gives it. Both patch.inits follow OUT 1, so the rig is
-  right and the swap is in each build.
+- **Left and right come out swapped on Boy Rev A and on the Seed module**: each one's out L follows ES-10
+  OUT 2. Both patch.inits follow OUT 1, so the rig is right. **Boy's is by design and handled:** Rev A's
+  panel wires audio in L and R to the codec's right and left (`analogue_board_reva_firmware.md`), Warps
+  mode swaps them back, and Chordal sums them; only this test firmware, copying straight through, showed
+  it. This was the first bench check of that map, and it holds: inputs swapped, outputs straight. **The
+  Seed's is undocumented,** on a hand-wired board.
 - **The old Boy's left input is miswired on the module** (David): both inputs reach its right channel and
   the left gets almost nothing, 58.6 dB down. Its right channel's +10.4 dB was read with both ES-10 outputs on
   one input, which halves each tone, so its true gain is likely nearer +16 dB. That fits a line-level input

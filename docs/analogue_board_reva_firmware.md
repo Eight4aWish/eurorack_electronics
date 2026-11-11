@@ -153,8 +153,10 @@ Boy has no pots.
   - outputs are DC-coupled, and a sample of 1.0 is about +10 V;
   - inputs are AC-coupled.
 - **Inputs invert, by design:** negate them (requirement 6).
-- **Channels, by design:** I2S left is AIN1 and AOUT1; right is AIN2 and AOUT2. Not separately
-  checked on the bench: the loopback test sent the same signal on both channels.
+- **Channels, by design:** I2S left is AIN1 and AOUT1; right is AIN2 and AOUT2. **Checked on the
+  bench 2026-11-11** by the noise test's gain run (`docs/noise_test.md`): 440 Hz into the panel's in L
+  and 554 Hz into in R, copied I2S left to left, came out on out R and out L. So the panel's inputs are
+  swapped, as the table below says, its outputs are straight, and the gain is +0.3 dB both ways.
 - **DC output trick:** `AudioSynthWaveform` sends nothing at amplitude 0, even with an offset. For
   a DC level, use a tiny amplitude plus `offset()`, as `hold_audio()` does.
 
