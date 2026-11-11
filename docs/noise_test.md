@@ -121,4 +121,52 @@ IEC 61672 exactly (−19.1, 0 and −2.5 dB at 100 Hz, 1 kHz and 10 kHz).
 
 **The interface, 2026-11-11** (`es10_loop`, ES-10 OUT 1 → IN 1 and OUT 2 → IN 2): −96.2 dB A-weighted, −94.3 flat, no spurs; hum −122 dB at 50 Hz. A 1 kHz tone on each output came back on its own input only (leakage −79 dB), 2.0 dB down. The Swords rig's volts per full scale predict 0.8 dB, so absolute levels may be about 1 dB out. Comparisons between boards are unaffected, since every board goes through the same input. The earlier patch.init figure (−92 dB) was only 4 dB above this floor, which is why IN 3 is recorded with every board.
 
-The boards: none yet. `tools/noise_test/results/summary.md` once boards are recorded.
+### The boards, 2026-11-11
+
+The figures below are all **A-weighted, in dB against a 10 Vpp sine**, the median of three takes,
+left channel. Right matches within 0.5 dB except where noted. The takes agreed within about
+0.5 dB, so every difference below that clears it is a real one.
+
+**With the screen off:**
+
+| Board | Out only | Out, less the ES-10 | Through | The input's share | Hum 50 Hz | Full scale |
+|---|---|---|---|---|---|---|
+| patch.init, stock | −95.5 | −98.9 | −91.7 | −94.0 | −120 | 17.4 Vpp |
+| patch.init, OLED | −95.7 | −99.5 | −91.8 | −94.1 | −120 | 17.2 Vpp |
+| Boy Rev A | −94.1 | −96.3 | **−93.0** | **−99.5** | −118 | 19.3 Vpp |
+| old Boy | −90.7 | −91.6 | −76.8 | −77.0 | −107 (R −102) | 9.9 Vpp (R 8.0) |
+| Seed module | −89.0 | −89.6 | −85.3 | −87.8 | **−93** | 34.6 Vpp |
+
+**What the screen costs,** on the output only:
+
+| Board | Still | Redrawing | Lines the screen adds |
+|---|---|---|---|
+| patch.init, OLED | +0.2 dB | +0.5 dB | 6.8 kHz −112; redrawing, 30 Hz −98 |
+| Boy Rev A | +1.7 dB | +1.9 dB | 6.0 kHz −100; redrawing, 30 Hz −90 |
+| Seed module | **+11.1 dB** (R +6.0) | +11.4 dB (R +6.9) | **6.2 kHz −80** |
+
+**Readings:**
+- **The question from 6 Nov, is audio through Rev A cleaner than through the old boards?** Yes.
+  Input to output, Rev A is the quietest board measured: −93.0 dB, against the patch.init's −91.7,
+  the Seed's −85.3 and the old Boy's −76.8. Its input stage is about 5 dB quieter than the patch.init's.
+  Its output alone is 1.4 dB noisier than the patch.init's.
+- **The old Boy's through figure is its line-level input:** the input is gained up to the output.
+  Its two outputs also differ in level (9.9 against 8.0 Vpp), with more hum on the right.
+- **The Seed module's screen is the biggest effect found.** Switching the panel on costs 6–11 dB,
+  dominated by a 6.2 kHz line about 30 dB above the patch.init's equivalent. Redrawing is no worse than
+  a still frame, so it's the panel being powered (its charge pump), not the I2C traffic.
+  `daisy_multifx_seed`'s "hibernate" stops redrawing but leaves the panel on. Turning the panel off
+  (`0xAE`, charge pump off), which this firmware does, is what removes the line.
+- **The Seed's hum, −93 dB, is about 27 dB worse than the patch.inits'.** That points at its grounding,
+  as NOISE.md's "residual" foresaw. Its output stage has about twice the patch.init's gain. Against its
+  own full scale its floor is about −100 dB, like the others, but a 10 Vpp signal sits 11 dB lower in
+  its digital range.
+- **Redrawing at 30 fps puts a 30 Hz line and its harmonics on every screen board:** −90 dB on Boy, −98 on
+  the patch.init. A-weighting plays it down, but it's the I2C burst at the frame rate.
+- **The block-rate line at 1 kHz** sits at −108 dB or below on every board. The Seed's old comb,
+  fixed by its buck, hasn't come back.
+
+**Not measured:** each board's input-to-output gain. The ES-10 sent only silence, so "the input's
+share" is as heard at the output and includes each board's gain. That matters most for the old Boy's
+line-level input. Absolute levels may be about 1 dB out (the ES-10 calibration); comparisons between
+boards are not affected. `tools/noise_test/results/summary.md` once boards are recorded.
