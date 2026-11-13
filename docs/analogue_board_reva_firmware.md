@@ -280,7 +280,7 @@ doesn't offer them again as new. Every panel jack is committed. What's left to b
 | Idea | What it uses | Against it, or what was there before |
 |---|---|---|
 | **Glide per voice** | DAC writes at a control rate well above 1 kHz | Abacus can slew CV patched through it |
-| **Audio outs as two CV outs**: velocity, or CC#42, for two voices | DC-coupled outputs | Shares the audio pair with every audio idea below |
+| **Audio outs as two CV outs**: velocity, or CC#42, for two voices | DC-coupled outputs | Shares the audio pair with every audio idea below. **In mode 1 they became drums 3 and 4 instead, 2026-11-13** (notes 38 and 39, +5 V pulses), so mode 1 has Move's four drums |
 | **Alternative tunings**: each note mapped through a table (just intonation, slendro and pelog, quarter tones, Scala files) | 16-bit DAC, flash or SD | The Move's MIDI carries plain note numbers, so a tuning has to be applied here. VCO tracking hides the small shifts of just intonation; the bold tunings come through |
 | **Warps on the audio pair**: crossfade, fold, two ring mods, XOR, comparator, spectral, morph and vocoder | FPU | **Built, 2026-11-02, now mode 3**, from `eurorack_modules/third_party/eurorack/warps` (MIT). Warps isn't in the rack. Its internal oscillator can be the carrier, played by a Move voice. Its oscillator runs at 96 kHz against the Teensy's 44.1 kHz. A vocoder was already on MultiOsc's list of future engines, unbuilt |
 | **The rack plays the Move**: pitch-track a rack voice on an audio input, send it to the Move as notes | FPU, USB MIDI out | Tracking adds a few tens of ms. Untested whether the Move plays and records notes from a USB device |
