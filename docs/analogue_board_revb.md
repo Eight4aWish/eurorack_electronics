@@ -352,6 +352,12 @@ classifier (about 30 ms per hand).
 3D-printed holder, on a ribbon long enough to reach a module in the middle of the rack, near
 the TLQ-SCREEN. So it takes no cells, and the board needs no slot for it.
 
+**Update, David 2026-11-13: two modules, two names.** The two assembled Rev B boards become two
+modules: **Health** again, the ESP32-P4 gesture controller behind the panel below, and **Wealth**
+(*twelve for wealth*), a Pico 2 W hosting Workshop Computer programs and MOD2/Melon voices
+(firmware in `eurorack_modules/src/revb`, `docs/REVB_COMPUTER.md`). Boy is the Rev A module only.
+The note of 2026-11-04 below is kept as the record.
+
 **Update, David 2026-11-04: Health is dropped for now.** The platform is Boy, in two versions, Boy Rev A
 and Boy Rev B (this board), and gesture control is an app on Rev B, not a module of its own. The panel
 below was already on order with the board, so it stays as the record of what's coming.
