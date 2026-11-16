@@ -144,6 +144,12 @@ How the holes are laid out (as built, 2026-10-26; `wiring.PLAN_REVB`):
 - **Top cells.** POT_REF on the A row, the pot wiper on the B row, a switch on the C row, so
   each cell can be a pot or a switch. A part in cell JPS*n* uses POT*n* or SW*n*. Ground at
   position 10.
+  - **On the deck a pot's legs sit left, wiper, right on pads A, B, C** (knob facing you; the
+    n8synth-layout skill's `references/board.md`, as the Dual LPG was built). Its top, the clockwise
+    end, is therefore on pad C, not A. So a pot's reference wire runs from pad C's strip hole to
+    the POT_REF hole two rows up; pad A, the ground end, is bridged to D on the deck, and pad A's
+    strip hole takes no wire (one to POT_REF would short the reference to ground). Found
+    2026-11-16, when Health's deck was planned; the field itself is as built.
 - **Middle cells.** A CV hole on the A row and a gate hole on the B row.
 - **Utility holes in the strips' empty positions:** WS2812, codec reset and the MIDI links on
   the left strip; the P4's I2C, the display's I2C and the gate expansion on the right strip.
@@ -380,8 +386,9 @@ display.
 - Rows 3-4 are the six two-way CV channels, all set as outputs: each hand's x, y and size
   (Z). The firmware maps any feature to any channel.
 - The encoder's common goes to 3.3 V digital, not POT_REF, since the panel has pots.
-- Pot tops may be daisy-chained on the deck through the cells' second A contacts; Rev B
-  gives every top cell its own POT_REF hole, where Rev A had one per two pots.
+- Pot tops are on pad C (§2, top cells), so they may be daisy-chained on the deck through the
+  cells' second C contacts; Rev B gives every top cell its own POT_REF hole, where Rev A had one
+  per two pots. Each pot's pad A is bridged to D.
 - SW4-SW6 stay free (the pot cells use their POT channels): two footswitches on one TRS jack
   could use them later, if a cell is given up. David left the panel as it is.
 - The audio outs are DC-coupled, so OUT-L and OUT-R can also carry CV. Gates can also come

@@ -263,9 +263,13 @@ section { display: grid; gap: 14px; }
       two-way channels set as outputs; Rev B's fixed CVO7 counts too), and drums, rst and clk are the four gate outputs. A jack's tip is on its A pad
       and its sleeve goes to the cell's D pad on the deck.</p>
     <p class="note" data-for="health"><b>Health</b> (panel as ordered, <code>build123d/panels/p4_gesture.py</code>; brief in
-      <code>docs/analogue_board_revb.md</code> §8). Each top cell's three pads sit level with its own POT_REF, POT and SW holes, so a pot or a
-      button there is a short hop. <b>Pots:</b> the clockwise end on pad A (the pot reference), the wiper on B, the other end to D; with the
-      ends the other way round the pot reads backwards. <b>Buttons:</b> one leg on pad C, the other to D; a button reads 0 when pressed.
+      <code>docs/analogue_board_revb.md</code> §8). <b>The deck's rules</b> (n8synth-layout skill, <code>references/board.md</code>): a jack's
+      tip on pad A and its sleeve on D, with B and C free; a pot's legs left, wiper, right on pads A, B and C with the knob facing you; one
+      spare pad bridged to D and wired to a ground hole, which grounds the whole D bus. Each top cell's pads sit level with a POT_REF, a POT
+      and an SW hole, in that order. <b>Pots:</b> the top, the clockwise end, is on pad C, so its wire runs from pad C's strip hole up to
+      the POT_REF hole two rows above; the wiper's goes straight across to its POT hole; pad A, the ground end, is bridged to D on the deck.
+      Pad A's own strip hole takes no wire: one to POT_REF would short the reference to ground through that bridge.
+      <b>Buttons:</b> the leg that goes to the board on pad C, level with its SW hole, the other to D; a button reads 0 when pressed.
       <b>MENU</b> (Bourns PEC11R): A, C (common) and B on pads A, B and C. A and B go to gate inputs 1 and 2; the common goes to +3V3D, never
       POT_REF, because the pots share that reference and the encoder's switching would reach their readings. One push pin goes to a free pad
       of BTN1's cell and on to SW1, the other to D. BTN1's cell also carries the deck's one ground link. <b>Jacks:</b> tip on A, sleeve to D.
@@ -412,7 +416,9 @@ section { display: grid; gap: 14px; }
     w.MENU = [[0, GIN_PIO, "A"], [2, GIN_PIO, "B"], [1, V33, "common"]];
     w.BTN1 = [[2, SW, ""], [null, SW, "push", "MENU"], [null, BANK_GND, "", "deck ground"]];
     w.BTN2 = [[2, SW, ""]];
-    ["X", "Y", "Z"].forEach(p => { w[p] = [[0, REF, "top"], [1, POTW, "wiper"]]; });
+    // a pot's legs sit left, wiper, right on pads A, B, C (knob facing you): its top, the clockwise end, is pad C, so the
+    // reference comes from pad C's position, and pad A, the ground end, is bridged to D on the deck
+    ["X", "Y", "Z"].forEach(p => { w[p] = [[2, REF, "top"], [1, POTW, "wiper"]]; });
     ["X1", "Y1", "Z1", "X2", "Y2", "Z2"].forEach(p => { w[p] = [[0, CV16, ""]]; });
     w["IN-L"] = [[0, AIN, ""]]; w["IN-R"] = [[0, AIN, ""]]; w["OUT-L"] = [[0, AOUT, ""]]; w["OUT-R"] = [[0, AOUT, ""]];
     w.RST = [[0, GIN_34, ""]]; w.CLK = [[0, GIN_34, ""]];
@@ -484,6 +490,7 @@ section { display: grid; gap: 14px; }
     return { wires, total, across };
   }
   // what each part's other legs do on the deck itself; its D pad is the deck-wide ground bus
+  const POT_DECK = "legs left, wiper, right on pads A, B, C, knob facing you; pad A (the ground end) bridged to D, and no wire from pad A's strip hole";
   const deckLink = part => ({
     encoder: "pins A, C, B on pads A, B, C; one push pin to the borrowed pad listed, the other to D",
     screen: "SDA, SCL and 3V3 to this cell's pads as listed; its GND to D",
@@ -493,8 +500,7 @@ section { display: grid; gap: 14px; }
     MENU: "pins A, C, B on pads A, B, C; one push pin to BTN1's free pad listed, the other to D",
     BTN1: "one leg on pad C, the other to D; its free pads take the encoder's push and the deck's ground link",
     BTN2: "one leg on pad C, the other to D",
-    X: "clockwise end on pad A, wiper on B, the other end to D", Y: "clockwise end on pad A, wiper on B, the other end to D",
-    Z: "clockwise end on pad A, wiper on B, the other end to D" }[part] || "tip on A, sleeve to D");
+    X: POT_DECK, Y: POT_DECK, Z: POT_DECK }[part] || "tip on A, sleeve to D; B and C free");
   const wireName = w => (w.label ? `${w.part} ${w.label}` : w.part);
   // the order the wires go in at bring-up, each batch tested before the next (David, 2026-10-31): the batch
   // table in docs/analogue_board_bringup.md, stage 8. Name, its parts, and its test on the Rev A test program
