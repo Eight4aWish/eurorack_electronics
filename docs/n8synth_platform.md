@@ -201,6 +201,18 @@ Consequences:
   position back to ground. Any ground will do. Picking one toward the middle of the board leaves
   power-rail position 39 free for grounding something toward the bottom.
 
+### Panel parts on a cell
+
+Kept in step with the n8synth-layout skill's `references/board.md` (eight4awish/skills).
+
+- **Jack:** tip on A, sleeve on D; B and C free.
+- **Pot:** its three legs on A, B and C: left, wiper, right, with the knob facing you. The top
+  (clockwise end) is therefore pad C, and pad A is the end to ground. As the Dual LPG was built.
+- **LED:** one leg on each of two pads, usually A and B.
+- **Two-pin momentary button:** legs on A and B (David, 2026-11-16).
+- **Rotary encoder with push** (PEC11R, as built on Boy): A, C (common), B on pads A, B, C; the
+  push pins sit off the pads, one linked to a neighbouring cell's free pad, the other to D.
+
 ---
 
 ## What the generated board profiles get wrong

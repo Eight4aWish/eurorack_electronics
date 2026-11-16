@@ -264,15 +264,16 @@ section { display: grid; gap: 14px; }
       and its sleeve goes to the cell's D pad on the deck.</p>
     <p class="note" data-for="health"><b>Health</b> (panel as ordered, <code>build123d/panels/p4_gesture.py</code>; brief in
       <code>docs/analogue_board_revb.md</code> §8). <b>The deck's rules</b> (n8synth-layout skill, <code>references/board.md</code>): a jack's
-      tip on pad A and its sleeve on D, with B and C free; a pot's legs left, wiper, right on pads A, B and C with the knob facing you; one
-      spare pad bridged to D and wired to a ground hole, which grounds the whole D bus. Each top cell's pads sit level with a POT_REF, a POT
-      and an SW hole, in that order. <b>Pots:</b> the top, the clockwise end, is on pad C, so its wire runs from pad C's strip hole up to
-      the POT_REF hole two rows above; the wiper's goes straight across to its POT hole; pad A, the ground end, is bridged to D on the deck.
-      Pad A's own strip hole takes no wire: one to POT_REF would short the reference to ground through that bridge.
-      <b>Buttons:</b> the leg that goes to the board on pad C, level with its SW hole, the other to D; a button reads 0 when pressed.
+      tip on pad A and its sleeve on D, with B and C free; a pot's legs left, wiper, right on pads A, B and C with the knob facing you; a
+      two-pin momentary button's legs on pads A and B (David, 2026-11-16); a pad bridged to D and wired to a ground hole, which grounds the
+      whole D bus. Each top cell's pads sit level with a POT_REF, a POT and an SW hole, in that order.
+      <b>Pad A is the ground end in every top cell here,</b> bridged to D on the deck, so its strip hole never goes to POT_REF: that would
+      short the reference to ground. <b>Pots:</b> the top, the clockwise end, is on pad C, so its wire runs from pad C's strip hole up to the
+      POT_REF hole two rows above; the wiper's goes straight across to its POT hole. X's pad A also carries the deck's one ground wire, to
+      the GND hole three rows down. <b>Buttons:</b> pad B to the SW hole a row below; a button reads 0 when pressed.
       <b>MENU</b> (Bourns PEC11R): A, C (common) and B on pads A, B and C. A and B go to gate inputs 1 and 2; the common goes to +3V3D, never
-      POT_REF, because the pots share that reference and the encoder's switching would reach their readings. One push pin goes to a free pad
-      of BTN1's cell and on to SW1, the other to D. BTN1's cell also carries the deck's one ground link. <b>Jacks:</b> tip on A, sleeve to D.
+      POT_REF, because the pots share that reference and the encoder's switching would reach their readings. One push pin goes to pad C of
+      BTN1's cell, the button's free pad, and on to SW1; the other to D. <b>Jacks:</b> tip on A, sleeve to D.
       X1–Z2 are the six two-way CV channels, all set as outputs; RST and CLK are gate inputs 4 and 3.</p>
     <p class="note" data-for="enc"><b>The encoder</b> (Bourns PEC11R): its A, C (common) and B pins sit on the cell's A, B and C pads. A and B go to two gate inputs,
       not through the I2C expander, whose bus the screen holds for about 23 ms per update. On Rev B only gate inputs 1 and 2 (GP6, GP7) are
@@ -396,6 +397,7 @@ section { display: grid; gap: 14px; }
   // Health's sets: each top cell's pot on its own POT_REF and POT holes; the six two-way CVs only (not CVO7); RST and CLK on
   // gate inputs 3 and 4, kept apart from the encoder's 1 and 2
   const REF = /^POT_REF$/, POTW = /^POT\d$/, CV16 = /^CV[1-6]$/, GIN_34 = /^GIN[34]$/;
+  const SW_1 = /^SW1$/, SW_23 = /^SW[23]$/;   // the brief: the encoder's push on SW1, BTN1 and BTN2 on SW2 and SW3
   const match = (pool, h) => (typeof pool === "function" ? pool(h) : pool.test(h.net));
   // each part's wires: [pad (A 0, B 1, C 2; null: whichever free pad of the cell gives the shortest wires), the holes it
   // may take, label, and the part it belongs to when that is not the cell's own]
@@ -411,14 +413,16 @@ section { display: grid; gap: 14px; }
       "audio in L": [[0, AIN, ""]], "audio in R": [[0, AIN, ""]], "audio out L": [[0, AOUT, ""]], "audio out R": [[0, AOUT, ""]] };
     ["gate1", "gate2", "gate3", "pitch1", "pitch2", "pitch3"].forEach(p => { w[p] = [[0, CVOUT, ""]]; });
     ["drum1", "drum3", "rst", "clk"].forEach(p => { w[p] = [[0, GOUT, ""]]; });
-    // Health: the encoder on gate inputs 1 and 2 with its common on +3V3D (the pots hold POT_REF); its push and the deck's
-    // ground link on BTN1's free pads
+    // Health: the encoder on gate inputs 1 and 2 with its common on +3V3D (the pots hold POT_REF). A two-pin button's legs
+    // take pads A and B (David, 2026-11-16): B to the board, A bridged to D; BTN1's free pad C carries the encoder's push
     w.MENU = [[0, GIN_PIO, "A"], [2, GIN_PIO, "B"], [1, V33, "common"]];
-    w.BTN1 = [[2, SW, ""], [null, SW, "push", "MENU"], [null, BANK_GND, "", "deck ground"]];
-    w.BTN2 = [[2, SW, ""]];
+    w.BTN1 = [[1, SW_23, ""], [2, SW_1, "push", "MENU"]];
+    w.BTN2 = [[1, SW_23, ""]];
     // a pot's legs sit left, wiper, right on pads A, B, C (knob facing you): its top, the clockwise end, is pad C, so the
-    // reference comes from pad C's position, and pad A, the ground end, is bridged to D on the deck
+    // reference comes from pad C's position, and pad A, the ground end, is bridged to D on the deck. X's pad A, already on
+    // D, also carries the deck's one ground wire
     ["X", "Y", "Z"].forEach(p => { w[p] = [[2, REF, "top"], [1, POTW, "wiper"]]; });
+    w.X = [...w.X, [0, BANK_GND, "", "deck ground"]];
     ["X1", "Y1", "Z1", "X2", "Y2", "Z2"].forEach(p => { w[p] = [[0, CV16, ""]]; });
     w["IN-L"] = [[0, AIN, ""]]; w["IN-R"] = [[0, AIN, ""]]; w["OUT-L"] = [[0, AOUT, ""]]; w["OUT-R"] = [[0, AOUT, ""]];
     w.RST = [[0, GIN_34, ""]]; w.CLK = [[0, GIN_34, ""]];
@@ -490,16 +494,16 @@ section { display: grid; gap: 14px; }
     return { wires, total, across };
   }
   // what each part's other legs do on the deck itself; its D pad is the deck-wide ground bus
-  const POT_DECK = "legs left, wiper, right on pads A, B, C, knob facing you; pad A (the ground end) bridged to D, and no wire from pad A's strip hole";
+  const POT_DECK = "legs left, wiper, right on pads A, B, C, knob facing you; pad A (the ground end) bridged to D. Pad A's strip hole never goes to POT_REF";
   const deckLink = part => ({
     encoder: "pins A, C, B on pads A, B, C; one push pin to the borrowed pad listed, the other to D",
     screen: "SDA, SCL and 3V3 to this cell's pads as listed; its GND to D",
     "under screen": "the encoder's push pin to one pad, another pad bridged to D, the third spare",
     "midi in": "sleeve open or to MI_S, never D",
     "deck ground": "this pad bridged to D: the deck's only ground link",
-    MENU: "pins A, C, B on pads A, B, C; one push pin to BTN1's free pad listed, the other to D",
-    BTN1: "one leg on pad C, the other to D; its free pads take the encoder's push and the deck's ground link",
-    BTN2: "one leg on pad C, the other to D",
+    MENU: "pins A, C, B on pads A, B, C; one push pin to pad C of BTN1's cell, the other to D",
+    BTN1: "legs on pads A and B; pad A bridged to D; pad C carries the encoder's push pin",
+    BTN2: "legs on pads A and B; pad A bridged to D; pad C free",
     X: POT_DECK, Y: POT_DECK, Z: POT_DECK }[part] || "tip on A, sleeve to D; B and C free");
   const wireName = w => (w.label ? `${w.part} ${w.label}` : w.part);
   // the order the wires go in at bring-up, each batch tested before the next (David, 2026-10-31): the batch

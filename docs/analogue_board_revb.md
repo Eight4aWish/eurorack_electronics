@@ -148,8 +148,11 @@ How the holes are laid out (as built, 2026-10-26; `wiring.PLAN_REVB`):
     n8synth-layout skill's `references/board.md`, as the Dual LPG was built). Its top, the clockwise
     end, is therefore on pad C, not A. So a pot's reference wire runs from pad C's strip hole to
     the POT_REF hole two rows up; pad A, the ground end, is bridged to D on the deck, and pad A's
-    strip hole takes no wire (one to POT_REF would short the reference to ground). Found
+    strip hole never goes to POT_REF (that would short the reference to ground). Found
     2026-11-16, when Health's deck was planned; the field itself is as built.
+  - **A two-pin button's legs sit on pads A and B** (David, 2026-11-16): pad B to the SW hole a
+    row below, pad A bridged to D. So pad A is the ground end in every top cell, pot or button,
+    and pad C is free in a button's cell.
 - **Middle cells.** A CV hole on the A row and a gate hole on the B row.
 - **Utility holes in the strips' empty positions:** WS2812, codec reset and the MIDI links on
   the left strip; the P4's I2C, the display's I2C and the gate expansion on the right strip.
