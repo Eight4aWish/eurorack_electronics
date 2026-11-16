@@ -107,7 +107,7 @@ the ESP32-P4 datasheet v0.7, Table 2-1. The nets are Rev B's, read from the rout
 
 | Pico pin | P4 board | Bank | Rev B net | Verdict |
 |---|---|---|---|---|
-| 1, 2 | GPIO52, 51 | VDD_IO_6 (3V3) | SPARE1, SPARE2 (MIDI by J101 link) | OK |
+| 1, 2 | GPIO52, 51 | VDD_IO_6 (3V3) | MIDI_TX, MIDI_RX (wired straight since 2026-11-03, Rev B §8) | OK |
 | 4, 5 | GPIO31, 30 | VDD_IO_4 (3V3) | SDA, SCL | OK |
 | 6, 7 | GPIO29, 28 | VDD_IO_4 | GATE_IN3, LED_DATA | OK |
 | 9, 10 | GPIO50, 49 | VDD_IO_6 | GATE_IN1, 2 | OK |

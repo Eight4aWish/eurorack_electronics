@@ -30,3 +30,5 @@ The working driver code for every chip is in `firmware/analogue_board_test/src/m
 - **Bring-up record:** `docs/analogue_board_bringup.md`.
 - **Spec:** `docs/analogue_board_spec.md`. Its §15 firmware requirements are binding.
 - **Rev B planning:** `docs/analogue_board_revb.md`.
+- **Rev B bring-up (ESP32-P4), from 2026-11-16:** `docs/analogue_board_revb_bringup.md`, the plan
+  and its Log; pictures in `docs/analogue_board_revb_bringup/`.
