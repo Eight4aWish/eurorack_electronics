@@ -265,7 +265,8 @@ hole beeps to a GND hole (SW6 beeps only while the encoder is pressed).
 | 6. Screen | JPS1 A → SDA, B → SCL, C → 3V3D | block 1: the screen's address joins 0x20 and 0x50; block 14 draws on it (passed 2026-11-01) |
 
 **Links on the deck itself.** Every D pad is on one deck-wide ground bus.
-- Each mono jack's sleeve to its cell's D: JPS4–16 and JPS18, 14 jacks.
+- Each mono jack's sleeve on its cell's pad C, with C's other contact linked to D: JPS4–16 and
+  JPS18, 14 jacks.
 - The encoder (JPS3): pins A, C, B onto pads A, B, C. Of its two push pins, one goes by a short link
   to JPS2's pad B, the other to D.
 - The screen: SDA, SCL and 3V3 to JPS1's pads A, B, C; its GND to D.

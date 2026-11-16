@@ -205,7 +205,9 @@ Consequences:
 
 Kept in step with the n8synth-layout skill's `references/board.md` (eight4awish/skills).
 
-- **Jack:** tip on A, sleeve on D; B and C free.
+- **Jack:** tip on A, sleeve on C, and the cell's other C contact linked to D (David, 2026-11-16).
+  Pad C's edge position is then on the ground bus, so it can carry the deck's one ground wire. A
+  TRS MIDI jack keeps its sleeve off D (no ground loop).
 - **Pot:** its three legs on A, B and C: left, wiper, right, with the knob facing you. The top
   (clockwise end) is therefore pad C, and pad A is the end to ground. As the Dual LPG was built.
 - **LED:** one leg on each of two pads, usually A and B.

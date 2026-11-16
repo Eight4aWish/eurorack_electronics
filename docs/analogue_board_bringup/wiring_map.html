@@ -261,26 +261,27 @@ section { display: grid; gap: 14px; }
     <p class="note">Every wire runs from a strip's inner hole, level with its pad, to the nearest free hole it may take, by straight hand-wire length.
       Channel names are firmware labels, so which CV is pitch 2 or which audio input is L does not matter. Gates and pitches are CV outputs (the
       two-way channels set as outputs; Rev B's fixed CVO7 counts too), and drums, rst and clk are the four gate outputs. A jack's tip is on its A pad
-      and its sleeve goes to the cell's D pad on the deck.</p>
+      and its sleeve on its C pad, whose other contact is linked to D on the deck.</p>
     <p class="note" data-for="health"><b>Health</b> (panel as ordered, <code>build123d/panels/p4_gesture.py</code>; brief in
       <code>docs/analogue_board_revb.md</code> §8). <b>The deck's rules</b> (n8synth-layout skill, <code>references/board.md</code>): a jack's
-      tip on pad A and its sleeve on D, with B and C free; a pot's legs left, wiper, right on pads A, B and C with the knob facing you; a
-      two-pin momentary button's legs on pads A and B (David, 2026-11-16); a pad bridged to D and wired to a ground hole, which grounds the
-      whole D bus. Each top cell's pads sit level with a POT_REF, a POT and an SW hole, in that order.
+      tip on pad A and its sleeve on pad C, with C's other contact linked to D (David, 2026-11-16); a pot's legs left, wiper, right on pads
+      A, B and C with the knob facing you; a two-pin momentary button's legs on pads A and B (David, 2026-11-16); one pad on the D bus
+      wired to a ground hole, which grounds the whole bus. Each top cell's pads sit level with a POT_REF, a POT and an SW hole, in that order.
       <b>Pad A is the ground end in every top cell here,</b> bridged to D on the deck, so its strip hole never goes to POT_REF: that would
       short the reference to ground. <b>Pots:</b> the top, the clockwise end, is on pad C, so its wire runs from pad C's strip hole up to the
-      POT_REF hole two rows above; the wiper's goes straight across to its POT hole. X's pad A also carries the deck's one ground wire, to
-      the GND hole three rows down. <b>Buttons:</b> pad B to the SW hole a row below; a button reads 0 when pressed.
+      POT_REF hole two rows above; the wiper's goes straight across to its POT hole. <b>Buttons:</b> pad B to the SW hole a row below; a
+      button reads 0 when pressed. <b>Jacks:</b> tip on A, sleeve on C linked to D, so every jack's pad C is on the D bus and its strip hole
+      takes no signal wire. Z1's pad C sits level with a ground hole, and that 2.5 mm hop is the deck's one ground wire.
       <b>MENU</b> (Bourns PEC11R): A, C (common) and B on pads A, B and C. A and B go to gate inputs 1 and 2; the common goes to +3V3D, never
       POT_REF, because the pots share that reference and the encoder's switching would reach their readings. One push pin goes to pad C of
-      BTN1's cell, the button's free pad, and on to SW1; the other to D. <b>Jacks:</b> tip on A, sleeve to D.
+      BTN1's cell, the button's free pad, and on to SW1; the other to D.
       X1–Z2 are the six two-way CV channels, all set as outputs; RST and CLK are gate inputs 4 and 3.</p>
     <p class="note" data-for="enc"><b>The encoder</b> (Bourns PEC11R): its A, C (common) and B pins sit on the cell's A, B and C pads. A and B go to two gate inputs,
       not through the I2C expander, whose bus the screen holds for about 23 ms per update. On Rev B only gate inputs 1 and 2 (GP6, GP7) are
       neighbouring pins, as Pico PIO decoding needs. The common goes to 3.3 V, never to D, which is ground. This panel has no pots, so it takes the
       pot reference (POT_REF, labelled REF in the bring-up pictures), much nearer than +3V3D; if pots are added later, move it to +3V3D. The push
       switch's two pins sit on the far side of the body: one is linked on the deck to a pad borrowed from the cell beside it, the other goes to D.
-      <b>MIDI in:</b> tip (A) to MI_T, ring (B) to MI_R. Leave the sleeve open or wire it to MI_S, never to D (no ground loop).</p>
+      <b>MIDI in:</b> tip (A) to MI_T, ring (B) to MI_R. Leave the sleeve (C) open or wire it to MI_S, never link it to D (no ground loop).</p>
     <p class="note" data-for="enc"><b>Borrowed pads, the screen and ground</b> (2026-10-31). The screen sits in the panel over the first two cells, so their six pads
       are free. The first carries the screen's SDA, SCL and 3V3 to the display holes (J703); its GND goes to D. The second carries the encoder's push
       and the deck's one ground link: a pad bridged to D on the deck, wired to a bank's ground hole. Every D pad is on one deck-wide bus, so that
@@ -419,11 +420,12 @@ section { display: grid; gap: 14px; }
     w.BTN1 = [[1, SW_23, ""], [2, SW_1, "push", "MENU"]];
     w.BTN2 = [[1, SW_23, ""]];
     // a pot's legs sit left, wiper, right on pads A, B, C (knob facing you): its top, the clockwise end, is pad C, so the
-    // reference comes from pad C's position, and pad A, the ground end, is bridged to D on the deck. X's pad A, already on
-    // D, also carries the deck's one ground wire
+    // reference comes from pad C's position, and pad A, the ground end, is bridged to D on the deck
     ["X", "Y", "Z"].forEach(p => { w[p] = [[2, REF, "top"], [1, POTW, "wiper"]]; });
-    w.X = [...w.X, [0, BANK_GND, "", "deck ground"]];
     ["X1", "Y1", "Z1", "X2", "Y2", "Z2"].forEach(p => { w[p] = [[0, CV16, ""]]; });
+    // a jack's sleeve sits on pad C, whose other contact is linked to D (David, 2026-11-16), so any jack's pad C is on the D
+    // bus: Z1's sits level with a ground hole, and carries the deck's one ground wire
+    w.Z1 = [...w.Z1, [2, BANK_GND, "", "deck ground"]];
     w["IN-L"] = [[0, AIN, ""]]; w["IN-R"] = [[0, AIN, ""]]; w["OUT-L"] = [[0, AOUT, ""]]; w["OUT-R"] = [[0, AOUT, ""]];
     w.RST = [[0, GIN_34, ""]]; w.CLK = [[0, GIN_34, ""]];
     return w;
@@ -499,12 +501,12 @@ section { display: grid; gap: 14px; }
     encoder: "pins A, C, B on pads A, B, C; one push pin to the borrowed pad listed, the other to D",
     screen: "SDA, SCL and 3V3 to this cell's pads as listed; its GND to D",
     "under screen": "the encoder's push pin to one pad, another pad bridged to D, the third spare",
-    "midi in": "sleeve open or to MI_S, never D",
-    "deck ground": "this pad bridged to D: the deck's only ground link",
+    "midi in": "tip, ring, sleeve on A, B, C; C open or wired to MI_S, never linked to D",
+    "deck ground": "this pad linked to D: the deck's only ground wire",
     MENU: "pins A, C, B on pads A, B, C; one push pin to pad C of BTN1's cell, the other to D",
     BTN1: "legs on pads A and B; pad A bridged to D; pad C carries the encoder's push pin",
     BTN2: "legs on pads A and B; pad A bridged to D; pad C free",
-    X: POT_DECK, Y: POT_DECK, Z: POT_DECK }[part] || "tip on A, sleeve to D; B and C free");
+    X: POT_DECK, Y: POT_DECK, Z: POT_DECK }[part] || "tip on A, sleeve on C, C's other contact linked to D; B free");
   const wireName = w => (w.label ? `${w.part} ${w.label}` : w.part);
   // the order the wires go in at bring-up, each batch tested before the next (David, 2026-10-31): the batch
   // table in docs/analogue_board_bringup.md, stage 8. Name, its parts, and its test on the Rev A test program
