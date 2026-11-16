@@ -38,7 +38,7 @@ As Rev A's stage 3, black lead on a square ground hole.
 | −12V | −12V (under J201) | outward | about −11.6 V | −11.68 V |
 | +5VD | +5VD | deck | 5.07 V (buck, 15k/2k) | 5.08 V |
 | +5VA | +5VA | deck | about 5.0 V (L78M05) | 4.98 V |
-| +3V3A | +3V3A | deck, top half | 3.3 V within 2 % | not yet read |
+| +3V3A | +3V3A | deck, top half | 3.3 V within 2 % | 3.30 V |
 | +3V3D | +3V3D | deck | 3.3 V within 2 % | 3.29 V |
 | MOD_5V | 5V MOD (under J201) | outward | just under +5VD with nothing on it | 5.02 V |
 
@@ -80,5 +80,7 @@ Its first act is `esp_ldo_acquire_channel` for channel 4 at 3300 mV. What change
 |---|---|---|---|---|
 | 2026-11-16 | — | The Rev B boards arrived, with the four PCB faceplates | | |
 | 2026-11-16 | 2 | J201 and the module sockets soldered; the P4 ready to fit | | |
-| 2026-11-16 | 4 | Module out: +12V 11.70, −12V −11.68, +5VD 5.08, +5VA 4.98, +3V3D 3.29, 5V MOD 5.02 V. All in range. +3V3A not yet read | | |
+| 2026-11-16 | 4 | Module out: +12V 11.70, −12V −11.68, +5VD 5.08, +5VA 4.98, +3V3D 3.29, 5V MOD 5.02 V, +3V3A 3.30 V. All seven in range | | |
+| 2026-11-16 | 5 | P4 in, USB-C end down, rack on: 5V MOD 5.07 V against +5VD's 5.08, so Q201 carries the P4 past D203 | | |
+| 2026-11-16 | 5 | USB-C to the Mac with the rack on, the P4 reset through the CH343's RTS: it boots on the board (ROM, the 32 MB PSRAM test OK, 400 MHz, chip v3.2) and runs the camera-to-HDMI app of 29 Oct, which stops at "LT8912B not found" because no display is connected. Its I2C pull-up warning is ESP-IDF's notice for any bus set up without internal pull-ups (`i2c_master.c`). **Stage 5 passes** | | |
 | 2026-11-16 | 4 | Two of the seven rail labels, 5V MOD and −12V, are printed where J201's shroud sits, on the outward face. Their test points are clear of it, so David found them by elimination | | Keep every label clear of every part's body on its face, shrouded headers included |
