@@ -274,7 +274,11 @@ section { display: grid; gap: 14px; }
       takes no signal wire. Z1's pad C sits level with a ground hole, and that 2.5 mm hop is the deck's one ground wire.
       <b>MENU</b> (Bourns PEC11R): A, C (common) and B on pads A, B and C. A and B go to gate inputs 1 and 2; the common goes to +3V3D, never
       POT_REF, because the pots share that reference and the encoder's switching would reach their readings. One push pin goes to pad C of
-      BTN1's cell, the button's free pad, and on to SW1; the other to D.
+      BTN1's cell, the button's free pad, and on to a switch line; the other to D. <b>Channel numbers are firmware labels:</b> each CV, gate
+      and switch wire takes the nearest free hole of its kind, so they need not match the brief's (push SW1, BTN1 SW2, BTN2 SW3). The
+      encoder keeps gate inputs 1 and 2, and RST and CLK share 3 and 4.
+      <b>The two ways of building the deck</b> differ only in the middle column, whose cells reach the other strip: the panel's left
+      and right columns land on the same side of the board either way.
       X1–Z2 are the six two-way CV channels, all set as outputs; RST and CLK are gate inputs 4 and 3.</p>
     <p class="note" data-for="enc"><b>The encoder</b> (Bourns PEC11R): its A, C (common) and B pins sit on the cell's A, B and C pads. A and B go to two gate inputs,
       not through the I2C expander, whose bus the screen holds for about 23 ms per update. On Rev B only gate inputs 1 and 2 (GP6, GP7) are
@@ -398,7 +402,6 @@ section { display: grid; gap: 14px; }
   // Health's sets: each top cell's pot on its own POT_REF and POT holes; the six two-way CVs only (not CVO7); RST and CLK on
   // gate inputs 3 and 4, kept apart from the encoder's 1 and 2
   const REF = /^POT_REF$/, POTW = /^POT\d$/, CV16 = /^CV[1-6]$/, GIN_34 = /^GIN[34]$/;
-  const SW_1 = /^SW1$/, SW_23 = /^SW[23]$/;   // the brief: the encoder's push on SW1, BTN1 and BTN2 on SW2 and SW3
   const match = (pool, h) => (typeof pool === "function" ? pool(h) : pool.test(h.net));
   // each part's wires: [pad (A 0, B 1, C 2; null: whichever free pad of the cell gives the shortest wires), the holes it
   // may take, label, and the part it belongs to when that is not the cell's own]
@@ -415,10 +418,12 @@ section { display: grid; gap: 14px; }
     ["gate1", "gate2", "gate3", "pitch1", "pitch2", "pitch3"].forEach(p => { w[p] = [[0, CVOUT, ""]]; });
     ["drum1", "drum3", "rst", "clk"].forEach(p => { w[p] = [[0, GOUT, ""]]; });
     // Health: the encoder on gate inputs 1 and 2 with its common on +3V3D (the pots hold POT_REF). A two-pin button's legs
-    // take pads A and B (David, 2026-11-16): B to the board, A bridged to D; BTN1's free pad C carries the encoder's push
+    // take pads A and B (David, 2026-11-16): B to the board, A bridged to D; BTN1's free pad C carries the encoder's push.
+    // Switch channels are firmware labels like the CVs, so each takes the nearest free SW hole: with the brief's SW1-3
+    // pinned, the deck built the other way paid 65 mm and two crossings for the names alone (2026-11-16)
     w.MENU = [[0, GIN_PIO, "A"], [2, GIN_PIO, "B"], [1, V33, "common"]];
-    w.BTN1 = [[1, SW_23, ""], [2, SW_1, "push", "MENU"]];
-    w.BTN2 = [[1, SW_23, ""]];
+    w.BTN1 = [[1, SW, ""], [2, SW, "push", "MENU"]];
+    w.BTN2 = [[1, SW, ""]];
     // a pot's legs sit left, wiper, right on pads A, B, C (knob facing you): its top, the clockwise end, is pad C, so the
     // reference comes from pad C's position, and pad A, the ground end, is bridged to D on the deck
     ["X", "Y", "Z"].forEach(p => { w[p] = [[2, REF, "top"], [1, POTW, "wiper"]]; });
@@ -524,7 +529,7 @@ section { display: grid; gap: 14px; }
     ],
     health: [
       ["Deck ground", ["deck ground"], "continuity, any jack sleeve to the board's GND"],
-      ["Encoder and buttons", ["MENU", "BTN1", "BTN2"], "block 8: turning slowly steps GIN1 and GIN2 in turn; block 12 counts both ways; block 3 sees the push on SW1 and the buttons on SW2 and SW3"],
+      ["Encoder and buttons", ["MENU", "BTN1", "BTN2"], "block 8: turning slowly steps GIN1 and GIN2 in turn; block 12 counts both ways; block 3 sees the push and each button on the SW line its wire goes to"],
       ["Pots", ["X", "Y", "Z"], "block 9: X, Y and Z each sweep 0 to full scale on POT4, POT5 and POT6"],
       ["CV outs", ["X1", "Y1", "Z1", "X2", "Y2", "Z2"], "block 5 (nothing patched), then c N V holds jack N's voltage for the meter"],
       ["Gate ins", ["RST", "CLK"], "block 8: a rack clock into RST and CLK steps GIN4 and GIN3"],
@@ -840,7 +845,7 @@ section { display: grid; gap: 14px; }
     }
     const ws = plan.wires.filter(w => batchOf(w) === batch), mm = ws.reduce((s, w) => s + (w.len || 0), 0);
     const before = batch === 0 ? "" : batch === 1 ? " Batch 0 is drawn faint: it goes in first." : ` Batches 0–${batch - 1} are drawn faint: they go in first.`;
-    const pressed = panel === "health" ? " (SW1 beeps only while the encoder is pressed, SW2 and SW3 while their buttons are)" : " (SW6 beeps only while the encoder is pressed)";
+    const pressed = panel === "health" ? " (each SW hole beeps only while its button, or the encoder, is pressed)" : " (SW6 beeps only while the encoder is pressed)";
     const check = batch === 0 ? "" : ` Before powering, check that none of its holes beeps to a GND hole${batch === 1 ? pressed : ""}.`;
     const own = (panel === "enc" && board === "teensy_core_midi") || (panel === "health" && board === "pico_revb");
     const test = own ? ` <b>Test:</b> ${esc(B[batch][2])}${panel === "health" ? " (the Rev B test program, still to be written)" : ""}.`
