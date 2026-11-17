@@ -536,10 +536,11 @@ section { display: grid; gap: 14px; }
     health: [
       ["Deck ground", ["deck ground"], "continuity, any jack sleeve to the board's GND"],
       ["Encoder and buttons", ["MENU", "BTN1", "BTN2"], "block 8: turning slowly steps GIN1 and GIN2 in turn; block 12 counts both ways; block 3 sees the push and each button on the SW line its wire goes to"],
-      ["Pots", ["X", "Y", "Z"], "block 9: X, Y and Z each sweep 0 to full scale on POT4, POT5 and POT6"],
       ["CV outs", ["X1", "Y1", "Z1", "X2", "Y2", "Z2"], "block 5 (nothing patched), then c N V holds jack N's voltage for the meter"],
       ["Gate ins", ["RST", "CLK"], "block 8: a rack clock into RST and CLK steps GIN4 and GIN3"],
       ["Audio", ["IN-L", "IN-R", "OUT-L", "OUT-R"], "block 10: sine out, then patch the outs into the ins. Then OUT-L into IN-L alone: both inputs read it through the normal, until a cable goes into IN-R"],
+      // the pots last: they arrived the day after the deck was built (David, 2026-11-17)
+      ["Pots", ["X", "Y", "Z"], "block 9: X, Y and Z each sweep 0 to full scale on POT4, POT5 and POT6"],
     ],
   };
   const batches = () => BATCHES_BY[panel] || [];

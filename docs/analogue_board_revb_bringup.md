@@ -74,6 +74,57 @@ Its first act is `esp_ldo_acquire_channel` for channel 4 at 3300 mV. What change
 - MIDI on UART pins 1 and 2 with no links;
 - the codec's MCLK from the APLL, so no video during the test.
 
+## Stage 7: MIDI in
+
+Not on Health: its panel has no MIDI jack. MIDI_TX and MIDI_RX are wired straight to the P4's
+UART pins (1 and 2), so a later panel with a TRS jack needs only its deck wires and block 13.
+
+## Stage 8: the control deck
+
+Health's panel ([Rev B §8](analogue_board_revb.md#8-order-changes-and-the-gesture-module-2026-11-02)),
+as the front reads:
+
+| Row | Left | Middle | Right |
+|---|---|---|---|
+| 1 | MENU, the push encoder | BTN1 | BTN2 |
+| 2 | X pot | Y pot | Z pot |
+| 3 | X1 | Y1 | Z1 |
+| 4 | X2 | Y2 | Z2 |
+| 5 | IN-L | RST | OUT-L |
+| 6 | IN-R | CLK | OUT-R |
+
+X1–Z2 are the six two-way CV channels, set as outputs; RST and CLK are gate inputs. Every wire,
+with its hole and length, is on the [wiring map](https://claude.ai/artifact/RptmC4zktQrcPzZHXxPau4)
+(Health panel; its Fit switch picks the way the deck was built; a copy is kept at
+[`analogue_board_bringup/wiring_map.html`](analogue_board_bringup/wiring_map.html)). 25 wires:
+243 mm of hand wire built the n8synth way, 246 mm the other way, one across the board either way.
+Channel numbers are firmware labels, so each wire takes the nearest free hole of its kind.
+
+**Links on the deck itself** (built 2026-11-17, all but the pots). Every D pad is on the
+deck-wide ground bus.
+- Each mono jack's sleeve on pad C, with C's other contact linked to D: 12 jacks. Pad B, the
+  switch lug, stays unwired, except:
+- **IN-R's pad B linked to IN-L's pad A,** the normal: a mono cable in IN-L reaches both inputs.
+- MENU (PEC11R): pins A, C, B on pads A, B, C; one push pin to BTN1's pad C, the other to D.
+- BTN1 and BTN2: legs on pads A and B, pad A bridged to D.
+- X, Y, Z: pad A, the ground end, bridged to D. Each top (pad C) takes its own board wire to
+  POT_REF, not a chain on the deck (Rev B §8).
+- Z1's pad C, on D through its jack, carries the deck's one ground wire to the board.
+
+**Wire it in batches, and test each before the next**, as on Rev A. Before powering after each
+batch, check with the meter that no newly wired hole beeps to a ground hole (a switch line beeps
+only while its button is pressed). Batches 1-5 are tested on the stage 6 program, so it comes
+first. **The pots go last:** they arrive on 2026-11-18, the day after the deck was built.
+
+| Batch | Wires | Test |
+|---|---|---|
+| 0. Deck ground | Z1's pad C → GND (LO 19), 3 mm | continuity, any jack sleeve to the board's GND (passed 2026-11-17) |
+| 1. Encoder and buttons | MENU A, B → GIN1, GIN2, common → +3V3D; the push (through BTN1's pad C), BTN1 and BTN2 → three SW lines | block 8: turning slowly steps GIN1 and GIN2 in turn; block 12 counts both ways; block 3 sees the push and each button |
+| 2. CV outs | X1–Z2 → CV1–6 | block 5 (nothing patched), then `c N V` holds jack N's voltage for the meter |
+| 3. Gate ins | RST, CLK → GIN3, GIN4 | block 8: a rack clock into each steps its gate input |
+| 4. Audio | IN-L, IN-R → AIN1, AIN2; OUT-L, OUT-R → AOUT1, AOUT2 | block 10: sine out, then patch the outs into the ins. Then OUT-L into IN-L alone: both inputs read it through the normal, until a cable goes into IN-R |
+| 5. Pots | X, Y, Z: top (pad C) → the POT_REF two rows up, 6 mm; wiper (pad B) → POT4, POT5, POT6, 3 mm | block 9: each sweeps 0 to full scale |
+
 ## Log
 
 | Date | Stage | What happened | Bodge or change | For the next board? |
@@ -84,3 +135,5 @@ Its first act is `esp_ldo_acquire_channel` for channel 4 at 3300 mV. What change
 | 2026-11-16 | 5 | P4 in, USB-C end down, rack on: 5V MOD 5.07 V against +5VD's 5.08, so Q201 carries the P4 past D203 | | |
 | 2026-11-16 | 5 | USB-C to the Mac with the rack on, the P4 reset through the CH343's RTS: it boots on the board (ROM, the 32 MB PSRAM test OK, 400 MHz, chip v3.2) and runs the camera-to-HDMI app of 29 Oct, which stops at "LT8912B not found" because no display is connected. Its I2C pull-up warning is ESP-IDF's notice for any bus set up without internal pull-ups (`i2c_master.c`). **Stage 5 passes** | | |
 | 2026-11-16 | 4 | Two of the seven rail labels, 5V MOD and −12V, are printed where J201's shroud sits, on the outward face. Their test points are clear of it, so David found them by elimination | | Keep every label clear of every part's body on its face, shrouded headers included |
+| 2026-11-17 | 8 | The control deck built, all but the pots (arriving 18 Nov): every jack's sleeve on pad C linked to D, IN-R's pad B linked to IN-L's pad A (the normal), each pot cell's pad A bridged to D, the encoder's push pins to BTN1's pad C and to D. Pots moved to the last batch | | |
+| 2026-11-17 | 8 | Batch 0, the deck ground, passes: continuity between the deck's ground bus and the board's ground | | |
