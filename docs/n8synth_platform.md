@@ -207,7 +207,11 @@ Kept in step with the n8synth-layout skill's `references/board.md` (eight4awish/
 
 - **Jack:** tip on A, sleeve on C, and the cell's other C contact linked to D (David, 2026-11-16).
   Pad C's edge position is then on the ground bus, so it can carry the deck's one ground wire. A
-  TRS MIDI jack keeps its sleeve off D (no ground loop).
+  TRS MIDI jack keeps its sleeve off D (no ground loop). Pad B holds a switched mono jack's third
+  leg, the switch lug: the tip rests on it while the jack is empty, and a plug lifts it off. Leave
+  B unwired, or wire a default to it (a normal), as Health's IN-R takes IN-L. On the Thonkiconn
+  (PJ398SM / PJ-301M) the lug sits between the other two: KiCad's footprint has S, TN and T at 0,
+  3.1 and 11.4 mm.
 - **Pot:** its three legs on A, B and C: left, wiper, right, with the knob facing you. The top
   (clockwise end) is therefore pad C, and pad A is the end to ground. As the Dual LPG was built.
 - **LED:** one leg on each of two pads, usually A and B.

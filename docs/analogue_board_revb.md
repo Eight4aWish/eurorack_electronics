@@ -394,6 +394,16 @@ display.
   per two pots. Each pot's pad A is bridged to D.
 - SW4-SW6 stay free (the pot cells use their POT channels): two footswitches on one TRS jack
   could use them later, if a cell is given up. David left the panel as it is.
+- **IN-R is normalled from IN-L** (David, 2026-11-17). IN-R's pad B, the jack's switch lug, is
+  linked on the deck to IN-L's pad A. A mono cable in IN-L reaches both inputs; a cable in IN-R
+  lifts its tip off the lug and breaks the link. Firmware could not do this itself: with no jack
+  detect, a silent IN-R reads the same as an empty one.
+- **Parked: CLK normalled from a spare gate out** (David, 2026-11-17: "leave it for now"). The
+  panel uses none of the four gate outs. Wire CLK's pad B to one and have the firmware put an
+  internal clock on it: an empty CLK runs on that clock, a patched clock replaces it, and
+  comparing the edges read with those sent tells the firmware whether CLK is patched, the job
+  the dropped jack-detect probe would have done. Built the n8synth way, CLK's pad B sits a row
+  from GOUT4's hole (left strip, 37); built the other way, RST takes that place.
 - The audio outs are DC-coupled, so OUT-L and OUT-R can also carry CV. Gates can also come
   from any CV output. With the CV outputs at ±10 V, all eight outputs reach the Oneiroi's
   full input ranges.
