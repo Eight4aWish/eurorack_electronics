@@ -389,9 +389,11 @@ display.
 - Rows 3-4 are the six two-way CV channels, all set as outputs: each hand's x, y and size
   (Z). The firmware maps any feature to any channel.
 - The encoder's common goes to 3.3 V digital, not POT_REF, since the panel has pots.
-- Pot tops are on pad C (§2, top cells), so they may be daisy-chained on the deck through the
-  cells' second C contacts; Rev B gives every top cell its own POT_REF hole, where Rev A had one
-  per two pots. Each pot's pad A is bridged to D.
+- Pot tops are on pad C (§2, top cells). Each takes its own 6 mm wire from pad C's strip hole to
+  the POT_REF hole two rows up: Rev B gives every top cell its own POT_REF hole, where Rev A had
+  one per two pots. Not chained on the deck (2026-11-17): a chain saves two of those wires for
+  two cell-long deck links, and the middle pot's pad C has only one free contact once its leg is
+  in. Each pot's pad A is bridged to D.
 - SW4-SW6 stay free (the pot cells use their POT channels): two footswitches on one TRS jack
   could use them later, if a cell is given up. David left the panel as it is.
 - **IN-R is normalled from IN-L** (David, 2026-11-17). IN-R's pad B, the jack's switch lug, is
