@@ -216,8 +216,8 @@ section { display: grid; gap: 14px; }
       <button type="button" id="p-none" data-panel="none" aria-pressed="false">No panel</button>
     </div>
     <div class="seg" role="group" aria-label="Fit: how the deck is built">
-      <button type="button" data-build="n8" aria-pressed="true">Deck the n8synth way</button>
-      <button type="button" data-build="other" aria-pressed="false">Deck the other way</button>
+      <button type="button" data-build="n8" aria-pressed="false">Deck the n8synth way</button>
+      <button type="button" data-build="other" aria-pressed="true">Deck the other way</button>
     </div>
     <div class="seg" role="group" aria-label="Fit: how the board sits">
       <button type="button" data-turn="up" aria-pressed="true">Board upright</button>
@@ -281,8 +281,9 @@ section { display: grid; gap: 14px; }
       and switch wire takes the nearest free hole of its kind, so they need not match the brief's (push SW1, BTN1 SW2, BTN2 SW3). The
       encoder keeps gate inputs 1 and 2, and RST and CLK share 3 and 4.
       <b>The two ways of building the deck</b> differ only in the middle column, whose cells reach the other strip: the panel's left
-      and right columns land on the same side of the board either way.
-      X1–Z2 are the six two-way CV channels, all set as outputs; RST and CLK are gate inputs 4 and 3.</p>
+      and right columns land on the same side of the board either way. <b>As built</b> (David, 2026-11-17): the deck the other way, the
+      board upright, which is the fit this panel opens on.
+      X1–Z2 are the six two-way CV channels, all set as outputs; RST and CLK are gate inputs 3 and 4, whichever is nearer.</p>
     <p class="note" data-for="enc"><b>The encoder</b> (Bourns PEC11R): its A, C (common) and B pins sit on the cell's A, B and C pads. A and B go to two gate inputs,
       not through the I2C expander, whose bus the screen holds for about 23 ms per update. On Rev B only gate inputs 1 and 2 (GP6, GP7) are
       neighbouring pins, as Pico PIO decoding needs. The common goes to 3.3 V, never to D, which is ground. This panel has no pots, so it takes the
@@ -365,7 +366,11 @@ section { display: grid; gap: 14px; }
   // In the board's own frame the four cases are JPS1 top left, top right, bottom right, bottom left.
   // Rev A was fitted the n8synth way, upright (agreed 2026-10-31), and Rev B's holes were laid out for that fit. The Fit
   // switches (put back 2026-11-16) show the other three.
-  let build = "n8", turn = "up", panel = "health";
+  // each panel opens on the fit it was built in: Boy the n8synth way (2026-10-31), Health the other way
+  // (David, 2026-11-17), both with the board upright. The fit switches still compare the others.
+  const BUILT = { enc: ["n8", "up"], health: ["other", "up"] };
+  let build = "other", turn = "up", panel = "health";
+  const builtFit = () => { if (BUILT[panel]) [build, turn] = BUILT[panel]; };
   let orient = "n8";
   const setOrient = () => { orient = turn === "up" ? (build === "n8" ? "n8" : "other") : (build === "n8" ? "br" : "bl"); };
   const upside = () => orient === "bl" || orient === "br";
@@ -537,10 +542,10 @@ section { display: grid; gap: 14px; }
       ["Deck ground", ["deck ground"], "continuity, any jack sleeve to the board's GND"],
       ["Encoder and buttons", ["MENU", "BTN1", "BTN2"], "block 8: turning slowly steps GIN1 and GIN2 in turn; block 12 counts both ways; block 3 sees the push and each button on the SW line its wire goes to"],
       ["CV outs", ["X1", "Y1", "Z1", "X2", "Y2", "Z2"], "block 5 (nothing patched), then c N V holds jack N's voltage for the meter"],
-      ["Gate ins", ["RST", "CLK"], "block 8: a rack clock into RST and CLK steps GIN4 and GIN3"],
+      ["Gate ins", ["RST", "CLK"], "block 8: a rack clock into RST and into CLK steps the gate input each one's wire goes to"],
       ["Audio", ["IN-L", "IN-R", "OUT-L", "OUT-R"], "block 10: sine out, then patch the outs into the ins. Then OUT-L into IN-L alone: both inputs read it through the normal, until a cable goes into IN-R"],
       // the pots last: they arrived the day after the deck was built (David, 2026-11-17)
-      ["Pots", ["X", "Y", "Z"], "block 9: X, Y and Z each sweep 0 to full scale on POT4, POT5 and POT6"],
+      ["Pots", ["X", "Y", "Z"], "block 9: X, Y and Z each sweep 0 to full scale on the POT channel its wiper's wire goes to"],
     ],
   };
   const batches = () => BATCHES_BY[panel] || [];
@@ -881,6 +886,7 @@ section { display: grid; gap: 14px; }
   // Health is a Rev B panel and Boy a Rev A one: picking a panel brings up its own board (the board switch still compares)
   document.querySelectorAll(".seg button[data-panel]").forEach(b => b.addEventListener("click", () => {
     panel = b.dataset.panel;
+    builtFit();
     loadBatch();
     show({ health: "pico_revb", enc: "teensy_core_midi" }[panel] || current);
   }));
@@ -897,7 +903,7 @@ section { display: grid; gap: 14px; }
   let redraw = 0;
   window.addEventListener("resize", () => { cancelAnimationFrame(redraw); redraw = requestAnimationFrame(() => drawWires(current)); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => drawWires(current));
-  if (location.hash === "#boy" || location.hash === "#teensy") { panel = "enc"; loadBatch(); }
+  if (location.hash === "#boy" || location.hash === "#teensy") { panel = "enc"; builtFit(); loadBatch(); }
   show(panel === "enc" ? "teensy_core_midi" : "pico_revb");
 })();
 </script>

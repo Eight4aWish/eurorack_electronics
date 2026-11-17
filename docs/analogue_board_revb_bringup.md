@@ -93,12 +93,45 @@ as the front reads:
 | 5 | IN-L | RST | OUT-L |
 | 6 | IN-R | CLK | OUT-R |
 
-X1–Z2 are the six two-way CV channels, set as outputs; RST and CLK are gate inputs. Every wire,
-with its hole and length, is on the [wiring map](https://claude.ai/artifact/RptmC4zktQrcPzZHXxPau4)
-(Health panel; its Fit switch picks the way the deck was built; a copy is kept at
-[`analogue_board_bringup/wiring_map.html`](analogue_board_bringup/wiring_map.html)). 25 wires:
-243 mm of hand wire built the n8synth way, 246 mm the other way, one across the board either way.
-Channel numbers are firmware labels, so each wire takes the nearest free hole of its kind.
+X1–Z2 are the six two-way CV channels, set as outputs; RST and CLK are gate inputs.
+
+**As built** (David, 2026-11-17): **the deck the other way** (JPS1 top right on the front) **and the
+board upright.** 25 wires, 246 mm of hand wire, one across the board (RST). The n8synth way would
+have been 243 mm. Every wire is also drawn on the [wiring map](https://claude.ai/artifact/RptmC4zktQrcPzZHXxPau4),
+which opens Health on this fit (a copy is kept at
+[`analogue_board_bringup/wiring_map.html`](analogue_board_bringup/wiring_map.html)).
+
+**Wires from the strips**, each from the strip's inner hole level with the pad to the hole named.
+Channel numbers are firmware labels: each wire took the nearest free hole of its kind, so they
+differ from the brief's (Rev B §8), and Health's firmware maps by this table.
+
+| Cell | Part | Pad | Hole | Length |
+|---|---|---|---|---|
+| JPS7 | deck ground (Z1's sleeve pad) | C | GND (LO 19), square | 3 mm |
+| JPS3 | MENU A | A | GIN1 (R 18) | 43 mm |
+| JPS3 | MENU common | B | +3V3D (RSI 15) | 33 mm |
+| JPS3 | MENU B | C | GIN2 (R 21) | 46 mm |
+| JPS2 | MENU push, through BTN1's free pad | C | SW6 (LO 9) | 8 mm |
+| JPS2 | BTN1 | B | SW5 (LO 6) | 4 mm |
+| JPS1 | BTN2 | B | SW3 (LO 3) | 4 mm |
+| JPS9 | X1 | A | CV1 (R 17) | 3 mm |
+| JPS8 | Y1 | A | CV5 (LO 20) | 3 mm |
+| JPS7 | Z1 | A | CV4 (LO 17) | 3 mm |
+| JPS12 | X2 | A | CV3 (R 23) | 3 mm |
+| JPS11 | Y2 | A | CV2 (R 20) | 3 mm |
+| JPS10 | Z2 | A | CV6 (LO 23) | 3 mm |
+| JPS14 | RST | A | GIN3 (R 24) | 47 mm, across |
+| JPS17 | CLK | A | GIN4 (R 33) | 6 mm |
+| JPS15 | IN-L | A | AIN1 (R 32) | 3 mm |
+| JPS18 | IN-R | A | AIN2 (R 38) | 3 mm |
+| JPS13 | OUT-L | A | AOUT1 (LO 34) | 6 mm |
+| JPS16 | OUT-R | A | AOUT2 (LO 38) | 3 mm |
+| JPS6 | X top | C | POT_REF (R 7) | 6 mm |
+| JPS6 | X wiper | B | POT4 (R 8) | 3 mm |
+| JPS5 | Y top | C | POT_REF (R 4) | 6 mm |
+| JPS5 | Y wiper | B | POT2 (R 5) | 3 mm |
+| JPS4 | Z top | C | POT_REF (LO 7) | 6 mm |
+| JPS4 | Z wiper | B | POT6 (LO 8) | 3 mm |
 
 **Links on the deck itself** (built 2026-11-17, all but the pots). Every D pad is on the
 deck-wide ground bus.
@@ -114,16 +147,18 @@ deck-wide ground bus.
 **Wire it in batches, and test each before the next**, as on Rev A. Before powering after each
 batch, check with the meter that no newly wired hole beeps to a ground hole (a switch line beeps
 only while its button is pressed). Batches 1-5 are tested on the stage 6 program, so it comes
-first. **The pots go last:** they arrive on 2026-11-18, the day after the deck was built.
+first. Batches 0-4 were wired together on 2026-11-17, so the meter check covers all 19 of their
+wires before the rack goes on; the tests still run one batch at a time, so a fault points at one
+batch. **The pots are the last hardware step:** they arrive on 2026-11-18.
 
 | Batch | Wires | Test |
 |---|---|---|
-| 0. Deck ground | Z1's pad C → GND (LO 19), 3 mm | continuity, any jack sleeve to the board's GND (passed 2026-11-17) |
-| 1. Encoder and buttons | MENU A, B → GIN1, GIN2, common → +3V3D; the push (through BTN1's pad C), BTN1 and BTN2 → three SW lines | block 8: turning slowly steps GIN1 and GIN2 in turn; block 12 counts both ways; block 3 sees the push and each button |
-| 2. CV outs | X1–Z2 → CV1–6 | block 5 (nothing patched), then `c N V` holds jack N's voltage for the meter |
-| 3. Gate ins | RST, CLK → GIN3, GIN4 | block 8: a rack clock into each steps its gate input |
-| 4. Audio | IN-L, IN-R → AIN1, AIN2; OUT-L, OUT-R → AOUT1, AOUT2 | block 10: sine out, then patch the outs into the ins. Then OUT-L into IN-L alone: both inputs read it through the normal, until a cable goes into IN-R |
-| 5. Pots | X, Y, Z: top (pad C) → the POT_REF two rows up, 6 mm; wiper (pad B) → POT4, POT5, POT6, 3 mm | block 9: each sweeps 0 to full scale |
+| 0. Deck ground | Z1's pad C → GND (LO 19) | continuity, any jack sleeve to the board's GND (passed 2026-11-17) |
+| 1. Encoder and buttons | MENU A → GIN1, B → GIN2, common → +3V3D; push → SW6, BTN1 → SW5, BTN2 → SW3 | block 8: turning slowly steps GIN1 and GIN2 in turn; block 12 counts both ways; block 3 sees the push on SW6, BTN1 on SW5 and BTN2 on SW3 |
+| 2. CV outs | X1 → CV1, Y1 → CV5, Z1 → CV4, X2 → CV3, Y2 → CV2, Z2 → CV6 | block 5 (nothing patched), then `c N V` holds jack N's voltage for the meter |
+| 3. Gate ins | RST → GIN3 (across the board), CLK → GIN4 | block 8: a rack clock into RST steps GIN3, into CLK GIN4 |
+| 4. Audio | IN-L → AIN1, IN-R → AIN2, OUT-L → AOUT1, OUT-R → AOUT2 | block 10: sine out, then patch the outs into the ins. Then OUT-L into IN-L alone: both inputs read it through the normal, until a cable goes into IN-R |
+| 5. Pots | X: top → POT_REF (R 7), wiper → POT4; Y: top → POT_REF (R 4), wiper → POT2; Z: top → POT_REF (LO 7), wiper → POT6 | block 9: X, Y and Z sweep 0 to full scale on POT4, POT2 and POT6 |
 
 ## Log
 
@@ -137,3 +172,4 @@ first. **The pots go last:** they arrive on 2026-11-18, the day after the deck w
 | 2026-11-16 | 4 | Two of the seven rail labels, 5V MOD and −12V, are printed where J201's shroud sits, on the outward face. Their test points are clear of it, so David found them by elimination | | Keep every label clear of every part's body on its face, shrouded headers included |
 | 2026-11-17 | 8 | The control deck built, all but the pots (arriving 18 Nov): every jack's sleeve on pad C linked to D, IN-R's pad B linked to IN-L's pad A (the normal), each pot cell's pad A bridged to D, the encoder's push pins to BTN1's pad C and to D. Pots moved to the last batch | | |
 | 2026-11-17 | 8 | Batch 0, the deck ground, passes: continuity between the deck's ground bus and the board's ground | | |
+| 2026-11-17 | 8 | Batches 1-4 wired, the deck built the other way and the board upright: 18 wires, all but the pots' six. Their tests wait for the stage 6 program | | |
