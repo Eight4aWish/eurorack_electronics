@@ -2,9 +2,8 @@
 
 The plan for the first Rev B board, with the Waveshare ESP32-P4-WIFI6 as its module (working
 name Health; see [Rev B §8](analogue_board_revb.md#8-order-changes-and-the-gesture-module-2026-11-02)).
-Started 2026-11-16, the day the boards arrived. It follows [Rev A's bring-up](analogue_board_bringup.md),
-stage for stage, and keeps the same rule: **one stage at a time, and stop at the first reading that
-is off.**
+Started 2026-11-16, the day the boards arrived. It follows [Rev A's bring-up](analogue_board_bringup.md)
+and keeps its rule: **one stage at a time, and stop at the first reading that is off.**
 
 What differs from Rev A:
 - **Every test point has its name printed beside it** (Rev B §4), and there are no ground test
@@ -62,50 +61,108 @@ As Rev A's stage 3, black lead on a square ground hole.
    the camera-to-HDMI test of 29 Oct, which uses only GPIO7 and 8 on the header (pins 16 and 17,
    which Rev B leaves to two wiring holes). Every other header pin is an input from reset.
 
-## Stage 6: one block at a time (test firmware)
+## Stage 6: the tests
 
-[`firmware/analogue_board_revb_test`](../firmware/analogue_board_revb_test/main/main.cpp) (written
-2026-11-18, ESP-IDF 5.5.4) is Rev A's [test menu](../firmware/analogue_board_test/src/main.cpp)
-ported to the P4: the same block numbers against Rev B's pin map (`analogue_board_esp32p4.md`, Pin
-table) and netlist. Its first act is `esp_ldo_acquire_channel` for channel 4 at 3300 mV, which puts
-the converter pins' bank at 3.3 V. Then, as on Rev A, nothing is driven until a block asks for it,
-and only I2C runs until the EEPROM answers.
+The test program, [`firmware/analogue_board_revb_test`](../firmware/analogue_board_revb_test/main/main.cpp),
+is a menu on the P4's serial console. Type a block number and Enter: the block runs and prints
+PASS or FAIL, with Health's name for each channel in brackets, as in "CV1 (X1)". Nothing on the
+board is driven until a block asks for it. `0` turns everything off again.
 
-**Build and flash**, with the P4's USB-C to the Mac and the rack on:
+Steps 1-3 get the board running. Steps 4-8 test the deck, one batch at a time (the wires are in
+stage 7). Write each step's readings in the log. At the first FAIL, stop, type `0`, and copy what
+the block printed into the log.
+
+**USB only while the rack is on:** rack on, then USB in; USB out, then rack off. With USB in and
+the rack off, the P4 runs from USB and its pins feed an unpowered board.
+
+### Step 1: meter check, rack off
+
+Batches 1-4 are wired, so check their 18 holes before the rack goes on. Put the black lead on a
+square ground hole and the red on each hole a wire goes to. Nothing should beep, except:
+- SW3, SW5 and SW6, each only while its button (BTN2, BTN1, MENU) is held down;
+- +3V3D, which may chirp for a moment while its capacitors charge. A steady beep is a short.
+
+### Step 2: flash the program
+
+Rack on, then the P4's USB-C to the Mac. From the repo:
 
 ```
 cd firmware/analogue_board_revb_test
-PATH="$HOME/esp/py312:/opt/homebrew/bin:$PATH" bash -c '. ~/esp/esp-idf/export.sh && idf.py build'
 PATH="$HOME/esp/py312:/opt/homebrew/bin:$PATH" bash -c '. ~/esp/esp-idf/export.sh && idf.py -p /dev/cu.usbmodem5CF71560381 flash monitor'
 ```
 
-The menu prints after the reset; type a block number and Enter, `h` for the list, Ctrl-] to leave
-the monitor. Flashing overwrites the camera-to-HDMI app of 29 Oct (its source is in `~/esp/p4_camera_hdmi`).
+It builds, flashes and opens the console. **Pass:** the menu prints after the reset, with no
+warning under it. A warning about LDO channel 4 means the ADC and DAC won't answer, and one about
+the EEPROM means the board isn't powered.
 
-What changes from Rev A:
-- **No EXP_INT:** the expander is polled. Block 3 now ends with the buttons live, so the deck's
-  buttons are tested there.
-- **Six buttons,** SW1-6 on the expander's port 1 (Rev A had nine).
-- **CV outputs at ±10 V** (Rev B §8: −10.71 to +10.54 V, 0 V at code 33043). Block 5 sweeps
-  −10 to +10 V in 2.5 V steps, inside the ADS8688's ±10.24 V.
-- **CVO7 and CVI7,** the fixed CV out and in: `5 7` sweeps one into the other along a wire,
-  and `c 7 V` holds CVO7.
-- **I2C on GPIO31/30;** the P4's own bus (GPIO8/7) is left alone.
-- **Gate inputs on GPIO50, 49, 29 and 4** (pins 9, 10, 6, 12). Block 12 counts the encoder on
-  the P4's pulse counter, A on GIN1 and B on GIN2 by default (`12 A B` for others).
-- **MIDI on UART1,** pins 1 and 2, with no links.
-- **The codec at 48 kHz,** MCLK 12.288 MHz from the APLL, so no video during the test. Rev B
-  has no clock test points, so block 6 names the module's pins 27, 31 and 32.
-- **Health's names:** beside each channel, the jack or control stage 8 wired it to (X1 on CV1,
-  RST on GIN3 and so on). Block 10 ends with IN-R's normal: OUT-L into IN-L alone should reach
-  both inputs, and a plug in IN-R should break it.
+- `h` prints the menu again.
+- Ctrl-] leaves the console.
+- To come back later without flashing, use `monitor` in place of `flash monitor`.
 
-## Stage 7: MIDI in
+Flashing replaces the camera-to-HDMI app, whose source is in `~/esp/p4_camera_hdmi`.
 
-Not on Health: its panel has no MIDI jack. MIDI_TX and MIDI_RX are wired straight to the P4's
-UART pins (1 and 2), so a later panel with a TRS jack needs only its deck wires and block 13.
+### Step 3: the board on its own
 
-## Stage 8: the control deck
+| Type | Pass |
+|---|---|
+| `1` | 0x20 (TCA9555 expander) and 0x50 (M24C64 EEPROM), nothing else; PASS |
+| `2` | "32 bytes written, 0 read back wrong; the old bytes restored"; PASS |
+| `4` | the range register echoes 01 and 00. With nothing patched, CV1-6 and CVI7 read about +0.20 V and AIN7 0.000 V; PASS |
+
+### Step 4: batch 1, the encoder and buttons
+
+| Type | Do | Pass |
+|---|---|---|
+| `3` | press MENU, BTN1 and BTN2 in turn, then Enter | PASS for the registers, then one line a press: SW6 (MENU push), SW5 (BTN1), SW3 (BTN2) |
+| `8` | turn MENU slowly, then Enter | GIN1 (MENU A) and GIN2 (MENU B) go HIGH and low in turn, and their counts rise |
+| `12` | turn MENU both ways and press it, then Enter | the detents count up one way and down the other; the press shows SW6 (MENU push) |
+
+### Step 5: batch 2, the CV outs
+
+| Type | Do | Pass |
+|---|---|---|
+| `5` | nothing patched into X1-Z2; Enter at the prompt | for each of CV1-6: within 0.2 V of −9.78 V at −10 V, 0.00 V at 0 V and +9.79 V at +10 V (the ADC reads 2 % low through its 2 kΩ); switch off about +0.20 V; PASS |
+| `c N 5`, `c N -5` | the meter on jack N's tip, for each jack | about +5 V, then −5 V, close to the figure the ADC prints |
+| `0` | | the jack released |
+
+N for each jack: X1 1, Y2 2, X2 3, Z1 4, Y1 5, Z2 6.
+
+### Step 6: batch 3, the gate ins
+
+| Type | Do | Pass |
+|---|---|---|
+| `8` | a rack clock into RST, then into CLK; Enter | GIN3 (RST), then GIN4 (CLK), counts once a pulse |
+| `8t 3` | a cable from X1 into RST; Enter at the prompt | high at about 1.98 V rising, low at about 1.67 V falling; PASS |
+| `8t 4` | the same cable into CLK | the same |
+
+### Step 7: batch 4, audio
+
+| Type | Do | Pass |
+|---|---|---|
+| `6` | | "The codec is sending samples." |
+| `10` | listen to OUT-L and OUT-R through the rack | a 440 Hz sine on both, about 3.4 V on AC volts |
+| | first prompt: OUT-L into IN-L, OUT-R into IN-R; Enter | IN-L and IN-R 8-12 Vpp each, both inverted; two PASSes |
+| | second prompt: pull the cable out of IN-R; Enter | both inputs above 8 Vpp, IN-R through the normal; PASS |
+| | third prompt: put it back (OUT-R is now silent); Enter | IN-L above 8 Vpp, IN-R under 0.5 Vpp; PASS |
+| `a 5`, `a -5` | the meter on OUT-L's and OUT-R's tips, DC volts | about +5 V, then −5 V |
+| `0` | | the outs silent |
+
+### Step 8: batch 5, the pots
+
+When they arrive (18 Nov):
+1. USB out, rack off. Wire X, Y and Z (stage 7, batch 5).
+2. Meter check on POT4, POT2, POT6 and the three POT_REF holes, with each pot turned fully
+   clockwise: no beep. Turned anticlockwise, a wiper meets the pot's ground end and beeps.
+3. Rack on, then USB in, and the console with `monitor` (step 2).
+
+| Type | Do | Pass |
+|---|---|---|
+| `9` | turn X, Y and Z in turn, end to end; Enter | POT4 (X), POT2 (Y) and POT6 (Z) each sweep from near 0 to 4095 |
+
+The menu's other blocks are for parts Health doesn't use: `5 7` (CVO7 into CVI7), `7` (gate outs),
+`11` (LEDs), `13` (MIDI) and `14` (screen).
+
+## Stage 7: the control deck
 
 Health's panel ([Rev B §8](analogue_board_revb.md#8-order-changes-and-the-gesture-module-2026-11-02)),
 as the front reads:
@@ -170,21 +227,19 @@ deck-wide ground bus.
   POT_REF, not a chain on the deck (Rev B §8).
 - Z1's pad C, on D through its jack, carries the deck's one ground wire to the board.
 
-**Wire it in batches, and test each before the next**, as on Rev A. Before powering after each
-batch, check with the meter that no newly wired hole beeps to a ground hole (a switch line beeps
-only while its button is pressed). Batches 1-5 are tested on the stage 6 program, so it comes
-first. Batches 0-4 were wired together on 2026-11-17, so the meter check covers all 19 of their
-wires before the rack goes on; the tests still run one batch at a time, so a fault points at one
-batch. **The pots are the last hardware step:** they arrive on 2026-11-18.
+**Wire it in batches, and test each before the next**, as on Rev A: a meter check with the rack
+off, then the batch's step in stage 6. Batches 0-4 were wired together on 2026-11-17, so stage 6
+checks their holes in one go, then tests them a batch at a time, so a fault points at one batch.
+**The pots are the last hardware step:** they arrive on 2026-11-18.
 
 | Batch | Wires | Test |
 |---|---|---|
 | 0. Deck ground | Z1's pad C → GND (LO 19) | continuity, any jack sleeve to the board's GND (passed 2026-11-17) |
-| 1. Encoder and buttons | MENU A → GIN1, B → GIN2, common → +3V3D; push → SW6, BTN1 → SW5, BTN2 → SW3 | block 8: turning slowly steps GIN1 and GIN2 in turn; block 12 counts both ways; block 3 sees the push on SW6, BTN1 on SW5 and BTN2 on SW3 |
-| 2. CV outs | X1 → CV1, Y1 → CV5, Z1 → CV4, X2 → CV3, Y2 → CV2, Z2 → CV6 | block 5 (nothing patched), then `c N V` holds jack N's voltage for the meter |
-| 3. Gate ins | RST → GIN3 (across the board), CLK → GIN4 | block 8: a rack clock into RST steps GIN3, into CLK GIN4 |
-| 4. Audio | IN-L → AIN1, IN-R → AIN2, OUT-L → AOUT1, OUT-R → AOUT2 | block 10: sine out, then patch the outs into the ins. Then OUT-L into IN-L alone: both inputs read it through the normal, until a cable goes into IN-R |
-| 5. Pots | X: top → POT_REF (R 7), wiper → POT4; Y: top → POT_REF (R 4), wiper → POT2; Z: top → POT_REF (LO 7), wiper → POT6 | block 9: X, Y and Z sweep 0 to full scale on POT4, POT2 and POT6 |
+| 1. Encoder and buttons | MENU A → GIN1, B → GIN2, common → +3V3D; push → SW6, BTN1 → SW5, BTN2 → SW3 | stage 6, step 4 |
+| 2. CV outs | X1 → CV1, Y1 → CV5, Z1 → CV4, X2 → CV3, Y2 → CV2, Z2 → CV6 | stage 6, step 5 |
+| 3. Gate ins | RST → GIN3 (across the board), CLK → GIN4 | stage 6, step 6 |
+| 4. Audio | IN-L → AIN1, IN-R → AIN2, OUT-L → AOUT1, OUT-R → AOUT2 | stage 6, step 7 |
+| 5. Pots | X: top → POT_REF (R 7), wiper → POT4; Y: top → POT_REF (R 4), wiper → POT2; Z: top → POT_REF (LO 7), wiper → POT6 | stage 6, step 8 |
 
 ## Log
 
@@ -196,7 +251,7 @@ batch. **The pots are the last hardware step:** they arrive on 2026-11-18.
 | 2026-11-16 | 5 | P4 in, USB-C end down, rack on: 5V MOD 5.07 V against +5VD's 5.08, so Q201 carries the P4 past D203 | | |
 | 2026-11-16 | 5 | USB-C to the Mac with the rack on, the P4 reset through the CH343's RTS: it boots on the board (ROM, the 32 MB PSRAM test OK, 400 MHz, chip v3.2) and runs the camera-to-HDMI app of 29 Oct, which stops at "LT8912B not found" because no display is connected. Its I2C pull-up warning is ESP-IDF's notice for any bus set up without internal pull-ups (`i2c_master.c`). **Stage 5 passes** | | |
 | 2026-11-16 | 4 | Two of the seven rail labels, 5V MOD and −12V, are printed where J201's shroud sits, on the outward face. Their test points are clear of it, so David found them by elimination | | Keep every label clear of every part's body on its face, shrouded headers included |
-| 2026-11-17 | 8 | The control deck built, all but the pots (arriving 18 Nov): every jack's sleeve on pad C linked to D, IN-R's pad B linked to IN-L's pad A (the normal), each pot cell's pad A bridged to D, the encoder's push pins to BTN1's pad C and to D. Pots moved to the last batch | | |
-| 2026-11-17 | 8 | Batch 0, the deck ground, passes: continuity between the deck's ground bus and the board's ground | | |
-| 2026-11-17 | 8 | Batches 1-4 wired, the deck built the other way and the board upright: 18 wires, all but the pots' six. Their tests wait for the stage 6 program | | |
+| 2026-11-17 | 7 | The control deck built, all but the pots (arriving 18 Nov): every jack's sleeve on pad C linked to D, IN-R's pad B linked to IN-L's pad A (the normal), each pot cell's pad A bridged to D, the encoder's push pins to BTN1's pad C and to D. Pots moved to the last batch | | |
+| 2026-11-17 | 7 | Batch 0, the deck ground, passes: continuity between the deck's ground bus and the board's ground | | |
+| 2026-11-17 | 7 | Batches 1-4 wired, the deck built the other way and the board upright: 18 wires, all but the pots' six. Their tests wait for the stage 6 program | | |
 | 2026-11-18 | 6 | The test program written (`firmware/analogue_board_revb_test`) and built clean on ESP-IDF 5.5.4; not yet flashed | | |

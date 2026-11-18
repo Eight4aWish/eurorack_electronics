@@ -14,7 +14,7 @@
 // - six buttons, SW1-6 on the expander's port 1;
 // - the CV outputs swing ±10 V (Rev B §8), and CVO7 and CVI7 are a fixed CV out and in;
 // - the codec at 48 kHz with its MCLK from the APLL;
-// - beside each channel, the jack or control it is wired to on Health's panel (stage 8).
+// - beside each channel, the jack or control it is wired to on Health's panel (stage 7).
 
 #include <math.h>
 #include <stdio.h>
@@ -54,7 +54,7 @@ constexpr gpio_num_t BOARD_PINS[] = {PIN_SPIA_SCK, PIN_SPIA_MOSI, PIN_SPIA_MISO,
                                      PIN_GATE_IN[2], PIN_GATE_IN[3], PIN_LED_DATA, PIN_MCLK, PIN_BCK, PIN_LRCK,
                                      PIN_I2S_DOUT, PIN_I2S_DIN, PIN_MIDI_TX, PIN_MIDI_RX};
 
-// ---- Health's panel, as wired on 2026-11-17 (bring-up stage 8): what each board channel is on its front
+// ---- Health's panel, as wired on 2026-11-17 (bring-up stage 7): what each board channel is on its front
 static const char *const CV_NAME[6] = {"X1", "Y2", "X2", "Z1", "Y1", "Z2"};
 static const char *const GIN_NAME[4] = {"MENU A", "MENU B", "RST", "CLK"};
 static const char *const POT_NAME[6] = {"-", "Y", "-", "X", "-", "Z"};

@@ -401,7 +401,7 @@ display.
   the table above: MENU A, B on GIN1, GIN2; push SW6, BTN1 SW5, BTN2 SW3; X, Y, Z on POT4, POT2,
   POT6; X1 CV1, Y1 CV5, Z1 CV4, X2 CV3, Y2 CV2, Z2 CV6; RST GIN3 (its wire crosses the board),
   CLK GIN4; IN-L, IN-R on AIN1, AIN2; OUT-L, OUT-R on AOUT1, AOUT2. Health's firmware maps by
-  these. The wire list is in `analogue_board_revb_bringup.md`, stage 8.
+  these. The wire list is in `analogue_board_revb_bringup.md`, stage 7.
 - **IN-R is normalled from IN-L** (David, 2026-11-17). IN-R's pad B, the jack's switch lug, is
   linked on the deck to IN-L's pad A. A mono cable in IN-L reaches both inputs; a cable in IN-R
   lifts its tip off the lug and breaks the link. Firmware could not do this itself: with no jack
