@@ -140,7 +140,7 @@ N for each jack: X1 1, Y2 2, X2 3, Z1 4, Y1 5, Z2 6.
 | Type | Do | Pass |
 |---|---|---|
 | `6` | | "The codec is sending samples." |
-| `10` | listen to OUT-L and OUT-R through the rack | a 440 Hz sine on both, about 3.4 V on AC volts |
+| `10` | listen to OUT-L and OUT-R through the rack | a 440 Hz sine on both |
 | | first prompt: OUT-L into IN-L, OUT-R into IN-R; Enter | IN-L and IN-R 8-12 Vpp each, both inverted; two PASSes |
 | | second prompt: pull the cable out of IN-R; Enter | both inputs above 8 Vpp, IN-R through the normal; PASS |
 | | third prompt: put it back (OUT-R is now silent); Enter | IN-L above 8 Vpp, IN-R under 0.5 Vpp; PASS |
@@ -157,7 +157,7 @@ When they arrive (18 Nov):
 
 | Type | Do | Pass |
 |---|---|---|
-| `9` | turn X, Y and Z in turn, end to end; Enter | POT4 (X), POT2 (Y) and POT6 (Z) each sweep from near 0 to 4095 |
+| `9` | turn X, Y and Z in turn, end to end; Enter | POT4 (X), POT2 (Y) and POT6 (Z) each sweep from 0 to about 4090 |
 
 The menu's other blocks are for parts Health doesn't use: `5 7` (CVO7 into CVI7), `7` (gate outs),
 `11` (LEDs), `13` (MIDI) and `14` (screen).
@@ -257,3 +257,10 @@ checks their holes in one go, then tests them a batch at a time, so a fault poin
 | 2026-11-18 | 6 | The test program written (`firmware/analogue_board_revb_test`) and built clean on ESP-IDF 5.5.4; not yet flashed | | |
 | 2026-11-18 | 6 | Step 2: flashed from the Mac, rack on. The menu prints with no warning, once the program was set to the P4's 32 MB flash (it had said 16 MB, and the boot warned) | | |
 | 2026-11-18 | 6 | Step 3: block 1 finds 0x20 and 0x50 and nothing else, PASS; block 2, 32 bytes, 0 wrong, restored, PASS. Block 4 first **FAILED**: the ADS8688 echoed 01 as 02, every reply one bit early. It changes SDO on the falling edge with a 10 ns hold, and the P4 samples after that (`analogue_board_esp32p4.md`, Soft problems). With the reply read one bit early: 256 of 256 patterns at 1, 4, 8 and 16 MHz (block 4s), and block 4 PASS: the range register echoes 01 and 00, CV1-6 and CVI7 read +0.204 to +0.207 V open, AIN7 0.000 V. **Step 3 passes** | Firmware: the ADS8688's reply read one bit early | Any P4 firmware for this board reads it the same way |
+| 2026-11-18 | 6 | Step 4, first try: block 3's registers PASS and the MENU push shows on SW6, but BTN1 and BTN2 show nothing: neither cell's pad A was linked to D, so a press connected its SW line to nothing | BTN1's and BTN2's pad A linked to D (David) | Check each button cell's A-D link with the meter before power |
+| 2026-11-18 | 7 | Batch 5 wired: the pots in, X, Y and Z to POT4, POT2 and POT6 and their tops to POT_REF. Meter check (David): SW5 and SW3 beep to ground only while BTN1 and BTN2 are held; each wiper beeps at one end of its travel only; no POT_REF hole beeps | | |
+| 2026-11-18 | 6 | Step 4: block 3, MENU push on SW6, BTN1 on SW5, BTN2 on SW3. Block 8: turning MENU steps GIN1 and GIN2 in turn (GIN2 bounces: 13 rises to GIN1's 6). Block 12: five clicks clockwise to −20, five back to exactly 0, 4 counts a click; the push shows on SW6. Clockwise counts down. **Step 4 passes** | | Health's firmware: flip the encoder's sign |
+| 2026-11-18 | 6 | Step 5: block 5 PASS on all six, worst error −63 mV (CV3), switches off +0.204 to +0.207 V. Held +1 to +6 V on X1, Y1, Z1, X2, Y2, Z2, the meter read 0.98, 1.96, 2.93, 3.94, 4.89, 5.88 V (the ADC 0.982, 1.969, 2.946, 3.955, 4.926, 5.911); held −1 to −6 V, −0.98, −1.96, −2.96, −3.95, −4.91, −5.89 (the ADC −0.994, −1.980, −2.983, −3.992, −4.946, −5.937). Every jack on its own channel, within 1 % of the ADC. **Step 5 passes** | | |
+| 2026-11-18 | 6 | Step 6: a rack clock (about 3.6 Hz) counted on GIN3 from RST, then on GIN4 from CLK. `8t 3` and `8t 4`, X1 into RST then CLK: high at 2.00 V rising, low at 1.64 V falling, both (design 1.98 and 1.67). **Step 6 passes** | | |
+| 2026-11-18 | 6 | Step 7: block 6, the codec sends samples (ESP-IDF warns that the second I2S channel takes the APLL at 24 575 996 Hz for 24 576 000: harmless). Block 10: the sine heard on both outs (David's meter reads no AC at 440 Hz); OUT-L into IN-L 9.9 Vpp, OUT-R into IN-R 10.2 Vpp, both inverted; IN-R empty, it hears IN-L's cable at 9.9 Vpp through the normal; the silent OUT-R back in IN-R, 0.0 Vpp. `a 5`, `a -5`, `a 0`: OUT-L +5.08, −5.03, +0.02 V; OUT-R +5.01, −5.29, −0.14 V. OUT-R's −140 mV offset is within the level shift's resistor tolerance, for calibration. **Step 7 passes** | | |
+| 2026-11-18 | 6 | Step 8: block 9, X, Y and Z sweep 0 to 4089 on POT4, POT2 and POT6; POT1, 3 and 5 and CH6-7 stay at 0. **Step 8 passes, and with it stage 6: Health's board and deck pass every test** | | |
