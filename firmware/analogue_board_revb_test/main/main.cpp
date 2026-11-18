@@ -125,6 +125,7 @@ static bool read_line(uint32_t wait_ms = 10) {  // true once a whole line (possi
       n = 0;
       return true;
     }
+    if (c < 0x20 || c > 0x7E) continue;  // a stray byte from the USB bridge at reset is not a command
     if (n < sizeof(line) - 1) line[n++] = c;
   }
   return false;
@@ -247,20 +248,33 @@ static void spia_start() {
   spia_ready = true;
 }
 
-static uint16_t adc_frame(uint16_t cmd) {  // 32 clocks: a command in, the previous frame's conversion out
-  const uint8_t tx[4] = {(uint8_t)(cmd >> 8), (uint8_t)cmd, 0, 0};
+// The ADS8688 changes SDO on SCLK's falling edge (datasheet §8.4.1.1.4), the edge a mode 1 master
+// samples on, and holds the old bit for only 10 ns after it. The Teensy samples inside those 10 ns;
+// the P4 samples after them, so it sees each bit one clock early, and the reply sits one bit higher
+// in the frame than the datasheet draws it. Nothing is lost: the frame's last bit is spare. Block 4s
+// checks the alignment at four clocks.
+constexpr int ADC_EARLY = 1;
+
+static uint32_t adc_raw(const uint8_t *tx, int bytes) {  // the whole frame as sampled, first bit highest
   uint8_t rx[4];
-  spi_frame(spi_conv, PIN_CS_ADC, tx, rx, 4);
-  return (rx[2] << 8) | rx[3];
+  spi_frame(spi_conv, PIN_CS_ADC, tx, rx, bytes);
+  uint32_t w = 0;
+  for (int i = 0; i < bytes; i++) w = (w << 8) | rx[i];
+  return w;
 }
 
-static uint8_t adc_reg(uint8_t reg, int val = -1) {  // read if val < 0; a write echoes the byte written
+static uint16_t adc_frame(uint16_t cmd) {  // 32 clocks: a command in, the previous frame's conversion out
+  const uint8_t tx[4] = {(uint8_t)(cmd >> 8), (uint8_t)cmd, 0, 0};
+  return (uint16_t)(adc_raw(tx, 4) >> ADC_EARLY);
+}
+
+static uint32_t adc_reg_raw(uint8_t reg, int val) {  // 24 clocks: read if val < 0; a write echoes the byte
   const uint16_t w = (reg << 9) | (val >= 0 ? 0x100 | val : 0);
   const uint8_t tx[3] = {(uint8_t)(w >> 8), (uint8_t)w, 0};
-  uint8_t rx[3];
-  spi_frame(spi_conv, PIN_CS_ADC, tx, rx, 3);
-  return rx[2];
+  return adc_raw(tx, 3);
 }
+
+static uint8_t adc_reg(uint8_t reg, int val = -1) { return (uint8_t)(adc_reg_raw(reg, val) >> ADC_EARLY); }
 
 static float adc_read(uint8_t ch, int n = 16) {  // volts, the mean of n conversions on ±10.24 V
   adc_frame(0xC000 | (ch << 10));                // MAN_Ch_n: converts in the next frame
@@ -552,6 +566,57 @@ static void block_adc() {
       printf("  CV%u (%s) %+.3f V  open: about %+.2f V%s\n", ch + 1, CV_NAME[ch], v, VBIAS, good ? "" : "  <- patched, or a fault");
   }
   verdict(ok, "open inputs read +0.1 to +0.3 V, the grounded one within 20 mV of 0");
+}
+
+static bool spi_conv_clock(int hz) {  // SPI-A's device again at another clock, mode 1
+  spi_bus_remove_device(spi_conv);
+  spi_device_interface_config_t d = {};
+  d.mode = 1;
+  d.clock_speed_hz = hz;
+  d.spics_io_num = -1;
+  d.queue_size = 1;
+  return spi_bus_add_device(SPI2_HOST, &d, &spi_conv) == ESP_OK;
+}
+
+// how the ADS8688's reply lines up on the P4, at four clocks: 256 bytes written to AUTO_SEQ_EN and read
+// back, counted both ways, and 256 conversions of the open CVI7, whose spread stays small only if every
+// bit is sampled cleanly
+static void block_adc_timing() {
+  printf("Block 4s, ADC timing: 256 bytes through AUTO_SEQ_EN and 256 conversions of CVI7 at each clock\n");
+  spia_start();
+  const int clocks[] = {1000000, 4000000, 8000000, 16000000};
+  for (int hz : clocks) {
+    if (!spi_conv_clock(hz)) {
+      printf("  %2d MHz: the driver refused this clock\n", hz / 1000000);
+      continue;
+    }
+    int khz = 0;
+    spi_device_get_actual_freq(spi_conv, &khz);
+    int early_echo = 0, early_read = 0, drawn_echo = 0, drawn_read = 0;
+    for (int p = 0; p < 256; p++) {
+      const uint32_t e = adc_reg_raw(0x01, p), r = adc_reg_raw(0x01, -1);
+      early_echo += ((e >> 1) & 0xFF) == (uint32_t)p;
+      early_read += ((r >> 1) & 0xFF) == (uint32_t)p;
+      drawn_echo += (e & 0xFF) == (uint32_t)p;
+      drawn_read += (r & 0xFF) == (uint32_t)p;
+    }
+    adc_reg_raw(0x01, 0xFF);  // its default
+    adc_frame(0xC000 | (6 << 10));  // CVI7
+    adc_frame(0x0000);
+    uint16_t lo = 0xFFFF, hi = 0;
+    uint32_t sum = 0;
+    for (int i = 0; i < 256; i++) {
+      const uint16_t c = adc_frame(0x0000);
+      lo = c < lo ? c : lo;
+      hi = c > hi ? c : hi;
+      sum += c;
+    }
+    printf("  %5.2f MHz: one bit early %3d/256 echoed, %3d/256 read; as drawn %3d, %3d. CVI7 %+.3f V, spread %u codes\n",
+           khz / 1000.0f, early_echo, early_read, drawn_echo, drawn_read, ((float)sum / 256 - 32768) * 20.48f / 65536,
+           hi - lo);
+  }
+  spi_conv_clock(SPI_CONV_HZ);
+  printf("  Back at %d MHz.\n", SPI_CONV_HZ / 1000000);
 }
 
 // one channel out through the DAC and back in through the ADC, from -10 to +10 V in 2.5 V steps
@@ -1026,6 +1091,7 @@ static void help() {
   printf("  2    EEPROM                      no deck\n");
   printf("  3    expander, then buttons live SW3 (BTN2), SW5 (BTN1), SW6 (MENU push)\n");
   printf("  4    ADC                         nothing patched into the CV jacks\n");
+  printf("  4s   ADC timing on the P4        how its reply lines up, at 1, 4, 8 and 16 MHz\n");
   printf("  5    DAC to ADC, CV1-6           nothing patched into X1-Z2\n");
   printf("  5 7  CVO7 into CVI7              a wire from the CVO7 hole to CVI7\n");
   printf("  6    codec clocks                meter on the module's pins 27, 31, 32\n");
@@ -1056,6 +1122,7 @@ static void run(char *cmd) {
   while (*rest == ' ') rest++;
   while (*rest >= '0' && *rest <= '9') rest++;
   if (n == 8 && strchr(cmd, 't')) return block_gate_threshold(atoi(strchr(cmd, 't') + 1));
+  if (n == 4 && strchr(cmd, 's')) return block_adc_timing();
   if (cmd[0] == 'c') return hold_cv(cmd + 1);
   if (cmd[0] == 'a') return hold_audio(cmd + 1);
   switch (n) {
@@ -1118,6 +1185,7 @@ extern "C" void app_main() {
   if (!powered)
     printf("\nThe EEPROM at 0x50 does not answer: is the rack on? Every other bus stays off (requirement 1).\n");
   printf("\n> ");
+  uart_flush_input(UART_NUM_0);
   for (;;) {
     if (!read_line(50)) continue;
     if (line[0]) {

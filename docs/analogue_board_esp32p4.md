@@ -84,6 +84,15 @@ pull-ups on CS_ADC, CS_DAC and CS_POT, helps every module.
   expect it to be largely unusable in the rack.
 - **Unpowered pins.** The P4 is not 5 V-tolerant or protected when unpowered, unlike the
   RP2350, so our 3.3 V pull-ups back-feed it slightly during power-up.
+- **The ADS8688's reply arrives one bit early** (found on Rev B, 2026-11-18). The ADS8688 changes
+  SDO on SCLK's falling edge, the edge a mode 1 master samples on, and holds the old bit for only
+  10 ns (datasheet §7.6 and §8.4.1.1.4). The Teensy samples inside that; the P4 samples after it,
+  so each reply sits one bit higher in the frame than the datasheet draws it. Firmware reads it one
+  bit early: a conversion is bits 16-1 of the 32-bit frame, a register byte bits 8-1 of the 24.
+  Nothing is lost, because the frame's last bit is spare. It held for 256 of 256 patterns at 1, 4, 8
+  and 16 MHz (the test program's block 4s), with a spread of 2-3 codes on an open input. The DAC8568
+  and the 595 only listen. The MCP3208 changes DOUT half a clock from where a mode 0 master samples,
+  so it should be unaffected; the pots' test will show.
 - **Toolchain.** Use ESP-IDF; Arduino support is limited. Wi-Fi needs ESP-Hosted running on the
   C6. Check the chip revision: ESP-IDF 5.5.3 and later need
   `CONFIG_ESP32P4_SELECTS_REV_LESS_V3=y` for v1.x silicon. None of the RP2350 firmware ports.
