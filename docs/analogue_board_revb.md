@@ -361,6 +361,10 @@ classifier (about 30 ms per hand).
 3D-printed holder, on a ribbon long enough to reach a module in the middle of the rack, near
 the TLQ-SCREEN. So it takes no cells, and the board needs no slot for it.
 
+**Update, David 2026-11-18: Wealth is dropped**, "not a current planned project". The second
+assembled board is spare; Health is the one Rev B module. The note of 2026-11-13 below is kept
+as the record.
+
 **Update, 2026-11-13: two modules, names undecided.** The two assembled Rev B boards become two
 modules, working names **Health** again, the ESP32-P4 gesture controller behind the panel below, and **Wealth**
 (*twelve for wealth*), a Pico 2 W hosting Workshop Computer programs and MOD2/Melon voices
