@@ -167,7 +167,16 @@ What it means for the module:
 - **The APLL can't do both jobs.** The planned I2S MCLK (12.288 MHz) and an exact video pixel clock
   both want it. Firmware has to choose: a video timing from the fixed PLLs (Espressif's 80 MHz
   1280×720 comes from 240 MHz ÷ 3), or the MCLK from elsewhere. The TLQ-SCREEN must have its own
-  39.07 MHz, which no fixed PLL divides to, so on Health the MCLK has to find another source. Open.
+  39.07 MHz, which no fixed PLL divides to, so on Health the APLL goes to the screen.
+  - **The codec's way out (2026-11-18, not yet tried on the bench):** I2S can also run from the
+    fixed 160 MHz PLL on v3 silicon (ESP-IDF `soc/esp32p4/.../clk_tree_defs.h`, `SOC_I2S_CLKS`;
+    the board's chip is v3.2). 160 MHz ÷ 13 = 12.3077 MHz, a whole-number division, so no
+    fractional-divider jitter. At 256 fS that makes fS 48.077 kHz, 0.16 % above 48 kHz.
+  - The PCM3060 takes it: 256 fS is one of its system clocks, and its limits are fS 16-96 kHz for
+    the ADC (192 for the DAC) and SCKI 2.048-36.864 MHz (SLAS533B, p. 3).
+  - Health's audio is analogue at both ends, so nothing else has to agree with the rate. DSP
+    written for the real rate stays in tune. Only a sample recorded at 48 kHz would play 2.8 cents
+    sharp.
 - **The display it is for is the TLQ-SCREEN** (round 720×720, DVI, Tiliqua's 720×720p60 timing).
   The camera runs on it (above).
 
