@@ -151,6 +151,14 @@ with 32 MB flash. The firmware is ESP-IDF 5.5.4, outside this repo.
   at about 22 frames/s. Lines sometimes jump sideways. The likely cause is the display DMA running
   short of PSRAM bandwidth, with camera, crop and display all in PSRAM. The colour bars, which use
   no PSRAM, were steady. Not chased; the real target is 720×720.
+- **Camera to the TLQ-SCREEN, on Health's board (2026-11-18).** `firmware/p4_camera_screen`, Rev B
+  bring-up step 10. Tiliqua's 720×720p60r2 (812×802, 39.07 MHz, syncs negative, as the screen's
+  EDID gives) with the pixel clock from the APLL at 39 070 007 Hz, 2 lanes at 960 Mbps. The
+  LT8912B is in DVI mode: the driver sets HDMI (0xB2 = 0x01), and the program writes 0x00 after
+  it. The bridge counts 802 lines a frame. The camera's middle 960×960 is scaled to 720×720 and
+  turned a quarter clockwise in the PPA, because the panel is mounted a quarter turn round. It
+  runs at 43 frames/s, upright and steady, with no lines jumping. That is likely because the
+  display DMA now reads about half as much PSRAM as at 1280×720 (62 MB/s against 110).
 
 What it means for the module:
 
@@ -158,9 +166,10 @@ What it means for the module:
   reserving them on Rev B.
 - **The APLL can't do both jobs.** The planned I2S MCLK (12.288 MHz) and an exact video pixel clock
   both want it. Firmware has to choose: a video timing from the fixed PLLs (Espressif's 80 MHz
-  1280×720 comes from 240 MHz ÷ 3), or the MCLK from elsewhere. Open.
+  1280×720 comes from 240 MHz ÷ 3), or the MCLK from elsewhere. The TLQ-SCREEN must have its own
+  39.07 MHz, which no fixed PLL divides to, so on Health the MCLK has to find another source. Open.
 - **The display it is for is the TLQ-SCREEN** (round 720×720, DVI, Tiliqua's 720×720p60 timing).
-  It is awaited; that mode is the next step.
+  The camera runs on it (above).
 
 ## Sources
 

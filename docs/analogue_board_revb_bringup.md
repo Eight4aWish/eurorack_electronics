@@ -69,7 +69,8 @@ PASS or FAIL, with Health's name for each channel in brackets, as in "CV1 (X1)".
 board is driven until a block asks for it. `0` turns everything off again.
 
 Steps 1-3 get the board running. Steps 4-8 test the deck, one batch at a time (the wires are in
-stage 7). Step 9 checks the camera's and the display's ribbons. Write each step's readings in the log. At the first FAIL, stop, type `0`, and copy what
+stage 7). Step 9 checks the camera's and the display's ribbons, and step 10 puts the camera on
+the screen. Write each step's readings in the log. At the first FAIL, stop, type `0`, and copy what
 the block printed into the log.
 
 **USB only while the rack is on:** rack on, then USB in; USB out, then rack off. With USB in and
@@ -99,7 +100,7 @@ the EEPROM means the board isn't powered.
 - Ctrl-] leaves the console.
 - To come back later without flashing, use `monitor` in place of `flash monitor`.
 
-Flashing replaces the camera-to-HDMI app, whose source is in `~/esp/p4_camera_hdmi`.
+Flashing replaces whatever the P4 was running, such as step 10's camera program.
 
 ### Step 3: the board on its own
 
@@ -165,11 +166,30 @@ The OV5647 camera is on the P4's CAMERA socket. The Olimex MIPI-HDMI is on DISPL
 TLQ-SCREEN on its HDMI lead. Both ribbons carry 3V3, ground and the P4 board's own I2C (GPIO7 and
 GPIO8), so a chip answering there shows its ribbon's power and I2C work. Block 15 only reads: it
 sends no video. That matters for the TLQ-SCREEN, which must only ever get its own 720×720p60. The
-MIPI lanes are a later test.
+MIPI lanes are step 10's.
 
 | Type | Pass |
 |---|---|
 | `15` | the camera's chip ID 56 47; the LT8912B's 12 B2, at all three of its addresses; the screen's EDID whole, maker APF, 720×720, 812×802 total, 39.07 MHz. Three PASS lines |
+
+### Step 10: the camera on the screen
+
+A program of its own, [`firmware/p4_camera_screen`](../firmware/p4_camera_screen/main/main.c),
+built from the October bench program that put the camera on HDMI at 1280×720. It reads the
+screen's EDID first, and sends nothing unless the preferred timing is exactly Tiliqua's 720×720p60
+(812×802 total, 39.07 MHz). It then shows the DSI host's colour bars for 5 s, with no camera and no
+PSRAM in the path, and then the camera.
+
+The camera's middle 960×960 is scaled to 720×720 and turned a quarter clockwise, because the
+screen's panel is mounted a quarter turn round, as Silver's rotation has it. The bridge runs in
+DVI mode: the driver sets HDMI, and the program writes 0xB2 = 0x00 after it.
+
+Flash it as in step 2, from `firmware/p4_camera_screen`. Step 2 puts the test program back.
+
+| Watch | Pass |
+|---|---|
+| the console | the EDID line reads 720x720, 812x802, 39.07 MHz; the bridge reads V 802 (lines a frame), DVI mode, hot-plug high; the camera at about 43 frames/s |
+| the screen | colour bars for 5 s, then the camera: upright and steady |
 
 The menu's other blocks are for parts Health doesn't use: `5 7` (CVO7 into CVI7), `7` (gate outs),
 `11` (LEDs), `13` (MIDI) and `14` (screen).
@@ -277,3 +297,4 @@ checks their holes in one go, then tests them a batch at a time, so a fault poin
 | 2026-11-18 | 6 | Step 7: block 6, the codec sends samples (ESP-IDF warns that the second I2S channel takes the APLL at 24 575 996 Hz for 24 576 000: harmless). Block 10: the sine heard on both outs (David's meter reads no AC at 440 Hz); OUT-L into IN-L 9.9 Vpp, OUT-R into IN-R 10.2 Vpp, both inverted; IN-R empty, it hears IN-L's cable at 9.9 Vpp through the normal; the silent OUT-R back in IN-R, 0.0 Vpp. `a 5`, `a -5`, `a 0`: OUT-L +5.08, −5.03, +0.02 V; OUT-R +5.01, −5.29, −0.14 V. OUT-R's −140 mV offset is within the level shift's resistor tolerance, for calibration. **Step 7 passes** | | |
 | 2026-11-18 | 6 | Step 8: block 9, X, Y and Z sweep 0 to 4089 on POT4, POT2 and POT6; POT1, 3 and 5 and CH6-7 stay at 0. **Step 8 passes, and with it stage 6: Health's board and deck pass every test** | | |
 | 2026-11-18 | 6 | Plugged back in: step 3 passes again (CV1-6 and CVI7 +0.204 to +0.207 V open). Step 9, new block 15: the camera reads 56 47 (OV5647); the bridge 12 B2 (LT8912B) at 0x48, 0x49 and 0x4A; the TLQ-SCREEN's EDID whole, maker APF, product AA61, "720x720 CVT", 720×720, 812×802, 39.07 MHz, as apf's `edid_720r2.bin`. Also answering, not identified: 0x4B, and 0x51 to 0x57 (the capture card in October gave only 0x50). The ES8311 at 0x18. **Step 9 passes: both ribbons' power and I2C work; the lanes are not tested yet** | | |
+| 2026-11-18 | 6 | Step 10, `firmware/p4_camera_screen`: the EDID matches 720×720p60r2 (syncs h− v−); APLL 39 070 007 Hz; the bridge reads V 802 from the DSI input (H 16628), DVI mode, hot-plug high; OV5647 detected, 1280×960; 43.0 and 43.2 frames/s to the screen (October's 1280×720 HDMI: about 22). David: the colour bars, then the camera, upright and steady. **Step 10 passes: the camera on the TLQ-SCREEN** | | |
