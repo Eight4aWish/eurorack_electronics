@@ -1022,6 +1022,112 @@ static void block_screen(bool sh1106, uint8_t rows) {
            tall ? "14 (128x32)" : "14 64 (128x64)");
 }
 
+// ---- camera and display: their ribbons carry 3V3, ground and the P4 board's own I2C (GPIO7 SDA, GPIO8 SCL,
+// 2.2 kΩ pull-ups on the board), which the analogue board leaves alone (P4_SCL and P4_SDA go only to two
+// holes). So each chip answering there shows its ribbon's power, ground and I2C conductors work; the MIPI
+// lanes are not tested. Nothing is configured and no video is sent: the bridge stays as it powered up.
+constexpr uint8_t ADDR_CODEC = 0x18, ADDR_CAM = 0x36, ADDR_LT_MAIN = 0x48, ADDR_LT_CEC = 0x49, ADDR_LT_AVI = 0x4A,
+                  ADDR_EDID = 0x50;
+static i2c_master_bus_handle_t p4_bus;
+
+static i2c_master_dev_handle_t p4_dev(uint8_t a) {
+  i2c_device_config_t c = {};
+  c.dev_addr_length = I2C_ADDR_BIT_LEN_7;
+  c.device_address = a;
+  c.scl_speed_hz = 100000;  // DDC's speed; the EDID is reached through the Olimex's level shifter
+  i2c_master_dev_handle_t h = nullptr;
+  i2c_master_bus_add_device(p4_bus, &c, &h);
+  return h;
+}
+
+static bool p4_read(i2c_master_dev_handle_t d, const uint8_t *reg, size_t reg_len, uint8_t *v, size_t n) {
+  return d && i2c_master_transmit_receive(d, reg, reg_len, v, n, 50) == ESP_OK;
+}
+
+static void block_camera_display() {
+  printf("Block 15, camera and display: the P4 board's own I2C (SDA GPIO7, SCL GPIO8) at 100 kHz, on both ribbons\n");
+  if (!p4_bus) {
+    i2c_master_bus_config_t bc = {};
+    bc.i2c_port = -1;
+    bc.sda_io_num = GPIO_NUM_7;
+    bc.scl_io_num = GPIO_NUM_8;
+    bc.clk_source = I2C_CLK_SRC_DEFAULT;
+    bc.glitch_ignore_cnt = 7;
+    if (i2c_new_master_bus(&bc, &p4_bus) != ESP_OK) {
+      verdict(false, "the second I2C bus would not start");
+      return;
+    }
+  }
+  bool seen[0x78] = {};
+  for (uint8_t a = 0x08; a < 0x78; a++) {
+    if (i2c_master_probe(p4_bus, a, 20) != ESP_OK) continue;
+    seen[a] = true;
+    printf("  0x%02X  %s\n", a,
+           a == ADDR_CODEC ? "ES8311 codec, on the P4 board"
+           : a == ADDR_CAM ? "OV5647 camera?"
+           : (a >= ADDR_LT_MAIN && a <= ADDR_LT_AVI) ? "LT8912B, the Olimex MIPI-HDMI bridge?"
+           : a == ADDR_EDID ? "a screen's EDID, through the Olimex's HDMI lead?"
+                            : "");
+  }
+
+  // the camera: OV5647 chip ID in registers 0x300A and 0x300B
+  uint8_t id[2] = {};
+  const uint8_t r_hi[2] = {0x30, 0x0A}, r_lo[2] = {0x30, 0x0B};
+  bool cam = false;
+  if (seen[ADDR_CAM]) {
+    i2c_master_dev_handle_t d = p4_dev(ADDR_CAM);
+    cam = p4_read(d, r_hi, 2, &id[0], 1) && p4_read(d, r_lo, 2, &id[1], 1);
+    printf("  Camera: chip ID %02X %02X (an OV5647 reads 56 47)\n", id[0], id[1]);
+    cam = cam && id[0] == 0x56 && id[1] == 0x47;
+    i2c_master_bus_rm_device(d);
+  }
+  verdict(cam, seen[ADDR_CAM] ? "the camera answers on its ribbon" : "nothing at 0x36: is the camera ribbon in, both ends, contacts the right way?");
+
+  // the bridge: LT8912B chip ID in the main page's registers 0x00 and 0x01
+  bool lt = false;
+  if (seen[ADDR_LT_MAIN]) {
+    i2c_master_dev_handle_t d = p4_dev(ADDR_LT_MAIN);
+    const uint8_t r0 = 0x00, r1 = 0x01;
+    lt = p4_read(d, &r0, 1, &id[0], 1) && p4_read(d, &r1, 1, &id[1], 1);
+    printf("  Bridge: chip ID %02X %02X (an LT8912B reads 12 B2); %d of its 3 addresses answer\n", id[0], id[1],
+           seen[ADDR_LT_MAIN] + seen[ADDR_LT_CEC] + seen[ADDR_LT_AVI]);
+    lt = lt && id[0] == 0x12 && id[1] == 0xB2 && seen[ADDR_LT_CEC] && seen[ADDR_LT_AVI];
+    i2c_master_bus_rm_device(d);
+  }
+  verdict(lt, seen[ADDR_LT_MAIN] ? "the Olimex bridge answers on the display ribbon"
+                                 : "nothing at 0x48: is the display ribbon in, both ends, the DISPLAY cable?");
+
+  // the screen: its EDID's first block, through the bridge board's DDC (needs the Olimex's HDMI 5 V)
+  if (!seen[ADDR_EDID]) {
+    printf("  No EDID at 0x50: no screen on the HDMI lead, or it is not powered (not a fault of the ribbon)\n");
+    return;
+  }
+  uint8_t e[128] = {};
+  i2c_master_dev_handle_t d = p4_dev(ADDR_EDID);
+  const uint8_t r0 = 0x00;
+  bool ok = p4_read(d, &r0, 1, e, sizeof(e));
+  i2c_master_bus_rm_device(d);
+  static const uint8_t HEADER[8] = {0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00};
+  uint8_t sum = 0;
+  for (uint8_t b : e) sum += b;
+  ok = ok && memcmp(e, HEADER, 8) == 0 && sum == 0;
+  if (ok) {
+    const uint16_t m = (e[8] << 8) | e[9];
+    const char maker[4] = {(char)('@' + ((m >> 10) & 31)), (char)('@' + ((m >> 5) & 31)), (char)('@' + (m & 31)), 0};
+    char name[14] = "";
+    for (int o = 72; o <= 108; o += 18)  // the display-name descriptor, if it has one
+      if (e[o] == 0 && e[o + 1] == 0 && e[o + 3] == 0xFC) {
+        for (int i = 0; i < 13 && e[o + 5 + i] != 0x0A; i++) name[i] = e[o + 5 + i], name[i + 1] = 0;
+      }
+    const uint8_t *t = e + 54;  // the preferred timing
+    const unsigned clk = t[0] | (t[1] << 8), ha = t[2] | ((t[4] >> 4) << 8), hb = t[3] | ((t[4] & 15) << 8);
+    const unsigned va = t[5] | ((t[7] >> 4) << 8), vb = t[6] | ((t[7] & 15) << 8);
+    printf("  Screen: maker %s, product %04X%s%s; preferred %ux%u, %ux%u total, %.2f MHz\n", maker, e[10] | (e[11] << 8),
+           name[0] ? ", " : "", name, ha, va, ha + hb, va + vb, clk / 100.0f);
+  }
+  verdict(ok, "a screen's EDID reads back whole (header and checksum)");
+}
+
 // c N V: hold CV N (1-6, or 7 for CVO7) at V volts, its switch closed, for a meter on the jack or a module
 static void hold_cv(const char *args) {
   char *end, *vend;
@@ -1104,6 +1210,7 @@ static void help() {
   printf("  12   encoder, live               MENU: A on GIN1, B on GIN2 (12 A B for others); push on SW6\n");
   printf("  13   MIDI                        a TRS cable from OUT to IN (not on Health)\n");
   printf("  14   screen                      a 128x32 OLED on the I2C holes; 14 64 for a 128x64, 14 sh for an SH1106\n");
+  printf("  15   camera and display I2C      the ribbons on the P4's CAMERA and DISPLAY sockets; no video sent\n");
   printf("  c N V  hold CV N at V volts      e.g. c 1 2.5 holds X1; meter on its jack's tip; c 7 is CVO7; 0 releases it\n");
   printf("  a V    hold the audio outs at V  e.g. a 5; DC volts on OUT-L and OUT-R; 0 stops it\n");
   printf("  0    safe: switches off, gate outs off, DAC at 0 V, audio and LEDs off\n");
@@ -1114,7 +1221,7 @@ static void run(char *cmd) {
   int n = atoi(cmd);
   if (cmd[0] == 'h' || cmd[0] == '?') return help();
   if (cmd[0] == 's') return status();
-  if (!powered && n != 1) {
+  if (!powered && n != 1 && n != 15) {  // 15 is on the P4 board alone
     printf("The EEPROM at 0x50 does not answer, so the board looks unpowered: only 1 (rescan) runs.\n");
     return;
   }
@@ -1141,6 +1248,7 @@ static void run(char *cmd) {
     case 12: return block_encoder(rest);
     case 13: return block_midi();
     case 14: return block_screen(strstr(cmd, "sh") != nullptr, strstr(cmd, "64") ? 64 : 32);
+    case 15: return block_camera_display();
   }
   printf("Not a command: %s (h for the list)\n", cmd);
 }
