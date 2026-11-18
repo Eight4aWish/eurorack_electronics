@@ -64,15 +64,41 @@ As Rev A's stage 3, black lead on a square ground hole.
 
 ## Stage 6: one block at a time (test firmware)
 
-To write: an ESP-IDF port of [`firmware/analogue_board_test`](../firmware/analogue_board_test/src/main.cpp)'s
-serial menu, the same blocks against Rev B's pin map (`analogue_board_esp32p4.md`, Pin table).
-Its first act is `esp_ldo_acquire_channel` for channel 4 at 3300 mV. What changes from Rev A:
-- no EXP_INT: the expander is polled;
-- the CV outputs swing ±10 V (Rev B §8: −10.71 to +10.54 V, 0 V at code ≈ 33044);
-- I2C on GPIO31/30, and the P4's own bus (GPIO8/7) left alone;
-- gate inputs on GPIO50, 49, 29 and 4 (pins 9, 10, 6, 12);
-- MIDI on UART pins 1 and 2 with no links;
-- the codec's MCLK from the APLL, so no video during the test.
+[`firmware/analogue_board_revb_test`](../firmware/analogue_board_revb_test/main/main.cpp) (written
+2026-11-18, ESP-IDF 5.5.4) is Rev A's [test menu](../firmware/analogue_board_test/src/main.cpp)
+ported to the P4: the same block numbers against Rev B's pin map (`analogue_board_esp32p4.md`, Pin
+table) and netlist. Its first act is `esp_ldo_acquire_channel` for channel 4 at 3300 mV, which puts
+the converter pins' bank at 3.3 V. Then, as on Rev A, nothing is driven until a block asks for it,
+and only I2C runs until the EEPROM answers.
+
+**Build and flash**, with the P4's USB-C to the Mac and the rack on:
+
+```
+cd firmware/analogue_board_revb_test
+PATH="$HOME/esp/py312:/opt/homebrew/bin:$PATH" bash -c '. ~/esp/esp-idf/export.sh && idf.py build'
+PATH="$HOME/esp/py312:/opt/homebrew/bin:$PATH" bash -c '. ~/esp/esp-idf/export.sh && idf.py -p /dev/cu.usbmodem5CF71560381 flash monitor'
+```
+
+The menu prints after the reset; type a block number and Enter, `h` for the list, Ctrl-] to leave
+the monitor. Flashing overwrites the camera-to-HDMI app of 29 Oct (its source is in `~/esp/p4_camera_hdmi`).
+
+What changes from Rev A:
+- **No EXP_INT:** the expander is polled. Block 3 now ends with the buttons live, so the deck's
+  buttons are tested there.
+- **Six buttons,** SW1-6 on the expander's port 1 (Rev A had nine).
+- **CV outputs at ±10 V** (Rev B §8: −10.71 to +10.54 V, 0 V at code 33043). Block 5 sweeps
+  −10 to +10 V in 2.5 V steps, inside the ADS8688's ±10.24 V.
+- **CVO7 and CVI7,** the fixed CV out and in: `5 7` sweeps one into the other along a wire,
+  and `c 7 V` holds CVO7.
+- **I2C on GPIO31/30;** the P4's own bus (GPIO8/7) is left alone.
+- **Gate inputs on GPIO50, 49, 29 and 4** (pins 9, 10, 6, 12). Block 12 counts the encoder on
+  the P4's pulse counter, A on GIN1 and B on GIN2 by default (`12 A B` for others).
+- **MIDI on UART1,** pins 1 and 2, with no links.
+- **The codec at 48 kHz,** MCLK 12.288 MHz from the APLL, so no video during the test. Rev B
+  has no clock test points, so block 6 names the module's pins 27, 31 and 32.
+- **Health's names:** beside each channel, the jack or control stage 8 wired it to (X1 on CV1,
+  RST on GIN3 and so on). Block 10 ends with IN-R's normal: OUT-L into IN-L alone should reach
+  both inputs, and a plug in IN-R should break it.
 
 ## Stage 7: MIDI in
 
@@ -173,3 +199,4 @@ batch. **The pots are the last hardware step:** they arrive on 2026-11-18.
 | 2026-11-17 | 8 | The control deck built, all but the pots (arriving 18 Nov): every jack's sleeve on pad C linked to D, IN-R's pad B linked to IN-L's pad A (the normal), each pot cell's pad A bridged to D, the encoder's push pins to BTN1's pad C and to D. Pots moved to the last batch | | |
 | 2026-11-17 | 8 | Batch 0, the deck ground, passes: continuity between the deck's ground bus and the board's ground | | |
 | 2026-11-17 | 8 | Batches 1-4 wired, the deck built the other way and the board upright: 18 wires, all but the pots' six. Their tests wait for the stage 6 program | | |
+| 2026-11-18 | 6 | The test program written (`firmware/analogue_board_revb_test`) and built clean on ESP-IDF 5.5.4; not yet flashed | | |
