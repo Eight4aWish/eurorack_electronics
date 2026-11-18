@@ -13,7 +13,7 @@
 // - no EXP_INT: the expander is polled;
 // - six buttons, SW1-6 on the expander's port 1;
 // - the CV outputs swing ±10 V (Rev B §8), and CVO7 and CVI7 are a fixed CV out and in;
-// - the codec at 48 kHz with its MCLK from the APLL;
+// - the codec at 48.077 kHz with its MCLK from the fixed 160 MHz PLL, so the APLL is free for the screen;
 // - beside each channel, the jack or control it is wired to on Health's panel (stage 7).
 
 #include <math.h>
@@ -92,8 +92,11 @@ static float cv7_read_expected(float v) { return VBIAS + (v - VBIAS) * RLOAD / (
 // the jack itself, from the ADC reading: add back the drop across the 1 kΩ on the ADC side
 static float jack_from_adc(float v) { return v + (v - VBIAS) / RLOAD; }
 
-// ---- audio: the PCM3060 as an I2S slave (hardware mode, 24-bit I2S), 48 kHz, MCLK 256 fs from the APLL
-constexpr uint32_t RATE = 48000, FRAMES = 240;  // 5 ms a DMA block
+// ---- audio: the PCM3060 as an I2S slave (hardware mode, 24-bit I2S), MCLK 256 fs. The APLL belongs to the
+// TLQ-SCREEN's 39.07 MHz pixel clock, so MCLK comes from the fixed 160 MHz PLL ÷ 13 = 12.3077 MHz, a whole-number
+// division (docs/analogue_board_esp32p4.md). fS is then 48 076.9 Hz; asking for 48 077 makes ESP-IDF's divider
+// search round to 13 with no fraction.
+constexpr uint32_t RATE = 48077, FRAMES = 240;  // 5 ms a DMA block
 constexpr float OUT_VOLTS = 9.72f;              // a sample of 1.0 at the jack: Rev A's outs read +4.86 V for 0.5
 constexpr float IN_VPP = 22.0f;                 // the inputs' full scale at the jack, about 22 Vpp (and inverted)
 
@@ -402,7 +405,7 @@ static void audio_start() {
       .gpio_cfg = {.mclk = PIN_MCLK, .bclk = PIN_BCK, .ws = PIN_LRCK, .dout = PIN_I2S_DOUT, .din = PIN_I2S_DIN,
                    .invert_flags = {}},
   };
-  sc.clk_cfg.clk_src = I2S_CLK_SRC_APLL;  // 12.288 MHz exactly; the APLL is then not free for video
+  sc.clk_cfg.clk_src = I2S_CLK_SRC_PLL_160M;  // ÷ 13: the APLL stays free for the screen
   i2s_channel_init_std_mode(i2s_tx, &sc);
   i2s_channel_init_std_mode(i2s_rx, &sc);
   i2s_channel_enable(i2s_tx);
@@ -681,9 +684,9 @@ static void block_dac(const char *args) {
 }
 
 static void block_codec() {
-  printf("Block 6, codec clocks: I2S at 48 kHz, MCLK 256 fs from the APLL\n");
+  printf("Block 6, codec clocks: I2S at 48.077 kHz, MCLK 256 fs from the fixed 160 MHz PLL / 13\n");
   audio_start();
-  printf("  Running: MCLK 12.288 MHz on header pin 27, BCK 3.072 MHz on pin 31, LRCK 48 kHz on pin 32.\n");
+  printf("  Running: MCLK 12.308 MHz on header pin 27, BCK 3.077 MHz on pin 31, LRCK 48.077 kHz on pin 32.\n");
   printf("  On DC volts each reads about 1.65 V at the module socket; a meter that counts Hz shows the rate instead.\n");
   int mn[2], mx[2];
   capture(RATE / 10, mn, mx);
@@ -1044,19 +1047,36 @@ static bool p4_read(i2c_master_dev_handle_t d, const uint8_t *reg, size_t reg_le
   return d && i2c_master_transmit_receive(d, reg, reg_len, v, n, 50) == ESP_OK;
 }
 
+static bool p4_bus_start() {
+  if (p4_bus) return true;
+  i2c_master_bus_config_t bc = {};
+  bc.i2c_port = -1;
+  bc.sda_io_num = GPIO_NUM_7;
+  bc.scl_io_num = GPIO_NUM_8;
+  bc.clk_source = I2C_CLK_SRC_DEFAULT;
+  bc.glitch_ignore_cnt = 7;
+  return i2c_new_master_bus(&bc, &p4_bus) == ESP_OK;
+}
+
+// At boot: a reset leaves the Olimex bridge as the last program set it, because the ribbon's 3V3 stays up. After
+// the camera program its HDMI output is still on with no MIPI coming in, and the TLQ-SCREEN gets a free-running
+// signal (a flash about every 2 s). So it is turned off: the main page's 0x33 = 0x0C, as esp_lcd_lt8912b does.
+static void bridge_quiet() {
+  if (!p4_bus_start() || i2c_master_probe(p4_bus, ADDR_LT_MAIN, 20) != ESP_OK) return;
+  i2c_master_dev_handle_t d = p4_dev(ADDR_LT_MAIN);
+  const uint8_t r33 = 0x33, off[2] = {0x33, 0x0C};
+  uint8_t was = 0;
+  const bool ok = p4_read(d, &r33, 1, &was, 1) && i2c_master_transmit(d, off, 2, 50) == ESP_OK;
+  i2c_master_bus_rm_device(d);
+  printf("\nThe Olimex bridge answers on the P4's I2C: its HDMI output %s (0x33 was %02X).\n",
+         ok ? "is now off, until a camera program runs" : "could NOT be turned off", was);
+}
+
 static void block_camera_display() {
   printf("Block 15, camera and display: the P4 board's own I2C (SDA GPIO7, SCL GPIO8) at 100 kHz, on both ribbons\n");
-  if (!p4_bus) {
-    i2c_master_bus_config_t bc = {};
-    bc.i2c_port = -1;
-    bc.sda_io_num = GPIO_NUM_7;
-    bc.scl_io_num = GPIO_NUM_8;
-    bc.clk_source = I2C_CLK_SRC_DEFAULT;
-    bc.glitch_ignore_cnt = 7;
-    if (i2c_new_master_bus(&bc, &p4_bus) != ESP_OK) {
-      verdict(false, "the second I2C bus would not start");
-      return;
-    }
+  if (!p4_bus_start()) {
+    verdict(false, "the second I2C bus would not start");
+    return;
   }
   bool seen[0x78] = {};
   for (uint8_t a = 0x08; a < 0x78; a++) {
@@ -1288,6 +1308,7 @@ extern "C" void app_main() {
   powered = i2c_present(ADDR_EE);
 
   help();
+  bridge_quiet();
   if (ldo_err != ESP_OK)
     printf("\nLDO channel 4 did not take 3.3 V (%s): the ADC and DAC will not answer.\n", esp_err_to_name(ldo_err));
   if (!powered)

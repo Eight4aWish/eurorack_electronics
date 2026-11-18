@@ -168,7 +168,8 @@ What it means for the module:
   both want it. Firmware has to choose: a video timing from the fixed PLLs (Espressif's 80 MHz
   1280×720 comes from 240 MHz ÷ 3), or the MCLK from elsewhere. The TLQ-SCREEN must have its own
   39.07 MHz, which no fixed PLL divides to, so on Health the APLL goes to the screen.
-  - **The codec's way out (2026-11-18, not yet tried on the bench):** I2S can also run from the
+  - **The codec's way out (2026-11-18, proved on the bench the same day: the Rev B test program
+    runs this way, and its audio step passes with the same readings):** I2S can also run from the
     fixed 160 MHz PLL on v3 silicon (ESP-IDF `soc/esp32p4/.../clk_tree_defs.h`, `SOC_I2S_CLKS`;
     the board's chip is v3.2). 160 MHz ÷ 13 = 12.3077 MHz, a whole-number division, so no
     fractional-divider jitter. At 256 fS that makes fS 48.077 kHz, 0.16 % above 48 kHz.

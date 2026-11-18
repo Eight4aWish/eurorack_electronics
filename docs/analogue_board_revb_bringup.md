@@ -186,6 +186,10 @@ DVI mode: the driver sets HDMI, and the program writes 0xB2 = 0x00 after it.
 
 Flash it as in step 2, from `firmware/p4_camera_screen`. Step 2 puts the test program back.
 
+A reset doesn't reset the bridge, because the ribbon's 3V3 stays up. So after the camera program
+its HDMI output stays on with no video coming in, and the screen flashes about every 2 s. The
+test program turns it off at boot (the bridge's 0x33 = 0x0C) and says so under the menu.
+
 | Watch | Pass |
 |---|---|
 | the console | the EDID line reads 720x720, 812x802, 39.07 MHz; the bridge reads V 802 (lines a frame), DVI mode, hot-plug high; the camera at about 43 frames/s |
@@ -298,3 +302,4 @@ checks their holes in one go, then tests them a batch at a time, so a fault poin
 | 2026-11-18 | 6 | Step 8: block 9, X, Y and Z sweep 0 to 4089 on POT4, POT2 and POT6; POT1, 3 and 5 and CH6-7 stay at 0. **Step 8 passes, and with it stage 6: Health's board and deck pass every test** | | |
 | 2026-11-18 | 6 | Plugged back in: step 3 passes again (CV1-6 and CVI7 +0.204 to +0.207 V open). Step 9, new block 15: the camera reads 56 47 (OV5647); the bridge 12 B2 (LT8912B) at 0x48, 0x49 and 0x4A; the TLQ-SCREEN's EDID whole, maker APF, product AA61, "720x720 CVT", 720×720, 812×802, 39.07 MHz, as apf's `edid_720r2.bin`. Also answering, not identified: 0x4B, and 0x51 to 0x57 (the capture card in October gave only 0x50). The ES8311 at 0x18. **Step 9 passes: both ribbons' power and I2C work; the lanes are not tested yet** | | |
 | 2026-11-18 | 6 | Step 10, `firmware/p4_camera_screen`: the EDID matches 720×720p60r2 (syncs h− v−); APLL 39 070 007 Hz; the bridge reads V 802 from the DSI input (H 16628), DVI mode, hot-plug high; OV5647 detected, 1280×960; 43.0 and 43.2 frames/s to the screen (October's 1280×720 HDMI: about 22). David: the colour bars, then the camera, upright and steady. **Step 10 passes: the camera on the TLQ-SCREEN** | | |
+| 2026-11-18 | 6 | The codec moved off the APLL, which the screen needs: MCLK from the fixed 160 MHz PLL ÷ 13 (12.3077 MHz), fS 48.077 kHz. Block 6 sends samples with no APLL warning. Step 7's block 10 again: the sine heard on both; OUT-L into IN-L 9.9 Vpp, OUT-R into IN-R 10.2 Vpp, both inverted; IN-R empty, 9.8 and 9.9 Vpp through the normal; the silent OUT-R in IN-R, 9.9 and 0.0 Vpp. The same as on the APLL. **Step 7 passes on the new clock.** Back on the test program, David saw the screen flash about every 2 s: the bridge's 0x33 read 0E, HDMI on, left from the camera program. The test program now turns it off at boot | | |
