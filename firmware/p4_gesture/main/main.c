@@ -8,13 +8,16 @@
  *   the hand on the screen's left  -> CV1 (X1 on the panel), 0 to 10 V -> Oneiroi's supersaw volume jack
  *   the hand on the screen's right -> CV3 (X2 on the panel), 0 to 10 V -> Oneiroi's filter cutoff jack (knob left)
  *
- * A lane is 0 V with the hand at NEAR_HW head-widths from the head or closer, and 10 V at FAR_HW or further. If its
- * hand (or the head) goes unseen for HOLD_US, the lane falls back to 0 V. The CV glides between detections.
+ * A lane is 0 V with the hand at NEAR_HW head-widths from the head or closer, and 10 V at FAR_HW or further. Like a
+ * fader let go of, a lane holds its value while its hand goes unseen; bringing the hand in to the head turns it down.
+ * The head is a reference that holds too: once found, each new face detection only nudges it (HEAD_SMOOTH), and the
+ * face detector runs on every FACE_EVERY-th picture, so the hands get the time. The CV glides between detections.
  *
- * The screen shows what the detectors found: the head in red, the hands in white, a grey line from the head to each.
- * The console prints, every 5 s, detections a second, each model's time, how often the head and hands were seen,
- * and the range of each lane in head-widths (to set NEAR_HW and FAR_HW from real playing). 'f' on the console swaps
- * the face detector between Espressif's fast two-stage one and the 224x224 one.
+ * The screen shows the head reference in red, hands found in this picture in white, held hands in grey, and a grey
+ * line from the head to each hand. The console prints, every 5 s, detections a second, each model's time, how often
+ * the face and hands were found, and the range of each lane in head-widths (to set NEAR_HW and FAR_HW from real
+ * playing). 'f' on the console swaps the face detector between Espressif's 224x224 one (the default) and its fast
+ * two-stage one, which found no face at 2.5 m on the first bench (2026-11-19).
  *
  * Pipeline: OV5647 1280x960 -> ISP -> RGB565 -> PPA: the middle 960x960 -> (a) 720x720, a quarter clockwise, to the
  * screen; (b) 320x320, upright, to the detectors when they are ready for another picture.
@@ -62,7 +65,8 @@ static const char *TAG = "gesture";
 #define NEAR_HW         1.0f        // head-widths from the head: 0 V at this or closer
 #define FAR_HW          4.0f        // ...and 10 V at this or further
 #define LANE_VOLTS      10.0f
-#define HOLD_US         1000000     // a lane holds this long without its hand or the head, then falls to 0 V
+#define FACE_EVERY      3           // once the head is known, the face detector runs on every third picture
+#define HEAD_SMOOTH     0.3f        // how far each new face detection moves the head reference
 #define SLEW_MS         50.0f       // the CV's glide between detections (a one-pole time constant)
 #define CV_TICK_MS      2
 
@@ -132,13 +136,14 @@ static TaskHandle_t det_task_handle;
 static volatile bool det_want;              // the detectors are ready for another picture
 
 typedef struct {
-    bool has_face, has_hand[2];             // [0] the hand on the screen's left, [1] on the right
-    box_t face, hand[2];
+    bool has_head, has_hand[2];             // [0] the hand on the screen's left, [1] on the right
+    bool hand_live[2];                      // found in this picture, or held from an earlier one
+    box_t head, hand[2];                    // the head is the smoothed reference
 } scene_t;
 static portMUX_TYPE scene_lock = portMUX_INITIALIZER_UNLOCKED;
 static scene_t scene;                       // the latest detection, for the overlay
 static float lane_target[2];                // volts
-static int64_t lane_seen[2];                // when each lane last had its hand and the head
+static bool lane_set[2];                    // each lane has had a hand and a head at least once
 
 // ---- the analogue board
 static bool board_ready;
@@ -364,12 +369,12 @@ static void draw_scene(uint16_t *fb)
     taskENTER_CRITICAL(&scene_lock);
     s = scene;
     taskEXIT_CRITICAL(&scene_lock);
-    if (!s.has_face && !s.has_hand[0] && !s.has_hand[1]) {
+    if (!s.has_head && !s.has_hand[0] && !s.has_hand[1]) {
         return;
     }
-    if (s.has_face) {
+    if (s.has_head) {
         int hx, hy;
-        to_screen((s.face.x0 + s.face.x1) / 2, (s.face.y0 + s.face.y1) / 2, &hx, &hy);
+        to_screen((s.head.x0 + s.head.x1) / 2, (s.head.y0 + s.head.y1) / 2, &hx, &hy);
         for (int i = 0; i < 2; i++) {
             if (s.has_hand[i]) {
                 int x, y;
@@ -377,11 +382,11 @@ static void draw_scene(uint16_t *fb)
                 draw_line(fb, hx, hy, x, y, RGB565_GREY);
             }
         }
-        draw_box(fb, &s.face, RGB565_RED);
+        draw_box(fb, &s.head, RGB565_RED);
     }
     for (int i = 0; i < 2; i++) {
         if (s.has_hand[i]) {
-            draw_box(fb, &s.hand[i], RGB565_WHITE);
+            draw_box(fb, &s.hand[i], s.hand_live[i] ? RGB565_WHITE : RGB565_GREY);
         }
     }
     // write the drawing back to PSRAM for the display DMA, and drop the lines so the next fill reads fresh
@@ -468,12 +473,15 @@ static float centre_y(const box_t *b) { return (b->y0 + b->y1) * 0.5f; }
 static void detect_task(void *arg)
 {
     detect_init();
-    int runs = 0, with_head = 0, two_hands = 0, one_hand = 0;
+    int runs = 0, face_runs = 0, faces_found = 0, hands_seen[2] = {0, 0};
     int64_t face_us = 0, hand_us = 0;
     float lo[2] = {INFINITY, INFINITY}, hi[2] = {0, 0};
     int64_t report = esp_timer_get_time();
-    box_t head = {0};
-    int64_t head_seen = 0;
+    // the head reference, once known: centre and size, each new face detection nudging it by HEAD_SMOOTH
+    bool head_known = false;
+    float hx = 0, hy = 0, hw = 0, hh = 0;
+    int since_face = 0;
+    scene_t s = {0};  // the hands persist from picture to picture, held until found again
     for (;;) {
         det_want = true;
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
@@ -486,40 +494,52 @@ static void detect_task(void *arg)
         }
 
         box_t f[4], h[8];
+        int nf = 0;
         const int64_t a = esp_timer_get_time();
-        const int nf = detect_faces(det_buf, DET, DET, f, 4);
+        if (!head_known || ++since_face >= FACE_EVERY) {
+            since_face = 0;
+            nf = detect_faces(det_buf, DET, DET, f, 4);
+            face_us += esp_timer_get_time() - a;
+            face_runs++;
+        }
         const int64_t b = esp_timer_get_time();
         const int nh = detect_hands(det_buf, DET, DET, h, 8);
         const int64_t now = esp_timer_get_time();
-        face_us += b - a;
         hand_us += now - b;
         runs++;
 
-        if (nf > 0) {
-            head = f[0];  // the most likely face
-            head_seen = now;
-            with_head++;
+        if (nf > 0) {  // the most likely face
+            const float fx = centre_x(&f[0]), fy = centre_y(&f[0]), fw = f[0].x1 - f[0].x0, fh = f[0].y1 - f[0].y0;
+            const float k = head_known ? HEAD_SMOOTH : 1;
+            hx += k * (fx - hx);
+            hy += k * (fy - hy);
+            hw += k * (fw - hw);
+            hh += k * (fh - hh);
+            head_known = true;
+            faces_found++;
         }
-        const bool head_fresh = head_seen && now - head_seen < HOLD_US;
-        // each side of the head (or of the picture, with no head yet) takes its most likely hand
-        const float split = head_fresh ? centre_x(&head) : DET / 2.0f;
-        scene_t s = {.has_face = nf > 0, .face = head};
+        if (head_known) {
+            s.has_head = true;
+            s.head = (box_t){(int)(hx - hw / 2), (int)(hy - hh / 2), (int)(hx + hw / 2), (int)(hy + hh / 2), 1};
+        }
+        // each side of the head (or of the picture, with no head yet) takes its most likely hand; a side with none
+        // found keeps its last hand, held
+        const float split = head_known ? hx : DET / 2.0f;
+        s.hand_live[0] = s.hand_live[1] = false;
         for (int i = 0; i < nh; i++) {
             const int side = centre_x(&h[i]) < split ? 0 : 1;
-            if (!s.has_hand[side]) {  // the boxes come highest score first
-                s.has_hand[side] = true;
+            if (!s.hand_live[side]) {  // the boxes come highest score first
+                s.hand_live[side] = s.has_hand[side] = true;
                 s.hand[side] = h[i];
+                hands_seen[side]++;
             }
         }
-        two_hands += s.has_hand[0] && s.has_hand[1];
-        one_hand += s.has_hand[0] != s.has_hand[1];
 
         float target[2];
         bool update[2] = {false, false};
-        const float head_w = (float)(head.x1 - head.x0);
         for (int i = 0; i < 2; i++) {
-            if (s.has_hand[i] && head_fresh && head_w > 0) {
-                const float d = hypotf(centre_x(&s.hand[i]) - centre_x(&head), centre_y(&s.hand[i]) - centre_y(&head)) / head_w;
+            if (s.hand_live[i] && head_known && hw > 0) {
+                const float d = hypotf(centre_x(&s.hand[i]) - hx, centre_y(&s.hand[i]) - hy) / hw;
                 lo[i] = fminf(lo[i], d);
                 hi[i] = fmaxf(hi[i], d);
                 const float x = (d - NEAR_HW) / (FAR_HW - NEAR_HW);
@@ -532,27 +552,28 @@ static void detect_task(void *arg)
         for (int i = 0; i < 2; i++) {
             if (update[i]) {
                 lane_target[i] = target[i];
-                lane_seen[i] = now;
+                lane_set[i] = true;
             }
         }
         taskEXIT_CRITICAL(&scene_lock);
 
         if (now - report >= 5000000) {
-            ESP_LOGI(TAG, "%.1f detections/s; face %.0f ms (%s), hands %.0f ms; head in %d%%, two hands %d%%, one %d%%",
-                     runs * 1e6 / (now - report), face_us / 1000.0 / runs, detect_face_model(), hand_us / 1000.0 / runs,
-                     100 * with_head / runs, 100 * two_hands / runs, 100 * one_hand / runs);
+            ESP_LOGI(TAG, "%.1f detections/s; face %.0f ms (%s, found in %d of %d runs), hands %.0f ms; "
+                     "left hand in %d%%, right in %d%%",
+                     runs * 1e6 / (now - report), face_runs ? face_us / 1000.0 / face_runs : 0.0, detect_face_model(),
+                     faces_found, face_runs, hand_us / 1000.0 / runs, 100 * hands_seen[0] / runs, 100 * hands_seen[1] / runs);
             for (int i = 0; i < 2; i++) {
                 if (hi[i] > 0) {
                     ESP_LOGI(TAG, "  %s lane (CV%d): %.1f to %.1f head-widths from the head (0 V at %.1f, 10 V at %.1f)",
                              i ? "right" : "left", i ? LANE_CH_RIGHT + 1 : LANE_CH_LEFT + 1, lo[i], hi[i], NEAR_HW, FAR_HW);
                 } else {
-                    ESP_LOGI(TAG, "  %s lane (CV%d): no hand with a head", i ? "right" : "left",
-                             i ? LANE_CH_RIGHT + 1 : LANE_CH_LEFT + 1);
+                    ESP_LOGI(TAG, "  %s lane (CV%d): %s", i ? "right" : "left", i ? LANE_CH_RIGHT + 1 : LANE_CH_LEFT + 1,
+                             head_known ? "no hand found, holding" : "waiting for the head");
                 }
                 lo[i] = INFINITY;
                 hi[i] = 0;
             }
-            runs = with_head = two_hands = one_hand = 0;
+            runs = face_runs = faces_found = hands_seen[0] = hands_seen[1] = 0;
             face_us = hand_us = 0;
             report = now;
         }
@@ -645,7 +666,7 @@ static bool board_start(void)
     return true;
 }
 
-// each lane glides to its target, or to 0 V once its hand or the head has gone unseen for HOLD_US
+// each lane glides to its target, and holds it while its hand goes unseen; 0 V until it has first had one
 static void cv_task(void *arg)
 {
     static const uint8_t ch[2] = {LANE_CH_LEFT, LANE_CH_RIGHT};
@@ -655,11 +676,10 @@ static void cv_task(void *arg)
     TickType_t wake = xTaskGetTickCount();
     for (;;) {
         vTaskDelayUntil(&wake, pdMS_TO_TICKS(CV_TICK_MS));
-        const int64_t now = esp_timer_get_time();
         float target[2];
         taskENTER_CRITICAL(&scene_lock);
         for (int i = 0; i < 2; i++) {
-            target[i] = lane_seen[i] && now - lane_seen[i] < HOLD_US ? lane_target[i] : 0;
+            target[i] = lane_set[i] ? lane_target[i] : 0;
         }
         taskEXIT_CRITICAL(&scene_lock);
         for (int i = 0; i < 2; i++) {

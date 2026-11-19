@@ -7,20 +7,21 @@
 
 static HandDetect *hands;
 static HumanFaceDetect *faces[2];
-static int face_model;  // 0: MSR+MNP, 1: ESPDet-Pico 224
-static const char *const FACE_NAME[2] = {"MSR+MNP", "ESPDet-Pico 224"};
+// 0: ESPDet-Pico 224, the default since the bench of 2026-11-19 (MSR+MNP found no face at 2.5 m); 1: MSR+MNP
+static int face_model;
+static const char *const FACE_NAME[2] = {"ESPDet-Pico 224", "MSR+MNP"};
 
 void detect_init(void)
 {
     hands = new HandDetect(HandDetect::ESPDET_PICO_224_224_HAND);
-    faces[0] = new HumanFaceDetect(HumanFaceDetect::MSRMNP_S8_V1);
+    faces[0] = new HumanFaceDetect(HumanFaceDetect::ESPDET_PICO_224_224_FACE);
 }
 
 void detect_swap_face_model(void)
 {
     face_model ^= 1;
     if (!faces[face_model]) {
-        faces[face_model] = new HumanFaceDetect(HumanFaceDetect::ESPDET_PICO_224_224_FACE);
+        faces[face_model] = new HumanFaceDetect(HumanFaceDetect::MSRMNP_S8_V1);
     }
 }
 

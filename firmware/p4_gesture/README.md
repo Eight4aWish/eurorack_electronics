@@ -12,20 +12,23 @@ sideways, forward or back.
 
 - **The lane's range:** a lane is 0 V with its hand 1 head-width from the head or closer. It reaches 10 V at 4
   head-widths. These are `NEAR_HW` and `FAR_HW` in `main/main.c`.
-- **When a hand is lost:** if a lane's hand, or the head, goes unseen for a second, the lane falls back to 0 V.
+- **When a hand is lost:** like a fader let go of, a lane holds its value while its hand goes unseen. Bringing the
+  hand in to the head turns the lane down.
+- **The head reference holds too.** Once found, each new face detection only nudges it (`HEAD_SMOOTH`). The face
+  detector runs on every third picture (`FACE_EVERY`), so the hands get the time.
 - **Smoothing:** the CV glides between detections with a 50 ms time constant. The other four CV jacks stay switched
   off.
 
-**The screen** shows what the detectors found: the head in red, the hands in white, and a grey line from the head
-to each hand.
+**The screen** shows the head reference in red, hands found in this picture in white, held hands in grey, and a grey
+line from the head to each hand.
 
 **The console** (115200 on the board's USB-C) prints every 5 seconds:
 - detections a second, and each model's time;
 - how often the head and the hands were seen;
 - each lane's range in head-widths, for setting `NEAR_HW` and `FAR_HW` from real playing.
 
-Typing **`f`** swaps the face detector between Espressif's fast two-stage one (MSR+MNP, the default) and the 224×224
-one (ESPDet-Pico, slower).
+Typing **`f`** swaps the face detector between Espressif's 224×224 one (ESPDet-Pico, the default) and its fast
+two-stage one (MSR+MNP), which found no face at 2.5 m on the first bench.
 
 **The pipeline:**
 - The OV5647 delivers 1280×960; the ISP turns it into RGB565.
@@ -42,6 +45,21 @@ one (ESPDet-Pico, slower).
 5. The switches of CV1 and CV3.
 
 Without the rack on, the screen still runs, but there's no CV out.
+
+**First bench, 2026-11-19** (2.5 m from the camera, with the background cleared of pictures and dark objects):
+- **Detections:** about 8 a second. The face model takes 68 ms on every third run, and the hands 65 ms on every run.
+  Espressif quotes 45 ms for the hand model alone.
+- **Hands:** each hand was found in 60–90 % of runs while playing. The face was found in 3–12 of every 14 face runs,
+  and the held reference covers the gaps.
+- **Lane range:** the lanes used 0.7–2.6 head-widths, so with `FAR_HW` at 4 a lane peaked at about 5 V.
+- **Screen:** the picture runs at about 22 frames a second while the detectors run, against 43 without them. The
+  camera, the screen and the models all share the PSRAM.
+- **Colour:** the camera picture was close to black and white in that room. The OV5647's default tuning
+  (`esp_cam_sensor/sensors/ov5647/cfg/ov5647_default.json`) turns its colour correction off below an average
+  brightness of 28.
+- **The first version** dropped a lane to 0 V a second after its hand or the head went unseen. David's verdict:
+  "amazing, but as it stands pretty useless", because the supersaw dropped out with every miss. Holding the lanes
+  and the head came from that.
 
 **Build and flash** (ESP-IDF 5.5.4, as in `docs/analogue_board_esp32p4.md`):
 
