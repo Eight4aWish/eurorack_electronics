@@ -1,26 +1,27 @@
 /*
  * Health's first gesture program (ESP-IDF 5.5.4, Waveshare ESP32-P4-WIFI6 on the analogue board Rev B).
  *
- * The camera shows on the TLQ-SCREEN as in firmware/p4_camera_screen (bring-up step 10), and Espressif's face and
- * hand detectors (esp-dl) look at the same square picture. The head is the reference: each hand's distance from it,
- * counted in head-widths so it holds when the player steps about, is a fader-like lane on a CV out.
+ * The camera shows on the TLQ-SCREEN as in firmware/p4_camera_screen (bring-up step 10), and Espressif's hand
+ * detector (esp-dl) looks at the same square picture. The player stands in the middle, about 2.5 m away. Each half
+ * of the picture is a vertical fader, and the height of the hand on it sets a CV out:
  *
  *   the hand on the screen's left  -> CV1 (X1 on the panel), 0 to 10 V -> Oneiroi's supersaw volume jack
  *   the hand on the screen's right -> CV3 (X2 on the panel), 0 to 10 V -> Oneiroi's filter cutoff jack (knob left)
  *
- * A lane is 0 V with the hand at NEAR_HW head-widths from the head or closer, and 10 V at FAR_HW or further. Like a
- * fader let go of, a lane holds its value while its hand goes unseen; bringing the hand in to the head turns it down.
- * The head is a reference that holds too: once found, each new face detection only nudges it (HEAD_SMOOTH), and the
- * face detector runs on every FACE_EVERY-th picture, so the hands get the time. The CV glides between detections.
+ * A lane is 0 V with its hand's centre in the bottom END_STOP of the picture, 10 V in the top END_STOP, and in
+ * proportion between (a hand's centre can't reach the very edge, so the end stops sit a little in). Only the height
+ * counts; the middle of the picture divides the two hands. Like a fader let go of, a lane holds its value while its
+ * hand goes unseen. The CV glides between detections.
  *
- * The screen shows the head reference in red, hands found in this picture in white, held hands in grey, and a grey
- * line from the head to each hand. The console prints, every 5 s, detections a second, each model's time, how often
- * the face and hands were found, and the range of each lane in head-widths (to set NEAR_HW and FAR_HW from real
- * playing). 'f' on the console swaps the face detector between Espressif's 224x224 one (the default) and its fast
- * two-stage one, which found no face at 2.5 m on the first bench (2026-11-19).
+ * Head detection was tried and dropped for now (David, 2026-11-19): Espressif's fast face model found no face at
+ * 2.5 m, and its 224x224 one found it in about half its runs at 68 ms each. The middle of the screen stands in for it.
+ *
+ * The screen shows a grey line down the middle, hands found in this picture in white, held hands in grey, and each
+ * fader's level as a grey line across its half at the hand's height. The console prints, every 5 s, detections a
+ * second, the model's time, how often each hand was found, and how high each hand went.
  *
  * Pipeline: OV5647 1280x960 -> ISP -> RGB565 -> PPA: the middle 960x960 -> (a) 720x720, a quarter clockwise, to the
- * screen; (b) 320x320, upright, to the detectors when they are ready for another picture.
+ * screen; (b) 320x320, upright, to the detector when it is ready for another picture.
  *
  * The analogue board: LDO channel 4 at 3.3 V first (GPIO46-48 are in its bank), then the EEPROM must answer before
  * any other bus starts, then the DAC8568's start-up order (spec §15, requirement 3): every jack switch off, 0 V codes,
@@ -45,8 +46,6 @@
 #include "driver/gpio.h"
 #include "driver/i2c_master.h"
 #include "driver/spi_master.h"
-#include "driver/uart.h"
-#include "driver/uart_vfs.h"
 #include "driver/ppa.h"
 #include "esp_lcd_panel_ops.h"
 #include "esp_lcd_panel_io.h"
@@ -62,11 +61,8 @@ static const char *TAG = "gesture";
 // ---- the lanes
 #define LANE_CH_LEFT    0           // CV1, X1 on the panel: the hand on the screen's left
 #define LANE_CH_RIGHT   2           // CV3, X2 on the panel: the hand on the screen's right
-#define NEAR_HW         1.0f        // head-widths from the head: 0 V at this or closer
-#define FAR_HW          4.0f        // ...and 10 V at this or further
+#define END_STOP        0.1f        // the bottom and top tenth of the picture: 0 V and 10 V
 #define LANE_VOLTS      10.0f
-#define FACE_EVERY      3           // once the head is known, the face detector runs on every third picture
-#define HEAD_SMOOTH     0.3f        // how far each new face detection moves the head reference
 #define SLEW_MS         50.0f       // the CV's glide between detections (a one-pole time constant)
 #define CV_TICK_MS      2
 
@@ -115,7 +111,6 @@ static const int BOARD_PINS[] = {46, 33, 32, 47, 48, 3, 2, 5, 24, 25, 50, 49, 29
 #define SPI_CONV_HZ     4000000
 
 #define RGB565_WHITE    0xFFFF
-#define RGB565_RED      0xE022              // the brand red, #E30613
 #define RGB565_GREY     0x8410
 
 // ---- the screen and camera
@@ -136,14 +131,14 @@ static TaskHandle_t det_task_handle;
 static volatile bool det_want;              // the detectors are ready for another picture
 
 typedef struct {
-    bool has_head, has_hand[2];             // [0] the hand on the screen's left, [1] on the right
+    bool has_hand[2];                       // [0] the hand on the screen's left, [1] on the right
     bool hand_live[2];                      // found in this picture, or held from an earlier one
-    box_t head, hand[2];                    // the head is the smoothed reference
+    box_t hand[2];
 } scene_t;
 static portMUX_TYPE scene_lock = portMUX_INITIALIZER_UNLOCKED;
 static scene_t scene;                       // the latest detection, for the overlay
 static float lane_target[2];                // volts
-static bool lane_set[2];                    // each lane has had a hand and a head at least once
+static bool lane_set[2];                    // each lane has had a hand at least once
 
 // ---- the analogue board
 static bool board_ready;
@@ -369,23 +364,16 @@ static void draw_scene(uint16_t *fb)
     taskENTER_CRITICAL(&scene_lock);
     s = scene;
     taskEXIT_CRITICAL(&scene_lock);
-    if (!s.has_head && !s.has_hand[0] && !s.has_hand[1]) {
-        return;
-    }
-    if (s.has_head) {
-        int hx, hy;
-        to_screen((s.head.x0 + s.head.x1) / 2, (s.head.y0 + s.head.y1) / 2, &hx, &hy);
-        for (int i = 0; i < 2; i++) {
-            if (s.has_hand[i]) {
-                int x, y;
-                to_screen((s.hand[i].x0 + s.hand[i].x1) / 2, (s.hand[i].y0 + s.hand[i].y1) / 2, &x, &y);
-                draw_line(fb, hx, hy, x, y, RGB565_GREY);
-            }
-        }
-        draw_box(fb, &s.head, RGB565_RED);
-    }
+    int xa, ya, xb, yb;
+    to_screen(DET / 2, 0, &xa, &ya);  // the middle, top to bottom of the picture
+    to_screen(DET / 2, DET - 1, &xb, &yb);
+    draw_line(fb, xa, ya, xb, yb, RGB565_GREY);
     for (int i = 0; i < 2; i++) {
         if (s.has_hand[i]) {
+            const int cy = (s.hand[i].y0 + s.hand[i].y1) / 2;
+            to_screen(i ? DET / 2 : 0, cy, &xa, &ya);  // the fader's level: across its half, at the hand's height
+            to_screen(i ? DET - 1 : DET / 2, cy, &xb, &yb);
+            draw_line(fb, xa, ya, xb, yb, RGB565_GREY);
             draw_box(fb, &s.hand[i], s.hand_live[i] ? RGB565_WHITE : RGB565_GREY);
         }
     }
@@ -468,89 +456,51 @@ static void camera_task(void *arg)
 // ============================================================================ the detectors
 
 static float centre_x(const box_t *b) { return (b->x0 + b->x1) * 0.5f; }
-static float centre_y(const box_t *b) { return (b->y0 + b->y1) * 0.5f; }
 
 static void detect_task(void *arg)
 {
     detect_init();
-    int runs = 0, face_runs = 0, faces_found = 0, hands_seen[2] = {0, 0};
-    int64_t face_us = 0, hand_us = 0;
+    int runs = 0, found[2] = {0, 0};
+    int64_t hand_us = 0;
     float lo[2] = {INFINITY, INFINITY}, hi[2] = {0, 0};
     int64_t report = esp_timer_get_time();
-    // the head reference, once known: centre and size, each new face detection nudging it by HEAD_SMOOTH
-    bool head_known = false;
-    float hx = 0, hy = 0, hw = 0, hh = 0;
-    int since_face = 0;
     scene_t s = {0};  // the hands persist from picture to picture, held until found again
     for (;;) {
         det_want = true;
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
         esp_cache_msync(det_buf, det_bytes, ESP_CACHE_MSYNC_FLAG_DIR_M2C);  // the PPA wrote it; read it fresh
 
-        uint8_t key;
-        if (uart_read_bytes(UART_NUM_0, &key, 1, 0) == 1 && (key == 'f' || key == 'F')) {
-            detect_swap_face_model();
-            ESP_LOGI(TAG, "face detector now %s (it loads on its first run)", detect_face_model());
-        }
-
-        box_t f[4], h[8];
-        int nf = 0;
+        box_t h[8];
         const int64_t a = esp_timer_get_time();
-        if (!head_known || ++since_face >= FACE_EVERY) {
-            since_face = 0;
-            nf = detect_faces(det_buf, DET, DET, f, 4);
-            face_us += esp_timer_get_time() - a;
-            face_runs++;
-        }
-        const int64_t b = esp_timer_get_time();
         const int nh = detect_hands(det_buf, DET, DET, h, 8);
         const int64_t now = esp_timer_get_time();
-        hand_us += now - b;
+        hand_us += now - a;
         runs++;
 
-        if (nf > 0) {  // the most likely face
-            const float fx = centre_x(&f[0]), fy = centre_y(&f[0]), fw = f[0].x1 - f[0].x0, fh = f[0].y1 - f[0].y0;
-            const float k = head_known ? HEAD_SMOOTH : 1;
-            hx += k * (fx - hx);
-            hy += k * (fy - hy);
-            hw += k * (fw - hw);
-            hh += k * (fh - hh);
-            head_known = true;
-            faces_found++;
-        }
-        if (head_known) {
-            s.has_head = true;
-            s.head = (box_t){(int)(hx - hw / 2), (int)(hy - hh / 2), (int)(hx + hw / 2), (int)(hy + hh / 2), 1};
-        }
-        // each side of the head (or of the picture, with no head yet) takes its most likely hand; a side with none
-        // found keeps its last hand, held
-        const float split = head_known ? hx : DET / 2.0f;
+        // each half of the picture takes its most likely hand; a half with none found keeps its last hand, held
         s.hand_live[0] = s.hand_live[1] = false;
         for (int i = 0; i < nh; i++) {
-            const int side = centre_x(&h[i]) < split ? 0 : 1;
+            const int side = centre_x(&h[i]) < DET / 2.0f ? 0 : 1;
             if (!s.hand_live[side]) {  // the boxes come highest score first
                 s.hand_live[side] = s.has_hand[side] = true;
                 s.hand[side] = h[i];
-                hands_seen[side]++;
+                found[side]++;
             }
         }
-
         float target[2];
-        bool update[2] = {false, false};
         for (int i = 0; i < 2; i++) {
-            if (s.hand_live[i] && head_known && hw > 0) {
-                const float d = hypotf(centre_x(&s.hand[i]) - hx, centre_y(&s.hand[i]) - hy) / hw;
-                lo[i] = fminf(lo[i], d);
-                hi[i] = fmaxf(hi[i], d);
-                const float x = (d - NEAR_HW) / (FAR_HW - NEAR_HW);
+            if (s.hand_live[i]) {
+                const float up = 1 - (s.hand[i].y0 + s.hand[i].y1) * 0.5f / DET;  // 0 bottom, 1 top
+                lo[i] = fminf(lo[i], up);
+                hi[i] = fmaxf(hi[i], up);
+                const float x = (up - END_STOP) / (1 - 2 * END_STOP);
                 target[i] = LANE_VOLTS * (x < 0 ? 0 : x > 1 ? 1 : x);
-                update[i] = true;
             }
         }
         taskENTER_CRITICAL(&scene_lock);
         scene = s;
         for (int i = 0; i < 2; i++) {
-            if (update[i]) {
+            if (s.hand_live[i]) {
                 lane_target[i] = target[i];
                 lane_set[i] = true;
             }
@@ -558,23 +508,21 @@ static void detect_task(void *arg)
         taskEXIT_CRITICAL(&scene_lock);
 
         if (now - report >= 5000000) {
-            ESP_LOGI(TAG, "%.1f detections/s; face %.0f ms (%s, found in %d of %d runs), hands %.0f ms; "
-                     "left hand in %d%%, right in %d%%",
-                     runs * 1e6 / (now - report), face_runs ? face_us / 1000.0 / face_runs : 0.0, detect_face_model(),
-                     faces_found, face_runs, hand_us / 1000.0 / runs, 100 * hands_seen[0] / runs, 100 * hands_seen[1] / runs);
+            ESP_LOGI(TAG, "%.1f detections/s; hands %.0f ms; left hand found in %d%%, right in %d%%",
+                     runs * 1e6 / (now - report), hand_us / 1000.0 / runs, 100 * found[0] / runs, 100 * found[1] / runs);
             for (int i = 0; i < 2; i++) {
+                const int cv = i ? LANE_CH_RIGHT + 1 : LANE_CH_LEFT + 1;
                 if (hi[i] > 0) {
-                    ESP_LOGI(TAG, "  %s lane (CV%d): %.1f to %.1f head-widths from the head (0 V at %.1f, 10 V at %.1f)",
-                             i ? "right" : "left", i ? LANE_CH_RIGHT + 1 : LANE_CH_LEFT + 1, lo[i], hi[i], NEAR_HW, FAR_HW);
+                    ESP_LOGI(TAG, "  %s lane (CV%d): %.0f%% to %.0f%% of the way up (0 V at %.0f%%, 10 V at %.0f%%)",
+                             i ? "right" : "left", cv, 100 * lo[i], 100 * hi[i], 100 * END_STOP, 100 * (1 - END_STOP));
                 } else {
-                    ESP_LOGI(TAG, "  %s lane (CV%d): %s", i ? "right" : "left", i ? LANE_CH_RIGHT + 1 : LANE_CH_LEFT + 1,
-                             head_known ? "no hand found, holding" : "waiting for the head");
+                    ESP_LOGI(TAG, "  %s lane (CV%d): no hand found, holding", i ? "right" : "left", cv);
                 }
                 lo[i] = INFINITY;
                 hi[i] = 0;
             }
-            runs = face_runs = faces_found = hands_seen[0] = hands_seen[1] = 0;
-            face_us = hand_us = 0;
+            runs = found[0] = found[1] = 0;
+            hand_us = 0;
             report = now;
         }
     }
@@ -697,10 +645,6 @@ static void cv_task(void *arg)
 
 void app_main(void)
 {
-    // the console through the UART driver, so the detector task can read 'f' without blocking
-    uart_driver_install(UART_NUM_0, 256, 0, 0, NULL, 0);
-    uart_vfs_dev_use_driver(UART_NUM_0);
-
     // the MIPI PHY supply (camera and display share it): LDO channel 3 at 2.5 V
     esp_ldo_channel_handle_t ldo3 = NULL, ldo4 = NULL;
     esp_ldo_channel_config_t ldo3_cfg = {.chan_id = 3, .voltage_mv = 2500};
@@ -714,8 +658,8 @@ void app_main(void)
     board_ready = ldo4_err == ESP_OK && board_start();
     if (board_ready) {
         xTaskCreatePinnedToCore(cv_task, "cv", 3072, NULL, 6, NULL, 1);
-        ESP_LOGI(TAG, "CV out: the hand on the screen's left -> CV1 (X1), on the right -> CV3 (X2); 0 V at %.1f "
-                 "head-widths from the head, 10 V at %.1f", NEAR_HW, FAR_HW);
+        ESP_LOGI(TAG, "CV out, vertical faders: the hand on the screen's left -> CV1 (X1), on the right -> CV3 (X2); "
+                 "0 V at %.0f%% of the way up, 10 V at %.0f%%", 100 * END_STOP, 100 * (1 - END_STOP));
     }
 
     i2c_master_bus_handle_t bus = NULL;
@@ -747,5 +691,4 @@ void app_main(void)
     }
     xTaskCreatePinnedToCore(detect_task, "detect", 16384, NULL, 4, &det_task_handle, 0);
     xTaskCreatePinnedToCore(camera_task, "cam_screen", 4096, NULL, 5, NULL, 1);
-    ESP_LOGI(TAG, "'f' on the console swaps the face detector");
 }

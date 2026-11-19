@@ -1,41 +1,36 @@
 # p4_gesture: Health's first gesture program
 
-The camera shows on the TLQ-SCREEN, as in [`p4_camera_screen`](../p4_camera_screen). Espressif's face and hand
-detectors (esp-dl) look at the same square picture. The head is the reference: each hand's distance from it becomes
-a fader-like lane on a CV out. The distance is counted in head-widths, so the lane holds when the player steps
-sideways, forward or back.
+The camera shows on the TLQ-SCREEN, as in [`p4_camera_screen`](../p4_camera_screen), and Espressif's hand detector
+(esp-dl) looks at the same square picture. The player stands in the middle, about 2.5 m away. Each half of the
+picture is a vertical fader, and the height of the hand on it sets a CV out.
 
 | Hand | Out (panel) | Range | Patched to (Oneiroi) |
 |---|---|---|---|
 | on the screen's left | CV1 (X1) | 0–10 V | supersaw volume jack: the fader sets the ceiling |
 | on the screen's right | CV3 (X2) | 0–10 V | filter cutoff jack: cutoff knob fully left, MOD LEVEL down |
 
-- **The lane's range:** a lane is 0 V with its hand 1 head-width from the head or closer. It reaches 10 V at 4
-  head-widths. These are `NEAR_HW` and `FAR_HW` in `main/main.c`.
-- **When a hand is lost:** like a fader let go of, a lane holds its value while its hand goes unseen. Bringing the
-  hand in to the head turns the lane down.
-- **The head reference holds too.** Once found, each new face detection only nudges it (`HEAD_SMOOTH`). The face
-  detector runs on every third picture (`FACE_EVERY`), so the hands get the time.
+- **The fader's range:** a lane is 0 V with its hand's centre in the bottom tenth of the picture and 10 V in the top
+  tenth, in proportion between (`END_STOP` in `main/main.c`). A hand's centre can't reach the very edge, so the end
+  stops sit a little in. Only the height counts, and the middle of the picture divides the two hands.
+- **When a hand is lost:** like a fader let go of, a lane holds its value while its hand goes unseen.
 - **Smoothing:** the CV glides between detections with a 50 ms time constant. The other four CV jacks stay switched
   off.
+- **No head detection:** it was tried and dropped for now (David, 2026-11-19); see the bench notes below.
 
-**The screen** shows the head reference in red, hands found in this picture in white, held hands in grey, and a grey
-line from the head to each hand.
+**The screen** shows a grey line down the middle, hands found in this picture in white, held hands in grey, and each
+fader's level as a grey line across its half at the hand's height.
 
 **The console** (115200 on the board's USB-C) prints every 5 seconds:
-- detections a second, and each model's time;
-- how often the head and the hands were seen;
-- each lane's range in head-widths, for setting `NEAR_HW` and `FAR_HW` from real playing.
-
-Typing **`f`** swaps the face detector between Espressif's 224×224 one (ESPDet-Pico, the default) and its fast
-two-stage one (MSR+MNP), which found no face at 2.5 m on the first bench.
+- detections a second, and the model's time;
+- how often each hand was found;
+- how high each hand went, for setting `END_STOP` from real playing.
 
 **The pipeline:**
 - The OV5647 delivers 1280×960; the ISP turns it into RGB565.
 - The PPA takes the middle 960×960 square and makes two copies:
   - 720×720, turned a quarter clockwise, for the screen;
-  - 320×320, upright, for the detectors, whenever they are ready for another picture.
-- Detection runs on core 0. The screen and the CV outs run on core 1.
+  - 320×320, upright, for the detector, whenever it is ready for another picture.
+- Detection runs on core 0, at about 11 pictures a second (66 ms each). The screen and the CV outs run on core 1.
 
 **The analogue board starts in its spec order (§15):**
 1. LDO channel 4 at 3.3 V.
@@ -59,7 +54,10 @@ Without the rack on, the screen still runs, but there's no CV out.
   brightness of 28.
 - **The first version** dropped a lane to 0 V a second after its hand or the head went unseen. David's verdict:
   "amazing, but as it stands pretty useless", because the supersaw dropped out with every miss. Holding the lanes
-  and the head came from that.
+  came from that.
+- **Head detection dropped** (David): the face models found the head too rarely at 2.5 m to be the reference. The
+  lanes became vertical faders on each half of the picture (hands only, about 11 detections a second). That version
+  works for David; it is less reliable for a player with smaller hands.
 
 **Build and flash** (ESP-IDF 5.5.4, as in `docs/analogue_board_esp32p4.md`):
 
@@ -67,5 +65,5 @@ Without the rack on, the screen still runs, but there's no CV out.
 PATH="$HOME/esp/py312:/opt/homebrew/bin:$PATH" bash -c '. ~/esp/esp-idf/export.sh && idf.py build flash monitor'
 ```
 
-Rack on before the USB goes in. The models (`espressif/hand_detect`, `espressif/human_face_detect`) are built into
-the app image, so the partition table gives the app 12 MB.
+Rack on before the USB goes in. The model (`espressif/hand_detect`) is built into the app
+image, so the partition table gives the app 12 MB.

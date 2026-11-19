@@ -3,4 +3,3 @@ dependencies:
   espressif/esp_lcd_lt8912b: "^0.2.1"
   espressif/esp_video: ">=2.2,<3.0"
   espressif/hand_detect: "^0.2.1"
-  espressif/human_face_detect: "^0.5.2"

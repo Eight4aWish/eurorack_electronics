@@ -1,4 +1,4 @@
-// Espressif's face and hand detectors (esp-dl), behind a C interface for main.c
+// Espressif's hand detector (esp-dl), behind a C interface for main.c
 #pragma once
 #ifdef __cplusplus
 extern "C" {
@@ -10,12 +10,8 @@ typedef struct {
 } box_t;
 
 void detect_init(void);
-// faces or hands in an RGB565 (little-endian) picture: up to max boxes, highest score first; returns how many
-int detect_faces(void *rgb565, int w, int h, box_t *out, int max);
+// hands in an RGB565 (little-endian) picture: up to max boxes, highest score first; returns how many
 int detect_hands(void *rgb565, int w, int h, box_t *out, int max);
-// the face detector: Espressif's 224x224 one-stage one (ESPDet-Pico, the default) or the fast two-stage one (MSR+MNP)
-void detect_swap_face_model(void);
-const char *detect_face_model(void);
 
 #ifdef __cplusplus
 }
