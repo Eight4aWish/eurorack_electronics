@@ -346,7 +346,7 @@ to SPI-A's would free three pins for a single-bus module (only relevant to Teens
 | Idea | Source | Use here |
 |---|---|---|
 | **Jack-detect probe** (**dropped 2026-10-16**, David, to ease routing; the pin it used is free): one GPIO drives 100 kΩ into each input jack's switch (normal) lug, with a BAT54S clamp. Firmware sends a pseudo-random bit every 16 samples and calls an input patched when its readings stop following the sequence. No extra ADC channels. | Workshop System Computer Rev 1.0.0, R63–R68, `ComputerCard.h` L617–623, L834–874 | Adopt. A PROBE column in the wiring field (one 100 kΩ per hole) reaches the switch pad of any input jack cell. [proposed] |
-| Calibration in an EEPROM on the board, magic number + CRC, 3 points per channel (−2/0/+2 V) written by a web UI | Workshop System Computer (ZD24C08, 0x50) | Same scheme in the M24C64 |
+| Calibration in an EEPROM on the board: a point per volt per channel, or a 17-point sweep, with an isolation test before it | O&C `calibrated_octaves[OCTAVES+1]`; Alchemy Lab V2 `v2_factory_cal.cpp` | In the M24C64, with a magic number and CRC (cv_out.md B5). Replaces the Workshop Computer's 3-point scheme (David, 2026-11-19: borrow calibration from someone else) |
 | Closed-loop output calibration: calibrate the input against known voltages, then loop each output into it — no meter | EuroPi `calibrate.py` | The DG412 loopback does this with no patch cable |
 | Series Schottky on both rails, 22 µF 35 V + 100 nF | Workshop System Computer | As §8 |
 | TL074H for every ±12 V output stage, 1 kΩ out | Workshop System Computer | As §7 |

@@ -30,8 +30,9 @@ Rg = 10 kΩ 0402 (R505, R507 …) from − input to OFFSET_REF; Rf = 30 kΩ 0603
 - CV7–8: CVDRV7/8 → 1 kΩ 0402 (R431, R432) → CVO7/CVO8 holes. **No ADC path.**
 - Feedback is taken from the op-amp pin, so the 1 kΩ (and the DG412) are **outside** the loop.
 
-**Firmware intent (spec §6.4, §15):** 3-point calibration per channel in the M24C64; CV1–6 calibrate by
-loopback (switch on, jack unpatched, ADC reads the jack).
+**Firmware intent (spec §6.4, §15):** calibration per channel in the M24C64, a point per volt or 17 (B5;
+the 3-point scheme it replaced was the Workshop Computer's); CV1–6 calibrate by loopback (switch on, jack
+unpatched, ADC reads the jack).
 
 ---
 
@@ -116,7 +117,7 @@ Source: `hermetic-modular/alchemy-sdk` @ 3f40b66.
 
 | | DAC / bits | Offset source | Topology | Range | Op-amp | Series R | Rf ∥ Cf pole | Calibration |
 |---|---|---|---|---|---|---|---|---|
-| **Ours** | DAC8568A / 16 | DAC VREF → 10k/20k, **1 µF**, **TL074H buffer** | non-inverting ×4 | ±5.00 V | TL074H | **1 k outside loop** (+DG412 on CV1–6) | 30k∥100p, 53 kHz | 3 points, loopback (CV1–6 only) |
+| **Ours** | DAC8568A / 16 | DAC VREF → 10k/20k, **1 µF**, **TL074H buffer** | non-inverting ×4 | ±5.00 V | TL074H | **1 k outside loop** (+DG412 on CV1–6) | 30k∥100p, 53 kHz | a point per volt or 17 (B5), loopback (CV1–6 only) |
 | Performer | DAC8568C / 15 used | DAC VREF → 33k/22k, 100 nF, unbuffered | inverting ×4.17 | +5.17/−5.25 | OPA4172 | 220 Ω **inside** loop | 100k∥18p, 88 kHz | firmware † |
 | O&C 2e | DAC8565 / 16 | DAC VREF → 47k/47k, 100 nF, unbuffered | inverting ×4.02 | +6.27/−3.77 | OPA2172 | 220 Ω **inside DC loop**, 22p local | 100k∥22p, 72 kHz | 1 point per octave |
 | Marbles | DAC8164 / 14 | DAC VREF → 150k/100k, 470 nF, unbuffered | inverting ×4.22 | ±5.3 | OPA4171 | **1.0 k inside DC loop**, 47p local | 34 kHz | † |

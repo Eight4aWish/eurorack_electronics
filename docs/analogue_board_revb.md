@@ -483,7 +483,8 @@ Parts Placement" ticked (spec §14).
 
 **The order (David, 2026-11-04):** 5 boards, 2 assembled, OSP. USD 37.47 for the PCBs and 268.11
 for assembly, 305.58 together, against Rev A's 45.11 and 281.62, 326.73 together. Both exclude
-postage, tax and the extra panels.
+postage, tax and the extra panels. **Landed in the UK, with postage and customs: £333** (David,
+2026-11-19), against Rev A's £347 (journal).
 
 **JLC's placement preview, reviewed 2026-11-04 and confirmed by David: nothing to correct.** JLC
 flagged no errors. The check is `tools/analogue_board/diag/jlc_placement.py`.
