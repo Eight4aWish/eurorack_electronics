@@ -59,6 +59,25 @@ Without the rack on, the screen still runs, but there's no CV out.
   lanes became vertical faders on each half of the picture (hands only, about 11 detections a second). That version
   works for David; it is less reliable for a player with smaller hands.
 
+**Status (2026-11-19): a proof of concept**, good enough for the Boy/Health video (David). These are left for a
+proper session:
+- **Colour:** the picture is near greyscale under room light (see the bench notes). Try more light on the player
+  first. The fix is Health's own IPA tuning file (`CONFIG_CAMERA_OV5647_CUSTOMIZED_IPA_JSON_CONFIGURATION_FILE`):
+  colour correction kept on in dim light, a white-balance section, and a little more saturation.
+- **Smaller hands:** detection is less reliable for a player with smaller hands. In order:
+  1. stand at about 2 m;
+  2. lower the detector's score threshold from 0.25 to about 0.15;
+  3. light and contrast on the hands.
+  Measure each hand's "found in" share for each player before and after.
+- **End stops:** set `END_STOP` from the logged range of real playing.
+- **Screen rate:** the picture runs at 22 frames a second against 43 while the detector runs, because they share the
+  PSRAM.
+- **Head reference:** dropped for now. A held, smoothed ESPDet-224 head on every third run half worked, or the job
+  could go to an NPU board if the P4 falls short.
+- **The other four CV outs** are unused. The original plan was each hand's x, y and size.
+- **Calibration** of the outs is still pending from the bring-up (OUT-R −140 mV; the encoder counts down
+  clockwise).
+
 **Build and flash** (ESP-IDF 5.5.4, as in `docs/analogue_board_esp32p4.md`):
 
 ```sh
