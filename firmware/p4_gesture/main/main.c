@@ -261,6 +261,45 @@ static void camera_flip(uint32_t id)
     }
 }
 
+// Mains lighting (David, 2026-11-20: the picture flickers at night, under the room's LEDs). LEDs flicker at 100 Hz on
+// UK mains. The OV5647 runs its own exposure (the default IPA JSON has no agc section for it) with a banding filter
+// that steps exposure in whole flicker periods, but by default it detects 50 or 60 Hz for itself (0x3C01 bit 7
+// clear: auto, the result in 0x3C0C bit 0). Fix it at 50 Hz: 0x3C01 bit 7 = manual, 0x3C00 bit 2 = 50 Hz, as the
+// driver's own ov5647_get_light_freq() reads them, and 0x3A00 bit 5 = the banding filter on. The driver has already
+// written the 50 Hz band step (0x3A08/09, 0x3A0E) for the format. The log says what the sensor had detected.
+static bool sccb_read(i2c_master_dev_handle_t d, uint16_t reg, uint8_t *v)
+{
+    const uint8_t a[2] = {reg >> 8, reg & 0xff};
+    return i2c_master_transmit_receive(d, a, 2, v, 1, 50) == ESP_OK;
+}
+
+static bool sccb_write(i2c_master_dev_handle_t d, uint16_t reg, uint8_t v)
+{
+    const uint8_t a[3] = {reg >> 8, reg & 0xff, v};
+    return i2c_master_transmit(d, a, 3, 50) == ESP_OK;
+}
+
+static void camera_mains_50hz(i2c_master_bus_handle_t bus)
+{
+    i2c_device_config_t c = {.dev_addr_length = I2C_ADDR_BIT_LEN_7, .device_address = 0x36, .scl_speed_hz = 100000};
+    i2c_master_dev_handle_t d = NULL;
+    if (i2c_master_bus_add_device(bus, &c, &d) != ESP_OK) {
+        ESP_LOGE(TAG, "camera mains: no OV5647 device on the bus, left as it was");
+        return;
+    }
+    uint8_t c00 = 0, c01 = 0, c0c = 0, a00 = 0;
+    bool ok = sccb_read(d, 0x3c00, &c00) && sccb_read(d, 0x3c01, &c01) && sccb_read(d, 0x3c0c, &c0c) &&
+              sccb_read(d, 0x3a00, &a00);
+    if (ok) {
+        ESP_LOGI(TAG, "camera mains, as started: %s, %s Hz (0x3C00 %02x, 0x3C01 %02x, 0x3C0C %02x), banding filter %s",
+                 (c01 & 0x80) ? "set by hand" : "detected", ((c01 & 0x80) ? (c00 & 0x04) : (c0c & 0x01)) ? "50" : "60",
+                 c00, c01, c0c, (a00 & 0x20) ? "on" : "OFF");
+        ok = sccb_write(d, 0x3c00, c00 | 0x04) && sccb_write(d, 0x3c01, c01 | 0x80) && sccb_write(d, 0x3a00, a00 | 0x20);
+    }
+    i2c_master_bus_rm_device(d);
+    ESP_LOGI(TAG, "camera mains: %s", ok ? "now fixed at 50 Hz, banding filter on" : "could NOT be set");
+}
+
 // the OV5647 through esp_video's V4L2 interface, RGB565 into two cache-aligned PSRAM buffers
 static esp_err_t camera_start(i2c_master_bus_handle_t bus)
 {
@@ -709,6 +748,7 @@ void app_main(void)
         ESP_LOGE(TAG, "camera failed to start: the bars stay");
         return;
     }
+    camera_mains_50hz(bus);
     xTaskCreatePinnedToCore(detect_task, "detect", 16384, NULL, 4, &det_task_handle, 0);
     xTaskCreatePinnedToCore(camera_task, "cam_screen", 4096, NULL, 5, NULL, 1);
 }

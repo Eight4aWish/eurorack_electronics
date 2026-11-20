@@ -84,6 +84,12 @@ proper session:
 PATH="$HOME/esp/py312:/opt/homebrew/bin:$PATH" bash -c '. ~/esp/esp-idf/export.sh && idf.py build flash monitor'
 ```
 
+**Mains flicker** (2026-11-20): at night under the room's LEDs, which flicker at 100 Hz on UK mains, the picture
+flickered. The OV5647 runs its own exposure, stepped in whole flicker periods by its banding filter, but it chose
+50 or 60 Hz for itself and read 60 at start-up. `camera_mains_50hz()` fixes it at 50 Hz once the camera has started
+(0x3C01 bit 7, 0x3C00 bit 2, 0x3A00 bit 5), and the boot log says what the sensor had before. Elsewhere, at 60 Hz
+mains, change it.
+
 **With the screen dark** (David, 2026-11-20: the camera picture flickers in low light): the same program, with the
 bridge's HDMI output turned off once the screen side has started, so the TLQ-SCREEN gets no signal. The camera,
 detector and CV run as usual. Its own build folder, so the setting never reaches `build/`:
