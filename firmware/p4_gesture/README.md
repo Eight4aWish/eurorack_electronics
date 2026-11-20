@@ -84,5 +84,13 @@ proper session:
 PATH="$HOME/esp/py312:/opt/homebrew/bin:$PATH" bash -c '. ~/esp/esp-idf/export.sh && idf.py build flash monitor'
 ```
 
+**With the screen dark** (David, 2026-11-20: the camera picture flickers in low light): the same program, with the
+bridge's HDMI output turned off once the screen side has started, so the TLQ-SCREEN gets no signal. The camera,
+detector and CV run as usual. Its own build folder, so the setting never reaches `build/`:
+
+```sh
+PATH="$HOME/esp/py312:/opt/homebrew/bin:$PATH" bash -c '. ~/esp/esp-idf/export.sh && idf.py -B build_dark -DSCREEN_DARK=1 build flash'
+```
+
 Rack on before the USB goes in. The model (`espressif/hand_detect`) is built into the app
 image, so the partition table gives the app 12 MB.

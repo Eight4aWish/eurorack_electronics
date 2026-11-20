@@ -90,6 +90,12 @@ static const char *TAG = "gesture";
 #define SQUARE      960                     // the camera's middle square, scaled by 0.75 to the screen
 #define DET         320                     // ...and by a third for the detectors
 #define BARS_MS     3000
+// SCREEN_DARK=1 (`idf.py -B build_dark -DSCREEN_DARK=1 build flash`): everything runs as usual, but the bridge's
+// HDMI output goes off as soon as the screen side has started, so the screen gets no signal and stays dark.
+// David, 2026-11-20: the camera picture flickers in low light.
+#ifndef SCREEN_DARK
+#define SCREEN_DARK 0
+#endif
 
 // ---- the analogue board (pins and codes from firmware/analogue_board_revb_test)
 #define PIN_ASDA        31
@@ -679,9 +685,23 @@ void app_main(void)
         ESP_LOGE(TAG, "the screen side failed to start");
         return;
     }
-    esp_lcd_dpi_panel_set_pattern(panel, MIPI_DSI_PATTERN_BAR_VERTICAL);
-    ESP_LOGI(TAG, "screen running at 720x720p60, DVI: colour bars for %d s", BARS_MS / 1000);
-    vTaskDelay(pdMS_TO_TICKS(BARS_MS));
+    if (SCREEN_DARK) {
+        // as firmware/revb_noise_test: the LT8912B's HDMI output off (register 0x33 = 0x0C); DSI keeps running
+        i2c_device_config_t c = {.dev_addr_length = I2C_ADDR_BIT_LEN_7, .device_address = LT8912B_IO_I2C_MAIN_ADDRESS,
+                                 .scl_speed_hz = 100000};
+        i2c_master_dev_handle_t d = NULL;
+        const uint8_t off[2] = {0x33, 0x0C};
+        const bool ok = i2c_master_bus_add_device(bus, &c, &d) == ESP_OK && i2c_master_transmit(d, off, 2, 50) == ESP_OK;
+        if (d) {
+            i2c_master_bus_rm_device(d);
+        }
+        ESP_LOGI(TAG, "SCREEN_DARK: the bridge's HDMI output %s; the camera and detector run, nothing is shown",
+                 ok ? "is off" : "could NOT be turned off");
+    } else {
+        esp_lcd_dpi_panel_set_pattern(panel, MIPI_DSI_PATTERN_BAR_VERTICAL);
+        ESP_LOGI(TAG, "screen running at 720x720p60, DVI: colour bars for %d s", BARS_MS / 1000);
+        vTaskDelay(pdMS_TO_TICKS(BARS_MS));
+    }
 
     ppa_client_config_t ppa_cfg = {.oper_type = PPA_OPERATION_SRM};
     ESP_ERROR_CHECK(ppa_register_client(&ppa_cfg, &ppa));
