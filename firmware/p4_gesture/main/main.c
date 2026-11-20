@@ -17,7 +17,8 @@
  * 2.5 m, and its 224x224 one found it in about half its runs at 68 ms each. The middle of the screen stands in for it.
  *
  * The screen shows a grey line down the middle, hands found in this picture in white, held hands in grey, and each
- * fader's level as a grey line across its half at the hand's height. The console prints, every 5 s, detections a
+ * fader's level as a grey line across its half at the hand's height. The MENU encoder's push turns the screen off
+ * and on again (David, 2026-11-20); the camera, the detector and the CV run on either way. The console prints, every 5 s, detections a
  * second, the model's time, how often each hand was found, and how high each hand went.
  *
  * Pipeline: OV5647 1280x960 -> ISP -> RGB565 -> PPA: the middle 960x960 -> (a) 720x720, a quarter clockwise, to the
@@ -90,9 +91,9 @@ static const char *TAG = "gesture";
 #define SQUARE      960                     // the camera's middle square, scaled by 0.75 to the screen
 #define DET         320                     // ...and by a third for the detectors
 #define BARS_MS     3000
-// SCREEN_DARK=1 (`idf.py -B build_dark -DSCREEN_DARK=1 build flash`): everything runs as usual, but the bridge's
-// HDMI output goes off as soon as the screen side has started, so the screen gets no signal and stays dark.
-// David, 2026-11-20: the camera picture flickers in low light.
+// SCREEN_DARK=1 (`idf.py -B build_dark -DSCREEN_DARK=1 build flash`): everything runs as usual, but the screen starts
+// dark: the bridge's HDMI output goes off as soon as the screen side has started, so the screen gets no signal. The
+// MENU push turns it on. David, 2026-11-20: the camera picture flickers in low light.
 #ifndef SCREEN_DARK
 #define SCREEN_DARK 0
 #endif
@@ -108,10 +109,13 @@ static const char *TAG = "gesture";
 static const int BOARD_PINS[] = {46, 33, 32, 47, 48, 3, 2, 5, 24, 25, 50, 49, 29, 4, 28, 27, 23, 22, 21, 26, 52, 51};
 #define ADDR_TCA        0x20
 #define ADDR_EE         0x50
+#define TCA_IN1         1
 #define TCA_OUT0        2
 #define TCA_CFG0        6
 #define TCA_CFG1        7
 #define OE_N            0x40                // TCA9555 P06: gate outputs disabled while high
+#define SW_MENU         0x20                // TCA9555 P15: SW6, the MENU encoder's push, low while pressed
+#define MENU_POLL_MS    20                  // Rev B has no INT line, so the push is polled
 #define DAC_GAIN        8.5f
 #define DAC_OFFSET      (7.5f * 2.5f * 20 / 35)  // 10.714 V
 #define SPI_CONV_HZ     4000000
@@ -686,6 +690,42 @@ static void cv_task(void *arg)
     }
 }
 
+// The screen on or off: the LT8912B's HDMI output (register 0x33: 0x0E on, 0x0C off, as the driver's own
+// _panel_lt8912b_hdmi_output() writes it; its disp_on_off() is a stub). DSI keeps running, so the timing never
+// changes: with the output off the screen just sees no signal.
+static bool screen_output(bool on)
+{
+    const uint8_t v = on ? 0x0E : 0x0C;
+    const bool ok = esp_lcd_panel_io_tx_param(io.main, 0x33, &v, 1) == ESP_OK;
+    ESP_LOGI(TAG, "screen %s%s", on ? "on" : "off", ok ? "" : ": the bridge did NOT take it");
+    return ok;
+}
+
+// the MENU push turns the screen off and on: a press is two reads in a row low, a release two high
+static void menu_task(void *arg)
+{
+    bool on = !SCREEN_DARK, down = false;
+    int n = 0;
+    for (;;) {
+        vTaskDelay(pdMS_TO_TICKS(MENU_POLL_MS));
+        const uint8_t reg = TCA_IN1;
+        uint8_t in1 = 0xFF;
+        if (i2c_master_transmit_receive(dev_tca, &reg, 1, &in1, 1, 20) != ESP_OK) {
+            continue;
+        }
+        const bool raw = !(in1 & SW_MENU);
+        if (raw == down) {
+            n = 0;
+        } else if (++n >= 2) {
+            down = raw;
+            n = 0;
+            if (down && screen_output(!on)) {
+                on = !on;
+            }
+        }
+    }
+}
+
 // ============================================================================
 
 void app_main(void)
@@ -725,21 +765,15 @@ void app_main(void)
         return;
     }
     if (SCREEN_DARK) {
-        // as firmware/revb_noise_test: the LT8912B's HDMI output off (register 0x33 = 0x0C); DSI keeps running
-        i2c_device_config_t c = {.dev_addr_length = I2C_ADDR_BIT_LEN_7, .device_address = LT8912B_IO_I2C_MAIN_ADDRESS,
-                                 .scl_speed_hz = 100000};
-        i2c_master_dev_handle_t d = NULL;
-        const uint8_t off[2] = {0x33, 0x0C};
-        const bool ok = i2c_master_bus_add_device(bus, &c, &d) == ESP_OK && i2c_master_transmit(d, off, 2, 50) == ESP_OK;
-        if (d) {
-            i2c_master_bus_rm_device(d);
-        }
-        ESP_LOGI(TAG, "SCREEN_DARK: the bridge's HDMI output %s; the camera and detector run, nothing is shown",
-                 ok ? "is off" : "could NOT be turned off");
+        screen_output(false);  // SCREEN_DARK: starts dark; the camera and detector run, and MENU turns it on
     } else {
         esp_lcd_dpi_panel_set_pattern(panel, MIPI_DSI_PATTERN_BAR_VERTICAL);
         ESP_LOGI(TAG, "screen running at 720x720p60, DVI: colour bars for %d s", BARS_MS / 1000);
         vTaskDelay(pdMS_TO_TICKS(BARS_MS));
+    }
+    if (board_ready) {
+        xTaskCreatePinnedToCore(menu_task, "menu", 3072, NULL, 3, NULL, 1);
+        ESP_LOGI(TAG, "MENU push: the screen off and on");
     }
 
     ppa_client_config_t ppa_cfg = {.oper_type = PPA_OPERATION_SRM};

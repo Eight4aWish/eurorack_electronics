@@ -94,9 +94,12 @@ with no margin, so a scene sitting near 28 flips between the two. **Film with en
 (0x3C01 bit 7, 0x3C00 bit 2, 0x3A00 bit 5); it had picked 60 Hz for itself. Right for UK mains, kept, but it wasn't
 the flicker. The boot log says what the sensor had before. Elsewhere, at 60 Hz mains, change it.
 
-**With the screen dark** (David, 2026-11-20: the camera picture flickers in low light): the same program, with the
-bridge's HDMI output turned off once the screen side has started, so the TLQ-SCREEN gets no signal. The camera,
-detector and CV run as usual. Its own build folder, so the setting never reaches `build/`:
+**The MENU push turns the screen off and on** (David, 2026-11-20). It switches the bridge's HDMI output (LT8912B
+register 0x33), so the TLQ-SCREEN just sees no signal and the timing never changes; the camera, detector and CV run
+on. The push is SW6 on the TCA9555 (P15, low while pressed), polled every 20 ms, two reads to a press.
+
+**Starting dark** (the camera picture flickers in low light): the same program, with the screen off from start-up
+until the first MENU press. Its own build folder, so the setting never reaches `build/`:
 
 ```sh
 PATH="$HOME/esp/py312:/opt/homebrew/bin:$PATH" bash -c '. ~/esp/esp-idf/export.sh && idf.py -B build_dark -DSCREEN_DARK=1 build flash'
