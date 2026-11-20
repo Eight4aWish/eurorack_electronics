@@ -206,7 +206,8 @@ signal going in, the fair way to compare audio passing through.
 | old Boy (R) | +10.4 dB as read | −87.9 | −88.1 |
 
 **Readings, corrected by the gains:**
-- **For audio passing through, Boy Rev A is on a par with the factory patch.init.** It comes out 1.3 dB
+- **Withdrawn 2026-11-20 (see "Rev A's input figure was flattered" below):** ~~For audio passing through, Boy
+  Rev A is on a par with the factory patch.init.~~ It comes out 1.3 dB
   behind, which clears the 0.3 dB take spread but is far below hearing at −93 dB, and is within the variation
   to expect between two units. Its input stage alone is the quietest, about 3 dB under the patch.init's. Its
   output stage is about 2.6 dB noisier (−96.3 against −98.9, the ES-10 taken out). The patch.init's
@@ -225,6 +226,37 @@ signal going in, the fair way to compare audio passing through.
   the left gets almost nothing, 58.6 dB down. Its right channel's +10.4 dB was read with both ES-10 outputs on
   one input, which halves each tone, so its true gain is likely nearer +16 dB. That fits a line-level input
   brought up to a Eurorack output.
+
+### Rev A's input figure was flattered (found 2026-11-20)
+
+Health's input measured 7 dB noisier than Rev A's, on the same circuit: the codec and its input stage
+have the same parts and values on both boards (`hardware/analogue_board/{teensy,pico_revb}/codec_audio.kicad_sch`),
+only the layout differs. The difference is in the test firmware, not the boards:
+- **Rev A's test firmware ran 16 bits.** The Teensy Audio Library's `AudioInputI2S` reads only the top
+  16 bits of each I2S word (`input_i2s.cpp`, DMA from `I2S1_RDR0 + 2`, 16-bit transfers), and
+  `noise_stream.h` turns it back with ÷32768, ×32767 and an `(int16_t)` cast, which rounds toward zero. A
+  sample within one 16-bit step of zero comes out as exact zero.
+- **The codec's hiss is a quarter of a 16-bit step.** The PCM3060's ADC has 99 dB dynamic range, A-weighted
+  (`analogue_board_review/codec_pcm3060.md`, datasheet p. 4): 0.26 steps RMS. Simulated through Rev A's
+  path, 99.9 % of samples come out zero and 30 dB of the hiss is lost
+  (`tools/noise_test/checks/teensy_16bit_deadzone.py`: floor to 16 bits, then the firmware's round trip). So Rev A's through segment measured its
+  output stage with the input's hiss deleted, and its −99.8 is 6 dB better than the codec can do.
+- **Health's firmware passes 24 bits, and reads what the datasheet predicts.** 99 dB below the ADC's full
+  scale, which is about 18.7 Vpp at Boy's jack, is −93.6 dB against 10 Vpp; Health measured −93.1. The
+  patch.init (Patch SM, also a PCM3060, 24 bits through libDaisy) maps about 12.5 Vpp onto the same
+  ADC (17.4 Vpp out at +2.9 dB of gain), predicting −97.1; it measured −96.9.
+- **So Rev A's input is the same as Health's,** and the gap to the patch.init is the input range: Boy takes
+  about ±9.3 V before the codec clips, the patch.init about ±6.2 V. The extra headroom costs about 3.5 dB
+  of hiss on a 10 Vpp signal: a trade, not a fault.
+- **Rev A's corrected figure, estimated:** out only (−94.1) plus Health's input hiss at Rev A's gain
+  (−92.8) gives through −90.4, **per signal in about −90.7**: 4 dB behind the patch.init, ahead of the
+  old Boy (−87.9) and the Seed (−85.9), and the same as Health (−90.4). Not measured: Rev A's test
+  firmware would need a 32-bit I2S input to show it.
+- **In use, Boy's modes run the same 16-bit path** (`warps_mode.cpp` and `chordal_mode.cpp` use
+  `AudioInputI2S`). With a signal present, the 16 bits add their own quantisation noise, about −95 dB
+  A-weighted against 10 Vpp, rather than deleting the hiss. Health's firmware isn't limited this way.
+- **The old Boy and the Chaos** went through the same 16-bit library, but their input hiss, behind line-level
+  gain, is far above one step, so their figures stand. The Daisy boards' are 24-bit.
 
 Absolute levels may be about 1 dB out (the ES-10 calibration); comparisons between boards are not
 affected, and the gains are free of it. `tools/noise_test/results/summary.md` once boards are recorded.
@@ -301,7 +333,7 @@ through the two leads that fed Health, laid along their route, no module, rack o
 | Board | Gain, in to out | Through, per signal in | The input alone, referred to it | Out only, less the ES-10 | Hum 50 Hz |
 |---|---|---|---|---|---|
 | patch.init, stock | +2.9 dB | **−94.6** | −96.9 | −98.9 | −120 |
-| Boy Rev A | +0.3 dB | −93.3 | **−99.8** | −96.3 | −118 |
+| Boy Rev A (16-bit test firmware: input flattered; about −90.7 per signal in, estimated) | +0.3 dB | −93.3 | −99.8 | −96.3 | −118 |
 | Health (idle), in place | +0.3 / +0.5 dB | −90.4 | −93.1 | −95.2 | −106 |
 | old Boy (R) | +10.4 dB as read | −87.9 | −88.1 | −92.2 | −102 |
 | Seed module | +0.6 dB | −85.9 | −88.4 | −89.6 | −93 |
@@ -309,10 +341,11 @@ through the two leads that fed Health, laid along their route, no module, rack o
 **Readings:**
 - **Health's output is on a par with Rev A's:** 1.1 dB behind with the ES-10 taken out, on the same codec
   (PCM3060).
-- **Its input is not:** −93.1 referred to the input, against Rev A's −99.8, so about 7 dB noisier, and audio
-  passing through comes out 2.9 dB behind Rev A (−90.4 against −93.3) and 4.2 dB behind the patch.init. That's
-  well clear of the take spread, so it's real, and far below hearing. It's still 2.5 dB ahead of the old Boy
-  and 4.5 dB ahead of the Seed.
+- **Its input is as the codec's datasheet predicts:** −93.1 referred to the input. It read 7 dB noisier than
+  Rev A's −99.8, but Rev A's figure was flattered by its 16-bit test firmware ("Rev A's input figure was
+  flattered", above): the circuits are the same. Audio passing through comes out at −90.4 per signal in,
+  4.2 dB behind the patch.init (its smaller input range), 2.5 dB ahead of the old Boy and 4.5 dB ahead of
+  the Seed, far below hearing.
 - **The hum, −106 dB, is Health's or its slot's,** 12 dB over Rev A's. The leads are cleared by the loopback
   and the laptop by the re-run, and it's the same in every state. Telling Health from its place in the rack
   would mean moving it, which David didn't want. It's inaudible: taking 10 Vpp to 100 dB SPL it's about
