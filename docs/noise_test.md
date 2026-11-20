@@ -357,3 +357,26 @@ through the two leads that fed Health, laid along their route, no module, rack o
 
 Health went back to `p4_gesture` straight after (rack on, then the USB lead in); its boot log showed the
 screen at 720x720p60 and the detector running.
+
+### Like with like: dynamic range (2026-11-20)
+
+"Per signal in" compares every board at the same 10 Vpp, which favours a board whose input range is
+smaller (David: "we are not comparing like with like"). **Dynamic range** is the like-for-like measure: the
+biggest signal a board passes before it clips, against its own hiss, in dB; bigger is better. It's the
+figure a codec's datasheet gives. Both ends come from the same recordings: full scale less the input's
+share for the input (the gain cancels), full scale less "out only, less the ES-10" for the output. Both
+are read through the ES-10, so its calibration cancels too. A-weighted, median of three takes, L / R:
+
+| Dynamic range | Input | Output |
+|---|---|---|
+| PCM3060 datasheet | 99 | 103 single-ended, 104 differential |
+| patch.init, stock | 98.8 / 98.9 | 103.7 / 103.5 |
+| patch.init, OLED | 98.8 / 98.8 | 104.2 / 104.0 |
+| Boy Rev A | not measurable: its 16-bit test firmware hid the input's hiss | 102.0 / 102.2 |
+| Health | 98.7 / 98.4 | 101.0 / 101.0 |
+
+- **The inputs are the same,** within half a dB, and at the chip's 99 dB: the patch.init's input is quieter
+  at 10 Vpp only because it clips at about ±6.2 V where Boy takes about ±9.3 V. Rev A's, the same circuit
+  as Health's, should read the same; a 24-bit test firmware would show it.
+- **The outputs differ a little:** the patch.inits at the chip's figure, Rev A 1.5 dB behind, Health 2.7 dB.
+  Real against the take spread, far below hearing.
