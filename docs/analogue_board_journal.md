@@ -164,6 +164,14 @@ David went through JLCPCB for the first time with a step-by-step walkthrough:
 
 **Ordered: 5 boards, 2 assembled** (image 13).
 
+**JLC's check (17 Oct).** JLC's engineers emailed the next day: U1002's package *"cannot match
+the corresponding pads on the PCB board, so we are unable to assemble them"*. The BOM drew the
+H11L1SR2M on `SMDIP-6_W7.62mm` pads, and the part is the 9.53 mm wide one. Of the three options
+(reselect the part, leave it off with a refund, or cancel the order), it was left off, so JLC
+placed 299 parts and 58 types. David soldered a spare through-hole H11L1 onto the pads on 30 Oct,
+its legs bent flat (bring-up Stage 7), and MIDI in passed on 1 Nov. Rev B has the corrected
+footprint ([`analogue_board_revb.md`](analogue_board_revb.md) §5).
+
 **13. The Pico board (16 to 17 Oct).** The Teensy lessons carried over:
 - no bus test points (every bus pin can be probed at the module socket);
 - the LDO out from under the module;
