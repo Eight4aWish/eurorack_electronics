@@ -276,3 +276,51 @@ up. The codec worked throughout (the tone came back at 19.4 Vpp). Its figures, f
 
 Screen and detect agreed within 0.3 dB, take to take and with each other. The hum, 11 dB over Rev A's on 11 Nov, and
 the input's share, 6 dB over Rev A's, are the figures to watch on the re-run, with the lead out.
+
+### Health's results, 2026-11-20
+
+**The re-run, 19:37, USB lead out** (`recordings/health_2026-11-20_19-37.wav`, `results/health.json`): all
+nine takes found, from a cold start. Median of three takes, left / right where they differ; the take spread
+is 0.2 dB or less on every A-weighted figure, 1 dB or less on the lines.
+
+| Health, A-wt against 10 Vpp | Out only | Out, less the ES-10 | Through | The input's share | Hum 50 Hz | Tallest lines |
+|---|---|---|---|---|---|---|
+| idle | −93.4 | −95.2 | −90.1 / −89.9 | −92.9 / −92.5 | −106 | 78 or 98 Hz −107 |
+| screen | −93.4 | −95.1 | −89.9 / −89.7 | −92.5 / −92.2 | −106 | 43 Hz −100, 86 Hz −102 |
+| detect | −93.1 | −94.7 | −89.8 / −89.6 | −92.5 / −92.2 | −106 | 86 Hz −102, 173 Hz −106 |
+
+Full scale 19.4 / 19.8 Vpp, as on Rev A (19.3).
+
+**The gain, 19:48** (`health-gain_…`, `results/health-gain.json`): +0.3 dB left, +0.5 dB right, unity like
+Rev A. Out L follows ES-10 OUT 1: **not swapped**, unlike Rev A. Crosstalk from the other input −77 dB.
+
+**The loopback with the long leads, 19:53** (`es10_loop_health_…`): ES-10 OUT 1 and 2 into IN 1 and 2
+through the two leads that fed Health, laid along their route, no module, rack on. −96.1 dB A-wt, hum
+−122.6, against the short cable's −96.2 and −122.3 on 11 Nov. **The long leads add nothing.**
+
+| Board | Gain, in to out | Through, per signal in | The input alone, referred to it | Out only, less the ES-10 | Hum 50 Hz |
+|---|---|---|---|---|---|
+| patch.init, stock | +2.9 dB | **−94.6** | −96.9 | −98.9 | −120 |
+| Boy Rev A | +0.3 dB | −93.3 | **−99.8** | −96.3 | −118 |
+| Health (idle), in place | +0.3 / +0.5 dB | −90.4 | −93.1 | −95.2 | −106 |
+| old Boy (R) | +10.4 dB as read | −87.9 | −88.1 | −92.2 | −102 |
+| Seed module | +0.6 dB | −85.9 | −88.4 | −89.6 | −93 |
+
+**Readings:**
+- **Health's output is on a par with Rev A's:** 1.1 dB behind with the ES-10 taken out, on the same codec
+  (PCM3060).
+- **Its input is not:** −93.1 referred to the input, against Rev A's −99.8, so about 7 dB noisier, and audio
+  passing through comes out 2.9 dB behind Rev A (−90.4 against −93.3) and 4.2 dB behind the patch.init. That's
+  well clear of the take spread, so it's real, and far below hearing. It's still 2.5 dB ahead of the old Boy
+  and 4.5 dB ahead of the Seed.
+- **The hum, −106 dB, is Health's or its slot's,** 12 dB over Rev A's. The leads are cleared by the loopback
+  and the laptop by the re-run, and it's the same in every state. Telling Health from its place in the rack
+  would mean moving it, which David didn't want. It's inaudible: taking 10 Vpp to 100 dB SPL it's about
+  −6 dB SPL, against a hearing threshold around 40 dB SPL at 50 Hz.
+- **The camera and the detector cost 0.3 dB at most.** The camera leaves its frame rate, 43 Hz, and harmonics
+  at about −100 dB; the detector a line at 86 Hz. A-weighting plays them down, and they're below hearing.
+- **The first run's figures stand:** the re-run reads within 0.5 dB of them, so the USB lead wasn't the
+  cause of either the hum or the input's share.
+
+Health went back to `p4_gesture` straight after (rack on, then the USB lead in); its boot log showed the
+screen at 720x720p60 and the detector running.

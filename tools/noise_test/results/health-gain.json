@@ -1,0 +1,21 @@
+{
+ "file": "health-gain_2026-11-20_19-48.wav",
+ "gain": true,
+ "sync_s": 36.4,
+ "outputs": [
+  {
+   "output": "L",
+   "from_input": "OUT 1",
+   "gain_db": 0.3,
+   "gain_vv": 1.032,
+   "crosstalk_db": -77.6
+  },
+  {
+   "output": "R",
+   "from_input": "OUT 2",
+   "gain_db": 0.5,
+   "gain_vv": 1.065,
+   "crosstalk_db": -76.7
+  }
+ ]
+}
