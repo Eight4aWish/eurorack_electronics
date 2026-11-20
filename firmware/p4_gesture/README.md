@@ -7,7 +7,7 @@ picture is a vertical fader, and the height of the hand on it sets a CV out.
 | Hand | Out (panel) | Range | Patched to (Oneiroi) |
 |---|---|---|---|
 | on the screen's left | CV1 (X1) | 0–10 V | supersaw volume jack: the fader sets the ceiling |
-| on the screen's right | CV3 (X2) | 0–10 V | filter cutoff jack: cutoff knob fully left, MOD LEVEL down |
+| on the screen's right | CV3 (X2) | 0–10 V | its echo (David, 2026-11-20: moved from the filter cutoff, as the echo made a better demo) |
 
 - **The fader's range:** a lane is 0 V with its hand's centre in the bottom tenth of the picture and 10 V in the top
   tenth, in proportion between (`END_STOP` in `main/main.c`). A hand's centre can't reach the very edge, so the end
