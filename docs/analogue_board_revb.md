@@ -295,7 +295,9 @@ is the source; what it has said so far:
   was ordered OSP too (David, 2026-11-04), so the same applies to it.
 - **The power and the core blocks worked first time.** Every rail in range; I2C, EEPROM,
   expander, ADC, and DAC through all six switches pass, the DAC within 34 mV of the design
-  uncalibrated. No bodges yet.
+  uncalibrated. No bodges on them. Rev A's one bodge is the MIDI opto: JLC couldn't fit U1002 on
+  its too-narrow pads, so a through-hole H11L1 went on them by hand (journal, "JLC's check";
+  David, 2026-11-20: "technically a bodge - albeit a dead easy one").
 - **MIDI on link holes [settled 2026-11-02: wired straight, §8].** The module's two
   serial pins (Pico GP0/GP1, Teensy 1/0) reach MIDI only through J101's links, so every MIDI build
   needs a jumper first (Boy links SPARE2 to MIDI_RX). They became link holes because they were
