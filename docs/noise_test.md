@@ -250,8 +250,8 @@ only the layout differs. The difference is in the test firmware, not the boards:
   of hiss on a 10 Vpp signal: a trade, not a fault.
 - **Rev A's corrected figure, estimated:** out only (−94.1) plus Health's input hiss at Rev A's gain
   (−92.8) gives through −90.4, **per signal in about −90.7**: 4 dB behind the patch.init, ahead of the
-  old Boy (−87.9) and the Seed (−85.9), and the same as Health (−90.4). Not measured: Rev A's test
-  firmware would need a 32-bit I2S input to show it.
+  old Boy (−87.9) and the Seed (−85.9), and the same as Health (−90.4). Measured the same evening:
+  "Rev A at 24 bits", below.
 - **In use, Boy's modes run the same 16-bit path** (`warps_mode.cpp` and `chordal_mode.cpp` use
   `AudioInputI2S`). With a signal present, the 16 bits add their own quantisation noise, about −95 dB
   A-weighted against 10 Vpp, rather than deleting the hiss. Health's firmware isn't limited this way.
@@ -333,7 +333,8 @@ through the two leads that fed Health, laid along their route, no module, rack o
 | Board | Gain, in to out | Through, per signal in | The input alone, referred to it | Out only, less the ES-10 | Hum 50 Hz |
 |---|---|---|---|---|---|
 | patch.init, stock | +2.9 dB | **−94.6** | −96.9 | −98.9 | −120 |
-| Boy Rev A (16-bit test firmware: input flattered; about −90.7 per signal in, estimated) | +0.3 dB | −93.3 | −99.8 | −96.3 | −118 |
+| Boy Rev A, 16-bit test firmware (input flattered) | +0.3 dB | −93.3 | −99.8 | −96.3 | −118 |
+| Boy Rev A, 24-bit (20 Nov) | +0.3 dB | −89.8 / −90.9 | −91.7 / −93.5 | −96.5 | −118 |
 | Health (idle), in place | +0.3 / +0.5 dB | −90.4 | −93.1 | −95.2 | −106 |
 | old Boy (R) | +10.4 dB as read | −87.9 | −88.1 | −92.2 | −102 |
 | Seed module | +0.6 dB | −85.9 | −88.4 | −89.6 | −93 |
@@ -372,11 +373,39 @@ are read through the ES-10, so its calibration cancels too. A-weighted, median o
 | PCM3060 datasheet | 99 | 103 single-ended, 104 differential |
 | patch.init, stock | 98.8 / 98.9 | 103.7 / 103.5 |
 | patch.init, OLED | 98.8 / 98.8 | 104.2 / 104.0 |
-| Boy Rev A | not measurable: its 16-bit test firmware hid the input's hiss | 102.0 / 102.2 |
+| Boy Rev A, 16-bit (11 Nov) | not measurable: its test firmware hid the input's hiss | 102.0 / 102.2 |
+| Boy Rev A, 24-bit (20 Nov) | **97.1 / 99.0** | 102.2 / 102.4 |
 | Health | 98.7 / 98.4 | 101.0 / 101.0 |
 
 - **The inputs are the same,** within half a dB, and at the chip's 99 dB: the patch.init's input is quieter
-  at 10 Vpp only because it clips at about ±6.2 V where Boy takes about ±9.3 V. Rev A's, the same circuit
-  as Health's, should read the same; a 24-bit test firmware would show it.
+  at 10 Vpp only because it clips at about ±6.2 V where Boy takes about ±9.3 V. Rev A at 24 bits: its right
+  input reads the same, its left 1.7 dB lower (below).
 - **The outputs differ a little:** the patch.inits at the chip's figure, Rev A 1.5 dB behind, Health 2.7 dB.
   Real against the take spread, far below hearing.
+
+### Rev A at 24 bits (2026-11-20)
+
+`eurorack_modules` env `noise_boy24` (`src/noise_test/noise_boy24.cpp`): the same schedule, screen off only,
+with its own DMA moving whole 32-bit I2S words both ways in place of the Audio library's 16-bit objects; the
+library's own clock and pin set-up, so the codec sees what it saw on 11 Nov. Boy in the rig's slot, USB lead
+out. `record.py boy24 --no-screen` (`recordings/boy24_2026-11-20_20-33.wav`) and `--gain`.
+
+| Rev A, A-wt against 10 Vpp, L / R | 16-bit (11 Nov) | 24-bit (20 Nov) |
+|---|---|---|
+| Out only | −94.1 / −94.1 | −94.2 / −94.2 |
+| Through | −93.0 / −93.3 | −89.5 / −90.6 |
+| The input's share | −99.5 / −101.2 | **−91.4 / −93.2** |
+| Gain | +0.3 / +0.3, L and R swapped | +0.3 / +0.3, L and R swapped |
+| Hum 50 Hz | −118 / −119 | −118 / −118 |
+
+- **The new firmware is sound:** out only and the gain read as on 11 Nov, so nothing moved but the input's
+  bits; a word misaligned by a bit would have shown as 6 dB of gain.
+- **The 16-bit firmware hid 8 dB of the input's hiss,** as the simulation said. Per signal in, Rev A is
+  −89.8 / −90.9 (estimated −90.7), with Health at −90.4 and the patch.init at −94.6.
+- **Rev A's right input is at the chip's figure** (dynamic range 99.0), level with the patch.init and Health.
+  **Its left is 1.7 dB noisier** (97.1). The 16-bit run leaned the same way (−99.5 against −101.2), so it's
+  this board's left channel, not the run; Health's two channels agree. Far below hearing. Out L carries in R's
+  jack on Rev A (the swap), so the noisier input is the codec's left channel, the panel's in R.
+- **Rev A's hum stays at −118:** Health's −106 belongs to Health or its place in the rack.
+
+Boy went back to its own firmware (env `teensy41`) straight after.
