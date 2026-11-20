@@ -38,16 +38,23 @@ def run_seconds(screen):
     return 30 + 3 * (2 + 50 * (3 if screen else 1))
 
 
+# Health (firmware/revb_noise_test): 30 s, then three one-state takes of 52 s each for idle, screen and detect,
+# with a take's length of silence before each new state: eleven 52 s slots
+HEALTH_SECONDS = 30 + 11 * 52
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("board", help="a short name: oldboy, boy, patchsm, patchsm_oled, seed, es10_loop")
+    ap.add_argument("board", help="a short name: oldboy, boy, patchsm, patchsm_oled, seed, health, es10_loop")
     ap.add_argument("--no-screen", action="store_true", help="a board without a screen")
+    ap.add_argument("--health", action="store_true", help="Health's run: idle, screen, detect, three takes each")
     ap.add_argument("--control", action="store_true", help="60 s, for the interface's own floor")
     ap.add_argument("--gain", action="store_true", help="tones into the inputs, for the through gain")
     a = ap.parse_args()
 
     # --gain needs only the first take's pass-through: 30 s + sync 2 s + 50 s, and the margin
-    secs = 60 if a.control else (30 + 2 + 50 + 25) if a.gain else run_seconds(not a.no_screen) + 25
+    secs = (60 if a.control else (30 + 2 + 50 + 25) if a.gain
+            else HEALTH_SECONDS + 25 if a.health else run_seconds(not a.no_screen) + 25)
     dev = next((i for i, d in enumerate(sd.query_devices()) if DEVICE in d["name"]), None)
     if dev is None:
         sys.exit(f"{DEVICE} not found: {[d['name'] for d in sd.query_devices()]}")

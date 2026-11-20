@@ -4,6 +4,7 @@
     python analyse.py --control recordings/es10_loop_....wav          # the interface's own floor
     python analyse.py --summary                                       # every result -> results/summary.md
     python analyse.py --gain recordings/boy-gain_....wav              # input-to-output gain -> results/<board>-gain.json
+    python analyse.py --health recordings/health_....wav              # Health: idle, screen, detect -> results/health.json
 
 Every level is in dB against a 10 Vpp sine (3.54 V RMS), the scale the earlier figures used
 (daisy_multifx_seed/NOISE.md: the patch.init at -92 dB, the Seed module at -90 dB after its buck).
@@ -32,6 +33,10 @@ FS = 48000
 IN_VFS = 11.9712  # V per digital full scale at an ES-10 input (rig.json, Swords captures, 2026-10)
 REF = 10 / 2 / np.sqrt(2)  # a 10 Vpp sine, V RMS
 SCREENS = ["off", "still", "redraw"]
+# Health (firmware/revb_noise_test): its states can only be added, so they run one after another, three one-state
+# takes each, with a take's length of silence before each new state. Takes sit in these 52 s slots after the first sync.
+HEALTH_STATES = ["idle", "screen", "detect"]
+HEALTH_SLOTS = [0, 1, 2, 4, 5, 6, 8, 9, 10]
 GAIN_HZ = (440.0, 554.37)  # record.py --gain: OUT 1, OUT 2
 GAIN_AMP = 0.0228          # their digital peak as sent
 # A plain cable, ES-10 OUT -> IN, returned a 1 kHz tone 2.0 dB down (2026-11-11, es10_loop). A gain
@@ -150,27 +155,64 @@ def analyse_board(path, screen=None):
     for t0 in starts:
         take = {"start_s": round(t0 / FS, 2), "groups": []}
         for g in range(groups):
-            base = t0 + int((2 + 50 * g) * FS)
-            seg = {"screen": SCREENS[g]}
-            if floor_ch is not None:
-                seg["es10_in"] = measure(floor_ch[base + 2 * FS: base + 19 * FS])
-            for name, a, b in (("zero", 2, 19), ("tone", 22, 29), ("through", 32, 49)):
-                y = x[:, base + a * FS: base + b * FS]
-                if name == "tone":
-                    vpp = [float(np.sqrt(np.mean(c ** 2)) * 2 * np.sqrt(2)) for c in y]
-                    seg["tone_vpp"] = [round(v, 3) for v in vpp]
-                    seg["full_scale_vpp"] = [round(2 * v, 2) for v in vpp]  # the tone is at -6 dBFS
-                else:
-                    seg[name] = [measure(c) for c in y]
-            for ch in range(x.shape[0]):
-                z, th = seg["zero"][ch]["noise_a"], seg["through"][ch]["noise_a"]
-                pz, pt = 10 ** (z / 10), 10 ** (th / 10)
-                seg.setdefault("input_a", []).append(round(10 * np.log10(pt - pz), 1) if pt > pz * 1.05 else None)
-                if "es10_in" in seg:  # the output stage alone: the interface's input floor taken out, as powers
-                    pf = 10 ** (seg["es10_in"]["noise_a"] / 10)
-                    seg.setdefault("zero_less_es10", []).append(round(10 * np.log10(pz - pf), 1) if pz > pf * 1.05 else None)
-            take["groups"].append(seg)
+            take["groups"].append(group_at(x, floor_ch, t0 + int((2 + 50 * g) * FS), SCREENS[g]))
         res["takes"].append(take)
+    return res
+
+
+def group_at(x, floor_ch, base, label):
+    """One state's zero, tone and pass-through, from base = its sync + 2 s."""
+    seg = {"screen": label}
+    if floor_ch is not None:
+        seg["es10_in"] = measure(floor_ch[base + 2 * FS: base + 19 * FS])
+    for name, a, b in (("zero", 2, 19), ("tone", 22, 29), ("through", 32, 49)):
+        y = x[:, base + a * FS: base + b * FS]
+        if name == "tone":
+            vpp = [float(np.sqrt(np.mean(c ** 2)) * 2 * np.sqrt(2)) for c in y]
+            seg["tone_vpp"] = [round(v, 3) for v in vpp]
+            seg["full_scale_vpp"] = [round(2 * v, 2) for v in vpp]  # the tone is at -6 dBFS
+        else:
+            seg[name] = [measure(c) for c in y]
+    for ch in range(x.shape[0]):
+        z, th = seg["zero"][ch]["noise_a"], seg["through"][ch]["noise_a"]
+        pz, pt = 10 ** (z / 10), 10 ** (th / 10)
+        seg.setdefault("input_a", []).append(round(10 * np.log10(pt - pz), 1) if pt > pz * 1.05 else None)
+        if "es10_in" in seg:  # the output stage alone: the interface's input floor taken out, as powers
+            pf = 10 ** (seg["es10_in"]["noise_a"] / 10)
+            seg.setdefault("zero_less_es10", []).append(round(10 * np.log10(pz - pf), 1) if pz > pf * 1.05 else None)
+    return seg
+
+
+def analyse_health(path):
+    """Health's run: nine one-state takes in HEALTH_SLOTS, counted back from the last sync (slot 10); a missed sync
+    is filled from the slot spacing. Returned in analyse_board's shape, takes x states, so the tables are the same."""
+    x, fs = sf.read(path, dtype="float64")
+    assert fs == FS, fs
+    x = np.atleast_2d(x.T) * IN_VFS
+    floor_ch = x[2] if x.shape[0] > 2 else None
+    x = x[:2]
+    ons = sync_onsets(x[0])
+    if not ons:
+        sys.exit("no sync found")
+    tl, last = 52 * FS, ons[-1]
+    found = {}
+    for o in ons:
+        k = (last - o) / tl
+        if abs(k - round(k)) < 0.02:
+            found[10 - int(round(k))] = o
+    if not set(found) <= set(HEALTH_SLOTS) or len(found) < 7:
+        sys.exit(f"the syncs don't fit Health's layout: slots {sorted(found)} "
+                 f"(onsets at {[round(o / FS, 1) for o in ons]} s)")
+    starts = [found.get(k, last - (10 - k) * tl) for k in HEALTH_SLOTS]
+    # a take that falls outside the recording (Health already running when it began) is left out, not measured
+    inside = [0 <= st and st + tl <= x.shape[1] for st in starts]
+    res = {"file": os.path.basename(path), "screen": True, "labels": HEALTH_STATES,
+           "missed_syncs": [k for k in HEALTH_SLOTS if k not in found],
+           "outside_recording": [k for k, ok in zip(HEALTH_SLOTS, inside) if not ok], "takes": []}
+    for t in range(3):
+        res["takes"].append({"start_s": [round(starts[3 * g + t] / FS, 2) for g in range(3)],
+                             "groups": [group_at(x, floor_ch, starts[3 * g + t] + 2 * FS, HEALTH_STATES[g])
+                                        if inside[3 * g + t] else None for g in range(3)]})
     return res
 
 
@@ -183,9 +225,9 @@ def med_range(vals):
 
 def board_rows(name, r):
     rows = []
-    for g, scr in enumerate(SCREENS[:3 if r["screen"] else 1]):
+    for g, scr in enumerate(r.get("labels", SCREENS)[:3 if r["screen"] else 1]):
         for ch, lab in enumerate("LR"):
-            T = [t["groups"][g] for t in r["takes"]]
+            T = [t["groups"][g] for t in r["takes"] if t["groups"][g]]  # Health: a take outside the recording is None
             zero = [s["zero"][ch] for s in T]
             thr = [s["through"][ch] for s in T]
             rows.append([name, scr, lab,
@@ -219,6 +261,7 @@ def main():
     ap.add_argument("--control", action="store_true")
     ap.add_argument("--summary", action="store_true")
     ap.add_argument("--gain", action="store_true")
+    ap.add_argument("--health", action="store_true", help="Health's layout: idle, screen, detect")
     a = ap.parse_args()
     os.makedirs(RES, exist_ok=True)
     if a.summary:
@@ -253,7 +296,7 @@ def main():
         r = {"file": os.path.basename(a.wav), "control": True,
              "channels": [measure(c[5 * FS: -5 * FS]) for c in x]}
     else:
-        r = analyse_board(a.wav)
+        r = analyse_health(a.wav) if a.health else analyse_board(a.wav)
         print(table(board_rows(name, r)))
     json.dump(r, open(os.path.join(RES, name + ".json"), "w"), indent=1)
     print(f"-> results/{name}.json")

@@ -228,3 +228,51 @@ signal going in, the fair way to compare audio passing through.
 
 Absolute levels may be about 1 dB out (the ES-10 calibration); comparisons between boards are not
 affected, and the gains are free of it. `tools/noise_test/results/summary.md` once boards are recorded.
+
+## Health (Rev B with the ESP32-P4), 2026-11-20
+
+David asked for Health's audio path to be tested the same way, as part of the Boy video's preparation, **in
+place**: Health stays beside the TLQ-SCREEN, not in the rig's slot. So its figures carry one difference from
+11 Nov, the position in the rack, and the long leads from the ES-10 to it.
+
+**What changes for Health:**
+- **States instead of screen off/still/redrawing:** *idle* (the codec and CV outs only; no camera, the bridge's
+  HDMI output turned off at boot, nothing sent to the screen), *screen* (the camera picture on the TLQ-SCREEN,
+  about 43 frames/s), *detect* (the hand detector as well, about 11 pictures/s). Once started, the camera and
+  screen have no safe way off (a stopped DSI leaves the bridge sending a blank signal, and the screen
+  flashes), so the states can only be added. They run one after another, three takes of the one-state layout
+  each (52 s: sync, gap, zero 20 s, tone 10 s, through 20 s), with a take's length of silence before each new
+  state while it starts: 30 s + eleven 52 s slots, about 10 minutes from one power-up.
+- **The firmware:** `firmware/revb_noise_test`, built on `p4_gesture` (the same EDID gate: 720x720p60r2 or
+  nothing). The codec runs at 48 076.9 Hz, its MCLK the 160 MHz PLL ÷ 13 so the APLL stays free for the
+  screen; segment lengths and tones are counted at that rate, so they come out at 11 Nov's. 48-frame blocks.
+  The inputs invert, so the pass-through negates them. CV1 and CV3 run as in `p4_gesture`, at 0 V with nobody in
+  view.
+- **The tools:** `record.py health --health` records the run; `analyse.py --health` reads it, counting the
+  nine takes back from the last sync and leaving out any that fall outside the recording. Checked before
+  use on a synthetic run (+6 and +12 dB steps read back exactly, a dropped sync filled), and Boy's 11 Nov
+  result reproduces byte for byte through the shared code.
+
+**The patch:** ES-10 OUT 1 → IN-L, OUT 2 → IN-R, OUT-L → ES-10 IN 1, OUT-R → ES-10 IN 2; ES-10 IN 3 empty;
+X1 and X2 unpatched from the Oneiroi; the camera and screen as they are.
+
+**Procedure, in place:** flash with the rack on and the USB lead in (Health's rule: rack on, then USB in);
+**USB lead out, then rack off** for a few seconds; start `record.py health --health`; power the rack within
+about 20 s; nobody in view of the camera for the 10½ minutes. Then the gain run (`record.py health --gain`,
+another power-up) and the loopback with the same long leads, no module (`record.py es10_loop_health
+--control`). Afterwards, reflash `p4_gesture`.
+
+**The first run, 2026-11-20 14:19, is void** (`recordings/health-usbin_2026-11-20_14-19.wav`): the USB lead
+stayed in while the rack was off and on. Health ran on the laptop's power throughout, so it never restarted
+(two of the three idle takes ran before the recording began), the laptop was a second ground path for the
+whole run, and the analogue board came up after the P4 had tried to start it, so its CV outs were never set
+up. The codec worked throughout (the tone came back at 19.4 Vpp). Its figures, for the record only:
+
+| Health, USB lead in (void) | Out only | Out, less the ES-10 | Through | The input's share | Hum 50 Hz |
+|---|---|---|---|---|---|
+| idle, one take | −93.6 | −95.6 | −90.3 | −92.9 | −106 |
+| screen | −94.2 | −96.4 | −90.6 | −93.2 | −107 |
+| detect | −94.2 | −96.4 | −90.6 | −93.2 | −107 |
+
+Screen and detect agreed within 0.3 dB, take to take and with each other. The hum, 11 dB over Rev A's on 11 Nov, and
+the input's share, 6 dB over Rev A's, are the figures to watch on the re-run, with the lead out.

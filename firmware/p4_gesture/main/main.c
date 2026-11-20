@@ -6,7 +6,7 @@
  * of the picture is a vertical fader, and the height of the hand on it sets a CV out:
  *
  *   the hand on the screen's left  -> CV1 (X1 on the panel), 0 to 10 V -> Oneiroi's supersaw volume jack
- *   the hand on the screen's right -> CV3 (X2 on the panel), 0 to 10 V -> Oneiroi's filter cutoff jack (knob left)
+ *   the hand on the screen's right -> CV3 (X2 on the panel), 0 to 10 V -> Oneiroi's echo dry/wet mixer jack (2026-11-20; the filter cutoff before)
  *
  * A lane is 0 V with its hand's centre in the bottom END_STOP of the picture, 10 V in the top END_STOP, and in
  * proportion between (a hand's centre can't reach the very edge, so the end stops sit a little in). Only the height
