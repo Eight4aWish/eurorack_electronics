@@ -213,7 +213,9 @@ sends a changed row in 32-byte pieces, one per pass of the loop.
 ## Measured on Boy's board
 
 Starting points for calibration, which belongs in the EEPROM (requirement 10: one point per volt
-for pitch):
+for pitch). **Written 2026-11-21** in Boy's firmware (eurorack_modules `src/teensy_move/calib_mode.cpp`, with
+the load correction of requirement 9 in `board.cpp`), not yet run on the bench; the method is in
+eurorack_modules `docs/TEENSY_MOVE.md`:
 
 | What | Measured |
 |---|---|
@@ -245,7 +247,7 @@ drums.
 | Button | pin 2, `INPUT_PULLUP` | encoder push on TCA9555 SW6. **Pin 2 is now GIN1, the encoder's B** |
 | Screen | SSD1306 128×32 at 0x3C | the same screen and address; the bus is now shared |
 | MIDI | USB MIDI only (`USB_MIDI_SERIAL`), its link to the Move, forced to full speed for hubs in `setup()` | USB MIDI still, plus TRS MIDI in on Serial1 |
-| Calibration | `calib_static.h`: gain and offset per channel | the EEPROM |
+| Calibration | `calib_static.h`: gain and offset per channel | the EEPROM at 0x1C00: a point per volt per channel, -5 to +5 V, by loopback through the ADC after a meter sets it (eurorack_modules `calib_mode.cpp`, 2026-11-21, not yet run on the bench) |
 
 **None of the old Boy's pin numbers carry over.** Pins 32–34 and 40 aren't connected on Rev A,
 and 37–39 now carry SPI-B.
